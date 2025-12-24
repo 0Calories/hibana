@@ -8,9 +8,7 @@ import { createClient } from '@/utils/supabase/client';
 export default function AccountForm({ user }: { user: User | null }) {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
-  const [fullname, setFullname] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
-  const [website, setWebsite] = useState<string | null>(null);
   const [avatar_url, setAvatarUrl] = useState<string | null>(null);
 
   const getProfile = useCallback(async () => {
@@ -18,9 +16,9 @@ export default function AccountForm({ user }: { user: User | null }) {
       setLoading(true);
 
       const { data, error, status } = await supabase
-        .from('profiles')
-        .select(`full_name, username, website, avatar_url`)
-        .eq('id', user?.id)
+        .from('user_profiles')
+        .select(`username, avatar_url`)
+        .eq('user_id', user?.id)
         .single();
 
       if (error && status !== 406) {
@@ -29,12 +27,10 @@ export default function AccountForm({ user }: { user: User | null }) {
       }
 
       if (data) {
-        setFullname(data.full_name);
         setUsername(data.username);
-        setWebsite(data.website);
         setAvatarUrl(data.avatar_url);
       }
-    } catch (error) {
+    } catch (_error) {
       alert('Error loading user data!');
     } finally {
       setLoading(false);
@@ -42,33 +38,30 @@ export default function AccountForm({ user }: { user: User | null }) {
   }, [user, supabase]);
 
   useEffect(() => {
-    getProfile();
+    if (user) {
+      getProfile();
+    }
   }, [user, getProfile]);
 
   async function updateProfile({
     username,
-    website,
     avatar_url,
   }: {
     username: string | null;
-    fullname: string | null;
-    website: string | null;
     avatar_url: string | null;
   }) {
     try {
       setLoading(true);
 
       const { error } = await supabase.from('profiles').upsert({
-        id: user?.id as string,
-        full_name: fullname,
+        user_id: user?.id as string,
         username,
-        website,
         avatar_url,
         updated_at: new Date().toISOString(),
       });
       if (error) throw error;
       alert('Profile updated!');
-    } catch (error) {
+    } catch (_error) {
       alert('Error updating the data!');
     } finally {
       setLoading(false);
@@ -83,15 +76,7 @@ export default function AccountForm({ user }: { user: User | null }) {
         <label htmlFor="email">Email</label>
         <input id="email" type="text" value={user?.email} disabled />
       </div>
-      <div>
-        <label htmlFor="fullName">Full Name</label>
-        <input
-          id="fullName"
-          type="text"
-          value={fullname || ''}
-          onChange={(e) => setFullname(e.target.value)}
-        />
-      </div>
+
       <div>
         <label htmlFor="username">Username</label>
         <input
@@ -101,23 +86,13 @@ export default function AccountForm({ user }: { user: User | null }) {
           onChange={(e) => setUsername(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor="website">Website</label>
-        <input
-          id="website"
-          type="url"
-          value={website || ''}
-          onChange={(e) => setWebsite(e.target.value)}
-        />
-      </div>
 
       <div>
         <button
           className="button primary block"
-          onClick={() =>
-            updateProfile({ fullname, username, website, avatar_url })
-          }
+          onClick={() => updateProfile({ username, avatar_url })}
           disabled={loading}
+          type="submit"
         >
           {loading ? 'Loading ...' : 'Update'}
         </button>
