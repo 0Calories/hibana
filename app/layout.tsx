@@ -30,11 +30,53 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <main>
-          {children}
+          <AppShell>{children}</AppShell>
+
           <SpeedInsights />
           <Analytics />
         </main>
       </body>
     </html>
+  );
+}
+
+function AppShell({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <div>
+      <TopBar />
+      <Sidebar />
+      {children}
+      <BottomNav />
+    </div>
+  );
+}
+
+function TopBar() {
+  return (
+    <div>
+      <nav className="fixed top-0 left-0 right-0">Top Bar</nav>
+    </div>
+  );
+}
+
+// Mobile only
+function BottomNav() {
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 md:hidden">
+      <div>Bottom tabs go here</div>
+    </nav>
+  );
+}
+
+// Desktop only
+function Sidebar() {
+  return (
+    <nav className="hidden top-4 md:flex md:w-64 md:flex-col">
+      <div>Left sidebar</div>
+    </nav>
   );
 }
