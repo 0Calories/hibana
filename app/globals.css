@@ -1,26 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff7ed; /* orange-50 - warm light mode */
+  --foreground: #18181b; /* zinc-900 */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Brand colors - Fire theme */
+  --color-brand-DEFAULT: #f97316; /* orange-500 */
+  --color-brand-light: #fdba74; /* orange-300 */
+  --color-brand-dark: #ea580c; /* orange-600 */
+
+  /* Fire gradient endpoints */
+  --color-fire-from: #f97316; /* orange-500 */
+  --color-fire-to: #ef4444; /* red-500 */
+
+  /* Custom gradients */
+  --gradient-fire: linear-gradient(to bottom right, var(--color-fire-from), var(--color-fire-to));
+  --gradient-fire-subtle: linear-gradient(to bottom right, #fdba74, #fb923c);
+  --gradient-fire-hover: linear-gradient(to bottom right, #ea580c, #dc2626);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #09090b; /* zinc-950 */
+    --foreground: #fafafa; /* zinc-50 */
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
