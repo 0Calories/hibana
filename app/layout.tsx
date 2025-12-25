@@ -66,8 +66,7 @@ function TopBar() {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Mobile: Logo + Ember */}
         <div className="flex items-center gap-2 md:hidden">
-          <span className="text-2xl">🔥</span>
-          <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-xl font-bold text-transparent">
             Hibana
           </span>
         </div>
@@ -151,8 +150,7 @@ function Sidebar() {
     <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-orange-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 md:flex">
       {/* Logo section */}
       <div className="flex h-16 items-center gap-2 border-b border-orange-200 px-6 dark:border-zinc-800">
-        <span className="text-2xl">🔥</span>
-        <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-xl font-bold text-transparent">
+        <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-xl font-bold text-transparent">
           Hibana
         </span>
       </div>
