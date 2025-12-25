@@ -15,11 +15,11 @@
   --color-brand-light: #fdba74; /* orange-300 */
   --color-brand-dark: #ea580c; /* orange-600 */
 
-  /* Fire gradient endpoints */
+  /* Fire gradient endpoints - Light mode */
   --color-fire-from: #f97316; /* orange-500 */
   --color-fire-to: #ef4444; /* red-500 */
 
-  /* Custom gradients */
+  /* Light mode gradients */
   --gradient-fire: linear-gradient(to bottom right, var(--color-fire-from), var(--color-fire-to));
   --gradient-fire-subtle: linear-gradient(to bottom right, #fdba74, #fb923c);
   --gradient-fire-hover: linear-gradient(to bottom right, #ea580c, #dc2626);
@@ -27,8 +27,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #09090b; /* zinc-950 */
-    --foreground: #fafafa; /* zinc-50 */
+    --background: #09090b; /* zinc-950 - deep space */
+    --foreground: #fafafa; /* zinc-50 - bright white */
+
+    /* Dark mode fire colors (slightly muted) */
+    --color-fire-from-dark: #fb923c; /* orange-400 */
+    --color-fire-to-dark: #f87171; /* red-400 */
+
+    /* Dark mode specific gradients */
+    --gradient-fire-dark: linear-gradient(to bottom right, var(--color-fire-from-dark), var(--color-fire-to-dark));
+    --gradient-fire-subtle-dark: linear-gradient(to bottom right, #fdba74, #fbbf24);
+    --gradient-fire-glow: linear-gradient(to bottom right, #f97316, #ef4444);
   }
 }
 

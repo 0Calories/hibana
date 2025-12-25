@@ -83,7 +83,7 @@ function TopBar() {
           {/* Quick add button */}
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:scale-105 hover:from-orange-600 hover:to-red-600 hover:shadow-xl hover:shadow-orange-500/40 active:scale-95"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30 transition-all duration-200 hover:scale-105 hover:from-orange-600 hover:to-red-600 hover:shadow-xl hover:shadow-orange-500/40 active:scale-95 dark:shadow-orange-500/20 dark:hover:shadow-orange-500/30"
             aria-label="Quick add"
           >
             <span className="text-xl font-light leading-none">+</span>
@@ -92,7 +92,7 @@ function TopBar() {
           {/* User avatar */}
           <button
             type="button"
-            className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 transition-all duration-200 hover:ring-orange-400 dark:ring-zinc-700 dark:hover:ring-orange-500"
+            className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 transition-all duration-200 hover:ring-orange-400 dark:from-orange-500 dark:to-red-500 dark:ring-zinc-700 dark:hover:ring-orange-500"
             aria-label="User menu"
           />
         </div>
@@ -111,7 +111,7 @@ function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-orange-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/80 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-orange-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/90 dark:backdrop-blur-xl md:hidden">
       <div className="grid h-16 grid-cols-4">
         {navItems.map((item) => (
           <a
@@ -163,8 +163,8 @@ function Sidebar() {
             href={item.href}
             className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               item.active
-                ? 'bg-gradient-to-r from-orange-50 to-red-50 text-orange-600 shadow-sm dark:from-orange-950/50 dark:to-red-950/50 dark:text-orange-400'
-                : 'text-zinc-700 hover:bg-orange-100 hover:text-orange-600 active:scale-95 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-orange-400'
+                ? 'bg-gradient-to-r from-orange-50 to-red-50 text-orange-600 shadow-sm dark:from-orange-950/50 dark:to-red-950/50 dark:text-orange-400 dark:shadow-orange-500/10'
+                : 'text-zinc-700 hover:bg-orange-100 hover:text-orange-600 active:scale-95 dark:text-zinc-300 dark:hover:bg-zinc-800/80 dark:hover:text-orange-400'
             }`}
           >
             <span className="text-xl leading-none">{item.icon}</span>
@@ -177,16 +177,16 @@ function Sidebar() {
       <div className="border-t border-orange-200 p-3 dark:border-zinc-800">
         <button
           type="button"
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 hover:bg-orange-100 active:scale-95 dark:hover:bg-zinc-800"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 hover:bg-orange-100 active:scale-95 dark:hover:bg-zinc-800/80"
         >
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 dark:ring-zinc-700" />
+          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 dark:from-orange-500 dark:to-red-500 dark:ring-zinc-700" />
           <div className="flex-1 text-left text-sm">
             <div className="font-semibold text-zinc-900 dark:text-zinc-50">
               Username
             </div>
             <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
               <span>Level 69</span>
-              <span className="text-orange-500">🔥</span>
+              <span className="text-orange-500 dark:text-amber-500">🔥</span>
               <span className="font-medium">420 XP</span>
             </div>
           </div>
