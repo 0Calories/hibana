@@ -43,7 +43,7 @@ function AppShell({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-orange-50 dark:bg-zinc-950">
+    <div className="min-h-screen">
       <TopBar />
       <Sidebar />
 
@@ -62,7 +62,7 @@ function AppShell({
 // Mobile-only
 function TopBar() {
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-orange-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/80 md:left-64 md:hidden">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-orange-200 bg-white/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80 md:left-64 md:hidden">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Mobile: Logo + Ember */}
         <div className="flex items-center gap-2 md:hidden">
@@ -111,7 +111,7 @@ function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-orange-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/90 dark:backdrop-blur-xl md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-orange-200 bg-white/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/90 dark:backdrop-blur-xl md:hidden">
       <div className="grid h-16 grid-cols-4">
         {navItems.map((item) => (
           <a
@@ -147,9 +147,9 @@ function Sidebar() {
   ];
 
   return (
-    <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-orange-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 md:flex">
+    <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-orange-200 bg-white dark:border-slate-800 dark:bg-slate-900 md:flex">
       {/* Logo section */}
-      <div className="flex h-16 items-center gap-2 border-b border-orange-200 px-6 dark:border-zinc-800">
+      <div className="flex h-16 items-center gap-2 border-b border-orange-200 px-6 dark:border-slate-800">
         <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-xl font-bold text-transparent">
           Hibana
         </span>
@@ -164,7 +164,7 @@ function Sidebar() {
             className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               item.active
                 ? 'bg-gradient-to-r from-orange-50 to-red-50 text-orange-600 shadow-sm dark:from-orange-950/50 dark:to-red-950/50 dark:text-orange-400 dark:shadow-orange-500/10'
-                : 'text-zinc-700 hover:bg-orange-100 hover:text-orange-600 active:scale-95 dark:text-zinc-300 dark:hover:bg-zinc-800/80 dark:hover:text-orange-400'
+                : 'text-zinc-700 hover:bg-orange-100 hover:text-orange-600 active:scale-95 dark:text-zinc-300 dark:hover:bg-slate-800/80 dark:hover:text-orange-400'
             }`}
           >
             <span className="text-xl leading-none">{item.icon}</span>
@@ -174,10 +174,10 @@ function Sidebar() {
       </div>
 
       {/* User section at bottom */}
-      <div className="border-t border-orange-200 p-3 dark:border-zinc-800">
+      <div className="border-t border-orange-200 p-3 dark:border-slate-800">
         <button
           type="button"
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 hover:bg-orange-100 active:scale-95 dark:hover:bg-zinc-800/80"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 hover:bg-orange-100 active:scale-95 dark:hover:bg-slate-800/80"
         >
           <div className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 dark:from-orange-500 dark:to-red-500 dark:ring-zinc-700" />
           <div className="flex-1 text-left text-sm">

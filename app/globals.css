@@ -27,8 +27,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #09090b; /* zinc-950 - deep space */
-    --foreground: #fafafa; /* zinc-50 - bright white */
+    --background: #020617; /* slate-950 */
+    --foreground: #fafafa; /* zinc-50 */
 
     /* Dark mode fire colors (slightly muted) */
     --color-fire-from-dark: #fb923c; /* orange-400 */
