@@ -186,8 +186,8 @@ function Sidebar() {
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
               <span>Level 69</span>
-              <span className="text-orange-500 dark:text-amber-500">🔥</span>
-              <span className="font-medium">420 XP</span>
+              <span className="text-orange-500 dark:text-amber-500"></span>
+              <span className="font-medium">✨ 420 XP</span>
             </div>
           </div>
         </button>
