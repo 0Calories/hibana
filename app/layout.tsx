@@ -104,10 +104,10 @@ function TopBar() {
 // Mobile-only
 function BottomNav() {
   const navItems = [
-    { icon: '🏠', label: 'Home', href: '/', active: true },
-    { icon: '✓', label: 'Todos', href: '/todos', active: false },
-    { icon: '🔥', label: 'Habits', href: '/habits', active: false },
-    { icon: '📅', label: 'Schedule', href: '/schedule', active: false },
+    { icon: '', label: 'Home', href: '/', active: true },
+    { icon: '', label: 'Todos', href: '/todos', active: false },
+    { icon: '', label: 'Habits', href: '/habits', active: false },
+    { icon: '', label: 'Schedule', href: '/schedule', active: false },
   ];
 
   return (
@@ -139,11 +139,11 @@ function BottomNav() {
 // Desktop-only
 function Sidebar() {
   const navItems = [
-    { icon: '🏠', label: 'Dashboard', href: '/', active: true },
-    { icon: '✓', label: 'Todos', href: '/todos', active: false },
-    { icon: '🔥', label: 'Habits', href: '/habits', active: false },
-    { icon: '📅', label: 'Schedule', href: '/schedule', active: false },
-    { icon: '💬', label: 'Ask Ember', href: '/chat', active: false },
+    { icon: '', label: 'Dashboard', href: '/', active: true },
+    { icon: '', label: 'Todos', href: '/todos', active: false },
+    { icon: '', label: 'Habits', href: '/habits', active: false },
+    { icon: '', label: 'Schedule', href: '/schedule', active: false },
+    { icon: '', label: 'Ask Ember', href: '/chat', active: false },
   ];
 
   return (
