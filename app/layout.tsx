@@ -73,7 +73,7 @@ function TopBar() {
 
         {/* Desktop: Page title / breadcrumb */}
         <div className="hidden md:block">
-          <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
             Dashboard
           </h1>
         </div>
@@ -92,7 +92,7 @@ function TopBar() {
           {/* User avatar */}
           <button
             type="button"
-            className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 transition-all duration-200 hover:ring-orange-400 dark:from-orange-500 dark:to-red-500 dark:ring-zinc-700 dark:hover:ring-orange-500"
+            className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 transition-all duration-200 hover:ring-orange-400 dark:from-orange-500 dark:to-red-500 dark:ring-slate-700 dark:hover:ring-orange-500"
             aria-label="User menu"
           />
         </div>
@@ -120,7 +120,7 @@ function BottomNav() {
             className={`flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
               item.active
                 ? 'text-orange-600 dark:text-orange-400'
-                : 'text-zinc-500 hover:text-orange-600 active:scale-95 dark:text-zinc-400 dark:hover:text-orange-400'
+                : 'text-slate-500 hover:text-orange-600 active:scale-95 dark:text-slate-400 dark:hover:text-orange-400'
             }`}
           >
             <span className="text-xl leading-none">{item.icon}</span>
@@ -164,7 +164,7 @@ function Sidebar() {
             className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               item.active
                 ? 'bg-gradient-to-r from-orange-50 to-red-50 text-orange-600 shadow-sm dark:from-orange-950/50 dark:to-red-950/50 dark:text-orange-400 dark:shadow-orange-500/10'
-                : 'text-zinc-700 hover:bg-orange-100 hover:text-orange-600 active:scale-95 dark:text-zinc-300 dark:hover:bg-slate-800/80 dark:hover:text-orange-400'
+                : 'text-slate-700 hover:bg-orange-100 hover:text-orange-600 active:scale-95 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-orange-400'
             }`}
           >
             <span className="text-xl leading-none">{item.icon}</span>
@@ -179,12 +179,12 @@ function Sidebar() {
           type="button"
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 hover:bg-orange-100 active:scale-95 dark:hover:bg-slate-800/80"
         >
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 dark:from-orange-500 dark:to-red-500 dark:ring-zinc-700" />
+          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-orange-200 dark:from-orange-500 dark:to-red-500 dark:ring-slate-700" />
           <div className="flex-1 text-left text-sm">
-            <div className="font-semibold text-zinc-900 dark:text-zinc-50">
+            <div className="font-semibold text-slate-900 dark:text-slate-50">
               Username
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
               <span>Level 69</span>
               <span className="text-orange-500 dark:text-amber-500">🔥</span>
               <span className="font-medium">420 XP</span>
