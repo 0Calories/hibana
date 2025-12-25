@@ -59,9 +59,10 @@ function AppShell({
   );
 }
 
+// Mobile-only
 function TopBar() {
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/80 md:left-64">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-900/80 md:left-64 md:hidden">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Mobile: Logo + Ember */}
         <div className="flex items-center gap-2 md:hidden">
@@ -101,6 +102,7 @@ function TopBar() {
   );
 }
 
+// Mobile-only
 function BottomNav() {
   const navItems = [
     { icon: '🏠', label: 'Home', href: '/', active: true },
@@ -135,6 +137,7 @@ function BottomNav() {
   );
 }
 
+// Desktop-only
 function Sidebar() {
   const navItems = [
     { icon: '🏠', label: 'Dashboard', href: '/', active: true },
@@ -145,7 +148,7 @@ function Sidebar() {
   ];
 
   return (
-    <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 md:flex">
+    <nav className="fixed left-0 top-0 z-40 hidden h-full w-42 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 md:flex">
       {/* Logo section */}
       <div className="flex h-16 items-center gap-2 border-b border-zinc-200 px-6 dark:border-zinc-800">
         <span className="text-2xl">🔥</span>
@@ -181,12 +184,12 @@ function Sidebar() {
           <div className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-400 to-red-400 ring-2 ring-zinc-200 dark:ring-zinc-700" />
           <div className="flex-1 text-left text-sm">
             <div className="font-semibold text-zinc-900 dark:text-zinc-50">
-              User Name
+              Username
             </div>
             <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-              <span>Level 5</span>
+              <span>Level 69</span>
               <span className="text-orange-500">🔥</span>
-              <span className="font-medium">1,250 XP</span>
+              <span className="font-medium">420 XP</span>
             </div>
           </div>
         </button>
