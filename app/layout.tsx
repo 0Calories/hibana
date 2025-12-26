@@ -67,7 +67,6 @@ async function AppShell({
 
   return (
     <div className="min-h-screen">
-      {/* <Sidebar /> */}
       {/* <TopNav /> */}
       <div className="pb-16 md:pb-0">{children}</div>
       {user && <BottomNav />}
