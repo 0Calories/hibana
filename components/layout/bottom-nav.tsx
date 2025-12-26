@@ -22,9 +22,7 @@ export function BottomNav() {
             key={item.href}
             href={item.href}
             className={`flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
-              item.active
-                ? 'text-orange-600 dark:text-orange-400'
-                : 'text-slate-500 hover:text-orange-600 active:scale-95 dark:text-slate-400 dark:hover:text-orange-400'
+              item.active ? 'text-primary' : 'text-gray-400 active:scale-95'
             }`}
           >
             <span className="text-xl leading-none">{item.icon}</span>
