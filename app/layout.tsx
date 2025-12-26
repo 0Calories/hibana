@@ -66,10 +66,10 @@ async function AppShell({
   } = await supabase.auth.getUser();
 
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen">
       {/* <TopNav /> */}
-      <div className="pb-16 md:pb-0">{children}</div>
-      {user && <BottomNav />}
-    </div>
+      {children}
+      {<BottomNav />}
+    </main>
   );
 }
