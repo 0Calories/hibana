@@ -6,6 +6,7 @@ import './globals.css';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { ThemeProvider } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/utils/supabase/server';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -44,13 +45,32 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <BottomNav />
+          <AppShell>{children}</AppShell>
         </ThemeProvider>
 
         <SpeedInsights />
         <Analytics />
       </body>
     </html>
+  );
+}
+
+async function AppShell({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return (
+    <div className="min-h-screen">
+      {/* <Sidebar /> */}
+      {/* <TopNav /> */}
+      <div className="pb-16 md:pb-0">{children}</div>
+      {user && <BottomNav />}
+    </div>
   );
 }
