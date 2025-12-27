@@ -69,7 +69,7 @@ async function AppShell({
     <main className="min-h-screen">
       {/* <TopNav /> */}
       {children}
-      {<BottomNav />}
+      {user && <BottomNav />}
     </main>
   );
 }

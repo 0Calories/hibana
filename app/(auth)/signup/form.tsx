@@ -36,7 +36,7 @@ const passwordSchema = z
 
 const signupFormSchema = z
   .object({
-    email: z.email(),
+    email: z.email({ message: 'Please enter a valid email address' }),
     password: passwordSchema,
     confirmPassword: z.string(),
   })
@@ -48,6 +48,7 @@ const signupFormSchema = z
 export function SignupForm() {
   const form = useForm({
     resolver: zodResolver(signupFormSchema),
+    mode: 'onChange',
     defaultValues: {
       email: '',
       password: '',
@@ -56,6 +57,8 @@ export function SignupForm() {
   });
 
   function onSubmit(data: z.infer<typeof signupFormSchema>) {
+    console.log('submitted:');
+    console.dir(data);
     toast('You submitted the following values:', {
       description: (
         <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
@@ -95,6 +98,7 @@ export function SignupForm() {
                     id={field.name}
                     aria-invalid={fieldState.invalid}
                     placeholder="name@example.com"
+                    type="email"
                     required
                   />
                   {fieldState.invalid && (
@@ -117,9 +121,6 @@ export function SignupForm() {
                     type="password"
                     required
                   />
-                  <FieldDescription>
-                    Must be at least 8 characters long
-                  </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -137,6 +138,7 @@ export function SignupForm() {
                     {...field}
                     id={field.name}
                     aria-invalid={fieldState.invalid}
+                    type="password"
                     required
                   />
                   {fieldState.invalid && (
@@ -148,7 +150,9 @@ export function SignupForm() {
 
             <FieldGroup>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit" form="form-signup">
+                  Create Account
+                </Button>
               </Field>
 
               <div className="flex items-center">
