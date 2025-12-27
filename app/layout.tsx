@@ -5,6 +5,7 @@ import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import './globals.css';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
 
@@ -50,6 +51,7 @@ export default function RootLayout({
 
         <SpeedInsights />
         <Analytics />
+        <Toaster />
       </body>
     </html>
   );
