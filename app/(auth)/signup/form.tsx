@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { signup } from './actions';
 
 const passwordSchema = z
   .string()
@@ -64,6 +65,8 @@ export function SignupForm() {
         </pre>
       ),
     });
+
+    signup(data.email, data.password);
   }
 
   return (
