@@ -55,9 +55,7 @@ export function LoginForm() {
     <Card>
       <CardHeader>
         <CardTitle>Welcome back!</CardTitle>
-        <CardDescription>
-          Enter your credentials to access your account
-        </CardDescription>
+        <CardDescription>Enter your credentials to log in</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -107,7 +105,7 @@ export function LoginForm() {
             <FieldGroup>
               <Field>
                 <Button type="submit" form="form-login">
-                  Sign In
+                  Log In
                 </Button>
               </Field>
 
