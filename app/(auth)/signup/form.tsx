@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { signup } from './actions';
+import { signup } from '../actions';
 
 const passwordSchema = z
   .string()

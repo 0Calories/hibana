@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +21,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { login } from './actions';
+import { login } from '../actions';
 
 const loginFormSchema = z.object({
   email: z.email({ message: 'Please enter a valid email address' }),
@@ -32,23 +31,40 @@ const loginFormSchema = z.object({
 export function LoginForm() {
   const form = useForm({
     resolver: zodResolver(loginFormSchema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  function onSubmit(data: z.infer<typeof loginFormSchema>) {
-    toast('Logging in...', {
-      description: (
-        <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-          <code>{JSON.stringify({ email: data.email }, null, 2)}</code>
-        </pre>
-      ),
-    });
+  async function onSubmit(data: z.infer<typeof loginFormSchema>) {
+    const toastId = toast.loading('Logging in...');
 
-    login(data.email, data.password);
+    try {
+      const result = await login(data.email, data.password);
+
+      if (result?.error) {
+        toast.error(
+          result.error.message || 'Something went wrong. Please try again.',
+          {
+            id: toastId,
+          },
+        );
+        return;
+      }
+
+      toast.success('Welcome back!', { id: toastId });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+        toast.success('Welcome back!', { id: toastId });
+        throw error;
+      }
+
+      toast.error('Something went wrong. Please try again.', {
+        id: toastId,
+      });
+    }
   }
 
   return (
