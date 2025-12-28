@@ -66,7 +66,6 @@ async function AppShell({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  console.dir(user);
 
   return (
     <main className="min-h-screen">
