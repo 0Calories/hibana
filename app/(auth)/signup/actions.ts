@@ -10,8 +10,8 @@ export async function signup(email: string, password: string) {
 
   if (error) {
     console.dir(error);
+  } else {
+    revalidatePath('/', 'layout');
+    redirect('/');
   }
-
-  revalidatePath('/', 'layout');
-  redirect('/');
 }

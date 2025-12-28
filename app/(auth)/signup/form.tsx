@@ -31,7 +31,7 @@ const passwordSchema = z
   .regex(/[A-Z]/, { message: 'Must contain at least one uppercase letter' })
   .regex(/[a-z]/, { message: 'Must contain at least one lowercase letter' })
   .regex(/[0-9]/, { message: 'Must contain at least one number' })
-  .regex(/[!@#$%^&*]/, {
+  .regex(/[!@#$%^&*.]/, {
     message: 'Must contain at least one special character',
   });
 
@@ -70,7 +70,7 @@ export function SignupForm() {
   }
 
   return (
-    <Card className="w-">
+    <Card>
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>
