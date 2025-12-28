@@ -5,6 +5,7 @@ import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import './globals.css';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
 
@@ -50,6 +51,7 @@ export default function RootLayout({
 
         <SpeedInsights />
         <Analytics />
+        <Toaster />
       </body>
     </html>
   );
@@ -64,12 +66,13 @@ async function AppShell({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  console.dir(user);
 
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen">
       {/* <TopNav /> */}
-      <div className="pb-16 md:pb-0">{children}</div>
+      {children}
       {user && <BottomNav />}
-    </div>
+    </main>
   );
 }
