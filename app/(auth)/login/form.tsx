@@ -1,7 +1,6 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthError } from '@supabase/supabase-js';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -61,7 +60,7 @@ export function LoginForm() {
         return;
       }
 
-      toast.success('Welcome back!', { id: toastId });
+      toast.success('Welcome back!', { id: toastId, position: 'top-center' });
     } catch (error) {
       if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
         toast.success('Welcome back!', { id: toastId, position: 'top-center' });
