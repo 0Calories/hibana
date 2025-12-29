@@ -1,7 +1,21 @@
 import { CalendarCheck, LayoutList, LucideHome, Sparkle } from 'lucide-react';
 import Link from 'next/link';
 
-export function BottomNav() {
+export default function AppLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <main className="min-h-screen">
+      {/* <TopNav /> */}
+      <section>{children}</section>
+      <BottomNav />
+    </main>
+  );
+}
+
+function BottomNav() {
   const navItems = [
     { icon: <LucideHome />, label: 'Home', href: '/', active: true },
     { icon: <LayoutList />, label: 'Todos', href: '/todos', active: false },
