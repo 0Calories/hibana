@@ -3,11 +3,9 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import './globals.css';
-import { BottomNav } from '@/components/layout/bottom-nav';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
-import { createClient } from '@/utils/supabase/server';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -46,32 +44,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppShell>{children}</AppShell>
+          {children}
         </ThemeProvider>
-
         <SpeedInsights />
         <Analytics />
         <Toaster />
       </body>
     </html>
-  );
-}
-
-async function AppShell({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  return (
-    <main className="min-h-screen">
-      {/* <TopNav /> */}
-      {children}
-      {user && <BottomNav />}
-    </main>
   );
 }
