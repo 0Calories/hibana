@@ -15,7 +15,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="md:hidden w-full fixed bottom-0 left-0 border-t backdrop-blur-lg dark:backdrop-blur-lg">
+    <nav className="md:hidden w-full fixed bottom-0 left-0 border-t backdrop-blur-lg dark:backdrop-blur-lg z-40">
       <div className="grid h-16 grid-cols-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;

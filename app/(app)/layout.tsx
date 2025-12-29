@@ -6,9 +6,10 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="min-h-screen">
+    <main className="h-screen w-full">
       {/* <TopNav /> */}
-      <section>{children}</section>
+      <section className="h-full w-full">{children}</section>
+
       <BottomNav />
     </main>
   );
