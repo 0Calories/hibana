@@ -1,6 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AuthError } from '@supabase/supabase-js';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -29,6 +31,8 @@ const loginFormSchema = z.object({
 });
 
 export function LoginForm() {
+  const [loginFailed, setLoginFailed] = useState(false);
+
   const form = useForm({
     resolver: zodResolver(loginFormSchema),
     mode: 'onSubmit',
@@ -39,30 +43,34 @@ export function LoginForm() {
   });
 
   async function onSubmit(data: z.infer<typeof loginFormSchema>) {
-    const toastId = toast.loading('Logging in...');
+    const toastId = toast.loading('Logging in...', { position: 'top-center' });
 
     try {
       const result = await login(data.email, data.password);
 
       if (result?.error) {
+        setLoginFailed(true);
         toast.error(
-          result.error.message || 'Something went wrong. Please try again.',
+          `Login failed: ${result.error.message || 'unknown error'}`,
           {
             id: toastId,
+            position: 'top-center',
           },
         );
+
         return;
       }
 
       toast.success('Welcome back!', { id: toastId });
     } catch (error) {
       if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-        toast.success('Welcome back!', { id: toastId });
+        toast.success('Welcome back!', { id: toastId, position: 'top-center' });
         throw error;
       }
 
       toast.error('Something went wrong. Please try again.', {
         id: toastId,
+        position: 'top-center',
       });
     }
   }
@@ -81,12 +89,12 @@ export function LoginForm() {
               name="email"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid || loginFailed}>
                   <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
-                    aria-invalid={fieldState.invalid}
+                    aria-invalid={fieldState.invalid || loginFailed}
                     placeholder="name@example.com"
                     type="email"
                     required
@@ -102,12 +110,12 @@ export function LoginForm() {
               name="password"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid || loginFailed}>
                   <FieldLabel htmlFor={field.name}>Password</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
-                    aria-invalid={fieldState.invalid}
+                    aria-invalid={fieldState.invalid || loginFailed}
                     type="password"
                     required
                   />
