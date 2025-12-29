@@ -1,9 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { signup } from './actions';
+import { signup } from '../actions';
 
 const passwordSchema = z
   .string()
@@ -47,6 +47,7 @@ const signupFormSchema = z
   });
 
 export function SignupForm() {
+  const [signupFailed, setSignupFailed] = useState(false);
   const form = useForm({
     resolver: zodResolver(signupFormSchema),
     mode: 'onChange',
@@ -57,14 +58,41 @@ export function SignupForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof signupFormSchema>) {
-    toast('Submitted with the following:', {
-      description: (
-        <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+  async function onSubmit(data: z.infer<typeof signupFormSchema>) {
+    const toastId = toast.loading('Signing up...', { position: 'top-center' });
+
+    try {
+      const result = await signup(data.email, data.password);
+
+      if (result?.error) {
+        setSignupFailed(true);
+        toast.error(
+          `Signup failed: ${result.error.message || 'unknown error'}`,
+          {
+            id: toastId,
+            position: 'top-center',
+          },
+        );
+
+        return;
+      }
+
+      toast.success('Welcome to Hibana!', {
+        id: toastId,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+        toast.success('Welcome to Hibana!', {
+          id: toastId,
+        });
+        throw error;
+      }
+
+      toast.error('Something went wrong. Please try again.', {
+        id: toastId,
+        position: 'top-center',
+      });
+    }
 
     signup(data.email, data.password);
   }
@@ -85,19 +113,20 @@ export function SignupForm() {
               name="email"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid || signupFailed}>
                   <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
-                    aria-invalid={fieldState.invalid}
+                    aria-invalid={fieldState.invalid || signupFailed}
                     placeholder="name@example.com"
                     type="email"
                     required
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  {fieldState.invalid ||
+                    (signupFailed && (
+                      <FieldError errors={[fieldState.error]} />
+                    ))}
                 </Field>
               )}
             />
