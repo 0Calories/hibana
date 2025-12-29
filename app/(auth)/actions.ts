@@ -12,8 +12,9 @@ export async function signup(email: string, password: string) {
     return { success: false, error };
   }
 
+  // TODO: Should redirect to email confirmation flow in the future
   revalidatePath('/', 'layout');
-  redirect('/');
+  redirect('/dashboard');
 }
 
 export async function login(email: string, password: string) {
@@ -28,5 +29,5 @@ export async function login(email: string, password: string) {
   }
 
   revalidatePath('/', 'layout');
-  redirect('/');
+  redirect('/dashboard');
 }
