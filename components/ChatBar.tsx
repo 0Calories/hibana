@@ -25,7 +25,7 @@ import {
 export function ChatBar() {
   return (
     <InputGroup className="rounded-full p-6 pl-2 pr-2">
-      <InputGroupInput placeholder="Write a note" />
+      <InputGroupInput placeholder="Ask Ember to do something ..." />
       <InputGroupAddon align="inline-end">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
