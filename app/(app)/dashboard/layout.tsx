@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { ChatBar } from '@/components/ChatBar';
 import { Button } from '@/components/ui/button';
 
 export default function DashboardLayout({
@@ -7,15 +8,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="flex justify-center">
       {children}
-      {/* Floating Action Button */}
-      <Button
-        size={'icon-lg'}
-        className="fixed bottom-20 right-4 md:bottom-8 size-12 rounded-full"
-      >
-        <Plus className="size-6" />
-      </Button>
+      <div className="w-full md:w-7/10 fixed bottom-18 md:bottom-8 p-4">
+        <ChatBar />
+      </div>
     </div>
   );
 }
