@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  CalendarDaysIcon,
+  CalendarCheckIcon,
   ListTodoIcon,
   NotebookPenIcon,
   PlusIcon,
@@ -24,34 +24,9 @@ import {
 
 export function ChatBar() {
   return (
-    <InputGroup className="rounded-full p-6 pl-2 pr-2">
+    <InputGroup className="radius-lg p-5 pl-2 pr-2 mr-2">
       <InputGroupInput placeholder="Ask Ember to do something ..." />
-      <InputGroupAddon align="inline-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size={'icon-lg'} className="rounded-full">
-              <PlusIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>Create a new</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <NotebookPenIcon /> Note
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <ListTodoIcon /> Todo
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <SparklesIcon />
-              Habit
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CalendarDaysIcon /> Schedule
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </InputGroupAddon>
+      <InputGroupAddon align="inline-end"></InputGroupAddon>
     </InputGroup>
   );
 }

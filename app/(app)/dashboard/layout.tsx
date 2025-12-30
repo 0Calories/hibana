@@ -1,4 +1,5 @@
 import { ChatBar } from '@/components/ChatBar';
+import { CreateButton } from '@/components/CreateButton';
 
 export default function DashboardLayout({
   children,
@@ -8,8 +9,9 @@ export default function DashboardLayout({
   return (
     <div className="flex justify-center">
       {children}
-      <div className="w-full md:w-7/10 fixed bottom-18 md:bottom-8 p-4">
+      <div className="w-full md:w-7/10 fixed bottom-18 md:bottom-8 p-4 flex flex-row justify-center items-center">
         <ChatBar />
+        <CreateButton />
       </div>
     </div>
   );
