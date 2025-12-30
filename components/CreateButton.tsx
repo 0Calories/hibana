@@ -19,12 +19,12 @@ export function CreateButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size={'icon-lg'} className="radius-lg">
+        <Button className="radius-lg size-10">
           <PlusIcon />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>Create a new</DropdownMenuLabel>
+        <DropdownMenuLabel>Create new</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <NotebookPenIcon /> Note
