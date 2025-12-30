@@ -1,6 +1,4 @@
-import { Plus } from 'lucide-react';
 import { ChatBar } from '@/components/ChatBar';
-import { Button } from '@/components/ui/button';
 
 export default function DashboardLayout({
   children,
