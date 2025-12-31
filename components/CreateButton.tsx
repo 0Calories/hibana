@@ -23,7 +23,7 @@ export function CreateButton() {
           <PlusIcon />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="m-4">
+      <DropdownMenuContent className="m-4 md:m-0 md:mb-2">
         <DropdownMenuLabel>Create new</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>

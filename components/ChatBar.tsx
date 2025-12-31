@@ -1,26 +1,10 @@
 'use client';
 
 import {
-  CalendarCheckIcon,
-  ListTodoIcon,
-  NotebookPenIcon,
-  PlusIcon,
-  SparklesIcon,
-} from 'lucide-react';
-import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from '@/components/ui/input-group';
-import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 
 export function ChatBar() {
   return (
