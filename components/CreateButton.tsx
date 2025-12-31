@@ -26,6 +26,14 @@ import {
 } from './ui/dropdown-menu';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+import { Textarea } from './ui/textarea';
 
 export function CreateButton() {
   return (
@@ -47,7 +55,7 @@ export function CreateButton() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create a new Todo item</DialogTitle>
           <DialogDescription>
@@ -55,22 +63,32 @@ export function CreateButton() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-2">
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="link" className="sr-only">
-              Name
-            </Label>
-            <Input defaultValue="New Todo" />
+        <form className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="title">Title</Label>
+            <Input id="title" placeholder="What needs to be done?" required />
           </div>
-        </div>
 
-        <DialogFooter className="sm:justify-start">
-          <DialogClose asChild>
-            <Button type="button" variant="secondary">
-              Close
-            </Button>
-          </DialogClose>
-        </DialogFooter>
+          <div className="grid gap-2">
+            <Label htmlFor="content">Description</Label>
+            <Textarea
+              id="content"
+              placeholder="Add more optional details about this task ..."
+              rows={3}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="due_date">Due Date</Label>
+            <Input id="due_date" type="date" />
+          </div>
+        </form>
+
+        <div className="flex-col gap-2 sm:flex-row sm:justify-end mt-2">
+          <Button type="submit" className="mr-2">
+            Submit
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
