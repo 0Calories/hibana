@@ -26,20 +26,45 @@ export function CreateButton() {
       <DropdownMenuContent className="m-4 md:m-0 md:mb-2">
         <DropdownMenuLabel>Create new</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <NotebookPenIcon /> Note
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <ListTodoIcon /> Todo
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <SparklesIcon />
-          Habit
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <CalendarCheckIcon /> Schedule
-        </DropdownMenuItem>
+
+        <CreateTodoButton />
+        <CreateNoteButton />
+        <CreateHabitButton />
+        <CreateScheduleButton />
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function CreateTodoButton() {
+  return (
+    <DropdownMenuItem>
+      <ListTodoIcon /> Todo
+    </DropdownMenuItem>
+  );
+}
+
+function CreateNoteButton() {
+  return (
+    <DropdownMenuItem>
+      <NotebookPenIcon /> Note
+    </DropdownMenuItem>
+  );
+}
+
+function CreateHabitButton() {
+  return (
+    <DropdownMenuItem>
+      <SparklesIcon />
+      Habit
+    </DropdownMenuItem>
+  );
+}
+
+function CreateScheduleButton() {
+  return (
+    <DropdownMenuItem>
+      <CalendarCheckIcon /> Schedule
+    </DropdownMenuItem>
   );
 }
