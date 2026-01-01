@@ -20,7 +20,7 @@ export async function createTask(content: string) {
     user: user.id,
   };
 
-  const { error: insertError } = await supabase.from('tasks').insert(tasksData);
+  const { error: insertError } = await supabase.from('tasks').insert(taskData);
   if (insertError) {
     return { success: false, error: insertError };
   }
