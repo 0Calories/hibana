@@ -15,12 +15,12 @@ export async function createTask(content: string) {
     return { success: false, error: authError };
   }
 
-  const todoData: TablesInsert<'tasks'> = {
+  const taskData: TablesInsert<'tasks'> = {
     content: content,
     user: user.id,
   };
 
-  const { error: insertError } = await supabase.from('tasks').insert(todoData);
+  const { error: insertError } = await supabase.from('tasks').insert(tasksData);
   if (insertError) {
     return { success: false, error: insertError };
   }

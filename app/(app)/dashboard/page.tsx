@@ -39,22 +39,22 @@ export default async function DashboardPage() {
       />
 
       <div className="mt-6 columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4">
-        {tasks.data?.map((todo, index) => {
+        {tasks.data?.map((task, index) => {
           const colorClass = cardColors[index % cardColors.length];
           return (
             <Card
-              key={todo.id}
+              key={task.id}
               className={`${colorClass} break-inside-avoid mb-4 cursor-pointer`}
             >
               <CardContent className="p-4">
-                {todo.title && (
+                {task.title && (
                   <h3 className="font-semibold text-base mb-2 text-foreground">
-                    {todo.title}
+                    {task.title}
                   </h3>
                 )}
-                {todo.content && (
+                {task.content && (
                   <p className="text-sm text-foreground/80 whitespace-pre-wrap">
-                    {todo.content}
+                    {task.content}
                   </p>
                 )}
               </CardContent>

@@ -32,11 +32,11 @@ import { Label } from '../../../components/ui/label';
 import { Textarea } from '../../../components/ui/textarea';
 import { createTask } from '../dashboard/actions';
 
-const todoSchema = z.object({
+const taskSchema = z.object({
   content: z.string().min(1, 'You gotta write something!'),
 });
 
-type TaskFormData = z.infer<typeof todoSchema>;
+type TaskFormData = z.infer<typeof taskSchema>;
 
 export function CreateButton() {
   const [open, setOpen] = useState(false);
@@ -46,7 +46,7 @@ export function CreateButton() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormData>({
-    resolver: zodResolver(todoSchema),
+    resolver: zodResolver(taskSchema),
   });
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -83,7 +83,7 @@ export function CreateButton() {
       setOpen(false);
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Error creating todo:', error);
+      console.error('Error creating task:', error);
     }
   };
 
