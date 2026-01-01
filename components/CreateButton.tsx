@@ -1,3 +1,6 @@
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CalendarCheckIcon,
   ListTodoIcon,
@@ -5,13 +8,17 @@ import {
   PlusIcon,
   SparklesIcon,
 } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+import { createClient } from '@/utils/supabase/client';
+import type { TablesInsert } from '@/utils/supabase/types';
 import { Button } from './ui/button';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -26,18 +33,71 @@ import {
 } from './ui/dropdown-menu';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
+
 import { Textarea } from './ui/textarea';
 
+const todoSchema = z.object({
+  content: z.string().min(1, 'You gotta write something!'),
+});
+
+type TodoFormData = z.infer<typeof todoSchema>;
+
 export function CreateButton() {
+  const [open, setOpen] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<TodoFormData>({
+    resolver: zodResolver(todoSchema),
+  });
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      reset();
+    }
+  };
+
+  const onSubmit = async (data: TodoFormData) => {
+    try {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        toast.error('You must be logged in to create a todo');
+        return;
+      }
+
+      const todoData: TablesInsert<'todos'> = {
+        content: data.content || null,
+        user: user.id,
+      };
+
+      // Insert the todo
+      const { error } = await supabase.from('todos').insert(todoData);
+
+      if (error) {
+        toast.error(`Failed to create todo: ${error.message}`);
+        return;
+      }
+
+      toast.success('Todo created successfully!');
+      reset();
+      setOpen(false);
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+      console.error('Error creating todo:', error);
+    }
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="radius-lg size-10">
@@ -55,40 +115,32 @@ export function CreateButton() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
+      <DialogContent className="flex flex-col justify-start w-4/5 h-4/6 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create a new Todo item</DialogTitle>
-          <DialogDescription>
-            Fill out the form to keep track of something you need to do
-          </DialogDescription>
+          <DialogTitle>New Todo</DialogTitle>
         </DialogHeader>
 
-        <form className="grid gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="h-fit">
           <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
-            <Input id="title" placeholder="What needs to be done?" required />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="content">Description</Label>
             <Textarea
               id="content"
-              placeholder="Add more optional details about this task ..."
-              rows={3}
+              placeholder="Add some details ..."
+              rows={10}
+              {...register('content')}
             />
+            {errors.content && (
+              <p className="text-sm text-destructive">
+                {errors.content.message}
+              </p>
+            )}
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="due_date">Due Date</Label>
-            <Input id="due_date" type="date" />
+          <div className="flex gap-2 justify-end mt-2">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Done'}
+            </Button>
           </div>
         </form>
-
-        <div className="flex-col gap-2 sm:flex-row sm:justify-end mt-2">
-          <Button type="submit" className="mr-2">
-            Submit
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   );
