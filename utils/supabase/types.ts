@@ -197,7 +197,7 @@ export type Database = {
         };
         Relationships: [];
       };
-      todos: {
+      tasks: {
         Row: {
           content: string | null;
           created_at: string;
@@ -236,10 +236,10 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: 'todos_parent_task_fkey';
+            foreignKeyName: 'tasks_parent_task_fkey';
             columns: ['parent_task'];
             isOneToOne: false;
-            referencedRelation: 'todos';
+            referencedRelation: 'tasks';
             referencedColumns: ['id'];
           },
         ];

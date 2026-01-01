@@ -25,8 +25,8 @@ const cardColors = [
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  const todos = await supabase.from('todos').select();
-  console.dir(todos);
+  const tasks = await supabase.from('tasks').select();
+  console.dir(tasks);
 
   return (
     <div className="size-full p-4 pb-24">
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
       />
 
       <div className="mt-6 columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4">
-        {todos.data?.map((todo, index) => {
+        {tasks.data?.map((todo, index) => {
           const colorClass = cardColors[index % cardColors.length];
           return (
             <Card

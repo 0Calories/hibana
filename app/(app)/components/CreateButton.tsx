@@ -30,13 +30,13 @@ import {
 } from '../../../components/ui/dropdown-menu';
 import { Label } from '../../../components/ui/label';
 import { Textarea } from '../../../components/ui/textarea';
-import { createTodo } from '../dashboard/actions';
+import { createTask } from '../dashboard/actions';
 
 const todoSchema = z.object({
   content: z.string().min(1, 'You gotta write something!'),
 });
 
-type TodoFormData = z.infer<typeof todoSchema>;
+type TaskFormData = z.infer<typeof todoSchema>;
 
 export function CreateButton() {
   const [open, setOpen] = useState(false);
@@ -45,7 +45,7 @@ export function CreateButton() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<TodoFormData>({
+  } = useForm<TaskFormData>({
     resolver: zodResolver(todoSchema),
   });
 
@@ -56,16 +56,16 @@ export function CreateButton() {
     }
   };
 
-  const onSubmit = async (data: TodoFormData) => {
-    const toastId = toast.loading('Creating Todo ...', {
+  const onSubmit = async (data: TaskFormData) => {
+    const toastId = toast.loading('Creating Task ...', {
       position: 'top-center',
     });
 
     try {
-      const result = await createTodo(data.content);
+      const result = await createTask(data.content);
       if (result.error) {
         toast.error(
-          `Failed to create Todo: ${result.error.message || 'unknown error'}`,
+          `Failed to create Task: ${result.error.message || 'unknown error'}`,
           {
             id: toastId,
             position: 'top-center',
@@ -74,7 +74,7 @@ export function CreateButton() {
         return;
       }
 
-      toast.success('Todo created successfully!', {
+      toast.success('Task created successfully!', {
         id: toastId,
         position: 'top-center',
       });
@@ -99,7 +99,7 @@ export function CreateButton() {
           <DropdownMenuLabel>Create new</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          <CreateTodoButton />
+          <CreateTaskButton />
           <CreateNoteButton />
           <CreateHabitButton />
           <CreateScheduleButton />
@@ -110,7 +110,7 @@ export function CreateButton() {
         <DialogHeader>
           <DialogTitle>
             <Label>
-              <NotebookPenIcon /> New Todo
+              <NotebookPenIcon /> New Task
             </Label>
           </DialogTitle>
         </DialogHeader>
@@ -144,11 +144,11 @@ export function CreateButton() {
   );
 }
 
-function CreateTodoButton() {
+function CreateTaskButton() {
   return (
     <DialogTrigger asChild>
       <DropdownMenuItem>
-        <ListTodoIcon /> Todo
+        <ListTodoIcon /> Task
       </DropdownMenuItem>
     </DialogTrigger>
   );
