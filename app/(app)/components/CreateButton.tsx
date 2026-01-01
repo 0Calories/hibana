@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CalendarCheckIcon,
   ListTodoIcon,
-  NotebookPen,
   NotebookPenIcon,
   PlusIcon,
   SparklesIcon,
@@ -13,8 +12,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { createClient } from '@/utils/supabase/client';
-import type { TablesInsert } from '@/utils/supabase/types';
 import { Button } from '../../../components/ui/button';
 import {
   Dialog,
@@ -94,7 +91,7 @@ export function CreateButton() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="radius-lg size-10">
+          <Button className="rounded-lg size-10">
             <PlusIcon />
           </Button>
         </DropdownMenuTrigger>
@@ -113,7 +110,7 @@ export function CreateButton() {
         <DialogHeader>
           <DialogTitle>
             <Label>
-              <NotebookPen /> New Todo
+              <NotebookPenIcon /> New Todo
             </Label>
           </DialogTitle>
         </DialogHeader>
