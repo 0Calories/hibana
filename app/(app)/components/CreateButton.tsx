@@ -33,6 +33,7 @@ import {
 } from '../../../components/ui/dropdown-menu';
 import { Label } from '../../../components/ui/label';
 import { Textarea } from '../../../components/ui/textarea';
+import { createTodo } from '../dashboard/actions';
 
 const todoSchema = z.object({
   content: z.string().min(1, 'You gotta write something!'),
@@ -59,33 +60,28 @@ export function CreateButton() {
   };
 
   const onSubmit = async (data: TodoFormData) => {
+    const toastId = toast.loading('Creating Todo ...', {
+      position: 'top-center',
+    });
+
     try {
-      const supabase = createClient();
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        toast.error('You must be logged in to create a todo');
+      const result = await createTodo(data.content);
+      if (result.error) {
+        toast.error(
+          `Failed to create Todo: ${result.error.message || 'unknown error'}`,
+          {
+            id: toastId,
+            position: 'top-center',
+          },
+        );
         return;
       }
 
-      const todoData: TablesInsert<'todos'> = {
-        content: data.content || null,
-        user: user.id,
-      };
+      toast.success('Todo created successfully!', {
+        id: toastId,
+        position: 'top-center',
+      });
 
-      // Insert the todo
-      const { error } = await supabase.from('todos').insert(todoData);
-
-      if (error) {
-        toast.error(`Failed to create todo: ${error.message}`);
-        return;
-      }
-
-      toast.success('Todo created successfully!');
       reset();
       setOpen(false);
     } catch (error) {
@@ -142,7 +138,7 @@ export function CreateButton() {
 
           <div className="flex gap-2 justify-end pt-2">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Done'}
+              Save
             </Button>
           </div>
         </form>
