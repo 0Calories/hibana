@@ -15,15 +15,14 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { createClient } from '@/utils/supabase/client';
 import type { TablesInsert } from '@/utils/supabase/types';
-import { Button } from './ui/button';
+import { Button } from '../../../components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog';
+} from '../../../components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,9 +30,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
+} from '../../../components/ui/dropdown-menu';
+import { Label } from '../../../components/ui/label';
+import { Textarea } from '../../../components/ui/textarea';
 
 const todoSchema = z.object({
   content: z.string().min(1, 'You gotta write something!'),

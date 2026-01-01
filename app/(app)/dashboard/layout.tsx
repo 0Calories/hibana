@@ -1,5 +1,5 @@
-import { ChatBar } from '@/components/ChatBar';
-import { CreateButton } from '@/components/CreateButton';
+import { ChatBar } from '@/app/(app)/components/ChatBar';
+import { CreateButton } from '@/app/(app)/components/CreateButton';
 
 export default function DashboardLayout({
   children,
