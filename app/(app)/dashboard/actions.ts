@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import type { TablesInsert } from '@/utils/supabase/types';
 
-export async function createTodo(content: string) {
+export async function createTask(content: string) {
   const supabase = await createClient();
 
   const {
@@ -15,12 +15,12 @@ export async function createTodo(content: string) {
     return { success: false, error: authError };
   }
 
-  const todoData: TablesInsert<'todos'> = {
+  const todoData: TablesInsert<'tasks'> = {
     content: content,
     user: user.id,
   };
 
-  const { error: insertError } = await supabase.from('todos').insert(todoData);
+  const { error: insertError } = await supabase.from('tasks').insert(todoData);
   if (insertError) {
     return { success: false, error: insertError };
   }

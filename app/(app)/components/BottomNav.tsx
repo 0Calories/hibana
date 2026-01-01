@@ -9,7 +9,7 @@ export function BottomNav() {
 
   const navItems = [
     { icon: <LucideHome />, label: 'Home', href: '/dashboard' },
-    { icon: <LayoutList />, label: 'Todos', href: '/todos' },
+    { icon: <LayoutList />, label: 'Tasks', href: '/tasks' },
     { icon: <Sparkles />, label: 'Habits', href: '/habits' },
     { icon: <CalendarCheck />, label: 'Schedule', href: '/schedule' },
   ];
