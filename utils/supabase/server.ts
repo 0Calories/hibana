@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { getSupabaseCredentials } from './env';
+import type { Database } from './types';
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -8,7 +9,7 @@ export async function createClient() {
 
   // Create a server's supabase client with newly configured cookie,
   // which could be used to maintain user's session
-  return createServerClient(publicUrl, publishableKey, {
+  return createServerClient<Database>(publicUrl, publishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
