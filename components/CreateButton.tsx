@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CalendarCheckIcon,
   ListTodoIcon,
+  NotebookPen,
   NotebookPenIcon,
   PlusIcon,
   SparklesIcon,
@@ -31,9 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { Input } from './ui/input';
 import { Label } from './ui/label';
-
 import { Textarea } from './ui/textarea';
 
 const todoSchema = z.object({
@@ -115,17 +114,24 @@ export function CreateButton() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DialogContent className="flex flex-col justify-start w-4/5 h-4/6 overflow-y-auto">
+      <DialogContent className="flex flex-col w-4/5 h-4/6 p-6">
         <DialogHeader>
-          <DialogTitle>New Todo</DialogTitle>
+          <DialogTitle>
+            <Label>
+              <NotebookPen /> New Todo
+            </Label>
+          </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="h-fit">
-          <div className="grid gap-2">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col flex-1 gap-2 min-h-0"
+        >
+          <div className="flex-1 flex flex-col gap-2 min-h-0">
             <Textarea
               id="content"
               placeholder="Add some details ..."
-              rows={10}
+              className="flex-1 resize-none"
               {...register('content')}
             />
             {errors.content && (
@@ -135,7 +141,7 @@ export function CreateButton() {
             )}
           </div>
 
-          <div className="flex gap-2 justify-end mt-2">
+          <div className="flex gap-2 justify-end pt-2">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Creating...' : 'Done'}
             </Button>
