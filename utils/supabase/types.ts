@@ -385,3 +385,8 @@ export const Constants = {
     Enums: {},
   },
 } as const;
+
+// Custom helper types
+export type Task = Database['public']['Tables']['tasks']['Row'];
+export type Note = Database['public']['Tables']['notes']['Row'];
+export type Habit = Database['public']['Tables']['habits']['Row'];

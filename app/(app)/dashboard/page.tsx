@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { createClient } from '@/utils/supabase/server';
+import type { Task } from '@/utils/supabase/types';
+import { StickyNote } from '../components/StickyNote';
 
 const cardColors = [
   'bg-red-400 dark:bg-red-400/90',
@@ -39,26 +41,13 @@ export default async function DashboardPage() {
       />
 
       <div className="mt-6 columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4 space-y-4">
-        {tasks.data?.map((task, index) => {
-          const colorClass = cardColors[index % cardColors.length];
+        {tasks.data?.map((task: Task, index) => {
           return (
-            <Card
+            <StickyNote
               key={task.id}
-              className={`${colorClass} break-inside-avoid mb-4 cursor-pointer`}
-            >
-              <CardContent className="p-4">
-                {task.title && (
-                  <h3 className="font-semibold text-base mb-2 text-foreground">
-                    {task.title}
-                  </h3>
-                )}
-                {task.content && (
-                  <p className="text-sm text-foreground/80 whitespace-pre-wrap">
-                    {task.content}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+              data={task}
+              colorClass={cardColors[index % cardColors.length]}
+            />
           );
         })}
       </div>
