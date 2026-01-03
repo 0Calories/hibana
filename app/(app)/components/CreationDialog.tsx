@@ -27,11 +27,14 @@ const taskSchema = z.object({
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
+export type CreationDialogMode = 'task' | 'note' | 'habit' | 'schedule';
+
 type Props = {
   setOpen: (open: boolean) => void;
+  mode: CreationDialogMode;
 };
 
-export function CreationDialog({ setOpen }: Props) {
+export function CreationDialog({ setOpen, mode }: Props) {
   const {
     handleSubmit,
     reset,

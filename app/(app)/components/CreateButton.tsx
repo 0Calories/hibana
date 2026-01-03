@@ -19,14 +19,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu';
-import { CreationDialog } from './CreationDialog';
+import { CreationDialog, type CreationDialogMode } from './CreationDialog';
 
 export function CreateButton() {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<CreationDialogMode>('task');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <CreationDialog setOpen={setOpen} />
+      <CreationDialog setOpen={setOpen} mode={mode} />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -38,47 +39,32 @@ export function CreateButton() {
           <DropdownMenuLabel>Create new</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          <CreateTaskButton />
-          <CreateNoteButton />
-          <CreateHabitButton />
-          <CreateScheduleButton />
+          <DialogTrigger asChild>
+            <DropdownMenuItem onClick={() => setMode('task')}>
+              <ListTodoIcon /> Task
+            </DropdownMenuItem>
+          </DialogTrigger>
+
+          <DialogTrigger asChild>
+            <DropdownMenuItem onClick={() => setMode('note')}>
+              <NotebookPenIcon /> Note
+            </DropdownMenuItem>
+          </DialogTrigger>
+
+          <DialogTrigger asChild>
+            <DropdownMenuItem onClick={() => setMode('habit')}>
+              <SparklesIcon />
+              Habit
+            </DropdownMenuItem>
+          </DialogTrigger>
+
+          <DialogTrigger asChild>
+            <DropdownMenuItem onClick={() => setMode('schedule')}>
+              <CalendarCheckIcon /> Schedule
+            </DropdownMenuItem>
+          </DialogTrigger>
         </DropdownMenuContent>
       </DropdownMenu>
     </Dialog>
-  );
-}
-
-function CreateTaskButton() {
-  return (
-    <DialogTrigger asChild>
-      <DropdownMenuItem>
-        <ListTodoIcon /> Task
-      </DropdownMenuItem>
-    </DialogTrigger>
-  );
-}
-
-function CreateNoteButton() {
-  return (
-    <DropdownMenuItem>
-      <NotebookPenIcon /> Note
-    </DropdownMenuItem>
-  );
-}
-
-function CreateHabitButton() {
-  return (
-    <DropdownMenuItem>
-      <SparklesIcon />
-      Habit
-    </DropdownMenuItem>
-  );
-}
-
-function CreateScheduleButton() {
-  return (
-    <DropdownMenuItem>
-      <CalendarCheckIcon /> Schedule
-    </DropdownMenuItem>
   );
 }
