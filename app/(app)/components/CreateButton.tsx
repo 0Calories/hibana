@@ -12,6 +12,11 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group';
 import { Button } from '../../../components/ui/button';
 import {
   Dialog,
@@ -33,7 +38,8 @@ import { Textarea } from '../../../components/ui/textarea';
 import { createTask } from '../dashboard/actions';
 
 const taskSchema = z.object({
-  content: z.string().min(1, 'You gotta write something!'),
+  title: z.string().min(1, 'Title must not be empty'),
+  content: z.string(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -107,17 +113,19 @@ export function CreateButton() {
       </DropdownMenu>
 
       <DialogContent className="flex flex-col w-4/5 h-4/6 p-6">
-        <DialogHeader>
+        <DialogHeader className="pt-4">
           <DialogTitle>
-            <Label>
-              <NotebookPenIcon /> New Task
-            </Label>
+            <InputGroup>
+              <InputGroupInput placeholder="Title" />
+              <InputGroupAddon>
+                <NotebookPenIcon />
+              </InputGroupAddon>
+            </InputGroup>
           </DialogTitle>
         </DialogHeader>
-
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col flex-1 gap-2 min-h-0"
+          className="flex flex-col flex-1 min-h-0"
         >
           <div className="flex-1 flex flex-col gap-2 min-h-0">
             <Textarea
