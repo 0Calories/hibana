@@ -51,14 +51,14 @@ export function CreateButton() {
             </DropdownMenuItem>
           </DialogTrigger>
 
-          <DialogTrigger asChild>
+          <DialogTrigger asChild disabled>
             <DropdownMenuItem onClick={() => setMode('habit')}>
               <SparklesIcon />
               Habit
             </DropdownMenuItem>
           </DialogTrigger>
 
-          <DialogTrigger asChild>
+          <DialogTrigger asChild disabled>
             <DropdownMenuItem onClick={() => setMode('schedule')}>
               <CalendarCheckIcon /> Schedule
             </DropdownMenuItem>
