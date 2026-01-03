@@ -1,7 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { NotebookPenIcon } from 'lucide-react';
+import {
+  CalendarCheckIcon,
+  ListTodoIcon,
+  NotebookPenIcon,
+  SparklesIcon,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
@@ -34,6 +40,13 @@ type Props = {
   mode: CreationDialogMode;
 };
 
+const MODE_TO_ICON: Record<CreationDialogMode, ReactNode> = {
+  task: <ListTodoIcon />,
+  note: <NotebookPenIcon />,
+  habit: <SparklesIcon />,
+  schedule: <CalendarCheckIcon />,
+};
+
 export function CreationDialog({ setOpen, mode }: Props) {
   const {
     handleSubmit,
@@ -42,10 +55,6 @@ export function CreationDialog({ setOpen, mode }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
-    defaultValues: {
-      title: 'New Task',
-      content: '',
-    },
   });
 
   const onSubmit = async (data: TaskFormData) => {
@@ -99,10 +108,9 @@ export function CreationDialog({ setOpen, mode }: Props) {
                       id={field.name}
                       aria-invalid={fieldState.invalid}
                       placeholder="Title"
+                      defaultValue={`New ${mode}`}
                     />
-                    <InputGroupAddon>
-                      <NotebookPenIcon />
-                    </InputGroupAddon>
+                    <InputGroupAddon>{MODE_TO_ICON[mode]}</InputGroupAddon>
                   </InputGroup>
                 </Field>
               )}
