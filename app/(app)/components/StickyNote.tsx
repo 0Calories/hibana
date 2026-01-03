@@ -1,4 +1,7 @@
-import { Card, CardContent } from '@/components/ui/card';
+'use client';
+
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { Task } from '@/utils/supabase/types';
 
 type Props = {
@@ -25,6 +28,12 @@ export function StickyNote({ data, colorClass }: Props) {
           </p>
         )}
       </CardContent>
+      <CardFooter className={`${colorClass}`}>
+        <div className="flex flex-row items-center gap-1">
+          <Checkbox />
+          Done
+        </div>
+      </CardFooter>
     </Card>
   );
 }
