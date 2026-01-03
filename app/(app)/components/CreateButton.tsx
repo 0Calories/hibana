@@ -9,9 +9,10 @@ import {
   SparklesIcon,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { Field } from '@/components/ui/field';
 import {
   InputGroup,
   InputGroupAddon,
@@ -33,7 +34,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu';
-import { Label } from '../../../components/ui/label';
 import { Textarea } from '../../../components/ui/textarea';
 import { createTask } from '../dashboard/actions';
 
@@ -47,12 +47,16 @@ type TaskFormData = z.infer<typeof taskSchema>;
 export function CreateButton() {
   const [open, setOpen] = useState(false);
   const {
-    register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
+    defaultValues: {
+      title: 'New Task',
+      content: '',
+    },
   });
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -113,34 +117,55 @@ export function CreateButton() {
       </DropdownMenu>
 
       <DialogContent className="flex flex-col w-4/5 h-4/6 p-6">
-        <DialogHeader className="pt-4">
-          <DialogTitle>
-            <InputGroup>
-              <InputGroupInput placeholder="Title" />
-              <InputGroupAddon>
-                <NotebookPenIcon />
-              </InputGroupAddon>
-            </InputGroup>
-          </DialogTitle>
-        </DialogHeader>
         <form
+          id="new-task"
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col flex-1 min-h-0"
+          className="flex flex-col flex-1 min-h-0 gap-4"
         >
+          <DialogHeader className="pt-4">
+            <DialogTitle>
+              <Controller
+                name="title"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <InputGroup>
+                      <InputGroupInput
+                        {...field}
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
+                        placeholder="Title"
+                      />
+                      <InputGroupAddon>
+                        <NotebookPenIcon />
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </Field>
+                )}
+              />
+            </DialogTitle>
+          </DialogHeader>
           <div className="flex-1 flex flex-col gap-2 min-h-0">
-            <Textarea
-              id="content"
-              placeholder="Add some details ..."
-              className="flex-1 resize-none"
-              {...register('content')}
+            <Controller
+              name="content"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Textarea
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  placeholder="Add optional details ..."
+                  className="flex-1 resize-none"
+                />
+              )}
             />
+
             {errors.content && (
               <p className="text-sm text-destructive">
                 {errors.content.message}
               </p>
             )}
           </div>
-
           <div className="flex gap-2 justify-end pt-2">
             <Button type="submit" disabled={isSubmitting}>
               Save
