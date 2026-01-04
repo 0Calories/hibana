@@ -51,7 +51,7 @@ export function CreateButton() {
             </DropdownMenuItem>
           </DialogTrigger>
 
-          <DialogTrigger asChild disabled>
+          <DialogTrigger asChild>
             <DropdownMenuItem onClick={() => setMode('habit')}>
               <SparklesIcon />
               Habit

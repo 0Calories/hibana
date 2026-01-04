@@ -7,7 +7,7 @@ import {
   NotebookPenIcon,
   SparklesIcon,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
@@ -51,14 +51,19 @@ export function CreationDialog({ setOpen, mode }: Props) {
   const {
     handleSubmit,
     reset,
-    setValue,
     control,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
+    defaultValues: {
+      title: `New ${mode}`,
+    },
   });
 
-  setValue('title', `New ${mode}`);
+  // Reset the default title when a new mode is selected
+  useEffect(() => {
+    reset({ title: `New ${mode}` });
+  }, [mode, reset]);
 
   const onSubmit = async (data: TaskFormData) => {
     const toastId = toast.loading('Creating Task ...', {
