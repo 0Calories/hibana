@@ -27,6 +27,6 @@ export async function createTask(title: string, content?: string) {
     return { success: false, error: insertError };
   }
 
-  revalidatePath('/posts');
+  revalidatePath('/dashboard');
   return { success: true };
 }
