@@ -9,8 +9,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import { Button } from '../../../components/ui/button';
-import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../../../components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import { CreationDialog, type CreationDialogMode } from './CreationDialog';
 
 export function CreateButton() {
