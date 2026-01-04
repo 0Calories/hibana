@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import type { TablesInsert } from '@/utils/supabase/types';
 
-export async function createTask(content: string) {
+export async function createTask(title: string, content?: string) {
   const supabase = await createClient();
 
   const {
@@ -16,7 +16,8 @@ export async function createTask(content: string) {
   }
 
   const taskData: TablesInsert<'tasks'> = {
-    content: content,
+    title,
+    content,
     user: user.id,
   };
 

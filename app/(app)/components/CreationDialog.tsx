@@ -28,7 +28,7 @@ import { createTask } from '../dashboard/actions';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title must not be empty'),
-  content: z.string(),
+  content: z.string().optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -55,6 +55,9 @@ export function CreationDialog({ setOpen, mode }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
+    defaultValues: {
+      title: `New ${mode}`,
+    },
   });
 
   const onSubmit = async (data: TaskFormData) => {
@@ -63,10 +66,11 @@ export function CreationDialog({ setOpen, mode }: Props) {
     });
 
     try {
-      const result = await createTask(data.content);
+      const result = await createTask(data.title, data.content);
       if (result.error) {
+        // TODO: Extract out a constant to map data types to display values: icon, display name, etc. Include i8n support
         toast.error(
-          `Failed to create Task: ${result.error.message || 'unknown error'}`,
+          `Failed to create ${mode}: ${result.error.message || 'unknown error'}`,
           {
             id: toastId,
             position: 'top-center',
@@ -75,7 +79,7 @@ export function CreationDialog({ setOpen, mode }: Props) {
         return;
       }
 
-      toast.success('Task created successfully!', {
+      toast.success(`${mode} created successfully!`, {
         id: toastId,
         position: 'top-center',
       });
@@ -84,7 +88,7 @@ export function CreationDialog({ setOpen, mode }: Props) {
       setOpen(false);
     } catch (error) {
       toast.error('An unexpected error occurred');
-      console.error('Error creating task:', error);
+      console.error(`Error creating ${mode}:`, error);
     }
   };
 
