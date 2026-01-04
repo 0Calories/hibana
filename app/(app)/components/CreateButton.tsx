@@ -45,7 +45,7 @@ export function CreateButton() {
             </DropdownMenuItem>
           </DialogTrigger>
 
-          <DialogTrigger asChild disabled>
+          <DialogTrigger asChild>
             <DropdownMenuItem onClick={() => setMode('note')}>
               <NotebookPenIcon /> Note
             </DropdownMenuItem>

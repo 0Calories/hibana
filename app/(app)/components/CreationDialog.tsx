@@ -51,14 +51,14 @@ export function CreationDialog({ setOpen, mode }: Props) {
   const {
     handleSubmit,
     reset,
+    setValue,
     control,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
-    defaultValues: {
-      title: `New ${mode}`,
-    },
   });
+
+  setValue('title', `New ${mode}`);
 
   const onSubmit = async (data: TaskFormData) => {
     const toastId = toast.loading('Creating Task ...', {
@@ -112,7 +112,6 @@ export function CreationDialog({ setOpen, mode }: Props) {
                       id={field.name}
                       aria-invalid={fieldState.invalid}
                       placeholder="Title"
-                      defaultValue={`New ${mode}`}
                     />
                     <InputGroupAddon>{MODE_TO_ICON[mode]}</InputGroupAddon>
                   </InputGroup>
