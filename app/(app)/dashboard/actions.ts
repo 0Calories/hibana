@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import type { TablesInsert } from '@/utils/supabase/types';
 
@@ -26,5 +27,6 @@ export async function createTask(title: string, content?: string) {
     return { success: false, error: insertError };
   }
 
+  revalidatePath('/dashboard');
   return { success: true };
 }

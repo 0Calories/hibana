@@ -25,7 +25,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn('h-full', inter.variable)}
     >
-      <body className={`h-full antialiased`}>
+      <body className="h-full antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
