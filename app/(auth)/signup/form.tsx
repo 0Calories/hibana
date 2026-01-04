@@ -93,8 +93,6 @@ export function SignupForm() {
         position: 'top-center',
       });
     }
-
-    signup(data.email, data.password);
   }
 
   return (
@@ -123,10 +121,9 @@ export function SignupForm() {
                     type="email"
                     required
                   />
-                  {fieldState.invalid ||
-                    (signupFailed && (
-                      <FieldError errors={[fieldState.error]} />
-                    ))}
+                  {(fieldState.invalid || signupFailed) && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />

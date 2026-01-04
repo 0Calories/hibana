@@ -24,9 +24,7 @@ const cardColors = [
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-
   const tasks = await supabase.from('tasks').select();
-  console.dir(tasks);
 
   return (
     <div className="size-full p-4 pb-24">
