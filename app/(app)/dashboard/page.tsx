@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { createClient } from '@/utils/supabase/server';
 
 const cardColors = [
@@ -44,18 +44,10 @@ export default async function DashboardPage() {
               key={task.id}
               className={`${colorClass} break-inside-avoid mb-4 cursor-pointer`}
             >
-              <CardContent className="p-4">
-                {task.title && (
-                  <h3 className="font-semibold text-base mb-2 text-foreground">
-                    {task.title}
-                  </h3>
-                )}
-                {task.content && (
-                  <p className="text-sm text-foreground/80 whitespace-pre-wrap">
-                    {task.content}
-                  </p>
-                )}
-              </CardContent>
+              <CardHeader className="font-semibold text-base text-foreground">
+                {task.title}
+              </CardHeader>
+              <CardContent>{task.content}</CardContent>
             </Card>
           );
         })}
