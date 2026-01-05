@@ -385,3 +385,7 @@ export const Constants = {
     Enums: {},
   },
 } as const;
+
+// Helper data types
+export type Task = Database['public']['Tables']['tasks']['Row'];
+export type Note = Database['public']['Tables']['notes']['Row'];
