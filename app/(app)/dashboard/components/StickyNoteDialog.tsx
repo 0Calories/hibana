@@ -12,14 +12,18 @@ type Props = {
 };
 
 export function StickyNoteDialog({ data, color }: Props) {
+  if (!data) {
+    return null;
+  }
+
   return (
     <DialogContent
       className={`opacity-100 ${color} flex flex-col w-4/5 h-4/6 p-6`}
     >
       <DialogHeader>
-        <DialogTitle>{data?.title ?? ''}</DialogTitle>
+        <DialogTitle>{data.title ?? ''}</DialogTitle>
       </DialogHeader>
-      {data?.content ?? ''}
+      {data.content ?? ''}
     </DialogContent>
   );
 }
