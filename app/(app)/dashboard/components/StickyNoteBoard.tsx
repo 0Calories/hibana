@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import type { Note, Task } from '@/utils/supabase/types';
+import { StickyNoteDialog } from './StickyNoteDialog';
 
 const CARD_COLOURS = [
   'bg-red-400 dark:bg-red-400/90',
@@ -31,7 +32,6 @@ type Props = {
 
 export function StickyNoteBoard({ tasks }: Props) {
   const [selectedNote, setSelectedNote] = useState<Task | Note | null>();
-  console.dir(tasks);
 
   return (
     <Dialog
@@ -53,6 +53,7 @@ export function StickyNoteBoard({ tasks }: Props) {
             <Card
               key={task.id}
               className={`${colorClass} break-inside-avoid mb-4 cursor-pointer`}
+              onClick={() => setSelectedNote(task)}
             >
               <CardHeader className="font-semibold text-base text-foreground">
                 {task.title}
@@ -62,6 +63,8 @@ export function StickyNoteBoard({ tasks }: Props) {
           );
         })}
       </div>
+
+      <StickyNoteDialog data={selectedNote} />
     </Dialog>
   );
 }
