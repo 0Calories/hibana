@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import type { Note, Task } from '@/utils/supabase/types';
 import { StickyNoteDialog } from './StickyNoteDialog';
@@ -61,7 +61,7 @@ export function StickyNoteBoard({ tasks }: Props) {
               onClick={() => setSelectedNote({ data: task, color: colorClass })}
             >
               <CardHeader className="font-semibold text-base text-foreground">
-                {task.title}
+                <CardTitle>{task.title}</CardTitle>
               </CardHeader>
               <CardContent>{task.content}</CardContent>
             </Card>
