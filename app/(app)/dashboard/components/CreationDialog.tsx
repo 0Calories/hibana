@@ -24,7 +24,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Textarea } from '@/components/ui/textarea';
-import { createTask } from '../dashboard/actions';
+import { createTask } from '../actions';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title must not be empty'),
