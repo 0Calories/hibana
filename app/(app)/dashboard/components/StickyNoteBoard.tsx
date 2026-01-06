@@ -30,8 +30,13 @@ type Props = {
   tasks: Task[];
 };
 
+type StickyNote = {
+  data: Task | Note;
+  color: string;
+} | null;
+
 export function StickyNoteBoard({ tasks }: Props) {
-  const [selectedNote, setSelectedNote] = useState<Task | Note | null>();
+  const [selectedNote, setSelectedNote] = useState<StickyNote>();
 
   return (
     <Dialog
@@ -53,7 +58,7 @@ export function StickyNoteBoard({ tasks }: Props) {
             <Card
               key={task.id}
               className={`${colorClass} break-inside-avoid mb-4 cursor-pointer`}
-              onClick={() => setSelectedNote(task)}
+              onClick={() => setSelectedNote({ data: task, color: colorClass })}
             >
               <CardHeader className="font-semibold text-base text-foreground">
                 {task.title}
@@ -64,7 +69,7 @@ export function StickyNoteBoard({ tasks }: Props) {
         })}
       </div>
 
-      <StickyNoteDialog data={selectedNote} />
+      <StickyNoteDialog data={selectedNote?.data} color={selectedNote?.color} />
     </Dialog>
   );
 }
