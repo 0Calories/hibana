@@ -36,7 +36,7 @@ type StickyNote = {
 } | null;
 
 export function StickyNoteBoard({ tasks }: Props) {
-  const [selectedNote, setSelectedNote] = useState<StickyNote>();
+  const [selectedNote, setSelectedNote] = useState<StickyNote>(null);
 
   return (
     <Dialog
