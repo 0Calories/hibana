@@ -1,5 +1,3 @@
-'use client';
-
 import { InputGroup, InputGroupInput } from '@/components/ui/input-group';
 
 export function ChatBar() {
