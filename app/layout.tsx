@@ -3,6 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { NextIntlClientProvider } from 'next-intl';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
@@ -32,7 +33,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <NextIntlClientProvider>{children}</NextIntlClientProvider>
         </ThemeProvider>
         <SpeedInsights />
         <Analytics />
