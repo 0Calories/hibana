@@ -1,5 +1,2 @@
-ignoredBuiltDependencies:
-  - supabase
-
-onlyBuiltDependencies:
-  - supabase
+allowBuilds:
+  supabase: true
