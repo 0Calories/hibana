@@ -1,7 +1,10 @@
+import { useTranslations } from 'next-intl';
+
 export default function Page() {
+  const t = useTranslations('MarketingPage');
   return (
     <div className="">
-      <span>🚧 Under Construction 🚧</span>
+      <span>{t('u')}</span>
     </div>
   );
 }
