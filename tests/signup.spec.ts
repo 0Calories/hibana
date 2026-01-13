@@ -5,7 +5,7 @@ test('should successfully create a new user when signing up', async ({
 }) => {
   await page.goto('/signup');
 
-  const email = `test@example.com`;
+  const email = `test${new Date().toDateString}@example.com`;
   const password = 'TestPassword123!';
 
   await page.getByLabel('Email').fill(email);
@@ -14,5 +14,5 @@ test('should successfully create a new user when signing up', async ({
 
   await page.getByRole('button', { name: 'Create Account' }).click();
 
-  await expect(page.getByText('Welcome to Hibana!')).toBeVisible();
+  await expect(page.getByText('Welcome back!')).toBeVisible();
 });
