@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 
 test('should successfully create a new user when signing up', async ({
@@ -5,7 +6,7 @@ test('should successfully create a new user when signing up', async ({
 }) => {
   await page.goto('/signup');
 
-  const email = `test${new Date().toDateString}@example.com`;
+  const email = `test${randomUUID()}@example.com`;
   const password = 'TestPassword123!';
 
   await page.getByLabel('Email').fill(email);
@@ -14,5 +15,5 @@ test('should successfully create a new user when signing up', async ({
 
   await page.getByRole('button', { name: 'Create Account' }).click();
 
-  await expect(page.getByText('Welcome back!')).toBeVisible();
+  await expect(page.getByText('Welcome to Hibana!')).toBeVisible();
 });
