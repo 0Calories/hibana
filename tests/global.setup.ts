@@ -1,7 +1,8 @@
-// import { execSync } from 'node:child_process';
-// import { test as setup } from '@playwright/test';
+import { test as setup } from '@playwright/test';
+import { cleanupTestData } from './helpers/db';
 
-// setup('create new database', async () => {
-//   console.log('creating new database...');
-//   execSync('pnpx supabase db reset', { stdio: 'inherit' });
-// });
+setup('cleanup test data', async () => {
+  console.log('Cleaning up test data...');
+  await cleanupTestData();
+  console.log('Test data cleaned up.');
+});

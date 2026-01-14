@@ -44,6 +44,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "dotenv": "^17.2.3",
     "supabase": "^2.72.3",
     "tailwindcss": "^4",
     "typescript": "^5"

@@ -96,6 +96,9 @@ importers:
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       supabase:
         specifier: ^2.72.3
         version: 2.72.3
