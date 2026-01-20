@@ -27,13 +27,28 @@
     primary key (flame_id, day_of_week)
   );
 
+  create table public.flame_sessions (
+    id uuid primary key default gen_random_uuid(),
+    flame_id uuid not null references public.flames(id) on delete cascade,
+    date date not null default current_date,
+    started_at timestamptz,
+    ended_at timestamptz,
+    duration_seconds integer not null default 0,
+    is_completed boolean not null default false,
+    notes text,
+    created_at timestamptz not null default now()
+  );
+
   -- Index for faster user queries
   create index flames_user_id_idx on public.flames(user_id);
+  create index flame_sessions_flame_id_idx on public.flame_sessions(flame_id);
+  create index flame_sessions_date_idx on public.flame_sessions(date);
 
   -- Enable RLS
   alter table public.flames enable row level security;
   alter table public.fuel_budgets enable row level security;
   alter table public.flame_schedules enable row level security;
+  alter table public.flame_sessions enable row level security;
 
   -- Flame management
   create policy "Users can view own flames"
@@ -101,4 +116,36 @@
       where flames.id = flame_schedules.flame_id
       and flames.user_id = auth.uid()
     ));
-    
+
+-- Users can only access sessions for their own flames
+create policy "Users can view own flame_sessions"
+    on public.flame_sessions for select
+    using (exists (
+      select 1 from public.flames
+      where flames.id = flame_sessions.flame_id
+      and flames.user_id = auth.uid()
+    ));
+
+  create policy "Users can insert own flame_sessions"
+    on public.flame_sessions for insert
+    with check (exists (
+      select 1 from public.flames
+      where flames.id = flame_sessions.flame_id
+      and flames.user_id = auth.uid()
+    ));
+
+  create policy "Users can update own flame_sessions"
+    on public.flame_sessions for update
+    using (exists (
+      select 1 from public.flames
+      where flames.id = flame_sessions.flame_id
+      and flames.user_id = auth.uid()
+    ));
+
+  create policy "Users can delete own flame_sessions"
+    on public.flame_sessions for delete
+    using (exists (
+      select 1 from public.flames
+      where flames.id = flame_sessions.flame_id
+      and flames.user_id = auth.uid()
+    ));
