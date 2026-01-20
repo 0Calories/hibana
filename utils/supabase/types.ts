@@ -7,25 +7,163 @@ export type Json =
   | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: '14.1';
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
   public: {
     Tables: {
-      activity_logs: {
+      flame_schedules: {
         Row: {
-          id: number;
-          timestamp: string;
+          day_of_week: number;
+          flame_id: string;
         };
         Insert: {
-          id?: number;
-          timestamp?: string;
+          day_of_week: number;
+          flame_id: string;
         };
         Update: {
-          id?: number;
-          timestamp?: string;
+          day_of_week?: number;
+          flame_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'flame_schedules_flame_id_fkey';
+            columns: ['flame_id'];
+            isOneToOne: false;
+            referencedRelation: 'flames';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      flame_sessions: {
+        Row: {
+          created_at: string;
+          date: string;
+          duration_seconds: number;
+          ended_at: string | null;
+          flame_id: string;
+          id: string;
+          is_completed: boolean;
+          notes: string | null;
+          started_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          date?: string;
+          duration_seconds?: number;
+          ended_at?: string | null;
+          flame_id: string;
+          id?: string;
+          is_completed?: boolean;
+          notes?: string | null;
+          started_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          date?: string;
+          duration_seconds?: number;
+          ended_at?: string | null;
+          flame_id?: string;
+          id?: string;
+          is_completed?: boolean;
+          notes?: string | null;
+          started_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'flame_sessions_flame_id_fkey';
+            columns: ['flame_id'];
+            isOneToOne: false;
+            referencedRelation: 'flames';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      flames: {
+        Row: {
+          color: string | null;
+          count_target: number | null;
+          count_unit: string | null;
+          created_at: string;
+          icon: string | null;
+          id: string;
+          is_archived: boolean;
+          is_daily: boolean;
+          name: string;
+          time_budget_minutes: number | null;
+          tracking_type: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          color?: string | null;
+          count_target?: number | null;
+          count_unit?: string | null;
+          created_at?: string;
+          icon?: string | null;
+          id?: string;
+          is_archived?: boolean;
+          is_daily?: boolean;
+          name: string;
+          time_budget_minutes?: number | null;
+          tracking_type: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          color?: string | null;
+          count_target?: number | null;
+          count_unit?: string | null;
+          created_at?: string;
+          icon?: string | null;
+          id?: string;
+          is_archived?: boolean;
+          is_daily?: boolean;
+          name?: string;
+          time_budget_minutes?: number | null;
+          tracking_type?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      fuel_budgets: {
+        Row: {
+          day_of_week: number;
+          minutes: number;
+          user_id: string;
+        };
+        Insert: {
+          day_of_week: number;
+          minutes?: number;
+          user_id: string;
+        };
+        Update: {
+          day_of_week?: number;
+          minutes?: number;
+          user_id?: string;
         };
         Relationships: [];
       };
@@ -122,81 +260,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      scheduled_activity: {
-        Row: {
-          created_at: string;
-          day_of_week: number | null;
-          description: string | null;
-          end_time: string | null;
-          icon: number | null;
-          id: number;
-          is_recurring: boolean | null;
-          log_entries: string[] | null;
-          name: string | null;
-          start_time: string | null;
-          user: string | null;
-        };
-        Insert: {
-          created_at?: string;
-          day_of_week?: number | null;
-          description?: string | null;
-          end_time?: string | null;
-          icon?: number | null;
-          id?: number;
-          is_recurring?: boolean | null;
-          log_entries?: string[] | null;
-          name?: string | null;
-          start_time?: string | null;
-          user?: string | null;
-        };
-        Update: {
-          created_at?: string;
-          day_of_week?: number | null;
-          description?: string | null;
-          end_time?: string | null;
-          icon?: number | null;
-          id?: number;
-          is_recurring?: boolean | null;
-          log_entries?: string[] | null;
-          name?: string | null;
-          start_time?: string | null;
-          user?: string | null;
-        };
-        Relationships: [];
-      };
-      time_envelopes: {
-        Row: {
-          created_at: string;
-          description: string | null;
-          icon: number | null;
-          id: number;
-          log_entries: string[] | null;
-          name: string | null;
-          time_budget: number | null;
-          user: string | null;
-        };
-        Insert: {
-          created_at?: string;
-          description?: string | null;
-          icon?: number | null;
-          id?: number;
-          log_entries?: string[] | null;
-          name?: string | null;
-          time_budget?: number | null;
-          user?: string | null;
-        };
-        Update: {
-          created_at?: string;
-          description?: string | null;
-          icon?: number | null;
-          id?: number;
-          log_entries?: string[] | null;
-          name?: string | null;
-          time_budget?: number | null;
-          user?: string | null;
-        };
-        Relationships: [];
-      };
       tasks: {
         Row: {
           content: string | null;
@@ -236,7 +299,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: 'tasks_parent_task_fkey';
+            foreignKeyName: 'todos_parent_task_fkey';
             columns: ['parent_task'];
             isOneToOne: false;
             referencedRelation: 'tasks';
@@ -381,11 +444,10 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
 } as const;
-
-// Helper data types
-export type Task = Database['public']['Tables']['tasks']['Row'];
-export type Note = Database['public']['Tables']['notes']['Row'];
