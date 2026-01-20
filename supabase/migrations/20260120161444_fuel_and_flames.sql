@@ -14,11 +14,26 @@
     updated_at timestamptz not null default now()
   );
 
+  create table public.fuel_budgets (
+    user_id uuid not null references auth.users(id) on delete cascade,
+    day_of_week smallint not null check (day_of_week between 0 and 6),
+    minutes integer not null default 0,
+    primary key (user_id, day_of_week)
+  );
+
+  create table public.flame_schedules (
+    flame_id uuid not null references public.flames(id) on delete cascade,
+    day_of_week smallint not null check (day_of_week between 0 and 6),
+    primary key (flame_id, day_of_week)
+  );
+
   -- Index for faster user queries
   create index flames_user_id_idx on public.flames(user_id);
 
   -- Enable RLS
   alter table public.flames enable row level security;
+  alter table public.fuel_budgets enable row level security;
+  alter table public.flame_schedules enable row level security;
 
   -- Flame management
   create policy "Users can view own flames"
@@ -36,3 +51,54 @@
   create policy "Users can delete own flames"
     on public.flames for delete
     using (auth.uid() = user_id);
+
+-- Users can only access their own fuel budgets
+  create policy "Users can view own fuel_budgets"
+    on public.fuel_budgets for select
+    using (auth.uid() = user_id);
+
+  create policy "Users can insert own fuel_budgets"
+    on public.fuel_budgets for insert
+    with check (auth.uid() = user_id);
+
+  create policy "Users can update own fuel_budgets"
+    on public.fuel_budgets for update
+    using (auth.uid() = user_id);
+
+  create policy "Users can delete own fuel_budgets"
+    on public.fuel_budgets for delete
+    using (auth.uid() = user_id);
+
+-- Users can only access schedules for their own flames
+  create policy "Users can view own flame_schedules"
+    on public.flame_schedules for select
+    using (exists (
+      select 1 from public.flames
+      where flames.id = flame_schedules.flame_id
+      and flames.user_id = auth.uid()
+    ));
+
+  create policy "Users can insert own flame_schedules"
+    on public.flame_schedules for insert
+    with check (exists (
+      select 1 from public.flames
+      where flames.id = flame_schedules.flame_id
+      and flames.user_id = auth.uid()
+    ));
+
+  create policy "Users can update own flame_schedules"
+    on public.flame_schedules for update
+    using (exists (
+      select 1 from public.flames
+      where flames.id = flame_schedules.flame_id
+      and flames.user_id = auth.uid()
+    ));
+
+  create policy "Users can delete own flame_schedules"
+    on public.flame_schedules for delete
+    using (exists (
+      select 1 from public.flames
+      where flames.id = flame_schedules.flame_id
+      and flames.user_id = auth.uid()
+    ));
+    
