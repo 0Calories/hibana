@@ -10,7 +10,8 @@
     "format": "biome format --write",
     "db:start": "pnpx supabase start",
     "db:stop": "pnpx supabase stop",
-    "db:reset": "pnpx supabase db reset"
+    "db:reset": "pnpx supabase db reset",
+    "db:push": "pnpx supabase db push"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
