@@ -3,7 +3,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import type { Note, Task } from '@/utils/supabase/types';
+import type { Note, Task } from '@/utils/supabase/rows';
 
 // Dialog component for rendering the full content of a sticky note on the dashboard when clicked
 type Props = {
