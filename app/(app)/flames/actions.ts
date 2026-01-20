@@ -37,6 +37,7 @@ export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
   const { data, error: insertError } = await supabase
     .from('flames')
     .insert(flameInsertData)
+    .select()
     .single();
   if (insertError) {
     return { success: false, error: insertError };
@@ -44,7 +45,7 @@ export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
 
   // If this flame was created alongside a schedule, we must also update the data accordingly
   if (!flameInput.is_daily && schedule) {
-    // TODO: Perform an insert in flame_schedules as well
+    // TODO: Perform an insert in flame_schedules as well. You need the flame ID from the first query's return data
   }
 
   revalidatePath('/flames');
