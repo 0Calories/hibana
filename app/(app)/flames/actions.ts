@@ -17,7 +17,7 @@ type FlameInput = Pick<
   | 'is_daily'
 >;
 
-export async function createFlame(data: FlameInput) {
+export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
   const supabase = await createClient();
 
   const {
@@ -29,18 +29,24 @@ export async function createFlame(data: FlameInput) {
     return { success: false, error: authError };
   }
 
-  const flameData: TablesInsert<'flames'> = {
+  const flameInsertData: TablesInsert<'flames'> = {
     user_id: user.id,
-    ...data,
+    ...flameInput,
   };
 
-  const { error: insertError } = await supabase
+  const { data, error: insertError } = await supabase
     .from('flames')
-    .insert(flameData);
+    .insert(flameInsertData)
+    .single();
   if (insertError) {
     return { success: false, error: insertError };
   }
 
+  // If this flame was created alongside a schedule, we must also update the data accordingly
+  if (!flameInput.is_daily && schedule) {
+    // TODO: Perform an insert in flame_schedules as well
+  }
+
   revalidatePath('/flames');
-  return { success: true };
+  return { success: true, data };
 }
