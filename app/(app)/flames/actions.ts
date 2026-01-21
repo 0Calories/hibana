@@ -57,12 +57,16 @@ export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
   return { success: true, data };
 }
 
-export async function updateFlame(flameId: string, flameInput: FlameInput) {
+export async function updateFlame(
+  flameId: string,
+  flameInput: Partial<FlameInput>,
+) {
   const { supabase, user } = await createClientWithAuth();
 
   const { data, error } = await supabase
     .from('flames')
-    .update({ ...flameInput, user_id: user.id })
+    .update({ ...flameInput })
+    .eq('user_id', user.id)
     .eq('id', flameId);
 
   if (error) {
