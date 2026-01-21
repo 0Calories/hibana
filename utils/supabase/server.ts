@@ -28,3 +28,21 @@ export async function createClient() {
     },
   });
 }
+
+/**
+ * For use within server components only!
+ * Wrapper function for `createClient()` that includes auth checks and throws an error if not authorized
+ */
+export async function createClientWithAuth() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  return { supabase, user };
+}
