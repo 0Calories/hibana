@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { Flame } from '@/utils/supabase/rows';
-import { createClient } from '@/utils/supabase/server';
+import { createClientWithAuth } from '@/utils/supabase/server';
 import type { TablesInsert } from '@/utils/supabase/types';
 
 type FlameInput = Pick<
@@ -18,16 +18,7 @@ type FlameInput = Pick<
 >;
 
 export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { success: false, error: authError };
-  }
+  const { supabase, user } = await createClientWithAuth();
 
   const flameInsertData: TablesInsert<'flames'> = {
     user_id: user.id,
@@ -60,6 +51,26 @@ export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
       await supabase.from('flames').delete().eq('id', data.id);
       return { success: false, error: scheduleInsertError };
     }
+  }
+
+  revalidatePath('/flames');
+  return { success: true, data };
+}
+
+export async function updateFlame(
+  flameId: string,
+  flameInput: Partial<FlameInput>,
+) {
+  const { supabase, user } = await createClientWithAuth();
+
+  const { data, error } = await supabase
+    .from('flames')
+    .update({ ...flameInput })
+    .eq('user_id', user.id)
+    .eq('id', flameId);
+
+  if (error) {
+    return { success: false, error };
   }
 
   revalidatePath('/flames');
