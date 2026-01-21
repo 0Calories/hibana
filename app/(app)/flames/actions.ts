@@ -44,8 +44,22 @@ export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
   }
 
   // If this flame was created alongside a schedule, we must also update the data accordingly
-  if (!flameInput.is_daily && schedule) {
-    // TODO: Perform an insert in flame_schedules as well. You need the flame ID from the first query's return data
+  if (!flameInput.is_daily && schedule && schedule.length > 0) {
+    const flameId = data.id;
+    const { error: scheduleInsertError } = await supabase
+      .from('flame_schedules')
+      .insert(
+        schedule.map((day) => ({
+          day_of_week: day,
+          flame_id: flameId,
+        })),
+      );
+
+    // If there was a problem when attempting to update the schedule, clean up the orphaned flame
+    if (scheduleInsertError) {
+      await supabase.from('flames').delete().eq('id', data.id);
+      return { success: false, error: scheduleInsertError };
+    }
   }
 
   revalidatePath('/flames');
