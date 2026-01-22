@@ -2,7 +2,9 @@
 
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { createFlame, setFlameSchedule } from './actions';
+import { createFlame, getFlamesForDay, setFlameSchedule } from './actions';
+
+const SAMPLE_FLAME_ID = 'ae3a55e2-46e0-40d8-8885-cd2f7a98685a';
 
 export default function TestPage() {
   const handleCreateFlame = async () => {
@@ -20,13 +22,27 @@ export default function TestPage() {
   };
 
   const handleSetFlameSchedule = async () => {
-    const result = await setFlameSchedule(
-      'ae3a55e2-46e0-40d8-8885-cd2f7a98685a',
-      [1, 2, 4, 5],
-    );
+    const result = await setFlameSchedule(SAMPLE_FLAME_ID, [1, 2, 4, 5]);
 
     if (result.success) {
       toast.success(`Flame schedule set successfully!`, {
+        position: 'top-center',
+      });
+    }
+  };
+
+  const handleGetFlamesForThursday = async () => {
+    const result = await getFlamesForDay('2026-01-21');
+    console.dir(result);
+    if (result.success) {
+      toast.success(
+        `Flame data for Thurs: ${result.data?.map((entry) => `${entry.name}, `)}`,
+        {
+          position: 'top-center',
+        },
+      );
+    } else {
+      toast.error(result.error?.message, {
         position: 'top-center',
       });
     }
@@ -36,6 +52,7 @@ export default function TestPage() {
     <div>
       <Button onClick={handleCreateFlame}>createFlame</Button>
       <Button onClick={handleSetFlameSchedule}>setFlameSchedule</Button>
+      <Button onClick={handleGetFlamesForThursday}>getFlamesForThursday</Button>
     </div>
   );
 }

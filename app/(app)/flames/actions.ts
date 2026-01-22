@@ -105,17 +105,34 @@ export async function setFlameSchedule(flameId: string, schedule: number[]) {
 export async function getFlamesForDay(date: string) {
   const { supabase, user } = await createClientWithAuth();
 
-  const day = new Date(date).getDay();
+  // Must ensure we use UTC day to avoid timezone fuckery
+  const day = new Date(date).getUTCDay();
 
-  const { data, error } = await supabase
-    .from('flame_schedules')
-    .select()
+  // Daily flames are not included in the schedule so we must retrieve them separately first
+  const { data: dailyFlames, error: dailyError } = await supabase
+    .from('flames')
+    .select('*')
     .eq('user_id', user.id)
-    .eq('day_of_week', day);
+    .eq('is_daily', true)
+    .eq('is_archived', false);
 
-  if (error) {
-    return { success: false, error };
+  if (dailyError) {
+    return { success: false, error: dailyError };
   }
 
-  return { success: true, data };
+  const { data: scheduledFlames, error: scheduledError } = await supabase
+    .from('flames')
+    .select('*, flame_schedules!inner()')
+    .eq('user_id', user.id)
+    .eq('is_daily', false)
+    .eq('is_archived', false)
+    .eq('flame_schedules.day_of_week', day);
+
+  if (scheduledError) {
+    return { success: false, error: scheduledError };
+  }
+
+  const combinedResult = [...(dailyFlames ?? []), ...(scheduledFlames ?? [])];
+
+  return { success: true, data: combinedResult };
 }
