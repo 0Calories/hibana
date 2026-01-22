@@ -32,7 +32,7 @@ export default function TestPage() {
   };
 
   const handleGetFlamesForThursday = async () => {
-    const result = await getFlamesForDay('2026-01-21');
+    const result = await getFlamesForDay('2026-01-22');
     console.dir(result);
     if (result.success) {
       toast.success(

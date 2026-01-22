@@ -85,6 +85,12 @@ export async function updateFlame(
 export async function setFlameSchedule(flameId: string, schedule: number[]) {
   const { supabase } = await createClientWithAuth();
 
+  // Clears schedule if empty array passed
+  if (schedule.length === 0) {
+    await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
+    return { success: true };
+  }
+
   await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
 
   const { error } = await supabase
@@ -95,6 +101,7 @@ export async function setFlameSchedule(flameId: string, schedule: number[]) {
     return { success: false, error };
   }
 
+  revalidatePath('/flames');
   return { success: true };
 }
 
