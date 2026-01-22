@@ -143,3 +143,22 @@ export async function getFlamesForDay(date: string) {
 
   return { success: true, data: combinedResult };
 }
+
+export async function deleteFlame(flameId: string) {
+  const { supabase, user } = await createClientWithAuth();
+
+  // Schedule data will also be automatically deleted due to cascade, no need to explicitly clean up
+  const { data, error } = await supabase
+    .from('flames')
+    .delete()
+    .eq('id', flameId)
+    .eq('user_id', user.id)
+    .select();
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  revalidatePath('/flames');
+  return { success: true, data };
+}

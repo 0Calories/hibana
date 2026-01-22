@@ -2,7 +2,12 @@
 
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { createFlame, getFlamesForDay, setFlameSchedule } from './actions';
+import {
+  createFlame,
+  deleteFlame,
+  getFlamesForDay,
+  setFlameSchedule,
+} from './actions';
 
 const SAMPLE_FLAME_ID = 'ae3a55e2-46e0-40d8-8885-cd2f7a98685a';
 
@@ -48,11 +53,26 @@ export default function TestPage() {
     }
   };
 
+  const handleDeleteFlame = async () => {
+    const result = await deleteFlame(SAMPLE_FLAME_ID);
+    console.dir(result);
+    if (result.success) {
+      toast.success(`Deleted sucessfully`, {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
   return (
     <div>
       <Button onClick={handleCreateFlame}>createFlame</Button>
       <Button onClick={handleSetFlameSchedule}>setFlameSchedule</Button>
       <Button onClick={handleGetFlamesForThursday}>getFlamesForThursday</Button>
+      <Button onClick={handleDeleteFlame}>deleteFlame</Button>
     </div>
   );
 }
