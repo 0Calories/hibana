@@ -76,3 +76,70 @@ export async function updateFlame(
   revalidatePath('/flames');
   return { success: true, data };
 }
+
+/**
+ * Configure a schedule for a flame. If the flame already has an existing schedule it will be cleared and replaced
+ * @param flameId
+ * @param schedule A list of days of the week that the flame should be assigned to (e.g. 1 for Monday, 2 for Tuesday, etc.)
+ */
+export async function setFlameSchedule(flameId: string, schedule: number[]) {
+  const { supabase } = await createClientWithAuth();
+
+  // Clears schedule if empty array passed
+  if (schedule.length === 0) {
+    await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
+    return { success: true };
+  }
+
+  await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
+
+  const { error } = await supabase
+    .from('flame_schedules')
+    .insert(schedule.map((day) => ({ day_of_week: day, flame_id: flameId })));
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  revalidatePath('/flames');
+  return { success: true };
+}
+
+/**
+ * Returns the Flames that must be tended to for a specific date
+ * @param date  Must be provided in the 'YYYY-MM-DD' format
+ */
+export async function getFlamesForDay(date: string) {
+  const { supabase, user } = await createClientWithAuth();
+
+  // Must ensure we use UTC day to avoid timezone fuckery
+  const day = new Date(date).getUTCDay();
+
+  // Daily flames are not included in the schedule so we must retrieve them separately first
+  const { data: dailyFlames, error: dailyError } = await supabase
+    .from('flames')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('is_daily', true)
+    .eq('is_archived', false);
+
+  if (dailyError) {
+    return { success: false, error: dailyError };
+  }
+
+  const { data: scheduledFlames, error: scheduledError } = await supabase
+    .from('flames')
+    .select('*, flame_schedules!inner()')
+    .eq('user_id', user.id)
+    .eq('is_daily', false)
+    .eq('is_archived', false)
+    .eq('flame_schedules.day_of_week', day);
+
+  if (scheduledError) {
+    return { success: false, error: scheduledError };
+  }
+
+  const combinedResult = [...(dailyFlames ?? []), ...(scheduledFlames ?? [])];
+
+  return { success: true, data: combinedResult };
+}
