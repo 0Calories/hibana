@@ -78,8 +78,29 @@ export async function updateFlame(
 }
 
 /**
+ * Configure a schedule for a flame. If the flame already has an existing schedule it will be cleared and replaced
+ * @param flameId
+ * @param schedule A list of days of the week that the flame should be assigned to (e.g. 1 for Monday, 2 for Tuesday, etc.)
+ */
+export async function setFlameSchedule(flameId: string, schedule: number[]) {
+  const { supabase } = await createClientWithAuth();
+
+  await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
+
+  const { data, error } = await supabase
+    .from('flame_schedules')
+    .insert(schedule.map((day) => ({ day_of_week: day, flame_id: flameId })));
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  return { success: true, data };
+}
+
+/**
  * Returns the Flames that must be tended to for a specific date
- * @param date - Must be provided in the 'YYYY-MM-DD' format
+ * @param date  Must be provided in the 'YYYY-MM-DD' format
  */
 export async function getFlamesForDay(date: string) {
   const { supabase, user } = await createClientWithAuth();
@@ -96,5 +117,5 @@ export async function getFlamesForDay(date: string) {
     return { success: false, error };
   }
 
-  return data;
+  return { success: true, data };
 }
