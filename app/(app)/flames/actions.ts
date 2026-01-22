@@ -148,15 +148,17 @@ export async function deleteFlame(flameId: string) {
   const { supabase, user } = await createClientWithAuth();
 
   // Schedule data will also be automatically deleted due to cascade, no need to explicitly clean up
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('flames')
     .delete()
     .eq('id', flameId)
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .select();
 
   if (error) {
     return { success: false, error };
   }
 
-  return { success: true };
+  revalidatePath('/flames');
+  return { success: true, data };
 }
