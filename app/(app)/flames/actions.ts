@@ -76,3 +76,25 @@ export async function updateFlame(
   revalidatePath('/flames');
   return { success: true, data };
 }
+
+/**
+ * Returns the Flames that must be tended to for a specific date
+ * @param date - Must be provided in the 'YYYY-MM-DD' format
+ */
+export async function getFlamesForDay(date: string) {
+  const { supabase, user } = await createClientWithAuth();
+
+  const day = new Date(date).getDay();
+
+  const { data, error } = await supabase
+    .from('flame_schedules')
+    .select()
+    .eq('user_id', user.id)
+    .eq('day_of_week', day);
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  return data;
+}
