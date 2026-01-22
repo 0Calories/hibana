@@ -59,7 +59,7 @@ export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
 
 export async function updateFlame(
   flameId: string,
-  flameInput: Partial<FlameInput>,
+  flameInput: Partial<FlameInput & 'is_archived'>,
 ) {
   const { supabase, user } = await createClientWithAuth();
 
