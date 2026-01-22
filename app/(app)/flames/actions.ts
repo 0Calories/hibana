@@ -87,7 +87,7 @@ export async function setFlameSchedule(flameId: string, schedule: number[]) {
 
   await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('flame_schedules')
     .insert(schedule.map((day) => ({ day_of_week: day, flame_id: flameId })));
 
@@ -95,7 +95,7 @@ export async function setFlameSchedule(flameId: string, schedule: number[]) {
     return { success: false, error };
   }
 
-  return { success: true, data };
+  return { success: true };
 }
 
 /**
