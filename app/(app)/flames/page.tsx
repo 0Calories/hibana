@@ -8,7 +8,11 @@ import {
   getFlamesForDay,
   setFlameSchedule,
 } from './actions';
-import { getFuelBudget, setFuelBudget } from './fuel-actions';
+import {
+  getFuelBudget,
+  getRemainingFuelBudget,
+  setFuelBudget,
+} from './fuel-actions';
 
 const SAMPLE_FLAME_ID = 'ae3a55e2-46e0-40d8-8885-cd2f7a98685a';
 
@@ -69,7 +73,7 @@ export default function TestPage() {
   };
 
   const handleSetFuelBudget = async () => {
-    const result = await setFuelBudget(4, 90);
+    const result = await setFuelBudget(5, 90);
     console.dir(result);
     if (result.success) {
       toast.success(`Set budget successfully`, {
@@ -96,6 +100,20 @@ export default function TestPage() {
     }
   };
 
+  const handleGetRemainingFuel = async () => {
+    const result = await getRemainingFuelBudget('2026-01-23');
+    console.dir(result);
+    if (result.success) {
+      toast.success(JSON.stringify(result.data), {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
   return (
     <div>
       <Button onClick={handleCreateFlame}>createFlame</Button>
@@ -104,6 +122,7 @@ export default function TestPage() {
       <Button onClick={handleDeleteFlame}>deleteFlame</Button>
       <Button onClick={handleSetFuelBudget}>setFuelBudget</Button>
       <Button onClick={handleGetFuelBudget}>getFuelBudget</Button>
+      <Button onClick={handleGetRemainingFuel}>getRemainingFuelBudget</Button>
     </div>
   );
 }

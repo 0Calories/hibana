@@ -60,17 +60,25 @@ export async function getRemainingFuelBudget(date: string) {
     return { success: false, error: fuelBudgetError };
   }
 
-  const { data: fuelSpentData, error: fuelSpentError } = await supabase
+  // Return early if there is no fuel budgeted at all
+  if (fuelBudgetData.minutes === 0) {
+    return { success: true, data: { remainingFuel: 0 } };
+  }
+
+  const { data: sessions, error: fuelSpentError } = await supabase
     .from('flame_sessions')
-    .select('duration_seconds.sum()')
-    .eq('date', date)
-    .single();
+    .select('duration_seconds')
+    .eq('date', date);
 
   if (fuelSpentError) {
     return { success: false, error: fuelSpentError };
   }
 
-  const totalMinutes = fuelSpentData.sum / 60;
+  const totalSeconds = sessions.reduce(
+    (sum, entry) => sum + entry.duration_seconds,
+    0,
+  );
+  const totalMinutes = totalSeconds / 60;
   const remainingFuel = fuelBudgetData.minutes - totalMinutes;
 
   return { success: true, data: { remainingFuel } };
