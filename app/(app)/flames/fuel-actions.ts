@@ -43,3 +43,35 @@ export async function setFuelBudget(dayOfWeek: number, fuelMinutes: number) {
   revalidatePath('/flames');
   return { success: true };
 }
+
+export async function getRemainingFuelBudget(date: string) {
+  const { supabase, user } = await createClientWithAuth();
+
+  const dayOfWeek = new Date(date).getUTCDay();
+
+  const { data: fuelBudgetData, error: fuelBudgetError } = await supabase
+    .from('fuel_budgets')
+    .select('minutes')
+    .eq('user_id', user.id)
+    .eq('day_of_week', dayOfWeek)
+    .single();
+
+  if (fuelBudgetError) {
+    return { success: false, error: fuelBudgetError };
+  }
+
+  const { data: fuelSpentData, error: fuelSpentError } = await supabase
+    .from('flame_sessions')
+    .select('duration_seconds.sum()')
+    .eq('date', date)
+    .single();
+
+  if (fuelSpentError) {
+    return { success: false, error: fuelSpentError };
+  }
+
+  const totalMinutes = fuelSpentData.sum / 60;
+  const remainingFuel = fuelBudgetData.minutes - totalMinutes;
+
+  return { success: true, data: { remainingFuel } };
+}
