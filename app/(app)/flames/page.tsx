@@ -8,6 +8,7 @@ import {
   getFlamesForDay,
   setFlameSchedule,
 } from './actions';
+import { getFuelBudget, setFuelBudget } from './fuel-actions';
 
 const SAMPLE_FLAME_ID = 'ae3a55e2-46e0-40d8-8885-cd2f7a98685a';
 
@@ -57,7 +58,35 @@ export default function TestPage() {
     const result = await deleteFlame(SAMPLE_FLAME_ID);
     console.dir(result);
     if (result.success) {
-      toast.success(`Deleted sucessfully`, {
+      toast.success(`Deleted successfully`, {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
+  const handleSetFuelBudget = async () => {
+    const result = await setFuelBudget(4, 90);
+    console.dir(result);
+    if (result.success) {
+      toast.success(`Set budget successfully`, {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
+  const handleGetFuelBudget = async () => {
+    const result = await getFuelBudget();
+    console.dir(result);
+    if (result.success) {
+      toast.success(JSON.stringify(result.data), {
         position: 'top-center',
       });
     } else {
@@ -73,6 +102,8 @@ export default function TestPage() {
       <Button onClick={handleSetFlameSchedule}>setFlameSchedule</Button>
       <Button onClick={handleGetFlamesForThursday}>getFlamesForThursday</Button>
       <Button onClick={handleDeleteFlame}>deleteFlame</Button>
+      <Button onClick={handleSetFuelBudget}>setFuelBudget</Button>
+      <Button onClick={handleGetFuelBudget}>getFuelBudget</Button>
     </div>
   );
 }
