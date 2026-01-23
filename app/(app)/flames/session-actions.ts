@@ -11,9 +11,15 @@ export async function startSession(flameId: string, date: string) {
     };
   }
 
-  supabase
+  const { data, error } = await supabase
     .from('flame_sessions')
     .insert({ flame_id: flameId, date, started_at: new Date().toTimeString() });
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  return { success: true, data };
 }
 
 export async function endSession(flameId: string, date: string) {
@@ -45,5 +51,18 @@ export async function endSession(flameId: string, date: string) {
     };
   }
 
-  supabase.from('flame_sessions').insert({ flame_id: flameId, date });
+  const currentDuration = lastSessionData.duration_seconds;
+  const endTime = new Date();
+  // TODO:
+  // - store endTime as a timestamp string in ended_at in the record
+  // - calculate the total duration of the session by timestamp mathing the diff between started_at and ended_at,
+  // then add it on duration_seconds and save the result in the record
+
+  const { data, error } = await supabase.from('flame_sessions').update({});
+
+  if (error) {
+    return { success: false };
+  }
+
+  return { sucess: true, data };
 }
