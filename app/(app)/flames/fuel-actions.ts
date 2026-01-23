@@ -3,8 +3,27 @@
 import { revalidatePath } from 'next/cache';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
+export async function getFuelBudget() {
+  const { supabase, user } = await createClientWithAuth();
+
+  const { data, error } = await supabase
+    .from('fuel_budgets')
+    .select('*')
+    .eq('user_id', user.id);
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  return { success: true, data };
+}
+
 export async function setFuelBudget(dayOfWeek: number, fuelMinutes: number) {
   const { supabase, user } = await createClientWithAuth();
+
+  if (dayOfWeek < 0 || dayOfWeek > 6) {
+    throw new Error('Day of week must be a number in the range [0, 6]');
+  }
 
   // Use upsert to replace existing budget for the day if already set
   const { error } = await supabase
