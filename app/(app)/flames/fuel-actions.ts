@@ -60,11 +60,6 @@ export async function getRemainingFuelBudget(date: string) {
     return { success: false, error: fuelBudgetError };
   }
 
-  // Return early if there is no fuel budgeted at all
-  if (fuelBudgetData.minutes === 0) {
-    return { success: true, data: { remainingFuel: 0 } };
-  }
-
   const { data: sessions, error: fuelSpentError } = await supabase
     .from('flame_sessions')
     .select('duration_seconds')
