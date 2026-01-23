@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { isValidDateString } from '@/lib/utils';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
 export async function getFuelBudget() {
@@ -46,6 +47,13 @@ export async function setFuelBudget(dayOfWeek: number, fuelMinutes: number) {
 
 export async function getRemainingFuelBudget(date: string) {
   const { supabase, user } = await createClientWithAuth();
+
+  if (!isValidDateString(date)) {
+    return {
+      success: false,
+      error: new Error('Date string must be of the format YYYY-MM-DD'),
+    };
+  }
 
   const dayOfWeek = new Date(date).getUTCDay();
 
