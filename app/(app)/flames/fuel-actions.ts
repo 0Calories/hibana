@@ -22,7 +22,10 @@ export async function setFuelBudget(dayOfWeek: number, fuelMinutes: number) {
   const { supabase, user } = await createClientWithAuth();
 
   if (dayOfWeek < 0 || dayOfWeek > 6) {
-    throw new Error('Day of week must be a number in the range [0, 6]');
+    return {
+      success: false,
+      error: new Error('Day of week must be in range [0, 6]'),
+    };
   }
 
   // Use upsert to replace existing budget for the day if already set

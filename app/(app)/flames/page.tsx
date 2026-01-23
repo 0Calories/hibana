@@ -58,7 +58,7 @@ export default function TestPage() {
     const result = await deleteFlame(SAMPLE_FLAME_ID);
     console.dir(result);
     if (result.success) {
-      toast.success(`Deleted sucessfully`, {
+      toast.success(`Deleted successfully`, {
         position: 'top-center',
       });
     } else {
@@ -69,10 +69,10 @@ export default function TestPage() {
   };
 
   const handleSetFuelBudget = async () => {
-    const result = await setFuelBudget(2, 90);
+    const result = await setFuelBudget(9, 90);
     console.dir(result);
     if (result.success) {
-      toast.success(`Set budget sucessfully`, {
+      toast.success(`Set budget successfully`, {
         position: 'top-center',
       });
     } else {
