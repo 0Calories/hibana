@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { isValidDateString } from '@/lib/utils';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
 export async function getFuelBudget() {
@@ -42,4 +43,46 @@ export async function setFuelBudget(dayOfWeek: number, fuelMinutes: number) {
 
   revalidatePath('/flames');
   return { success: true };
+}
+
+export async function getRemainingFuelBudget(date: string) {
+  const { supabase, user } = await createClientWithAuth();
+
+  if (!isValidDateString(date)) {
+    return {
+      success: false,
+      error: new Error('Date string must be of the format YYYY-MM-DD'),
+    };
+  }
+
+  const dayOfWeek = new Date(date).getUTCDay();
+
+  const { data: fuelBudgetData, error: fuelBudgetError } = await supabase
+    .from('fuel_budgets')
+    .select('minutes')
+    .eq('user_id', user.id)
+    .eq('day_of_week', dayOfWeek)
+    .single();
+
+  if (fuelBudgetError) {
+    return { success: false, error: fuelBudgetError };
+  }
+
+  const { data: sessions, error: fuelSpentError } = await supabase
+    .from('flame_sessions')
+    .select('duration_seconds')
+    .eq('date', date);
+
+  if (fuelSpentError) {
+    return { success: false, error: fuelSpentError };
+  }
+
+  const totalSeconds = sessions.reduce(
+    (sum, entry) => sum + entry.duration_seconds,
+    0,
+  );
+  const totalMinutes = totalSeconds / 60;
+  const remainingFuel = fuelBudgetData.minutes - totalMinutes;
+
+  return { success: true, data: { remainingFuel } };
 }
