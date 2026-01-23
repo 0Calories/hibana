@@ -69,7 +69,7 @@ export default function TestPage() {
   };
 
   const handleSetFuelBudget = async () => {
-    const result = await setFuelBudget(9, 90);
+    const result = await setFuelBudget(4, 90);
     console.dir(result);
     if (result.success) {
       toast.success(`Set budget successfully`, {
