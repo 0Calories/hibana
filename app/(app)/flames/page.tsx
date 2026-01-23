@@ -8,6 +8,7 @@ import {
   getFlamesForDay,
   setFlameSchedule,
 } from './actions';
+import { setFuelBudget } from './fuel-actions';
 
 const SAMPLE_FLAME_ID = 'ae3a55e2-46e0-40d8-8885-cd2f7a98685a';
 
@@ -67,12 +68,27 @@ export default function TestPage() {
     }
   };
 
+  const handleSetFuelBudget = async () => {
+    const result = await setFuelBudget(4, 90);
+    console.dir(result);
+    if (result.success) {
+      toast.success(`Set budget sucessfully`, {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
   return (
     <div>
       <Button onClick={handleCreateFlame}>createFlame</Button>
       <Button onClick={handleSetFlameSchedule}>setFlameSchedule</Button>
       <Button onClick={handleGetFlamesForThursday}>getFlamesForThursday</Button>
       <Button onClick={handleDeleteFlame}>deleteFlame</Button>
+      <Button onClick={handleSetFuelBudget}>setFuelBudget</Button>
     </div>
   );
 }
