@@ -134,7 +134,10 @@ export async function endSession(flameId: string, date: string) {
     return { success: false, error };
   }
 
-  return { success: true, data };
+  return {
+    success: true,
+    data: `Successfully ended flame session on date ${date} - Duration: ${data.duration_seconds}s`,
+  };
 }
 
 // Edge cases to consider for the future:
