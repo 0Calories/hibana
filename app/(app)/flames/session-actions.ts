@@ -13,16 +13,34 @@ export async function startSession(flameId: string, date: string) {
     };
   }
 
-  const { data, error } = await supabase
+  // If there is already a session in progress that has not been ended yet, return an error
+  const { data: existingSession } = await supabase
     .from('flame_sessions')
-    .insert({ flame_id: flameId, date, started_at: new Date().toISOString() })
+    .select()
+    .eq('flame_id', flameId)
+    .eq('date', date)
+    .is('ended_at', null)
     .single();
+
+  if (existingSession) {
+    return {
+      success: false,
+      error: new Error('An ongoing session for this flame already exists'),
+    };
+  }
+
+  const { error } = await supabase
+    .from('flame_sessions')
+    .insert({ flame_id: flameId, date, started_at: new Date().toISOString() });
 
   if (error) {
     return { success: false, error };
   }
 
-  return { success: true, data };
+  return {
+    success: true,
+    data: `Successfully started a new flame session on date: ${date}`,
+  };
 }
 
 export async function endSession(flameId: string, date: string) {
@@ -43,6 +61,13 @@ export async function endSession(flameId: string, date: string) {
     .eq('date', date)
     .is('ended_at', null) // Get the session that is still in progress
     .single();
+
+  if (!lastSessionData) {
+    return {
+      success: false,
+      error: new Error('Could not find an existing flame session'),
+    };
+  }
 
   if (lastSessionError) {
     return { success: false, error: lastSessionError };
