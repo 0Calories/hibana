@@ -1,9 +1,13 @@
 'use server';
 
+import type { ActionResult } from '@/lib/types';
 import { isValidDateString } from '@/lib/utils';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
-export async function startSession(flameId: string, date: string) {
+export async function startSession(
+  flameId: string,
+  date: string,
+): ActionResult {
   const { supabase } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {
@@ -72,7 +76,7 @@ export async function startSession(flameId: string, date: string) {
   };
 }
 
-export async function endSession(flameId: string, date: string) {
+export async function endSession(flameId: string, date: string): ActionResult {
   const { supabase } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {

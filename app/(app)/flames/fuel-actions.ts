@@ -1,10 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { ActionResult } from '@/lib/types';
 import { isValidDateString } from '@/lib/utils';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
-export async function getFuelBudget() {
+export async function getFuelBudget(): ActionResult {
   const { supabase, user } = await createClientWithAuth();
 
   const { data, error } = await supabase
@@ -19,7 +20,10 @@ export async function getFuelBudget() {
   return { success: true, data };
 }
 
-export async function setFuelBudget(dayOfWeek: number, fuelMinutes: number) {
+export async function setFuelBudget(
+  dayOfWeek: number,
+  fuelMinutes: number,
+): ActionResult {
   const { supabase, user } = await createClientWithAuth();
 
   if (dayOfWeek < 0 || dayOfWeek > 6) {
@@ -42,10 +46,13 @@ export async function setFuelBudget(dayOfWeek: number, fuelMinutes: number) {
   }
 
   revalidatePath('/flames');
-  return { success: true };
+  return {
+    success: true,
+    data: `Successfully set fuel budget for day ${dayOfWeek}`,
+  };
 }
 
-export async function getRemainingFuelBudget(date: string) {
+export async function getRemainingFuelBudget(date: string): ActionResult {
   const { supabase, user } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {
