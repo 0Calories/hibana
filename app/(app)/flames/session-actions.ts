@@ -1,3 +1,5 @@
+'use server';
+
 import { isValidDateString } from '@/lib/utils';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
@@ -13,7 +15,8 @@ export async function startSession(flameId: string, date: string) {
 
   const { data, error } = await supabase
     .from('flame_sessions')
-    .insert({ flame_id: flameId, date, started_at: new Date().toISOString() });
+    .insert({ flame_id: flameId, date, started_at: new Date().toISOString() })
+    .single();
 
   if (error) {
     return { success: false, error };

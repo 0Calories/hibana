@@ -13,8 +13,16 @@ import {
   getRemainingFuelBudget,
   setFuelBudget,
 } from './fuel-actions';
+import { endSession, startSession } from './session-actions';
 
-const SAMPLE_FLAME_ID = 'ae3a55e2-46e0-40d8-8885-cd2f7a98685a';
+const SAMPLE_FLAME_ID = '92fe4034-3d8e-490c-aa1b-fb1ad41fc6a6';
+
+function getLocalDateString(d = new Date()): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export default function TestPage() {
   const handleCreateFlame = async () => {
@@ -114,6 +122,38 @@ export default function TestPage() {
     }
   };
 
+  const handleStartFlameSession = async () => {
+    const dateString = getLocalDateString();
+    const result = await startSession(SAMPLE_FLAME_ID, dateString);
+
+    console.dir(result);
+    if (result.success) {
+      toast.success(JSON.stringify(result.data), {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
+  const handleEndFlameSession = async () => {
+    const dateString = getLocalDateString();
+    const result = await endSession(SAMPLE_FLAME_ID, dateString);
+
+    console.dir(result);
+    if (result.success) {
+      toast.success(JSON.stringify(result.data), {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
   return (
     <div>
       <Button onClick={handleCreateFlame}>createFlame</Button>
@@ -123,6 +163,11 @@ export default function TestPage() {
       <Button onClick={handleSetFuelBudget}>setFuelBudget</Button>
       <Button onClick={handleGetFuelBudget}>getFuelBudget</Button>
       <Button onClick={handleGetRemainingFuel}>getRemainingFuelBudget</Button>
+
+      <div className="flex flex-row gap-2">
+        <Button onClick={handleStartFlameSession}>Start Flame Sesh 🔥</Button>
+        <Button onClick={handleEndFlameSession}>End Flame Sesh 🧯</Button>
+      </div>
     </div>
   );
 }
