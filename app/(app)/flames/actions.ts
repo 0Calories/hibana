@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { ActionResult } from '@/lib/types';
 import type { Flame } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 import type { TablesInsert } from '@/utils/supabase/types';
@@ -17,7 +18,10 @@ type FlameInput = Pick<
   | 'is_daily'
 >;
 
-export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
+export async function createFlame(
+  flameInput: FlameInput,
+  schedule?: number[],
+): ActionResult<Flame> {
   const { supabase, user } = await createClientWithAuth();
 
   const flameInsertData: TablesInsert<'flames'> = {
@@ -60,10 +64,10 @@ export async function createFlame(flameInput: FlameInput, schedule?: number[]) {
 export async function updateFlame(
   flameId: string,
   flameInput: Partial<FlameInput & { is_archived: boolean }>,
-) {
+): ActionResult {
   const { supabase, user } = await createClientWithAuth();
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('flames')
     .update({ ...flameInput })
     .eq('user_id', user.id)
@@ -74,7 +78,10 @@ export async function updateFlame(
   }
 
   revalidatePath('/flames');
-  return { success: true, data };
+  return {
+    success: true,
+    data: `Successfully updated flame with id ${flameId}`,
+  };
 }
 
 /**
@@ -82,13 +89,16 @@ export async function updateFlame(
  * @param flameId
  * @param schedule A list of days of the week that the flame should be assigned to (e.g. 1 for Monday, 2 for Tuesday, etc.)
  */
-export async function setFlameSchedule(flameId: string, schedule: number[]) {
+export async function setFlameSchedule(
+  flameId: string,
+  schedule: number[],
+): ActionResult {
   const { supabase } = await createClientWithAuth();
 
   // Clears schedule if empty array passed
   if (schedule.length === 0) {
     await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
-    return { success: true };
+    return { success: true, data: 'Flame schedule cleared successfully' };
   }
 
   await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
@@ -102,7 +112,7 @@ export async function setFlameSchedule(flameId: string, schedule: number[]) {
   }
 
   revalidatePath('/flames');
-  return { success: true };
+  return { success: true, data: 'Flame schedule successfully updated!' };
 }
 
 /**
