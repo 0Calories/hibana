@@ -13,13 +13,12 @@ export async function startSession(flameId: string, date: string) {
     };
   }
 
-  // If there is already a session in progress that has not been ended yet, return an error
   const { data: existingSession, error: existingSessionError } = await supabase
     .from('flame_sessions')
     .select()
     .eq('flame_id', flameId)
     .eq('date', date)
-    .is('ended_at', null)
+    .limit(1)
     .maybeSingle();
 
   if (existingSessionError) {
@@ -29,16 +28,39 @@ export async function startSession(flameId: string, date: string) {
     };
   }
 
-  if (existingSession) {
+  if (existingSession && !existingSession.ended_at) {
     return {
       success: false,
-      error: new Error('An ongoing session for this flame already exists'),
+      error: new Error(
+        `A session for this flame on date ${date} already exists. Please end it before starting a new session`,
+      ),
     };
   }
 
-  const { error } = await supabase
-    .from('flame_sessions')
-    .insert({ flame_id: flameId, date, started_at: new Date().toISOString() });
+  // Update the existing session by resetting the start time and clearing the end time
+  if (existingSession) {
+    const { error: updateExistingError } = await supabase
+      .from('flame_sessions')
+      .update({ started_at: new Date().toISOString(), ended_at: null })
+      .eq('id', existingSession.id);
+
+    if (updateExistingError) {
+      return { success: false, error: updateExistingError };
+    }
+
+    return {
+      success: true,
+      data: `Successfully resumed flame session on date: ${date}`,
+    };
+  }
+
+  // Simply create a new session if there aren't any existing on the given date
+  const { error } = await supabase.from('flame_sessions').insert({
+    flame_id: flameId,
+    date,
+    started_at: new Date().toISOString(),
+    ended_at: null,
+  });
 
   if (error) {
     return { success: false, error };
@@ -60,14 +82,14 @@ export async function endSession(flameId: string, date: string) {
     };
   }
 
-  // Errors automatically if there was no existing session
   const { data: lastSessionData, error: lastSessionError } = await supabase
     .from('flame_sessions')
     .select()
     .eq('flame_id', flameId)
     .eq('date', date)
     .is('ended_at', null) // Get the session that is still in progress
-    .single();
+    .limit(1)
+    .maybeSingle();
 
   if (lastSessionError) {
     return { success: false, error: lastSessionError };
