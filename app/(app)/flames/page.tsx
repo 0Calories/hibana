@@ -2,6 +2,7 @@
 
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { getLocalDateString } from '@/lib/utils';
 import {
   createFlame,
   deleteFlame,
@@ -16,13 +17,6 @@ import {
 import { endSession, startSession } from './session-actions';
 
 const SAMPLE_FLAME_ID = '92fe4034-3d8e-490c-aa1b-fb1ad41fc6a6';
-
-function getLocalDateString(d = new Date()): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 export default function TestPage() {
   const handleCreateFlame = async () => {
