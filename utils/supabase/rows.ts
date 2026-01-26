@@ -7,4 +7,4 @@ export type FlameSchedule =
   Database['public']['Tables']['flame_schedules']['Row'];
 export type FlameSession =
   Database['public']['Tables']['flame_sessions']['Row'];
-export type FuelBudgets = Database['public']['Tables']['fuel_budgets']['Row'];
+export type FuelBudget = Database['public']['Tables']['fuel_budgets']['Row'];

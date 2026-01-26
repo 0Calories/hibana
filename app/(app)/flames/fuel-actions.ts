@@ -3,9 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/lib/types';
 import { isValidDateString } from '@/lib/utils';
+import type { FuelBudget } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
-export async function getFuelBudget(): ActionResult {
+export async function getFuelBudget(): ActionResult<FuelBudget[]> {
   const { supabase, user } = await createClientWithAuth();
 
   const { data, error } = await supabase
@@ -52,7 +53,9 @@ export async function setFuelBudget(
   };
 }
 
-export async function getRemainingFuelBudget(date: string): ActionResult {
+export async function getRemainingFuelBudget(
+  date: string,
+): ActionResult<{ remainingFuel: number }> {
   const { supabase, user } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {

@@ -21,7 +21,7 @@ type FlameInput = Pick<
 export async function createFlame(
   flameInput: FlameInput,
   schedule?: number[],
-): ActionResult {
+): ActionResult<Flame> {
   const { supabase, user } = await createClientWithAuth();
 
   const flameInsertData: TablesInsert<'flames'> = {
