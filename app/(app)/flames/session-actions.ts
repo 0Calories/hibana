@@ -13,7 +13,7 @@ export async function startSession(flameId: string, date: string) {
 
   const { data, error } = await supabase
     .from('flame_sessions')
-    .insert({ flame_id: flameId, date, started_at: new Date().toTimeString() });
+    .insert({ flame_id: flameId, date, started_at: new Date().toISOString() });
 
   if (error) {
     return { success: false, error };
@@ -38,6 +38,7 @@ export async function endSession(flameId: string, date: string) {
     .select()
     .eq('flame_id', flameId)
     .eq('date', date)
+    .is('ended_at', null) // Get the session that is still in progress
     .single();
 
   if (lastSessionError) {
@@ -52,17 +53,32 @@ export async function endSession(flameId: string, date: string) {
   }
 
   const currentDuration = lastSessionData.duration_seconds;
+  const startTime = new Date(lastSessionData.started_at);
   const endTime = new Date();
   // TODO:
   // - store endTime as a timestamp string in ended_at in the record
   // - calculate the total duration of the session by timestamp mathing the diff between started_at and ended_at,
   // then add it on duration_seconds and save the result in the record
+  // Calculate total duration here via timestamp math (diff between lastSessionData.started_at and endTime)
 
-  const { data, error } = await supabase.from('flame_sessions').update({});
+  const sessionDurationSeconds = Math.floor(
+    (endTime.getTime() - startTime.getTime()) / 1000,
+  );
+  const totalDuration = currentDuration + sessionDurationSeconds;
+
+  const { data, error } = await supabase
+    .from('flame_sessions')
+    .update({
+      ended_at: endTime.toISOString(),
+      duration_seconds: totalDuration,
+    })
+    .eq('id', lastSessionData.id)
+    .select()
+    .single();
 
   if (error) {
     return { success: false };
   }
 
-  return { sucess: true, data };
+  return { success: true, data };
 }
