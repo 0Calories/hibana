@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/lib/types';
+import { isValidDateString } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 import type { TablesInsert } from '@/utils/supabase/types';
@@ -175,16 +176,42 @@ export async function deleteFlame(flameId: string) {
 
 export async function setFlameCompletion(
   flameId: string,
+  date: string,
   isCompleted: boolean,
 ) {
   const { supabase } = await createClientWithAuth();
+
+  if (!isValidDateString(date)) {
+    return {
+      success: false,
+      error: new Error('Date string must be of the format YYYY-MM-DD'),
+    };
+  }
+
+  // Check if session exists for this date
+  const { data: session, error: fetchError } = await supabase
+    .from('flame_sessions')
+    .select()
+    .eq('flame_id', flameId)
+    .eq('date', date)
+    .maybeSingle();
+
+  if (fetchError) {
+    return { success: false, error: fetchError };
+  }
+
+  if (!session) {
+    return {
+      success: false,
+      error: new Error(`No session found for this flame on date ${date}`),
+    };
+  }
 
   // RLS already enforces that the user can only manage their own flame session records
   const { error } = await supabase
     .from('flame_sessions')
     .update({ is_completed: isCompleted })
-    .eq('flame_id', flameId)
-    .select();
+    .eq('id', session.id);
 
   if (error) {
     return { success: false, error };
@@ -193,6 +220,6 @@ export async function setFlameCompletion(
   revalidatePath('/flames');
   return {
     success: true,
-    data: `Successfully marked flame with id ${flameId} as ${isCompleted ? 'complete' : 'incomplete'}`,
+    data: `Successfully marked flame session as ${isCompleted ? 'complete' : 'incomplete'}`,
   };
 }
