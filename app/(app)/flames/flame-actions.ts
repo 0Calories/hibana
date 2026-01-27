@@ -172,3 +172,27 @@ export async function deleteFlame(flameId: string) {
   revalidatePath('/flames');
   return { success: true, data };
 }
+
+export async function setFlameCompletion(
+  flameId: string,
+  isCompleted: boolean,
+) {
+  const { supabase } = await createClientWithAuth();
+
+  // RLS already enforces that the user can only manage their own flame session records
+  const { error } = await supabase
+    .from('flame_sessions')
+    .update({ is_completed: isCompleted })
+    .eq('flame_id', flameId)
+    .select();
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  revalidatePath('/flames');
+  return {
+    success: true,
+    data: `Successfully marked flame with id ${flameId} as ${isCompleted ? 'complete' : 'incomplete'}`,
+  };
+}
