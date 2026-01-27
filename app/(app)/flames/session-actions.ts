@@ -2,6 +2,7 @@
 
 import type { ActionResult } from '@/lib/types';
 import { isValidDateString } from '@/lib/utils';
+import type { FlameSession } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
 export async function startSession(
@@ -142,6 +143,23 @@ export async function endSession(flameId: string, date: string): ActionResult {
     success: true,
     data: `Successfully ended flame session on date ${date} - Duration: ${data.duration_seconds}s`,
   };
+}
+
+export async function getAllSessionsForDate(
+  date: string,
+): ActionResult<FlameSession[]> {
+  const { supabase } = await createClientWithAuth();
+
+  const { data, error } = await supabase
+    .from('flame_sessions')
+    .select('*')
+    .eq('date', date);
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  return { success: true, data };
 }
 
 // Edge cases to consider for the future:
