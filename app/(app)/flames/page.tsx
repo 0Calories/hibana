@@ -7,6 +7,7 @@ import {
   createFlame,
   deleteFlame,
   getFlamesForDay,
+  setFlameCompletion,
   setFlameSchedule,
 } from './flame-actions';
 import {
@@ -148,6 +149,22 @@ export default function TestPage() {
     }
   };
 
+  const handleMarkFlameComplete = async () => {
+    const dateString = getLocalDateString();
+    const result = await setFlameCompletion(SAMPLE_FLAME_ID, dateString, true);
+
+    console.dir(result);
+    if (result.success) {
+      toast.success(JSON.stringify(result.data), {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
   return (
     <div>
       <Button onClick={handleCreateFlame}>createFlame</Button>
@@ -161,6 +178,9 @@ export default function TestPage() {
       <div className="flex flex-row gap-2">
         <Button onClick={handleStartFlameSession}>Start Flame Sesh 🔥</Button>
         <Button onClick={handleEndFlameSession}>End Flame Sesh 🧯</Button>
+        <Button onClick={handleMarkFlameComplete}>
+          Mark Flame Complete ✅
+        </Button>
       </div>
     </div>
   );
