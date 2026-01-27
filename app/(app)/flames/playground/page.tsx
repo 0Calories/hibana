@@ -9,13 +9,13 @@ import {
   getFlamesForDay,
   setFlameCompletion,
   setFlameSchedule,
-} from './flame-actions';
+} from '../flame-actions';
 import {
   getFuelBudget,
   getRemainingFuelBudget,
   setFuelBudget,
-} from './fuel-actions';
-import { endSession, startSession } from './session-actions';
+} from '../fuel-actions';
+import { endSession, startSession } from '../session-actions';
 
 const SAMPLE_FLAME_ID = '92fe4034-3d8e-490c-aa1b-fb1ad41fc6a6';
 
