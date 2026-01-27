@@ -15,7 +15,11 @@ import {
   getRemainingFuelBudget,
   setFuelBudget,
 } from '../fuel-actions';
-import { endSession, startSession } from '../session-actions';
+import {
+  endSession,
+  getAllSessionsForDate,
+  startSession,
+} from '../session-actions';
 
 const SAMPLE_FLAME_ID = '92fe4034-3d8e-490c-aa1b-fb1ad41fc6a6';
 
@@ -165,6 +169,22 @@ export default function TestPage() {
     }
   };
 
+  const handleGetAllSessions = async () => {
+    const dateString = getLocalDateString();
+    const result = await getAllSessionsForDate(dateString);
+
+    console.dir(result);
+    if (result.success) {
+      toast.success(JSON.stringify(result.data), {
+        position: 'top-center',
+      });
+    } else {
+      toast.error(result.error?.message, {
+        position: 'top-center',
+      });
+    }
+  };
+
   return (
     <div>
       <Button onClick={handleCreateFlame}>createFlame</Button>
@@ -181,6 +201,10 @@ export default function TestPage() {
         <Button onClick={handleMarkFlameComplete}>
           Mark Flame Complete ✅
         </Button>
+      </div>
+
+      <div className="flex flex-row gap-2">
+        <Button onClick={handleGetAllSessions}>Get Today's Sessions</Button>
       </div>
     </div>
   );
