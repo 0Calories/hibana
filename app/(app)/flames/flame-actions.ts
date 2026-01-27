@@ -178,7 +178,7 @@ export async function setFlameCompletion(
   flameId: string,
   date: string,
   isCompleted: boolean,
-) {
+): ActionResult {
   const { supabase } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {
