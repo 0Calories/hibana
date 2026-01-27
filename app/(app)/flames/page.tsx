@@ -8,7 +8,7 @@ import {
   deleteFlame,
   getFlamesForDay,
   setFlameSchedule,
-} from './actions';
+} from './flame-actions';
 import {
   getFuelBudget,
   getRemainingFuelBudget,
