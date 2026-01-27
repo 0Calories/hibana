@@ -2,6 +2,7 @@
 
 import {
   CalendarCheckIcon,
+  FlameIcon,
   ListTodoIcon,
   NotebookPenIcon,
   PlusIcon,
@@ -40,6 +41,21 @@ export function CreateButton() {
           <DropdownMenuSeparator />
 
           <DialogTrigger asChild>
+            <DropdownMenuItem onClick={() => setMode('flame')}>
+              <FlameIcon /> Flame
+            </DropdownMenuItem>
+          </DialogTrigger>
+
+          <DialogTrigger asChild disabled>
+            <DropdownMenuItem onClick={() => setMode('habit')}>
+              <SparklesIcon />
+              Habit
+            </DropdownMenuItem>
+          </DialogTrigger>
+
+          <DropdownMenuSeparator />
+
+          <DialogTrigger asChild>
             <DropdownMenuItem onClick={() => setMode('task')}>
               <ListTodoIcon /> Task
             </DropdownMenuItem>
@@ -51,12 +67,7 @@ export function CreateButton() {
             </DropdownMenuItem>
           </DialogTrigger>
 
-          <DialogTrigger asChild>
-            <DropdownMenuItem onClick={() => setMode('habit')}>
-              <SparklesIcon />
-              Habit
-            </DropdownMenuItem>
-          </DialogTrigger>
+          <DropdownMenuSeparator />
 
           <DialogTrigger asChild disabled>
             <DropdownMenuItem onClick={() => setMode('schedule')}>
