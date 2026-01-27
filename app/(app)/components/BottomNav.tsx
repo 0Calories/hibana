@@ -1,6 +1,12 @@
 'use client';
 
-import { CalendarCheck, LayoutList, LucideHome, Sparkles } from 'lucide-react';
+import {
+  CalendarCheck,
+  Flame,
+  LayoutList,
+  LucideHome,
+  Sparkles,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,9 +15,9 @@ export function BottomNav() {
 
   const navItems = [
     { icon: <LucideHome />, label: 'Home', href: '/dashboard' },
-    { icon: <LayoutList />, label: 'Tasks', href: '/tasks' },
+    { icon: <Flame />, label: 'Flames', href: '/flames' },
     { icon: <Sparkles />, label: 'Habits', href: '/habits' },
-    { icon: <CalendarCheck />, label: 'Schedule', href: '/schedule' },
+    { icon: <LayoutList />, label: 'Tasks', href: '/tasks' },
   ];
 
   return (
