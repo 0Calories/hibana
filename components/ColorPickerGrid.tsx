@@ -1,111 +1,70 @@
 'use client';
 
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import { useState } from 'react';
-
 import { cn } from '@/lib/utils';
-import { Button } from './ui/button';
 
 // Colors picked from Tailwind color palette:
 // https://tailwindcss.com/docs/colors
+// Each family has shades: [400, 500, 600]
 
-// Organized by color family: [400, 500, 600]
-// Ordered for 3x3 grid: flame intensity theme
-// Columns = flame types (Earthly, Chemical, Cosmic)
-// Rows = heat intensity (hot → cool, top to bottom)
-
-const COLOR_FAMILIES = [
-  // Row 1: Hottest
+// Earthly flames: warm fire colors (ordered hot → cool)
+const EARTHLY = [
   { name: 'Rose', shades: ['#fb7185', '#f43f5e', '#e11d48'] },
-  { name: 'Cyan', shades: ['#22d3ee', '#06b6d4', '#0891b2'] },
-  { name: 'Fuchsia', shades: ['#e879f9', '#d946ef', '#c026d3'] },
-  // Row 2: Medium
-  { name: 'Amber', shades: ['#fbbf24', '#f59e0b', '#d97706'] },
-  { name: 'Teal', shades: ['#2dd4bf', '#14b8a6', '#0d9488'] },
-  { name: 'Indigo', shades: ['#818cf8', '#6366f1', '#4f46e5'] },
-  // Row 3: Coolest
   { name: 'Orange', shades: ['#fb923c', '#f97316', '#ea580c'] },
-  { name: 'Green', shades: ['#4ade80', '#22c55e', '#16a34a'] },
-  { name: 'Blue', shades: ['#60a5fa', '#3b82f6', '#2563eb'] },
+  { name: 'Amber', shades: ['#fbbf24', '#f59e0b', '#d97706'] },
 ];
 
-// Default colors: middle shade (500) from each family (index 1)
-const DEFAULT_COLORS = COLOR_FAMILIES.map((family) => family.shades[1]);
+// Chemical flames: nature/elemental colors (ordered hot → cool)
+const CHEMICAL = [
+  { name: 'Indigo', shades: ['#818cf8', '#6366f1', '#4f46e5'] },
+  { name: 'Teal', shades: ['#2dd4bf', '#14b8a6', '#0d9488'] },
+  { name: 'Green', shades: ['#4ade80', '#22c55e', '#16a34a'] },
+];
+
+// Cosmic flames: mystical/space colors (ordered hot → cool)
+const COSMIC = [
+  { name: 'Blue', shades: ['#60a5fa', '#3b82f6', '#2563eb'] },
+  { name: 'Sky', shades: ['#38bdf8', '#0ea5e9', '#0284c7'] },
+  { name: 'Fuchsia', shades: ['#e879f9', '#d946ef', '#c026d3'] },
+];
+
+const COLOR_GRID = [
+  [COSMIC[0], COSMIC[1], COSMIC[2]],
+  [CHEMICAL[0], CHEMICAL[1], CHEMICAL[2]],
+  [EARTHLY[0], EARTHLY[1], EARTHLY[2]],
+];
+
+// Defaults to middle shade (500) from each family (index 1)
+const COLOR_INDEX = 1;
 
 interface ColorPickerGridProps {
   value?: string;
-  expandable?: boolean;
   onChange: (color: string) => void;
 }
 
-export function ColorPickerGrid({
-  value,
-  onChange,
-  expandable,
-}: ColorPickerGridProps) {
-  const [expanded, setExpanded] = useState(false);
-
-  const renderBaseGrid = () => {
-    return DEFAULT_COLORS.map((color, index) => (
-      <button
-        key={color}
-        type="button"
-        className={cn(
-          'size-7 rounded-md transition-transform hover:scale-110',
-          value === color && 'ring-2 ring-offset-2 ring-foreground',
-        )}
-        style={{ backgroundColor: color }}
-        onClick={() => onChange(color)}
-        aria-label={`Select ${COLOR_FAMILIES[index].name}`}
-      />
-    ));
-  };
-
-  const renderExpandedGrid = () => {
-    return COLOR_FAMILIES.map((family) =>
-      family.shades.map((shade, shadeIndex) => (
-        <button
-          key={shade}
-          type="button"
-          className={cn(
-            'size-7 rounded-md transition-transform hover:scale-110',
-            value === shade && 'ring-2 ring-offset-2 ring-foreground',
-          )}
-          style={{ backgroundColor: shade }}
-          onClick={() => onChange(shade)}
-          aria-label={`Select ${family.name} ${400 + shadeIndex * 100}`}
-        />
-      )),
-    );
-  };
-
+export function ColorPickerGrid({ value, onChange }: ColorPickerGridProps) {
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-3 gap-1.5">
-        {expanded ? renderExpandedGrid() : renderBaseGrid()}
-      </div>
+        {COLOR_GRID.map((row) =>
+          row.map((col) => {
+            const color = col.shades[COLOR_INDEX];
 
-      {expandable && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="w-full text-xs text-muted-foreground"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? (
-            <>
-              <ChevronUpIcon className="size-3" />
-              Less colors
-            </>
-          ) : (
-            <>
-              <ChevronDownIcon className="size-3" />
-              More colors
-            </>
-          )}
-        </Button>
-      )}
+            return (
+              <button
+                key={color}
+                type="button"
+                className={cn(
+                  'size-7 rounded-md transition-transform hover:scale-110',
+                  value === color && 'ring-2 ring-offset-2 ring-foreground',
+                )}
+                style={{ backgroundColor: color }}
+                onClick={() => onChange(color)}
+                aria-label={`Select ${col.name}`}
+              />
+            );
+          }),
+        )}
+      </div>
     </div>
   );
 }
