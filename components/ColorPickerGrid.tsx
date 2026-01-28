@@ -7,17 +7,20 @@ import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 
 // Organized by color family: [400, 500, 600]
+// Ordered for 3x3 grid: warm row, mixed row, cool row
 const COLOR_FAMILIES = [
+  // Warm
   { name: 'Rose', shades: ['#fb7185', '#f43f5e', '#e11d48'] },
   { name: 'Pink', shades: ['#f472b6', '#ec4899', '#db2777'] },
-  { name: 'Fuchsia', shades: ['#e879f9', '#d946ef', '#c026d3'] },
   { name: 'Orange', shades: ['#fb923c', '#f97316', '#ea580c'] },
-  { name: 'Amber', shades: ['#fbbf24', '#f59e0b', '#d97706'] },
+  // Mixed
+  { name: 'Fuchsia', shades: ['#e879f9', '#d946ef', '#c026d3'] },
   { name: 'Green', shades: ['#4ade80', '#22c55e', '#16a34a'] },
   { name: 'Teal', shades: ['#2dd4bf', '#14b8a6', '#0d9488'] },
-  { name: 'Cyan', shades: ['#22d3ee', '#06b6d4', '#0891b2'] },
-  { name: 'Blue', shades: ['#60a5fa', '#3b82f6', '#2563eb'] },
+  // Cool
   { name: 'Indigo', shades: ['#818cf8', '#6366f1', '#4f46e5'] },
+  { name: 'Blue', shades: ['#60a5fa', '#3b82f6', '#2563eb'] },
+  { name: 'Cyan', shades: ['#22d3ee', '#06b6d4', '#0891b2'] },
 ];
 
 // Default colors: middle shade (500) from each family (index 1)
@@ -34,33 +37,27 @@ interface ColorPickerGridProps {
 export function ColorPickerGrid({ value, onChange }: ColorPickerGridProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const colors = expanded ? ALL_COLORS : DEFAULT_COLORS;
-  const gridCols = expanded ? 'grid-cols-10' : 'grid-cols-10';
-
   return (
     <div className="space-y-2">
-      <div className={cn('grid gap-1.5', gridCols)}>
+      <div className="grid grid-cols-3 gap-1.5">
         {expanded
-          ? // Expanded: show as 3 rows (400s, 500s, 600s)
-            [0, 1, 2].map((shadeIndex) => (
-              <div key={shadeIndex} className="contents">
-                {COLOR_FAMILIES.map((family) => (
-                  <button
-                    key={family.shades[shadeIndex]}
-                    type="button"
-                    className={cn(
-                      'size-7 rounded-md transition-transform hover:scale-110',
-                      value === family.shades[shadeIndex] &&
-                        'ring-2 ring-offset-2 ring-foreground',
-                    )}
-                    style={{ backgroundColor: family.shades[shadeIndex] }}
-                    onClick={() => onChange(family.shades[shadeIndex])}
-                    aria-label={`Select ${family.name} ${400 + shadeIndex * 100}`}
-                  />
-                ))}
-              </div>
-            ))
-          : // Collapsed: single row of default colors
+          ? // Expanded: 9 rows × 3 cols (one row per color family, showing 400/500/600)
+            COLOR_FAMILIES.map((family) =>
+              family.shades.map((shade, shadeIndex) => (
+                <button
+                  key={shade}
+                  type="button"
+                  className={cn(
+                    'size-7 rounded-md transition-transform hover:scale-110',
+                    value === shade && 'ring-2 ring-offset-2 ring-foreground',
+                  )}
+                  style={{ backgroundColor: shade }}
+                  onClick={() => onChange(shade)}
+                  aria-label={`Select ${family.name} ${400 + shadeIndex * 100}`}
+                />
+              )),
+            )
+          : // Collapsed: 3x3 grid of default colors (500 shade)
             DEFAULT_COLORS.map((color, index) => (
               <button
                 key={color}
