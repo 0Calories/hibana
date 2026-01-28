@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CalendarCheckIcon,
+  FlameIcon,
   ListTodoIcon,
   NotebookPenIcon,
   SparklesIcon,
@@ -33,7 +34,12 @@ const taskSchema = z.object({
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
-export type CreationDialogMode = 'task' | 'note' | 'habit' | 'schedule';
+export type CreationDialogMode =
+  | 'task'
+  | 'note'
+  | 'flame'
+  | 'habit'
+  | 'schedule';
 
 type Props = {
   setOpen: (open: boolean) => void;
@@ -43,6 +49,7 @@ type Props = {
 const MODE_TO_ICON: Record<CreationDialogMode, ReactNode> = {
   task: <ListTodoIcon />,
   note: <NotebookPenIcon />,
+  flame: <FlameIcon />,
   habit: <SparklesIcon />,
   schedule: <CalendarCheckIcon />,
 };
