@@ -4,7 +4,7 @@ export const createFlameSchema = z
   .object({
     name: z.string().min(1, 'Name is required'),
     icon: z.string().optional(),
-    color: z.string().optional(),
+    color: z.string(),
     category_id: z.string().optional(),
     tracking_type: z.enum(['time', 'count']),
     time_budget_minutes: z.number().min(1).optional(),

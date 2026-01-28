@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FlameIcon } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { ColorPickerGrid } from '@/components/ColorPickerGrid';
+import { ColorPickerGrid } from '@/app/(app)/flames/components/ColorPickerGrid';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,6 +24,7 @@ import {
   createFlameSchema,
 } from '@/lib/schemas/flame';
 import { createFlame } from '../flame-actions';
+import type { FlameColorName } from '../utils/colors';
 
 interface CreateFlameDialogProps {
   open: boolean;
@@ -44,7 +45,7 @@ export function CreateFlameDialog({
     resolver: zodResolver(createFlameSchema),
     defaultValues: {
       name: '',
-      color: '#f43f5e',
+      color: 'rose',
       tracking_type: 'time',
       is_daily: true,
       schedule: [],
@@ -89,21 +90,25 @@ export function CreateFlameDialog({
     <Controller
       name="color"
       control={control}
-      render={({ field }) => (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              className="size-10 rounded-lg flex items-center justify-center shrink-0 transition-transform hover:scale-105"
-              style={{ backgroundColor: field.value }}
-            >
-              <FlameIcon className="size-6" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-auto">
-            <ColorPickerGrid value={field.value} onChange={field.onChange} />
-          </PopoverContent>
-        </Popover>
-      )}
+      render={({ field }) => {
+        const color = field.value;
+        // const gradientClass = FLAME_GRADIENT_CLASSES;
+        return (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button className="size-10 rounded-lg flex items-center justify-center shrink-0 transition-transform hover:scale-105">
+                <FlameIcon className="size-6" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-auto">
+              <ColorPickerGrid
+                value={color as FlameColorName}
+                onChange={field.onChange}
+              />
+            </PopoverContent>
+          </Popover>
+        );
+      }}
     />
   );
 
