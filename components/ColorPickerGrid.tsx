@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
 
 // Colors picked from Tailwind color palette:
 // https://tailwindcss.com/docs/colors
@@ -50,12 +51,12 @@ export function ColorPickerGrid({ value, onChange }: ColorPickerGridProps) {
             const color = col.shades[COLOR_INDEX];
 
             return (
-              <button
+              <Button
                 key={color}
                 type="button"
                 className={cn(
                   'size-7 rounded-md transition-transform hover:scale-110',
-                  value === color && 'ring-2 ring-offset-2 ring-foreground',
+                  value === color && 'ring-1 ring-foreground',
                 )}
                 style={{ backgroundColor: color }}
                 onClick={() => onChange(color)}

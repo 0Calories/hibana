@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FlameIcon } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { ColorPickerGrid } from '@/components/ColorPickerGrid';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,12 +13,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Field } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from '@/components/ui/input-group';
-import { Textarea } from '@/components/ui/textarea';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   type CreateFlameFormData,
   createFlameSchema,
@@ -43,6 +44,7 @@ export function CreateFlameDialog({
     resolver: zodResolver(createFlameSchema),
     defaultValues: {
       name: '',
+      color: '#f43f5e',
       tracking_type: 'time',
       is_daily: true,
       schedule: [],
@@ -83,6 +85,28 @@ export function CreateFlameDialog({
     // }
   };
 
+  const renderFlameStyleButton = () => (
+    <Controller
+      name="color"
+      control={control}
+      render={({ field }) => (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              className="size-10 rounded-lg flex items-center justify-center shrink-0 transition-transform hover:scale-105"
+              style={{ backgroundColor: field.value }}
+            >
+              <FlameIcon className="size-6" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-auto">
+            <ColorPickerGrid value={field.value} onChange={field.onChange} />
+          </PopoverContent>
+        </Popover>
+      )}
+    />
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col w-4/5 h-4/6 p-6">
@@ -93,49 +117,27 @@ export function CreateFlameDialog({
         >
           <DialogHeader className="pt-4">
             <DialogTitle>
-              <Controller
-                name="name"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <InputGroup>
-                      <InputGroupInput
+              <div className="flex items-center gap-2">
+                {renderFlameStyleButton()}
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid} className="flex-1">
+                      <Input
                         {...field}
                         id={field.name}
                         aria-invalid={fieldState.invalid}
                         placeholder="New Flame"
                       />
-                      <InputGroupAddon>
-                        <FlameIcon />
-                      </InputGroupAddon>
-                    </InputGroup>
-                  </Field>
-                )}
-              />
+                    </Field>
+                  )}
+                />
+              </div>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex-1 flex flex-col gap-2 min-h-0">
-            {/* <Controller
-              name="content"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Textarea
-                  {...field}
-                  id={field.name}
-                  aria-invalid={fieldState.invalid}
-                  placeholder="Add optional details ..."
-                  className="flex-1 resize-none"
-                />
-              )}
-            />
-
-            {errors.content && (
-              <p className="text-sm text-destructive">
-                {errors.content.message}
-              </p>
-            )} */}
-          </div>
+          <div className="flex-1 flex flex-col gap-2 min-h-0"></div>
 
           <div className="flex gap-2 justify-end pt-2">
             <Button type="submit" disabled={isSubmitting}>
