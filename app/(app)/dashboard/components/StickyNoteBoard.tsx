@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useState } from 'react';
+import { ColorPickerGrid } from '@/components/ColorPickerGrid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import type { Note, Task } from '@/utils/supabase/rows';
@@ -67,6 +68,10 @@ export function StickyNoteBoard({ tasks }: Props) {
             </Card>
           );
         })}
+      </div>
+
+      <div className="flex">
+        <ColorPickerGrid onChange={(color) => console.log(color)} />
       </div>
 
       <StickyNoteDialog data={selectedNote?.data} color={selectedNote?.color} />
