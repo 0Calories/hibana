@@ -6,8 +6,12 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 
+// Colors picked from Tailwind color palette:
+// https://tailwindcss.com/docs/colors
+
 // Organized by color family: [400, 500, 600]
 // Ordered for 3x3 grid: warm row, mixed row, cool row
+
 const COLOR_FAMILIES = [
   // Warm
   { name: 'Rose', shades: ['#fb7185', '#f43f5e', '#e11d48'] },
@@ -26,72 +30,80 @@ const COLOR_FAMILIES = [
 // Default colors: middle shade (500) from each family (index 1)
 const DEFAULT_COLORS = COLOR_FAMILIES.map((family) => family.shades[1]);
 
-// All colors for expanded view
-const ALL_COLORS = COLOR_FAMILIES.flatMap((family) => family.shades);
-
 interface ColorPickerGridProps {
   value?: string;
+  expandable?: boolean;
   onChange: (color: string) => void;
 }
 
-export function ColorPickerGrid({ value, onChange }: ColorPickerGridProps) {
+export function ColorPickerGrid({
+  value,
+  onChange,
+  expandable,
+}: ColorPickerGridProps) {
   const [expanded, setExpanded] = useState(false);
+
+  const renderBaseGrid = () => {
+    return DEFAULT_COLORS.map((color, index) => (
+      <button
+        key={color}
+        type="button"
+        className={cn(
+          'size-7 rounded-md transition-transform hover:scale-110',
+          value === color && 'ring-2 ring-offset-2 ring-foreground',
+        )}
+        style={{ backgroundColor: color }}
+        onClick={() => onChange(color)}
+        aria-label={`Select ${COLOR_FAMILIES[index].name}`}
+      />
+    ));
+  };
+
+  const renderExpandedGrid = () => {
+    return COLOR_FAMILIES.map((family) =>
+      family.shades.map((shade, shadeIndex) => (
+        <button
+          key={shade}
+          type="button"
+          className={cn(
+            'size-7 rounded-md transition-transform hover:scale-110',
+            value === shade && 'ring-2 ring-offset-2 ring-foreground',
+          )}
+          style={{ backgroundColor: shade }}
+          onClick={() => onChange(shade)}
+          aria-label={`Select ${family.name} ${400 + shadeIndex * 100}`}
+        />
+      )),
+    );
+  };
 
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-3 gap-1.5">
-        {expanded
-          ? // Expanded: 9 rows × 3 cols (one row per color family, showing 400/500/600)
-            COLOR_FAMILIES.map((family) =>
-              family.shades.map((shade, shadeIndex) => (
-                <button
-                  key={shade}
-                  type="button"
-                  className={cn(
-                    'size-7 rounded-md transition-transform hover:scale-110',
-                    value === shade && 'ring-2 ring-offset-2 ring-foreground',
-                  )}
-                  style={{ backgroundColor: shade }}
-                  onClick={() => onChange(shade)}
-                  aria-label={`Select ${family.name} ${400 + shadeIndex * 100}`}
-                />
-              )),
-            )
-          : // Collapsed: 3x3 grid of default colors (500 shade)
-            DEFAULT_COLORS.map((color, index) => (
-              <button
-                key={color}
-                type="button"
-                className={cn(
-                  'size-7 rounded-md transition-transform hover:scale-110',
-                  value === color && 'ring-2 ring-offset-2 ring-foreground',
-                )}
-                style={{ backgroundColor: color }}
-                onClick={() => onChange(color)}
-                aria-label={`Select ${COLOR_FAMILIES[index].name}`}
-              />
-            ))}
+        {expanded ? renderExpandedGrid() : renderBaseGrid()}
       </div>
 
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="w-full text-xs text-muted-foreground"
-        onClick={() => setExpanded(!expanded)}
-      >
-        {expanded ? (
-          <>
-            <ChevronUpIcon className="size-3" />
-            Less colors
-          </>
-        ) : (
-          <>
-            <ChevronDownIcon className="size-3" />
-            More colors
-          </>
-        )}
-      </Button>
+      {expandable && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="w-full text-xs text-muted-foreground"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? (
+            <>
+              <ChevronUpIcon className="size-3" />
+              Less colors
+            </>
+          ) : (
+            <>
+              <ChevronDownIcon className="size-3" />
+              More colors
+            </>
+          )}
+        </Button>
+      )}
     </div>
   );
 }
