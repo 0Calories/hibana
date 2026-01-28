@@ -10,22 +10,23 @@ import { Button } from './ui/button';
 // https://tailwindcss.com/docs/colors
 
 // Organized by color family: [400, 500, 600]
-// Ordered for 3x3 grid: flame intensity theme (hot → cool per row, left to right)
+// Ordered for 3x3 grid: flame intensity theme
+// Columns = flame types (Earthly, Chemical, Cosmic)
+// Rows = heat intensity (hot → cool, top to bottom)
 
 const COLOR_FAMILIES = [
-  // Row 3: Cosmic/plasma flames (hottest)
-  { name: 'Fuchsia', shades: ['#e879f9', '#d946ef', '#c026d3'] },
-  { name: 'Indigo', shades: ['#818cf8', '#6366f1', '#4f46e5'] },
-  { name: 'Blue', shades: ['#60a5fa', '#3b82f6', '#2563eb'] },
-  // Row 2: Chemical flames (copper, magnesium)
-  { name: 'Cyan', shades: ['#22d3ee', '#06b6d4', '#0891b2'] },
-  { name: 'Teal', shades: ['#2dd4bf', '#14b8a6', '#0d9488'] },
-  { name: 'Green', shades: ['#4ade80', '#22c55e', '#16a34a'] },
-
-  // Row 1: Earthly flames (campfire)
+  // Row 1: Hottest
   { name: 'Rose', shades: ['#fb7185', '#f43f5e', '#e11d48'] },
+  { name: 'Cyan', shades: ['#22d3ee', '#06b6d4', '#0891b2'] },
+  { name: 'Fuchsia', shades: ['#e879f9', '#d946ef', '#c026d3'] },
+  // Row 2: Medium
   { name: 'Amber', shades: ['#fbbf24', '#f59e0b', '#d97706'] },
+  { name: 'Teal', shades: ['#2dd4bf', '#14b8a6', '#0d9488'] },
+  { name: 'Indigo', shades: ['#818cf8', '#6366f1', '#4f46e5'] },
+  // Row 3: Coolest
   { name: 'Orange', shades: ['#fb923c', '#f97316', '#ea580c'] },
+  { name: 'Green', shades: ['#4ade80', '#22c55e', '#16a34a'] },
+  { name: 'Blue', shades: ['#60a5fa', '#3b82f6', '#2563eb'] },
 ];
 
 // Default colors: middle shade (500) from each family (index 1)
