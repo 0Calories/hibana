@@ -1,13 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ClockIcon,
-  FlameIcon,
-  FlameKindlingIcon,
-  HashIcon,
-  HourglassIcon,
-} from 'lucide-react';
+import { FlameIcon, FlameKindlingIcon, HourglassIcon } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ColorPickerGrid } from '@/app/(app)/flames/components/ColorPickerGrid';
@@ -55,6 +49,7 @@ export function CreateFlameDialog({
     control,
     handleSubmit,
     watch,
+    reset,
     formState: { isSubmitting },
   } = useForm<CreateFlameFormData>({
     resolver: zodResolver(createFlameSchema),
@@ -62,43 +57,42 @@ export function CreateFlameDialog({
       name: '',
       color: 'rose',
       tracking_type: 'time',
+      time_budget_minutes: 60,
       is_daily: true,
-      schedule: [],
     },
   });
 
   const trackingType = watch('tracking_type');
-  const isDaily = watch('is_daily');
 
   const onSubmit = async (data: CreateFlameFormData) => {
     const toastId = toast.loading('Creating flame...', {
       position: 'top-center',
     });
 
-    // const result = await createFlame(
-    //   {
-    //     name: data.name,
-    //     icon: data.icon,
-    //     color: data.color,
-    //     tracking_type: data.tracking_type,
-    //     time_budget_minutes: data.time_budget_minutes,
-    //     count_target: data.count_target,
-    //     count_unit: data.count_unit,
-    //     is_daily: data.is_daily,
-    //   },
-    //   data.schedule,
-    // );
+    const result = await createFlame(
+      {
+        name: data.name,
+        icon: null,
+        color: data.color,
+        tracking_type: data.tracking_type,
+        time_budget_minutes: data.time_budget_minutes ?? null,
+        count_target: data.count_target ?? null,
+        count_unit: data.count_unit ?? 'number',
+        is_daily: data.is_daily,
+      },
+      data.schedule,
+    );
 
-    // if (result.success) {
-    //   toast.success('Flame created!', { id: toastId, position: 'top-center' });
-    //   reset();
-    //   onOpenChange(false);
-    // } else {
-    //   toast.error(result.error.message, {
-    //     id: toastId,
-    //     position: 'top-center',
-    //   });
-    // }
+    if (result.success) {
+      toast.success('Flame created!', { id: toastId, position: 'top-center' });
+      reset();
+      onOpenChange(false);
+    } else {
+      toast.error(result.error.message, {
+        id: toastId,
+        position: 'top-center',
+      });
+    }
   };
 
   const renderFlameStyleButton = () => (
@@ -225,7 +219,6 @@ export function CreateFlameDialog({
                         id={field.name}
                         type="number"
                         min={1}
-                        placeholder="30"
                         aria-invalid={fieldState.invalid}
                         value={field.value ?? ''}
                         onChange={(e) =>
