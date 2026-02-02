@@ -58,6 +58,7 @@ export function CreateFlameDialog({
       color: 'rose',
       tracking_type: 'time',
       time_budget_minutes: 60,
+      count_target: 10,
       is_daily: true,
     },
   });
@@ -69,19 +70,16 @@ export function CreateFlameDialog({
       position: 'top-center',
     });
 
-    const result = await createFlame(
-      {
-        name: data.name,
-        icon: null,
-        color: data.color,
-        tracking_type: data.tracking_type,
-        time_budget_minutes: data.time_budget_minutes ?? null,
-        count_target: data.count_target ?? null,
-        count_unit: data.count_unit ?? 'number',
-        is_daily: data.is_daily,
-      },
-      data.schedule,
-    );
+    const result = await createFlame({
+      name: data.name,
+      icon: null,
+      color: data.color,
+      tracking_type: data.tracking_type,
+      time_budget_minutes: data.time_budget_minutes ?? null,
+      count_target: data.count_target ?? null,
+      count_unit: data.count_unit ?? 'number',
+      is_daily: data.is_daily,
+    });
 
     if (result.success) {
       toast.success('Flame created!', { id: toastId, position: 'top-center' });

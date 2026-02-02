@@ -1,7 +1,7 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Button } from '../../../../components/ui/button';
 import {
   CHEMICAL_FLAMES,
   COSMIC_FLAMES,
