@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Field } from '@/components/ui/field';
+import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   Popover,
@@ -148,7 +148,24 @@ export function CreateFlameDialog({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex-1 flex flex-col gap-2 min-h-0"></div>
+          <div className="flex-1 flex flex-row gap-2 min-h-0">
+            <Controller
+              name="time_budget_minutes"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="time_budget_minutes">
+                    Fuel Budget
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                  />
+                </Field>
+              )}
+            />
+          </div>
 
           <div className="flex gap-2 justify-end pt-2">
             <Button type="submit" disabled={isSubmitting}>
