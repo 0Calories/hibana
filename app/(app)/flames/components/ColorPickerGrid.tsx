@@ -6,11 +6,11 @@ import {
   CHEMICAL_FLAMES,
   COSMIC_FLAMES,
   EARTHLY_FLAMES,
+  FLAME_BG_CLASSES,
   type FlameColorName,
-  getFlameColorClass,
 } from '../utils/colors';
 
-const COLOR_GRID = [
+const FLAME_COLOR_GRID = [
   [COSMIC_FLAMES[0], COSMIC_FLAMES[1], COSMIC_FLAMES[2]],
   [CHEMICAL_FLAMES[0], CHEMICAL_FLAMES[1], CHEMICAL_FLAMES[2]],
   [EARTHLY_FLAMES[0], EARTHLY_FLAMES[1], EARTHLY_FLAMES[2]],
@@ -25,25 +25,22 @@ export function ColorPickerGrid({
   value = 'rose',
   onChange,
 }: ColorPickerGridProps) {
-  const bgColorClass = `bg-${getFlameColorClass(value)}`;
-  console.log(bgColorClass);
-
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-3 gap-1.5">
-        {COLOR_GRID.map((row) =>
+        {FLAME_COLOR_GRID.map((row) =>
           row.map((color) => {
             return (
               <Button
-                key={color.name}
+                key={color}
                 type="button"
                 className={cn(
                   'size-7 rounded-md transition-transform hover:scale-110',
-                  bgColorClass,
-                  value === color.name && 'ring-1 ring-foreground',
+                  FLAME_BG_CLASSES[color],
+                  value === color && 'ring-1 ring-foreground',
                 )}
-                onClick={() => onChange(color.name)}
-                aria-label={`Select ${color.name}`}
+                onClick={() => onChange(color)}
+                aria-label={`Select ${color}`}
               />
             );
           }),

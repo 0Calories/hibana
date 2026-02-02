@@ -23,8 +23,9 @@ import {
   type CreateFlameFormData,
   createFlameSchema,
 } from '@/lib/schemas/flame';
+import { cn } from '@/lib/utils';
 import { createFlame } from '../flame-actions';
-import type { FlameColorName } from '../utils/colors';
+import { FLAME_GRADIENT_CLASSES, type FlameColorName } from '../utils/colors';
 
 interface CreateFlameDialogProps {
   open: boolean;
@@ -91,12 +92,18 @@ export function CreateFlameDialog({
       name="color"
       control={control}
       render={({ field }) => {
-        const color = field.value;
-        // const gradientClass = FLAME_GRADIENT_CLASSES;
+        const color = field.value as FlameColorName;
+        const gradientClass = FLAME_GRADIENT_CLASSES[color];
+
         return (
           <Popover>
             <PopoverTrigger asChild>
-              <Button className="size-10 rounded-lg flex items-center justify-center shrink-0 transition-transform hover:scale-105">
+              <Button
+                className={cn(
+                  'size-10 rounded-lg flex items-center justify-center shrink-0 transition-transform hover:scale-105',
+                  gradientClass,
+                )}
+              >
                 <FlameIcon className="size-6" />
               </Button>
             </PopoverTrigger>
