@@ -11,9 +11,9 @@ import {
 } from '../utils/colors';
 
 const FLAME_COLOR_GRID = [
+  [EARTHLY_FLAMES[0], EARTHLY_FLAMES[1], EARTHLY_FLAMES[2]],
   [COSMIC_FLAMES[0], COSMIC_FLAMES[1], COSMIC_FLAMES[2]],
   [CHEMICAL_FLAMES[0], CHEMICAL_FLAMES[1], CHEMICAL_FLAMES[2]],
-  [EARTHLY_FLAMES[0], EARTHLY_FLAMES[1], EARTHLY_FLAMES[2]],
 ];
 
 interface ColorPickerGridProps {
@@ -35,7 +35,7 @@ export function ColorPickerGrid({
                 key={color}
                 type="button"
                 className={cn(
-                  'size-7 rounded-md transition-transform hover:scale-110',
+                  'size-7 rounded-md transition-transform hover:scale-110 cursor-pointer',
                   FLAME_BG_CLASSES[color],
                   value === color && 'ring-1 ring-foreground',
                 )}

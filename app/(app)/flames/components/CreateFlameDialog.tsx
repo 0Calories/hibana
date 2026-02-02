@@ -40,7 +40,6 @@ export function CreateFlameDialog({
     control,
     handleSubmit,
     watch,
-    reset,
     formState: { isSubmitting },
   } = useForm<CreateFlameFormData>({
     resolver: zodResolver(createFlameSchema),
@@ -100,11 +99,11 @@ export function CreateFlameDialog({
             <PopoverTrigger asChild>
               <Button
                 className={cn(
-                  'size-10 rounded-lg flex items-center justify-center shrink-0 transition-transform hover:scale-105',
+                  'size-9 rounded-lg flex items-center justify-center shrink-0 transition-transform cursor-pointer',
                   gradientClass,
                 )}
               >
-                <FlameIcon className="size-6" />
+                <FlameIcon className="size-5" />
               </Button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-auto">

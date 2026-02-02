@@ -26,15 +26,15 @@ export const FLAME_BG_CLASSES: Record<FlameColorName, string> = {
 };
 
 export const FLAME_GRADIENT_CLASSES: Record<FlameColorName, string> = {
-  rose: 'bg-gradient-to-br from-rose-400 to-rose-600',
-  orange: 'bg-gradient-to-br from-orange-400 to-orange-600',
-  amber: 'bg-gradient-to-br from-amber-400 to-amber-600',
-  indigo: 'bg-gradient-to-br from-indigo-400 to-indigo-600',
-  teal: 'bg-gradient-to-br from-teal-400 to-teal-600',
-  green: 'bg-gradient-to-br from-green-400 to-green-600',
-  blue: 'bg-gradient-to-br from-blue-400 to-blue-600',
-  sky: 'bg-gradient-to-br from-sky-400 to-sky-600',
-  fuchsia: 'bg-gradient-to-br from-fuchsia-400 to-fuchsia-600',
+  rose: 'bg-gradient-to-t from-rose-400 to-rose-600',
+  orange: 'bg-gradient-to-t from-orange-300 to-orange-600',
+  amber: 'bg-gradient-to-t from-amber-300 to-amber-600',
+  indigo: 'bg-gradient-to-t from-indigo-300 to-indigo-600',
+  teal: 'bg-gradient-to-t from-teal-300 to-teal-600',
+  green: 'bg-gradient-to-t from-green-300 to-green-600',
+  blue: 'bg-gradient-to-t from-blue-300 to-blue-600',
+  sky: 'bg-gradient-to-t from-sky-300 to-sky-600',
+  fuchsia: 'bg-gradient-to-t from-fuchsia-300 to-fuchsia-600',
 };
 
 // Earthly flames: warm fire colors (ordered hot → cool)
