@@ -1,24 +1,39 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FlameIcon } from 'lucide-react';
+import {
+  ClockIcon,
+  FlameIcon,
+  FlameKindlingIcon,
+  HashIcon,
+  HourglassIcon,
+} from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ColorPickerGrid } from '@/app/(app)/flames/components/ColorPickerGrid';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Field, FieldLabel } from '@/components/ui/field';
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@/components/ui/input-group';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import {
   type CreateFlameFormData,
   createFlameSchema,
@@ -148,24 +163,135 @@ export function CreateFlameDialog({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex-1 flex flex-row gap-2 min-h-0">
+          <Separator />
+
+          <div className="flex-1 flex flex-col gap-8 min-h-0">
+            {/* Tracking Type Toggle */}
             <Controller
-              name="time_budget_minutes"
+              name="tracking_type"
               control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="time_budget_minutes">
-                    Fuel Budget
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    id={field.name}
-                    aria-invalid={fieldState.invalid}
+              render={({ field }) => (
+                <Field orientation="horizontal" className="justify-between">
+                  <div className="flex flex-col gap-1">
+                    <FieldLabel htmlFor="tracking_type">
+                      Tracking Type
+                    </FieldLabel>
+                    <FieldDescription>
+                      {field.value === 'time' ? 'Time' : 'Repetitions'}
+                    </FieldDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FlameKindlingIcon
+                      className={cn(
+                        'size-4',
+                        field.value === 'count'
+                          ? 'text-foreground'
+                          : 'text-muted-foreground',
+                      )}
+                    />
+                    <Switch
+                      id="tracking_type"
+                      checked={field.value === 'time'}
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked ? 'time' : 'count')
+                      }
+                    />
+                    <HourglassIcon
+                      className={cn(
+                        'size-4',
+                        field.value === 'time'
+                          ? 'text-foreground'
+                          : 'text-muted-foreground',
+                      )}
+                    />
+                  </div>
+                </Field>
+              )}
+            />
+
+            {/* Fuel Budget Field */}
+            {trackingType === 'time' ? (
+              <Controller
+                name="time_budget_minutes"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="time_budget_minutes">
+                      Fuel Budget
+                    </FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        {...field}
+                        id={field.name}
+                        type="number"
+                        min={1}
+                        placeholder="30"
+                        aria-invalid={fieldState.invalid}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : undefined,
+                          )
+                        }
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupText>min</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </Field>
+                )}
+              />
+            ) : (
+              <Controller
+                name="count_target"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="count_target">Target Count</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        {...field}
+                        id={field.name}
+                        type="number"
+                        min={1}
+                        placeholder="10"
+                        aria-invalid={fieldState.invalid}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : undefined,
+                          )
+                        }
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupText>times</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </Field>
+                )}
+              />
+            )}
+
+            {/* Daily Checkbox */}
+            <Controller
+              name="is_daily"
+              control={control}
+              render={({ field }) => (
+                <Field orientation="horizontal" className="justify-self-end">
+                  <div className="flex flex-col gap-1">
+                    <FieldLabel htmlFor="is_daily">Daily</FieldLabel>
+                  </div>
+                  <Checkbox
+                    id="is_daily"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
                   />
                 </Field>
               )}
             />
           </div>
+
+          <Separator />
 
           <div className="flex gap-2 justify-end pt-2">
             <Button type="submit" disabled={isSubmitting}>
