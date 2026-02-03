@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { getFlameColors } from '../utils/colors';
+import { getFlameLevel } from '../utils/levels';
 import { GeometricFlame } from './flame-card/GeometricFlame';
 import { ParticleEmbers } from './flame-card/ParticleEmbers';
 import { ProgressBar } from './flame-card/ProgressBar';
@@ -17,10 +18,8 @@ interface FlameCardProps {
   date: string;
   onSessionUpdate?: () => void;
   isBlocked?: boolean;
+  level?: number;
 }
-
-// Placeholder until level system is implemented
-const LEVEL_INFO = { level: 1, name: 'Ember' };
 
 export function FlameCard({
   flame,
@@ -28,10 +27,12 @@ export function FlameCard({
   date,
   onSessionUpdate,
   isBlocked = false,
+  level = 1,
 }: FlameCardProps) {
   const t = useTranslations('flames.card');
   const shouldReduceMotion = useReducedMotion();
   const colors = getFlameColors(flame.color);
+  const levelInfo = getFlameLevel(level);
 
   const { state, elapsedSeconds, targetSeconds, progress, toggle, isLoading } =
     useFlameTimer({
@@ -126,7 +127,11 @@ export function FlameCard({
           state={isBlocked ? 'idle' : state}
           color={colors.light}
         />
-        <GeometricFlame state={isBlocked ? 'idle' : state} colors={colors} />
+        <GeometricFlame
+          state={isBlocked ? 'idle' : state}
+          level={level}
+          colors={colors}
+        />
       </div>
 
       {/* Footer - Level, Timer, Progress, State */}
@@ -136,7 +141,7 @@ export function FlameCard({
           className="text-center text-[10px] font-medium sm:text-xs"
           style={{ color: colors.medium }}
         >
-          Lv. {LEVEL_INFO.level} · {LEVEL_INFO.name}
+          Lv. {levelInfo.level} · {levelInfo.name}
         </div>
 
         {/* Timer display */}

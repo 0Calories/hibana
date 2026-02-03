@@ -35,7 +35,7 @@ export function FlamesList({ flames, initialSessions, date }: FlamesListProps) {
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-      {flames.map((flame) => (
+      {flames.map((flame, index) => (
         <FlameCard
           key={flame.id}
           flame={flame}
@@ -43,6 +43,7 @@ export function FlamesList({ flames, initialSessions, date }: FlamesListProps) {
           date={date}
           onSessionUpdate={refreshSessions}
           isBlocked={activeFlameId !== null && activeFlameId !== flame.id}
+          level={(index % 8) + 1} // Demo: cycle through levels 1-8
         />
       ))}
     </div>
