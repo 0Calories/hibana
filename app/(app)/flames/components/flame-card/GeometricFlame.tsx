@@ -74,7 +74,7 @@ export function GeometricFlame({ state, colors }: GeometricFlameProps) {
     return (
       <motion.svg
         viewBox="0 0 100 140"
-        className="h-16 w-12"
+        className="h-16 w-12 sm:h-20 sm:w-16 md:h-28 md:w-20"
         role="img"
         aria-hidden="true"
         initial={false}
@@ -99,7 +99,7 @@ export function GeometricFlame({ state, colors }: GeometricFlameProps) {
   return (
     <motion.svg
       viewBox="0 0 100 140"
-      className="h-16 w-12"
+      className="h-16 w-12 sm:h-20 sm:w-16 md:h-28 md:w-20"
       role="img"
       aria-hidden="true"
       initial={false}

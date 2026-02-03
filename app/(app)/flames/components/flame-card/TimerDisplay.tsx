@@ -53,7 +53,7 @@ export function TimerDisplay({
 
   return (
     <motion.div
-      className="text-center font-mono text-[10px] tracking-tight"
+      className="text-center font-mono text-[10px] tracking-tight sm:text-xs md:text-sm"
       style={{
         color: state === 'completed' ? color : 'rgba(255, 255, 255, 0.8)',
       }}

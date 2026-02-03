@@ -21,7 +21,7 @@ function generateParticles(count: number): Particle[] {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     x: 35 + Math.random() * 30, // 35-65% horizontal position
-    size: 2 + Math.random() * 2, // 2-4px (smaller for compact cards)
+    size: 3 + Math.random() * 3, // 3-6px
     delay: Math.random() * 1.5, // 0-1.5s staggered delay
     duration: 1.5 + Math.random() * 1, // 1.5-2.5s float duration
   }));
@@ -56,8 +56,8 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
               initial={{ opacity: 0, y: 0 }}
               animate={{
                 opacity: [0, 1, 1, 0],
-                y: -60, // Shorter travel for compact cards
-                x: [0, (Math.random() - 0.5) * 15],
+                y: -80,
+                x: [0, (Math.random() - 0.5) * 20],
               }}
               exit={{ opacity: 0 }}
               transition={{

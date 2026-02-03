@@ -91,16 +91,16 @@ export function FlameCard({
       variants={cardVariants}
       transition={cardTransition}
     >
-      {/* Flame visual area - fixed height */}
-      <div className="relative flex h-28 items-center justify-center">
+      {/* Flame visual area */}
+      <div className="relative flex h-28 items-center justify-center sm:h-36 md:h-44">
         <ParticleEmbers state={state} color={colors.light} />
         <GeometricFlame state={state} colors={colors} />
       </div>
 
       {/* Info footer */}
-      <div className="flex flex-col gap-1 bg-black/30 px-2 py-2">
+      <div className="flex flex-col gap-1 bg-black/30 px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
         {/* Flame name - prominent */}
-        <h3 className="truncate text-center text-xs font-semibold leading-tight">
+        <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
           {flame.name}
         </h3>
 
@@ -120,7 +120,7 @@ export function FlameCard({
         )}
 
         {/* State hint */}
-        <div className="text-center text-[10px] text-white/50">
+        <div className="text-center text-[10px] text-white/50 sm:text-xs">
           {state === 'idle' && t('tapToStart')}
           {state === 'active' && t('tapToPause')}
           {state === 'paused' && t('tapToResume')}
