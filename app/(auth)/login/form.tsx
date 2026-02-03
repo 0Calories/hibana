@@ -1,7 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -24,13 +25,23 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { login } from '../actions';
 
-const loginFormSchema = z.object({
-  email: z.email({ message: 'Please enter a valid email address' }),
-  password: z.string().min(1, { message: 'Please enter your password' }),
-});
+function createLoginSchema(t: (key: string) => string) {
+  return z.object({
+    email: z.email({ message: t('emailInvalid') }),
+    password: z.string().min(1, { message: t('passwordRequired') }),
+  });
+}
 
 export function LoginForm() {
   const [loginFailed, setLoginFailed] = useState(false);
+  const t = useTranslations('auth.login');
+  const tValidation = useTranslations('validation');
+  const tCommon = useTranslations('common');
+
+  const loginFormSchema = useMemo(
+    () => createLoginSchema(tValidation as unknown as (key: string) => string),
+    [tValidation],
+  );
 
   const form = useForm({
     resolver: zodResolver(loginFormSchema),
@@ -42,7 +53,7 @@ export function LoginForm() {
   });
 
   async function onSubmit(data: z.infer<typeof loginFormSchema>) {
-    const toastId = toast.loading('Logging in...', { position: 'top-center' });
+    const toastId = toast.loading(t('loading'), { position: 'top-center' });
 
     try {
       const result = await login(data.email, data.password);
@@ -50,7 +61,7 @@ export function LoginForm() {
       if (result?.error) {
         setLoginFailed(true);
         toast.error(
-          `Login failed: ${result.error.message || 'unknown error'}`,
+          t('error', { error: result.error.message || 'unknown error' }),
           {
             id: toastId,
             position: 'top-center',
@@ -60,14 +71,14 @@ export function LoginForm() {
         return;
       }
 
-      toast.success('Welcome back!', { id: toastId, position: 'top-center' });
+      toast.success(t('success'), { id: toastId, position: 'top-center' });
     } catch (error) {
       if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-        toast.success('Welcome back!', { id: toastId, position: 'top-center' });
+        toast.success(t('success'), { id: toastId, position: 'top-center' });
         throw error;
       }
 
-      toast.error('Something went wrong. Please try again.', {
+      toast.error(tCommon('somethingWentWrong'), {
         id: toastId,
         position: 'top-center',
       });
@@ -77,8 +88,8 @@ export function LoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Welcome back!</CardTitle>
-        <CardDescription>Enter your credentials to log in</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -89,7 +100,7 @@ export function LoginForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid || loginFailed}>
-                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{tCommon('email')}</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
@@ -110,7 +121,7 @@ export function LoginForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid || loginFailed}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{tCommon('password')}</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
@@ -128,29 +139,29 @@ export function LoginForm() {
             <FieldGroup>
               <Field>
                 <Button type="submit" form="form-login">
-                  Log In
+                  {t('submit')}
                 </Button>
               </Field>
 
               <div className="flex items-center">
                 <Separator className="flex-1" />
                 <span className="shrink-0 px-2 text-xs text-muted-foreground">
-                  Or continue with
+                  {tCommon('orContinueWith')}
                 </span>
                 <Separator className="flex-1" />
               </div>
 
               <Field>
                 <Button variant="outline" type="button">
-                  Google
+                  {tCommon('google')}
                 </Button>
                 <Button variant="outline" type="button">
-                  Discord
+                  {tCommon('discord')}
                 </Button>
               </Field>
 
               <FieldDescription className="px-6 text-center">
-                Don't have an account? <a href="/signup">Sign up</a>
+                {t('noAccount')} <a href="/signup">{t('signUpLink')}</a>
               </FieldDescription>
             </FieldGroup>
           </FieldGroup>

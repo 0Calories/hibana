@@ -1,7 +1,11 @@
-export default function SchedulePage() {
+import { getTranslations } from 'next-intl/server';
+
+export default async function SchedulePage() {
+  const t = await getTranslations('pages');
+
   return (
     <div className="flex-col min-h-svh w-full items-center justify-center align-center p-4">
-      Schedule
+      {t('schedule')}
     </div>
   );
 }

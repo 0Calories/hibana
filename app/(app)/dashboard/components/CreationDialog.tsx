@@ -8,7 +8,8 @@ import {
   NotebookPenIcon,
   SparklesIcon,
 } from 'lucide-react';
-import { type ReactNode, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { type ReactNode, useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
@@ -27,12 +28,19 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { createTask } from '../actions';
 
-const taskSchema = z.object({
-  title: z.string().min(1, 'Title must not be empty'),
+const baseTaskSchema = z.object({
+  title: z.string().min(1),
   content: z.string().optional(),
 });
 
-type TaskFormData = z.infer<typeof taskSchema>;
+type TaskFormData = z.infer<typeof baseTaskSchema>;
+
+function createTaskSchema(t: (key: string) => string) {
+  return z.object({
+    title: z.string().min(1, t('titleRequired')),
+    content: z.string().optional(),
+  });
+}
 
 export type CreationDialogMode =
   | 'task'
@@ -55,6 +63,18 @@ const MODE_TO_ICON: Record<CreationDialogMode, ReactNode> = {
 };
 
 export function CreationDialog({ setOpen, mode }: Props) {
+  const t = useTranslations('dashboard.creation');
+  const tModes = useTranslations('dashboard.modes');
+  const tValidation = useTranslations('validation');
+  const tCommon = useTranslations('common');
+
+  const taskSchema = useMemo(
+    () => createTaskSchema(tValidation as unknown as (key: string) => string),
+    [tValidation],
+  );
+
+  const modeLabel = tModes(mode);
+
   const {
     handleSubmit,
     reset,
@@ -63,26 +83,28 @@ export function CreationDialog({ setOpen, mode }: Props) {
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      title: `New ${mode}`,
+      title: t('defaultTitle', { mode: modeLabel }),
     },
   });
 
   // Reset the default title when a new mode is selected
   useEffect(() => {
-    reset({ title: `New ${mode}` });
-  }, [mode, reset]);
+    reset({ title: t('defaultTitle', { mode: modeLabel }) });
+  }, [modeLabel, reset, t]);
 
   const onSubmit = async (data: TaskFormData) => {
-    const toastId = toast.loading('Creating Task ...', {
+    const toastId = toast.loading(t('loading', { mode: modeLabel }), {
       position: 'top-center',
     });
 
     try {
       const result = await createTask(data.title, data.content);
       if (result.error) {
-        // TODO: Extract out a constant to map data types to display values: icon, display name, etc. Include i8n support
         toast.error(
-          `Failed to create ${mode}: ${result.error.message || 'unknown error'}`,
+          t('error', {
+            mode: modeLabel,
+            error: result.error.message || 'unknown error',
+          }),
           {
             id: toastId,
             position: 'top-center',
@@ -91,7 +113,7 @@ export function CreationDialog({ setOpen, mode }: Props) {
         return;
       }
 
-      toast.success(`${mode} created successfully!`, {
+      toast.success(t('success', { mode: modeLabel }), {
         id: toastId,
         position: 'top-center',
       });
@@ -99,7 +121,7 @@ export function CreationDialog({ setOpen, mode }: Props) {
       reset();
       setOpen(false);
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error(tCommon('unexpectedError'));
       console.error(`Error creating ${mode}:`, error);
     }
   };
@@ -123,7 +145,7 @@ export function CreationDialog({ setOpen, mode }: Props) {
                       {...field}
                       id={field.name}
                       aria-invalid={fieldState.invalid}
-                      placeholder="Title"
+                      placeholder={t('titlePlaceholder')}
                     />
                     <InputGroupAddon>{MODE_TO_ICON[mode]}</InputGroupAddon>
                   </InputGroup>
@@ -142,7 +164,7 @@ export function CreationDialog({ setOpen, mode }: Props) {
                 {...field}
                 id={field.name}
                 aria-invalid={fieldState.invalid}
-                placeholder="Add optional details ..."
+                placeholder={t('detailsPlaceholder')}
                 className="flex-1 resize-none"
               />
             )}
@@ -155,7 +177,7 @@ export function CreationDialog({ setOpen, mode }: Props) {
 
         <div className="flex gap-2 justify-end pt-2">
           <Button type="submit" disabled={isSubmitting}>
-            Save
+            {tCommon('save')}
           </Button>
         </div>
       </form>

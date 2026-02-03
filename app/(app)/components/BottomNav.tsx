@@ -1,17 +1,19 @@
 'use client';
 
 import { Flame, LayoutList, LucideHome, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useTranslations('navigation');
 
   const navItems = [
-    { icon: <LucideHome />, label: 'Home', href: '/dashboard' },
-    { icon: <Flame />, label: 'Flames', href: '/flames' },
-    { icon: <Sparkles />, label: 'Habits', href: '/habits' },
-    { icon: <LayoutList />, label: 'Tasks', href: '/tasks' },
+    { icon: <LucideHome />, label: t('home'), href: '/dashboard' },
+    { icon: <Flame />, label: t('flames'), href: '/flames' },
+    { icon: <Sparkles />, label: t('habits'), href: '/habits' },
+    { icon: <LayoutList />, label: t('tasks'), href: '/tasks' },
   ];
 
   return (

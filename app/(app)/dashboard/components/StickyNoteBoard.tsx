@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +38,7 @@ type StickyNote = {
 
 export function StickyNoteBoard({ tasks }: Props) {
   const [selectedNote, setSelectedNote] = useState<StickyNote>(null);
+  const t = useTranslations('dashboard');
 
   return (
     <Dialog
@@ -45,7 +47,7 @@ export function StickyNoteBoard({ tasks }: Props) {
     >
       <Image
         src={'/ember.png'}
-        alt={'Ember'}
+        alt={t('emberAlt')}
         width={48}
         height={48}
         className="fixed bottom-30 shadow-xl"
