@@ -13,6 +13,12 @@ interface GeometricFlameProps {
   };
 }
 
+interface ShapeColors {
+  light: string;
+  medium: string;
+  dark: string;
+}
+
 const stateVariants = {
   idle: {
     scale: 0.9,
@@ -55,8 +61,12 @@ const flickerVariants = {
   },
 };
 
-// Level 1: Ember - tiny glowing dot
-function EmberShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
+// ============ LEVEL 1: EMBER ============
+function EmberBase() {
+  return null; // No base for ember
+}
+
+function EmberFlame({ colors }: { colors: ShapeColors }) {
   return (
     <>
       <circle cx="50" cy="60" r="20" fill={colors.dark} opacity={0.5} />
@@ -67,17 +77,21 @@ function EmberShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
   );
 }
 
-// Level 2: Candle - flame on candlestick
-function CandleShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
+// ============ LEVEL 2: CANDLE ============
+function CandleBase() {
   return (
     <>
-      {/* Candlestick base */}
       <rect x="44" y="70" width="12" height="25" fill="#8B7355" rx="1" />
       <rect x="42" y="68" width="16" height="4" fill="#A08060" rx="1" />
       <ellipse cx="50" cy="95" rx="14" ry="4" fill="#6B5344" />
-      {/* Wick */}
       <rect x="49" y="62" width="2" height="10" fill="#333" />
-      {/* Flame */}
+    </>
+  );
+}
+
+function CandleFlame({ colors }: { colors: ShapeColors }) {
+  return (
+    <>
       <polygon
         points="50,15 65,55 58,68 42,68 35,55"
         fill={colors.dark}
@@ -93,17 +107,21 @@ function CandleShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
   );
 }
 
-// Level 3: Torch - flame on wooden torch handle
-function TorchShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
+// ============ LEVEL 3: TORCH ============
+function TorchBase() {
   return (
     <>
-      {/* Torch handle */}
       <polygon points="42,65 58,65 54,98 46,98" fill="#5D4037" />
       <polygon points="44,65 56,65 53,98 47,98" fill="#6D4C41" />
-      {/* Torch head wrap */}
       <ellipse cx="50" cy="65" rx="12" ry="5" fill="#4E342E" />
       <ellipse cx="50" cy="63" rx="10" ry="4" fill="#3E2723" />
-      {/* Flame - wider and more dynamic */}
+    </>
+  );
+}
+
+function TorchFlame({ colors }: { colors: ShapeColors }) {
+  return (
+    <>
       <polygon
         points="50,5 75,50 65,65 35,65 25,50"
         fill={colors.dark}
@@ -119,11 +137,10 @@ function TorchShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
   );
 }
 
-// Level 4: Bonfire - flames on log pile
-function BonfireShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
+// ============ LEVEL 4: BONFIRE ============
+function BonfireBase() {
   return (
     <>
-      {/* Log pile base */}
       <ellipse cx="50" cy="88" rx="35" ry="8" fill="#3E2723" opacity={0.5} />
       <rect
         x="15"
@@ -162,7 +179,13 @@ function BonfireShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
         transform="rotate(8 58 75)"
       />
       <rect x="38" y="68" width="24" height="6" rx="3" fill="#4E342E" />
-      {/* Main flames */}
+    </>
+  );
+}
+
+function BonfireFlame({ colors }: { colors: ShapeColors }) {
+  return (
+    <>
       <polygon
         points="25,30 38,60 32,72 12,72 8,55"
         fill={colors.dark}
@@ -188,11 +211,14 @@ function BonfireShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
   );
 }
 
-// Level 5: Blaze - chaotic raging flames
-function BlazeShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
+// ============ LEVEL 5: BLAZE ============
+function BlazeBase() {
+  return null;
+}
+
+function BlazeFlame({ colors }: { colors: ShapeColors }) {
   return (
     <>
-      {/* Multiple chaotic flame tongues */}
       <polygon
         points="15,20 28,45 22,95 5,95 2,50"
         fill={colors.dark}
@@ -213,7 +239,6 @@ function BlazeShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
         fill={colors.dark}
         opacity={0.7}
       />
-      {/* Center blaze */}
       <polygon
         points="50,2 80,50 72,95 28,95 20,50"
         fill={colors.medium}
@@ -233,11 +258,14 @@ function BlazeShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
   );
 }
 
-// Level 6: Inferno - wild raging flames everywhere
-function InfernoShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
+// ============ LEVEL 6: INFERNO ============
+function InfernoBase() {
+  return null;
+}
+
+function InfernoFlame({ colors }: { colors: ShapeColors }) {
   return (
     <>
-      {/* Wild outer flames */}
       <polygon
         points="8,25 20,50 15,95 0,95 0,45"
         fill={colors.dark}
@@ -268,7 +296,6 @@ function InfernoShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
         fill={colors.dark}
         opacity={0.7}
       />
-      {/* Inner intense flames */}
       <polygon
         points="38,8 55,35 48,95 28,95 22,42"
         fill={colors.medium}
@@ -279,7 +306,6 @@ function InfernoShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
         fill={colors.medium}
         opacity={0.8}
       />
-      {/* Central core */}
       <polygon
         points="50,0 72,45 65,95 35,95 28,45"
         fill={colors.medium}
@@ -295,14 +321,16 @@ function InfernoShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
   );
 }
 
-// Level 7: Star - brilliant celestial body
-function StarShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
+// ============ LEVEL 7: STAR ============
+function StarBase() {
+  return null;
+}
+
+function StarFlame({ colors }: { colors: ShapeColors }) {
   return (
     <>
-      {/* Outer corona/glow */}
       <circle cx="50" cy="50" r="45" fill={colors.dark} opacity={0.25} />
       <circle cx="50" cy="50" r="38" fill={colors.dark} opacity={0.35} />
-      {/* Solar flare rays */}
       {[0, 60, 120, 180, 240, 300].map((angle) => {
         const rad = (angle * Math.PI) / 180;
         const x2 = 50 + Math.cos(rad) * 44;
@@ -316,7 +344,6 @@ function StarShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
           />
         );
       })}
-      {/* Star body - layered circles for depth */}
       <circle cx="50" cy="50" r="28" fill={colors.dark} opacity={0.9} />
       <circle cx="50" cy="50" r="22" fill={colors.medium} />
       <circle cx="50" cy="50" r="15" fill={colors.light} />
@@ -326,11 +353,14 @@ function StarShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
   );
 }
 
-// Level 8: Supernova - explosive cosmic event
-function SupernovaShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
+// ============ LEVEL 8: SUPERNOVA ============
+function SupernovaBase() {
+  return null;
+}
+
+function SupernovaFlame({ colors }: { colors: ShapeColors }) {
   return (
     <>
-      {/* Outer shockwave rings */}
       <circle
         cx="50"
         cy="50"
@@ -349,7 +379,6 @@ function SupernovaShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
         strokeWidth="2"
         opacity={0.4}
       />
-      {/* Explosion rays */}
       {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle) => {
         const rad = (angle * Math.PI) / 180;
         const length = angle % 60 === 0 ? 46 : 38;
@@ -370,7 +399,6 @@ function SupernovaShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
           />
         );
       })}
-      {/* Glowing core */}
       <circle cx="50" cy="50" r="22" fill={colors.dark} />
       <circle cx="50" cy="50" r="16" fill={colors.medium} />
       <circle cx="50" cy="50" r="10" fill={colors.light} />
@@ -379,24 +407,28 @@ function SupernovaShape({ colors }: { colors: GeometricFlameProps['colors'] }) {
   );
 }
 
+// ============ SHAPE REGISTRY ============
 const FLAME_SHAPES: Record<
   number,
-  React.FC<{ colors: GeometricFlameProps['colors'] }>
+  {
+    Base: React.FC;
+    Flame: React.FC<{ colors: ShapeColors }>;
+  }
 > = {
-  1: EmberShape,
-  2: CandleShape,
-  3: TorchShape,
-  4: BonfireShape,
-  5: BlazeShape,
-  6: InfernoShape,
-  7: StarShape,
-  8: SupernovaShape,
+  1: { Base: EmberBase, Flame: EmberFlame },
+  2: { Base: CandleBase, Flame: CandleFlame },
+  3: { Base: TorchBase, Flame: TorchFlame },
+  4: { Base: BonfireBase, Flame: BonfireFlame },
+  5: { Base: BlazeBase, Flame: BlazeFlame },
+  6: { Base: InfernoBase, Flame: InfernoFlame },
+  7: { Base: StarBase, Flame: StarFlame },
+  8: { Base: SupernovaBase, Flame: SupernovaFlame },
 };
 
 export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
   const shouldReduceMotion = useReducedMotion();
   const clampedLevel = Math.max(1, Math.min(8, level));
-  const ShapeComponent = FLAME_SHAPES[clampedLevel];
+  const { Base, Flame } = FLAME_SHAPES[clampedLevel];
 
   const transition = {
     type: 'spring' as const,
@@ -421,7 +453,8 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
         animate={stateVariants[state]}
         transition={transition}
       >
-        <ShapeComponent colors={colors} />
+        <Base />
+        <Flame colors={colors} />
       </motion.svg>
     );
   }
@@ -436,12 +469,15 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
       animate={stateVariants[state]}
       transition={transition}
     >
+      {/* Static base - not animated */}
+      <Base />
+      {/* Animated flame */}
       <motion.g
         style={{ originX: '50%', originY: '100%' }}
         animate={flickerVariants[state]}
         transition={flickerTransition}
       >
-        <ShapeComponent colors={colors} />
+        <Flame colors={colors} />
       </motion.g>
     </motion.svg>
   );
