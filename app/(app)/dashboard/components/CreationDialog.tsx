@@ -90,7 +90,7 @@ export function CreationDialog({ setOpen, mode }: Props) {
   // Reset the default title when a new mode is selected
   useEffect(() => {
     reset({ title: t('defaultTitle', { mode: modeLabel }) });
-  }, [mode, modeLabel, reset, t]);
+  }, [modeLabel, reset, t]);
 
   const onSubmit = async (data: TaskFormData) => {
     const toastId = toast.loading(t('loading', { mode: modeLabel }), {
@@ -101,7 +101,10 @@ export function CreationDialog({ setOpen, mode }: Props) {
       const result = await createTask(data.title, data.content);
       if (result.error) {
         toast.error(
-          t('error', { mode: modeLabel, error: result.error.message || 'unknown error' }),
+          t('error', {
+            mode: modeLabel,
+            error: result.error.message || 'unknown error',
+          }),
           {
             id: toastId,
             position: 'top-center',
