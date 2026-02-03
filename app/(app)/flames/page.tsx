@@ -37,9 +37,7 @@ export default async function FlamesPage() {
     <div className="size-full p-4 pb-24">
       <h1 className="mb-6 text-2xl font-bold">{t('pageTitle')}</h1>
       {flames.length === 0 ? (
-        <p className="text-muted-foreground">
-          No flames yet. Create one to get started!
-        </p>
+        <p className="text-muted-foreground">{t('empty')}</p>
       ) : (
         <FlamesList flames={flames} initialSessions={sessions} date={today} />
       )}

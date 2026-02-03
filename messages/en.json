@@ -90,11 +90,12 @@
     },
     "card": {
       "ready": "Ready",
-      "burning": "Burning...",
+      "burning": "Burning ...",
       "resting": "Resting",
       "tended": "Tended",
-      "blocked": "Waiting..."
-    }
+      "blocked": "Idle"
+    },
+    "empty": "No flames yet. Create one to get started!"
   },
   "pages": {
     "tasks": "Tasks",
