@@ -87,6 +87,12 @@
       "daily": "Daily",
       "loading": "Creating flame...",
       "success": "Flame created!"
+    },
+    "card": {
+      "tapToStart": "Tap to start",
+      "tapToPause": "Tap to pause",
+      "tapToResume": "Tap to resume",
+      "completed": "Completed!"
     }
   },
   "pages": {
