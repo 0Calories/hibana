@@ -14,24 +14,24 @@ interface GeometricFlameProps {
 
 const stateVariants = {
   idle: {
-    scale: 0.85,
+    scale: 0.9,
     opacity: 0.7,
     y: 0,
   },
   active: {
-    scale: 1.5,
+    scale: 1.2,
     opacity: 1,
-    y: -10,
+    y: -4,
   },
   paused: {
-    scale: 0.7,
+    scale: 0.8,
     opacity: 0.5,
     y: 0,
   },
   completed: {
     scale: 0,
     opacity: 0,
-    y: -20,
+    y: -10,
   },
 };
 
@@ -74,7 +74,7 @@ export function GeometricFlame({ state, colors }: GeometricFlameProps) {
     return (
       <motion.svg
         viewBox="0 0 100 140"
-        className="h-32 w-24"
+        className="h-16 w-12"
         role="img"
         aria-hidden="true"
         initial={false}
@@ -99,7 +99,7 @@ export function GeometricFlame({ state, colors }: GeometricFlameProps) {
   return (
     <motion.svg
       viewBox="0 0 100 140"
-      className="h-32 w-24"
+      className="h-16 w-12"
       role="img"
       aria-hidden="true"
       initial={false}

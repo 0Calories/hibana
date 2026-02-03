@@ -20,10 +20,10 @@ interface Particle {
 function generateParticles(count: number): Particle[] {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
-    x: 30 + Math.random() * 40, // 30-70% horizontal position
-    size: 4 + Math.random() * 4, // 4-8px
-    delay: Math.random() * 2, // 0-2s staggered delay
-    duration: 2 + Math.random() * 1.5, // 2-3.5s float duration
+    x: 35 + Math.random() * 30, // 35-65% horizontal position
+    size: 2 + Math.random() * 2, // 2-4px (smaller for compact cards)
+    delay: Math.random() * 1.5, // 0-1.5s staggered delay
+    duration: 1.5 + Math.random() * 1, // 1.5-2.5s float duration
   }));
 }
 
@@ -31,10 +31,9 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
   const shouldReduceMotion = useReducedMotion();
   const isActive = state === 'active';
 
-  // Generate particles once and memoize
-  const particles = useMemo(() => generateParticles(10), []);
+  // Fewer particles for compact cards
+  const particles = useMemo(() => generateParticles(6), []);
 
-  // Don't render particles if reduced motion is preferred or not active
   if (shouldReduceMotion || !isActive) {
     return null;
   }
@@ -49,7 +48,7 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
               className="absolute rounded-full"
               style={{
                 left: `${particle.x}%`,
-                bottom: '30%',
+                bottom: '40%',
                 width: particle.size,
                 height: particle.size,
                 backgroundColor: color,
@@ -57,8 +56,8 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
               initial={{ opacity: 0, y: 0 }}
               animate={{
                 opacity: [0, 1, 1, 0],
-                y: -150,
-                x: [0, (Math.random() - 0.5) * 30],
+                y: -60, // Shorter travel for compact cards
+                x: [0, (Math.random() - 0.5) * 15],
               }}
               exit={{ opacity: 0 }}
               transition={{

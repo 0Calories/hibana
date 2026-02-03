@@ -10,14 +10,15 @@ interface TimerDisplayProps {
   color: string;
 }
 
-function formatTime(totalSeconds: number): string {
+function formatTimeCompact(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  return [hours, minutes, seconds]
-    .map((unit) => unit.toString().padStart(2, '0'))
-    .join(':');
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 export function TimerDisplay({
@@ -29,15 +30,14 @@ export function TimerDisplay({
   const shouldReduceMotion = useReducedMotion();
   const isActive = state === 'active';
 
-  const elapsedFormatted = formatTime(elapsedSeconds);
-  const targetFormatted = formatTime(targetSeconds);
+  const elapsedFormatted = formatTimeCompact(elapsedSeconds);
+  const targetFormatted = formatTimeCompact(targetSeconds);
 
   const displayText =
     targetSeconds > 0
       ? `${elapsedFormatted} / ${targetFormatted}`
       : elapsedFormatted;
 
-  // Pulse animation for active state
   const pulseAnimation =
     isActive && !shouldReduceMotion
       ? {
@@ -53,9 +53,9 @@ export function TimerDisplay({
 
   return (
     <motion.div
-      className="font-mono text-lg tracking-wider"
+      className="text-center font-mono text-[10px] tracking-tight"
       style={{
-        color: state === 'completed' ? color : 'rgba(255, 255, 255, 0.9)',
+        color: state === 'completed' ? color : 'rgba(255, 255, 255, 0.8)',
       }}
       animate={pulseAnimation}
       transition={pulseTransition}

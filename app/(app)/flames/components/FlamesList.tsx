@@ -31,7 +31,7 @@ export function FlamesList({ flames, initialSessions, date }: FlamesListProps) {
   };
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-3 gap-3">
       {flames.map((flame) => (
         <FlameCard
           key={flame.id}

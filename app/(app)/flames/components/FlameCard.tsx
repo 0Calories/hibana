@@ -39,7 +39,6 @@ export function FlameCard({
   const isActive = state === 'active';
   const isCompleted = state === 'completed';
 
-  // Get accessible label based on state
   const getAriaLabel = () => {
     const baseName = flame.name;
     switch (state) {
@@ -54,10 +53,9 @@ export function FlameCard({
     }
   };
 
-  // Press animation variants
   const cardVariants = {
     rest: { scale: 1 },
-    pressed: { scale: 0.97 },
+    pressed: { scale: 0.96 },
   };
 
   const cardTransition = shouldReduceMotion
@@ -68,10 +66,9 @@ export function FlameCard({
         damping: 25,
       };
 
-  // Border glow styles
   const borderGlowStyle = isActive
     ? {
-        boxShadow: `0 0 20px ${colors.medium}60, 0 0 40px ${colors.medium}30, inset 0 0 20px ${colors.dark}20`,
+        boxShadow: `0 0 15px ${colors.medium}50, 0 0 30px ${colors.medium}25`,
         borderColor: colors.medium,
       }
     : {};
@@ -83,63 +80,59 @@ export function FlameCard({
       disabled={isLoading || isCompleted}
       aria-label={getAriaLabel()}
       className={cn(
-        'relative flex w-full flex-col items-center overflow-hidden rounded-2xl border-2 border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 p-6 text-white transition-colors',
+        'relative flex aspect-[3/4] w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 text-white transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         isCompleted && 'cursor-default opacity-60',
         isLoading && 'cursor-wait',
       )}
-      style={{
-        ...borderGlowStyle,
-        minHeight: '320px',
-      }}
+      style={borderGlowStyle}
       initial="rest"
       whileTap={isCompleted ? 'rest' : 'pressed'}
       variants={cardVariants}
       transition={cardTransition}
     >
-      {/* Particle embers layer */}
-      <ParticleEmbers state={state} color={colors.light} />
-
-      {/* Geometric flame */}
+      {/* Flame visual area */}
       <div className="relative flex flex-1 items-center justify-center">
+        <ParticleEmbers state={state} color={colors.light} />
         <GeometricFlame state={state} colors={colors} />
       </div>
 
-      {/* Flame name */}
-      <h3 className="mt-4 text-xl font-semibold">{flame.name}</h3>
+      {/* Info footer */}
+      <div className="flex flex-col gap-1 bg-black/30 px-2 py-2">
+        {/* Flame name - prominent */}
+        <h3 className="truncate text-center text-xs font-semibold leading-tight">
+          {flame.name}
+        </h3>
 
-      {/* Timer display (only for time tracking) */}
-      {flame.tracking_type === 'time' && targetSeconds > 0 && (
-        <div className="mt-2">
+        {/* Timer display */}
+        {flame.tracking_type === 'time' && targetSeconds > 0 && (
           <TimerDisplay
             elapsedSeconds={elapsedSeconds}
             targetSeconds={targetSeconds}
             state={state}
             color={colors.light}
           />
-        </div>
-      )}
+        )}
 
-      {/* Progress bar (only for time tracking) */}
-      {flame.tracking_type === 'time' && targetSeconds > 0 && (
-        <div className="mt-4 w-full">
+        {/* Progress bar */}
+        {flame.tracking_type === 'time' && targetSeconds > 0 && (
           <ProgressBar progress={progress} state={state} colors={colors} />
-        </div>
-      )}
+        )}
 
-      {/* State hint text */}
-      <div className="mt-2 text-sm text-white/60">
-        {state === 'idle' && t('tapToStart')}
-        {state === 'active' && t('tapToPause')}
-        {state === 'paused' && t('tapToResume')}
-        {state === 'completed' && t('completed')}
+        {/* State hint */}
+        <div className="text-center text-[10px] text-white/50">
+          {state === 'idle' && t('tapToStart')}
+          {state === 'active' && t('tapToPause')}
+          {state === 'paused' && t('tapToResume')}
+          {state === 'completed' && t('completed')}
+        </div>
       </div>
 
       {/* Loading overlay */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
           <div
-            className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
+            className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
             style={{ borderColor: `${colors.medium} transparent` }}
           />
         </div>
