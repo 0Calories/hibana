@@ -8,6 +8,7 @@ import {
   PlusIcon,
   SparklesIcon,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,8 @@ import { CreationDialog, type CreationDialogMode } from './CreationDialog';
 export function CreateButton() {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<CreationDialogMode>('task');
+  const t = useTranslations('dashboard');
+  const tModes = useTranslations('dashboard.modes');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -37,19 +40,19 @@ export function CreateButton() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="m-4 md:m-0 md:mb-2">
-          <DropdownMenuLabel>Create new</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('createNew')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
           <DialogTrigger asChild>
             <DropdownMenuItem onClick={() => setMode('flame')}>
-              <FlameIcon /> Flame
+              <FlameIcon /> {tModes('flame')}
             </DropdownMenuItem>
           </DialogTrigger>
 
           <DialogTrigger asChild disabled>
             <DropdownMenuItem onClick={() => setMode('habit')}>
               <SparklesIcon />
-              Habit
+              {tModes('habit')}
             </DropdownMenuItem>
           </DialogTrigger>
 
@@ -57,13 +60,13 @@ export function CreateButton() {
 
           <DialogTrigger asChild>
             <DropdownMenuItem onClick={() => setMode('task')}>
-              <ListTodoIcon /> Task
+              <ListTodoIcon /> {tModes('task')}
             </DropdownMenuItem>
           </DialogTrigger>
 
           <DialogTrigger asChild>
             <DropdownMenuItem onClick={() => setMode('note')}>
-              <NotebookPenIcon /> Note
+              <NotebookPenIcon /> {tModes('note')}
             </DropdownMenuItem>
           </DialogTrigger>
 
@@ -71,7 +74,7 @@ export function CreateButton() {
 
           <DialogTrigger asChild disabled>
             <DropdownMenuItem onClick={() => setMode('schedule')}>
-              <CalendarCheckIcon /> Schedule
+              <CalendarCheckIcon /> {tModes('schedule')}
             </DropdownMenuItem>
           </DialogTrigger>
         </DropdownMenuContent>

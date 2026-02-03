@@ -1,4 +1,103 @@
 {
+  "common": {
+    "save": "Save",
+    "email": "Email",
+    "password": "Password",
+    "google": "Google",
+    "discord": "Discord",
+    "orContinueWith": "Or continue with",
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "unexpectedError": "An unexpected error occurred"
+  },
+  "validation": {
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Please enter your password",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordMaxLength": "Password cannot be longer than 32 characters",
+    "passwordUppercase": "Must contain at least one uppercase letter",
+    "passwordLowercase": "Must contain at least one lowercase letter",
+    "passwordNumber": "Must contain at least one number",
+    "passwordSpecialChar": "Must contain at least one special character",
+    "passwordsNoMatch": "Passwords don't match",
+    "titleRequired": "Title must not be empty"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back!",
+      "description": "Enter your credentials to log in",
+      "submit": "Log In",
+      "loading": "Logging in...",
+      "success": "Welcome back!",
+      "error": "Login failed: {error}",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create an account",
+      "description": "Enter your information below to get started",
+      "confirmPassword": "Confirm password",
+      "submit": "Create Account",
+      "loading": "Signing up...",
+      "success": "Welcome to Hibana!",
+      "error": "Signup failed: {error}",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Login"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "flames": "Flames",
+    "habits": "Habits",
+    "tasks": "Tasks",
+    "signUp": "Sign Up",
+    "logIn": "Log In"
+  },
+  "dashboard": {
+    "chatPlaceholder": "Ask Ember to do something ...",
+    "emberAlt": "Ember",
+    "createNew": "Create new",
+    "creation": {
+      "titlePlaceholder": "Title",
+      "detailsPlaceholder": "Add optional details ...",
+      "loading": "Creating {mode} ...",
+      "success": "{mode} created successfully!",
+      "error": "Failed to create {mode}: {error}",
+      "defaultTitle": "New {mode}"
+    },
+    "modes": {
+      "flame": "Flame",
+      "habit": "Habit",
+      "task": "Task",
+      "note": "Note",
+      "schedule": "Schedule"
+    }
+  },
+  "flames": {
+    "pageTitle": "Your Flames",
+    "loading": "Loading ...",
+    "create": {
+      "namePlaceholder": "New Flame",
+      "trackingType": "Tracking Type",
+      "trackingTime": "Time",
+      "trackingRepetitions": "Repetitions",
+      "fuelBudget": "Fuel Budget",
+      "targetCount": "Target Count",
+      "unitMinutes": "min",
+      "unitTimes": "times",
+      "daily": "Daily",
+      "loading": "Creating flame...",
+      "success": "Flame created!"
+    }
+  },
+  "pages": {
+    "tasks": "Tasks",
+    "habits": "Habits",
+    "schedule": "Schedule"
+  },
+  "metadata": {
+    "title": "Hibana",
+    "description": "Ignite your good habits and extinguish the bad"
+  },
   "MarketingPage": {
     "under construction": "🚧 Under Construction 🚧"
   }

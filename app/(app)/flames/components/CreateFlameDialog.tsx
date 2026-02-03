@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FlameIcon, FlameKindlingIcon, HourglassIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ColorPickerGrid } from '@/app/(app)/flames/components/ColorPickerGrid';
@@ -45,6 +46,9 @@ export function CreateFlameDialog({
   open,
   onOpenChange,
 }: CreateFlameDialogProps) {
+  const t = useTranslations('flames.create');
+  const tCommon = useTranslations('common');
+
   const {
     control,
     handleSubmit,
@@ -66,7 +70,7 @@ export function CreateFlameDialog({
   const trackingType = watch('tracking_type');
 
   const onSubmit = async (data: CreateFlameFormData) => {
-    const toastId = toast.loading('Creating flame...', {
+    const toastId = toast.loading(t('loading'), {
       position: 'top-center',
     });
 
@@ -82,7 +86,7 @@ export function CreateFlameDialog({
     });
 
     if (result.success) {
-      toast.success('Flame created!', { id: toastId, position: 'top-center' });
+      toast.success(t('success'), { id: toastId, position: 'top-center' });
       reset();
       onOpenChange(false);
     } else {
@@ -146,7 +150,7 @@ export function CreateFlameDialog({
                         {...field}
                         id={field.name}
                         aria-invalid={fieldState.invalid}
-                        placeholder="New Flame"
+                        placeholder={t('namePlaceholder')}
                       />
                     </Field>
                   )}
@@ -166,10 +170,10 @@ export function CreateFlameDialog({
                 <Field orientation="horizontal" className="justify-between">
                   <div className="flex flex-col gap-1">
                     <FieldLabel htmlFor="tracking_type">
-                      Tracking Type
+                      {t('trackingType')}
                     </FieldLabel>
                     <FieldDescription>
-                      {field.value === 'time' ? 'Time' : 'Repetitions'}
+                      {field.value === 'time' ? t('trackingTime') : t('trackingRepetitions')}
                     </FieldDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -209,7 +213,7 @@ export function CreateFlameDialog({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="time_budget_minutes">
-                      Fuel Budget
+                      {t('fuelBudget')}
                     </FieldLabel>
                     <InputGroup>
                       <InputGroupInput
@@ -226,7 +230,7 @@ export function CreateFlameDialog({
                         }
                       />
                       <InputGroupAddon align="inline-end">
-                        <InputGroupText>min</InputGroupText>
+                        <InputGroupText>{t('unitMinutes')}</InputGroupText>
                       </InputGroupAddon>
                     </InputGroup>
                   </Field>
@@ -238,7 +242,7 @@ export function CreateFlameDialog({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="count_target">Target Count</FieldLabel>
+                    <FieldLabel htmlFor="count_target">{t('targetCount')}</FieldLabel>
                     <InputGroup>
                       <InputGroupInput
                         {...field}
@@ -255,7 +259,7 @@ export function CreateFlameDialog({
                         }
                       />
                       <InputGroupAddon align="inline-end">
-                        <InputGroupText>times</InputGroupText>
+                        <InputGroupText>{t('unitTimes')}</InputGroupText>
                       </InputGroupAddon>
                     </InputGroup>
                   </Field>
@@ -270,7 +274,7 @@ export function CreateFlameDialog({
               render={({ field }) => (
                 <Field orientation="horizontal" className="justify-self-end">
                   <div className="flex flex-col gap-1">
-                    <FieldLabel htmlFor="is_daily">Daily</FieldLabel>
+                    <FieldLabel htmlFor="is_daily">{t('daily')}</FieldLabel>
                   </div>
                   <Checkbox
                     id="is_daily"
@@ -286,7 +290,7 @@ export function CreateFlameDialog({
 
           <div className="flex gap-2 justify-end pt-2">
             <Button type="submit" disabled={isSubmitting}>
-              Save
+              {tCommon('save')}
             </Button>
           </div>
         </form>
