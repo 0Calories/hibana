@@ -89,10 +89,11 @@
       "success": "Flame created!"
     },
     "card": {
-      "tapToStart": "Tap to start",
-      "tapToPause": "Tap to pause",
-      "tapToResume": "Tap to resume",
-      "completed": "Completed!"
+      "ready": "Ready",
+      "burning": "Burning...",
+      "resting": "Resting",
+      "tended": "Tended",
+      "blocked": "Waiting..."
     }
   },
   "pages": {

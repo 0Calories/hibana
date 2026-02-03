@@ -21,7 +21,6 @@ export function FlamesList({ flames, initialSessions, date }: FlamesListProps) {
     }
   }, [date]);
 
-  // Refresh sessions when date changes
   useEffect(() => {
     refreshSessions();
   }, [refreshSessions]);
@@ -29,6 +28,10 @@ export function FlamesList({ flames, initialSessions, date }: FlamesListProps) {
   const getSessionForFlame = (flameId: string): FlameSession | null => {
     return sessions.find((s) => s.flame_id === flameId) ?? null;
   };
+
+  // Find which flame is currently active (has a session with started_at but no ended_at)
+  const activeFlameId =
+    sessions.find((s) => s.started_at && !s.ended_at)?.flame_id ?? null;
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -39,6 +42,7 @@ export function FlamesList({ flames, initialSessions, date }: FlamesListProps) {
           session={getSessionForFlame(flame.id)}
           date={date}
           onSessionUpdate={refreshSessions}
+          isBlocked={activeFlameId !== null && activeFlameId !== flame.id}
         />
       ))}
     </div>

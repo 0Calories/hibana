@@ -16,13 +16,18 @@ interface FlameCardProps {
   session: FlameSession | null;
   date: string;
   onSessionUpdate?: () => void;
+  isBlocked?: boolean;
 }
+
+// Placeholder until level system is implemented
+const LEVEL_INFO = { level: 1, name: 'Ember' };
 
 export function FlameCard({
   flame,
   session,
   date,
   onSessionUpdate,
+  isBlocked = false,
 }: FlameCardProps) {
   const t = useTranslations('flames.card');
   const shouldReduceMotion = useReducedMotion();
@@ -38,18 +43,34 @@ export function FlameCard({
 
   const isActive = state === 'active';
   const isCompleted = state === 'completed';
+  const isDisabled = isLoading || isCompleted || isBlocked;
 
   const getAriaLabel = () => {
     const baseName = flame.name;
+    if (isBlocked) return `${baseName}. ${t('blocked')}`;
     switch (state) {
       case 'idle':
-        return `${baseName}. ${t('tapToStart')}`;
+        return `${baseName}. ${t('ready')}`;
       case 'active':
-        return `${baseName}. ${t('tapToPause')}`;
+        return `${baseName}. ${t('burning')}`;
       case 'paused':
-        return `${baseName}. ${t('tapToResume')}`;
+        return `${baseName}. ${t('resting')}`;
       case 'completed':
-        return `${baseName}. ${t('completed')}`;
+        return `${baseName}. ${t('tended')}`;
+    }
+  };
+
+  const getStateText = () => {
+    if (isBlocked) return t('blocked');
+    switch (state) {
+      case 'idle':
+        return t('ready');
+      case 'active':
+        return t('burning');
+      case 'paused':
+        return t('resting');
+      case 'completed':
+        return t('tended');
     }
   };
 
@@ -77,32 +98,46 @@ export function FlameCard({
     <motion.button
       type="button"
       onClick={toggle}
-      disabled={isLoading || isCompleted}
+      disabled={isDisabled}
       aria-label={getAriaLabel()}
       className={cn(
         'relative flex w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950 text-white transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         isCompleted && 'cursor-default opacity-60',
+        isBlocked && 'cursor-default opacity-40',
         isLoading && 'cursor-wait',
       )}
       style={borderGlowStyle}
       initial="rest"
-      whileTap={isCompleted ? 'rest' : 'pressed'}
+      whileTap={isDisabled ? 'rest' : 'pressed'}
       variants={cardVariants}
       transition={cardTransition}
     >
-      {/* Flame visual area */}
-      <div className="relative flex h-28 items-center justify-center sm:h-36 md:h-44">
-        <ParticleEmbers state={state} color={colors.light} />
-        <GeometricFlame state={state} colors={colors} />
-      </div>
-
-      {/* Info footer */}
-      <div className="flex flex-col gap-1 bg-black/30 px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
-        {/* Flame name - prominent */}
+      {/* Header - Name */}
+      <div className="px-2 pt-2 sm:px-3 sm:pt-3">
         <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
           {flame.name}
         </h3>
+      </div>
+
+      {/* Flame visual area */}
+      <div className="relative flex h-24 items-center justify-center sm:h-32 md:h-40">
+        <ParticleEmbers
+          state={isBlocked ? 'idle' : state}
+          color={colors.light}
+        />
+        <GeometricFlame state={isBlocked ? 'idle' : state} colors={colors} />
+      </div>
+
+      {/* Footer - Level, Timer, Progress, State */}
+      <div className="flex flex-col gap-1 bg-black/30 px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
+        {/* Level info */}
+        <div
+          className="text-center text-[10px] font-medium sm:text-xs"
+          style={{ color: colors.medium }}
+        >
+          Lv. {LEVEL_INFO.level} · {LEVEL_INFO.name}
+        </div>
 
         {/* Timer display */}
         {flame.tracking_type === 'time' && targetSeconds > 0 && (
@@ -119,12 +154,9 @@ export function FlameCard({
           <ProgressBar progress={progress} state={state} colors={colors} />
         )}
 
-        {/* State hint */}
+        {/* State text */}
         <div className="text-center text-[10px] text-white/50 sm:text-xs">
-          {state === 'idle' && t('tapToStart')}
-          {state === 'active' && t('tapToPause')}
-          {state === 'paused' && t('tapToResume')}
-          {state === 'completed' && t('completed')}
+          {getStateText()}
         </div>
       </div>
 
