@@ -122,7 +122,7 @@ export function FlameCard({
       </div>
 
       {/* Flame visual area */}
-      <div className="relative flex h-24 items-center justify-center sm:h-32 md:h-40">
+      <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
         <ParticleEmbers
           state={isBlocked ? 'idle' : state}
           color={colors.light}
