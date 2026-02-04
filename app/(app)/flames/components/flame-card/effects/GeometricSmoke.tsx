@@ -7,6 +7,7 @@ import type { FlameState } from '../../hooks/useFlameTimer';
 interface GeometricSmokeProps {
   state: FlameState;
   color: string;
+  level: number;
 }
 
 interface SmokeParticle {
@@ -17,87 +18,123 @@ interface SmokeParticle {
   duration: number;
   rotation: number;
   drift: number;
+  isGrey: boolean;
 }
 
-function generateParticles(count: number, seed: number): SmokeParticle[] {
+// Grey smoke colors for variety
+const GREY_COLORS = ['#6b7280', '#9ca3af', '#4b5563', '#d1d5db'];
+
+function generateParticles(
+  count: number,
+  seed: number,
+  baseSize: number,
+): SmokeParticle[] {
   const particles: SmokeParticle[] = [];
   for (let i = 0; i < count; i++) {
     const hash = (seed * (i + 1) * 9973) % 10000;
+    const sizeVariation = (hash % 60) / 100; // 0-0.6 variation
     particles.push({
       id: i,
       x: 30 + (hash % 40), // 30-70% horizontal position
-      size: 3 + (hash % 5), // 3-7px
+      size: baseSize * (0.7 + sizeVariation), // Size varies around base
       delay: (hash % 3000) / 1000, // 0-3s delay
       duration: 2.5 + (hash % 2000) / 1000, // 2.5-4.5s duration
       rotation: (hash % 90) - 45, // -45 to 45 degrees
       drift: (hash % 30) - 15, // -15 to 15px horizontal drift
+      isGrey: i % 3 === 0, // Every 3rd particle is grey
     });
   }
   return particles;
 }
 
-export function GeometricSmoke({ state, color }: GeometricSmokeProps) {
+// Get particle size based on flame level (bigger flames = bigger smoke)
+function getBaseSizeForLevel(level: number): number {
+  // Level 1-2: small (3-4px), Level 3-4: medium (5-6px), Level 5-6: large (7-9px)
+  const sizes: Record<number, number> = {
+    1: 3,
+    2: 4,
+    3: 5,
+    4: 6,
+    5: 7,
+    6: 9,
+  };
+  return sizes[level] ?? 5;
+}
+
+export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
   const shouldReduceMotion = useReducedMotion();
+
+  // Stars and supernovas don't have smoke
+  const isCelestial = level >= 7;
 
   const isActive = state === 'active';
   const isUntended = state === 'untended';
-  const showSmoke = isActive || isUntended;
+  const showSmoke = (isActive || isUntended) && !isCelestial;
+
+  const baseSize = getBaseSizeForLevel(level);
 
   // Generate different particle counts based on state
   const particles = useMemo(() => {
+    if (isCelestial) return [];
     if (isActive) {
-      return generateParticles(10, 42); // More particles when active
+      return generateParticles(12, 42, baseSize); // More particles when active
     }
     if (isUntended) {
-      return generateParticles(4, 42); // Fewer particles when idle
+      return generateParticles(5, 42, baseSize); // Fewer particles when idle
     }
     return [];
-  }, [isActive, isUntended]);
+  }, [isActive, isUntended, isCelestial, baseSize]);
 
   if (shouldReduceMotion || !showSmoke) {
     return null;
   }
 
-  const baseOpacity = isActive ? 0.4 : 0.2;
+  const baseOpacity = isActive ? 0.45 : 0.25;
   const speedMultiplier = isActive ? 1 : 1.8; // Slower when idle
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <AnimatePresence>
-        {particles.map((particle) => (
-          <motion.div
-            key={`smoke-${particle.id}-${state}`}
-            className="absolute"
-            style={{
-              left: `${particle.x}%`,
-              bottom: '35%',
-              width: particle.size,
-              height: particle.size,
-              backgroundColor: color,
-              opacity: baseOpacity,
-            }}
-            initial={{
-              y: 0,
-              x: 0,
-              opacity: 0,
-              rotate: 0,
-              scale: 0.5,
-            }}
-            animate={{
-              y: [-10, -80, -140],
-              x: [0, particle.drift * 0.5, particle.drift],
-              opacity: [0, baseOpacity, baseOpacity * 0.6, 0],
-              rotate: [0, particle.rotation * 0.5, particle.rotation],
-              scale: [0.5, 1, 1.3, 0.8],
-            }}
-            transition={{
-              duration: particle.duration * speedMultiplier,
-              delay: particle.delay,
-              repeat: Infinity,
-              ease: 'easeOut',
-            }}
-          />
-        ))}
+        {particles.map((particle) => {
+          const particleColor = particle.isGrey
+            ? GREY_COLORS[particle.id % GREY_COLORS.length]
+            : color;
+
+          return (
+            <motion.div
+              key={`smoke-${particle.id}-${state}`}
+              className="absolute"
+              style={{
+                left: `${particle.x}%`,
+                bottom: '35%',
+                width: particle.size,
+                height: particle.size,
+                backgroundColor: particleColor,
+                opacity: baseOpacity,
+              }}
+              initial={{
+                y: 0,
+                x: 0,
+                opacity: 0,
+                rotate: 0,
+                scale: 0.5,
+              }}
+              animate={{
+                y: [-10, -80, -140],
+                x: [0, particle.drift * 0.5, particle.drift],
+                opacity: [0, baseOpacity, baseOpacity * 0.6, 0],
+                rotate: [0, particle.rotation * 0.5, particle.rotation],
+                scale: [0.5, 1, 1.3, 0.8],
+              }}
+              transition={{
+                duration: particle.duration * speedMultiplier,
+                delay: particle.delay,
+                repeat: Infinity,
+                ease: 'easeOut',
+              }}
+            />
+          );
+        })}
       </AnimatePresence>
     </div>
   );

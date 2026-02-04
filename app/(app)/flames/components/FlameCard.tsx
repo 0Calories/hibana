@@ -127,6 +127,7 @@ export function FlameCard({
         <GeometricSmoke
           state={isBlocked ? 'untended' : state}
           color={colors.medium}
+          level={level}
         />
         <ParticleEmbers
           state={isBlocked ? 'untended' : state}

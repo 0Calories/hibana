@@ -22,7 +22,7 @@ interface ShapeColors {
 const stateVariants = {
   untended: {
     scale: 0.9,
-    opacity: 0.88,
+    opacity: 0.95,
     y: 0,
   },
   active: {
@@ -58,6 +58,26 @@ const flickerVariants = {
   completed: {
     scaleY: 1,
     scaleX: 1,
+  },
+};
+
+// Celestial bodies (Star, Supernova) radiate instead of flicker
+const radiateVariants = {
+  untended: {
+    scale: [1, 1.02, 1],
+    opacity: [0.95, 1, 0.95],
+  },
+  active: {
+    scale: [1, 1.06, 1.03, 1.06, 1],
+    opacity: [1, 1, 0.95, 1, 1],
+  },
+  paused: {
+    scale: [1, 1.01, 1],
+    opacity: [0.5, 0.52, 0.5],
+  },
+  completed: {
+    scale: 1,
+    opacity: 0,
   },
 };
 
@@ -430,6 +450,9 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
   const clampedLevel = Math.max(1, Math.min(8, level));
   const { Base, Flame } = FLAME_SHAPES[clampedLevel];
 
+  // Celestial bodies (Star, Supernova) use radiate animation
+  const isCelestial = clampedLevel >= 7;
+
   const transition = {
     type: 'spring' as const,
     stiffness: 200,
@@ -438,6 +461,13 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
 
   const flickerTransition = {
     duration: state === 'active' ? 0.8 : 2,
+    repeat: Infinity,
+    ease: 'easeInOut' as const,
+  };
+
+  // Slower, smoother transition for celestial bodies
+  const radiateTransition = {
+    duration: state === 'active' ? 3 : 4,
     repeat: Infinity,
     ease: 'easeInOut' as const,
   };
@@ -471,11 +501,11 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
     >
       {/* Static base - not animated */}
       <Base />
-      {/* Animated flame */}
+      {/* Animated flame/celestial body */}
       <motion.g
-        style={{ originX: '50%', originY: '100%' }}
-        animate={flickerVariants[state]}
-        transition={flickerTransition}
+        style={{ originX: '50%', originY: isCelestial ? '50%' : '100%' }}
+        animate={isCelestial ? radiateVariants[state] : flickerVariants[state]}
+        transition={isCelestial ? radiateTransition : flickerTransition}
       >
         <Flame colors={colors} />
       </motion.g>
