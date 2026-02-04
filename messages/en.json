@@ -87,7 +87,15 @@
       "daily": "Daily",
       "loading": "Creating flame...",
       "success": "Flame created!"
-    }
+    },
+    "card": {
+      "ready": "Ready",
+      "burning": "Burning ...",
+      "resting": "Resting",
+      "tended": "Tended",
+      "blocked": "Idle"
+    },
+    "empty": "No flames yet. Create one to get started!"
   },
   "pages": {
     "tasks": "Tasks",

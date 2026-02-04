@@ -1,26 +1,38 @@
 import { getTranslations } from 'next-intl/server';
-import { Card, CardHeader } from '@/components/ui/card';
-import { createClient } from '@/utils/supabase/server';
+import { FlamesList } from './components/FlamesList';
+import { getFlamesForDay } from './flame-actions';
+import { getAllSessionsForDate } from './session-actions';
+import { getTodayDateString } from './utils/utils';
 
 export default async function FlamesPage() {
   const t = await getTranslations('flames');
-  const supabase = await createClient();
-  const result = await supabase.from('flames').select();
+  const today = getTodayDateString();
 
-  if (!result) {
-    return t('loading');
+  const [flamesResult, sessionsResult] = await Promise.all([
+    getFlamesForDay(today),
+    getAllSessionsForDate(today),
+  ]);
+
+  if (!flamesResult.data) {
+    return (
+      <div className="size-full p-4 pb-24">
+        <h1 className="mb-6 text-2xl font-bold">{t('pageTitle')}</h1>
+        <p>{t('loading')}</p>
+      </div>
+    );
   }
 
-  const flames = result.data;
+  const flames = flamesResult.data;
+  const sessions = sessionsResult.success ? (sessionsResult.data ?? []) : [];
 
   return (
     <div className="size-full p-4 pb-24">
-      {t('pageTitle')}
-      {flames?.map((flame) => (
-        <Card key={flame.id}>
-          <CardHeader>{flame.name}</CardHeader>
-        </Card>
-      ))}
+      <h1 className="mb-6 text-2xl font-bold">{t('pageTitle')}</h1>
+      {flames.length === 0 ? (
+        <p className="text-muted-foreground">{t('empty')}</p>
+      ) : (
+        <FlamesList flames={flames} initialSessions={sessions} date={today} />
+      )}
     </div>
   );
 }

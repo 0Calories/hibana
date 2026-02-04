@@ -155,6 +155,22 @@ export async function getFlamesForDay(date: string) {
   return { success: true, data: combinedResult };
 }
 
+export async function getAllFlames(): ActionResult<Flame[]> {
+  const { supabase, user } = await createClientWithAuth();
+
+  const { data, error } = await supabase
+    .from('flames')
+    .select()
+    .eq('user_id', user.id)
+    .eq('is_archived', false);
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  return { success: true, data };
+}
+
 export async function deleteFlame(flameId: string) {
   const { supabase, user } = await createClientWithAuth();
 

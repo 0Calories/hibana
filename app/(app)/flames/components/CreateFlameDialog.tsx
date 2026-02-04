@@ -173,7 +173,9 @@ export function CreateFlameDialog({
                       {t('trackingType')}
                     </FieldLabel>
                     <FieldDescription>
-                      {field.value === 'time' ? t('trackingTime') : t('trackingRepetitions')}
+                      {field.value === 'time'
+                        ? t('trackingTime')
+                        : t('trackingRepetitions')}
                     </FieldDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -242,7 +244,9 @@ export function CreateFlameDialog({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="count_target">{t('targetCount')}</FieldLabel>
+                    <FieldLabel htmlFor="count_target">
+                      {t('targetCount')}
+                    </FieldLabel>
                     <InputGroup>
                       <InputGroupInput
                         {...field}
