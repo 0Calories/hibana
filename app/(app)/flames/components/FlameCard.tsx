@@ -132,11 +132,17 @@ export function FlameCard({
         variants={cardVariants}
         transition={cardTransition}
       >
-        {/* Header - Name */}
+        {/* Header - Name and Level */}
         <div className="px-2 pt-2 sm:px-3 sm:pt-3">
           <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
             {flame.name}
           </h3>
+          <div
+            className="text-center text-[10px] font-medium sm:text-xs"
+            style={{ color: levelInfo.color }}
+          >
+            Lv. {levelInfo.level} · {levelInfo.name}
+          </div>
         </div>
 
         {/* Flame visual area */}
@@ -152,16 +158,8 @@ export function FlameCard({
           />
         </div>
 
-        {/* Footer - Level, Timer, Progress, State */}
+        {/* Footer - Timer, Progress, State */}
         <div className="flex flex-col gap-1 bg-slate-200/70 px-2 py-2 dark:bg-black/30 sm:gap-1.5 sm:px-3 sm:py-3">
-          {/* Level info */}
-          <div
-            className="text-center text-[10px] font-medium sm:text-xs"
-            style={{ color: levelInfo.color }}
-          >
-            Lv. {levelInfo.level} · {levelInfo.name}
-          </div>
-
           {/* Timer display */}
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
             <TimerDisplay
