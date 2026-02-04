@@ -103,7 +103,7 @@ export function FlameCard({
       aria-label={getAriaLabel()}
       className={cn(
         'relative flex w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-linear-to-b from-slate-900 to-slate-950 text-white transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
         isCompleted && 'cursor-default opacity-60',
         isBlocked && 'cursor-default opacity-40',
         isLoading && 'cursor-wait',
