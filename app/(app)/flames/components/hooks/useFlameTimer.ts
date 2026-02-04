@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
-import { setFlameCompletion } from '../../flame-actions';
 import { endSession, startSession } from '../../session-actions';
 
-export type FlameState = 'idle' | 'active' | 'paused' | 'completed';
+export type FlameState = 'untended' | 'active' | 'paused' | 'completed';
 
 interface UseFlameTimerOptions {
   flame: Flame;
@@ -29,24 +28,21 @@ export function useFlameTimer({
   date,
   onSessionUpdate,
 }: UseFlameTimerOptions): UseFlameTimerReturn {
+  const [state, setState] = useState<FlameState>('untended');
   const [isLoading, setIsLoading] = useState(false);
   const [localElapsed, setLocalElapsed] = useState(0);
-  const [state, setState] = useState<FlameState>('idle');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const completionHandledRef = useRef(false);
 
   const targetSeconds = (flame.time_budget_minutes ?? 0) * 60;
 
-  // Derive state from session data
   const deriveState = useCallback((): FlameState => {
-    if (!session) return 'idle';
+    if (!session) return 'untended';
     if (session.is_completed) return 'completed';
     if (session.started_at && !session.ended_at) return 'active';
     if (session.ended_at) return 'paused';
-    return 'idle';
+    return 'untended';
   }, [session]);
 
-  // Calculate elapsed time from session
   const calculateElapsed = useCallback((): number => {
     if (!session) return 0;
 
@@ -67,25 +63,7 @@ export function useFlameTimer({
   useEffect(() => {
     setState(deriveState());
     setLocalElapsed(calculateElapsed());
-    completionHandledRef.current = false;
   }, [deriveState, calculateElapsed]);
-
-  // Handle completion
-  const handleCompletion = useCallback(async () => {
-    if (completionHandledRef.current) return;
-    completionHandledRef.current = true;
-
-    setState('completed');
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    // End the session and mark as completed
-    await endSession(flame.id, date);
-    await setFlameCompletion(flame.id, date, true);
-    onSessionUpdate?.();
-  }, [flame.id, date, onSessionUpdate]);
 
   // Timer interval for active state
   useEffect(() => {
@@ -93,9 +71,9 @@ export function useFlameTimer({
       intervalRef.current = setInterval(() => {
         setLocalElapsed((prev) => {
           const newElapsed = prev + 1;
-          // Check for completion
+          // Indicates overburn (going above budgeted time)
           if (targetSeconds > 0 && newElapsed >= targetSeconds) {
-            handleCompletion();
+            // TODO: Add overburn warning state handling here
           }
           return newElapsed;
         });
@@ -113,28 +91,28 @@ export function useFlameTimer({
         intervalRef.current = null;
       }
     };
-  }, [state, targetSeconds, handleCompletion]);
+  }, [state, targetSeconds]);
 
   const toggle = async () => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       switch (state) {
-        case 'idle':
-          // Start a new session
+        case 'untended':
           await startSession(flame.id, date);
           setState('active');
           break;
 
         case 'active':
-          // Pause the session
           await endSession(flame.id, date);
           setState('paused');
           break;
 
         case 'paused':
-          // Resume the session
           await startSession(flame.id, date);
           setState('active');
           break;
