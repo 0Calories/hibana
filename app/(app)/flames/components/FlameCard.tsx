@@ -8,7 +8,7 @@ import { getFlameColors } from '../utils/colors';
 import { getFlameLevel } from '../utils/levels';
 import { GeometricFlame } from './flame-card/effects/GeometricFlame';
 import { GeometricSmoke } from './flame-card/effects/GeometricSmoke';
-import { ParticleEmbers } from './flame-card/ParticleEmbers';
+import { ParticleEmbers } from './flame-card/effects/ParticleEmbers';
 import { ProgressBar } from './flame-card/ProgressBar';
 import { TimerDisplay } from './flame-card/TimerDisplay';
 import { useFlameTimer } from './hooks/useFlameTimer';

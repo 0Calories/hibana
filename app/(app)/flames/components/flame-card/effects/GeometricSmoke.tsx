@@ -69,7 +69,8 @@ export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
 
   const isActive = state === 'active';
   const isUntended = state === 'untended';
-  const showSmoke = (isActive || isUntended) && !isCelestial;
+  const isPaused = state === 'paused';
+  const showSmoke = (isActive || isUntended || isPaused) && !isCelestial;
 
   const baseSize = getBaseSizeForLevel(level);
 
@@ -79,21 +80,21 @@ export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
     if (isActive) {
       return generateParticles(12, 42, baseSize); // More particles when active
     }
-    if (isUntended) {
-      return generateParticles(5, 42, baseSize); // Fewer particles when idle
+    if (isUntended || isPaused) {
+      return generateParticles(5, 42, baseSize); // Fewer particles when idle/paused
     }
     return [];
-  }, [isActive, isUntended, isCelestial, baseSize]);
+  }, [isActive, isUntended, isPaused, isCelestial, baseSize]);
 
   if (shouldReduceMotion || !showSmoke) {
     return null;
   }
 
   const baseOpacity = isActive ? 0.85 : 0.55;
-  const speedMultiplier = isActive ? 1 : 1.8; // Slower when idle
+  const speedMultiplier = isActive ? 1 : 1.8; // Slower when idle/paused
 
   return (
-    <div className="pointer-events-none absolute inset-0">
+    <div className="pointer-events-none absolute inset-0 scale-75 md:scale-100">
       <AnimatePresence>
         {particles.map((particle) => {
           const particleColor = particle.isGrey

@@ -64,20 +64,20 @@ const flickerVariants = {
 // Celestial bodies (Star, Supernova) radiate instead of flicker
 const radiateVariants = {
   untended: {
-    scale: [1, 1.02, 1],
-    opacity: [0.95, 1, 0.95],
+    scale: [1, 1.08, 1.03, 1.06, 1],
+    rotate: [0, 3, -2, 1, 0],
   },
   active: {
-    scale: [1, 1.06, 1.03, 1.06, 1],
-    opacity: [1, 1, 0.95, 1, 1],
+    scale: [1, 1.15, 1.08, 1.12, 1.05, 1.1, 1],
+    rotate: [0, 5, -3, 4, -2, 3, 0],
   },
   paused: {
-    scale: [1, 1.01, 1],
-    opacity: [0.5, 0.52, 0.5],
+    scale: [1, 1.05, 1.02, 1.04, 1],
+    rotate: [0, 2, -1, 1, 0],
   },
   completed: {
     scale: 1,
-    opacity: 0,
+    rotate: 0,
   },
 };
 
@@ -465,9 +465,9 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
     ease: 'easeInOut' as const,
   };
 
-  // Slower, smoother transition for celestial bodies
+  // Pulsing transition for celestial bodies
   const radiateTransition = {
-    duration: state === 'active' ? 3 : 4,
+    duration: state === 'active' ? 2 : 3,
     repeat: Infinity,
     ease: 'easeInOut' as const,
   };
