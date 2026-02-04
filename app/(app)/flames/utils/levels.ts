@@ -5,7 +5,7 @@ export interface FlameLevel {
 }
 
 export const FLAME_LEVELS: FlameLevel[] = [
-  { level: 1, name: 'Ember', description: 'A tiny spark, just beginning' },
+  { level: 1, name: 'Wisp', description: 'A tiny flame, just beginning' },
   { level: 2, name: 'Candle', description: 'A steady, focused flame' },
   { level: 3, name: 'Torch', description: 'Bold and unwavering' },
   { level: 4, name: 'Bonfire', description: 'Warmth that draws others in' },
