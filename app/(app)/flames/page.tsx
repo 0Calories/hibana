@@ -2,14 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/utils/supabase/server';
 import { FlamesList } from './components/FlamesList';
 import { getAllSessionsForDate } from './session-actions';
-
-function getTodayDateString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+import { getTodayDateString } from './utils/utils';
 
 export default async function FlamesPage() {
   const t = await getTranslations('flames');
@@ -17,7 +10,11 @@ export default async function FlamesPage() {
   const today = getTodayDateString();
 
   const [flamesResult, sessionsResult] = await Promise.all([
-    supabase.from('flames').select().eq('is_archived', false),
+    // TODO: For now, we fetch all Flames. The Dashboard page will have daily flames, this page should eventually be strictly for Flame management
+    supabase
+      .from('flames')
+      .select()
+      .eq('is_archived', false),
     getAllSessionsForDate(today),
   ]);
 
@@ -39,7 +36,7 @@ export default async function FlamesPage() {
       {flames.length === 0 ? (
         <p className="text-muted-foreground">{t('empty')}</p>
       ) : (
-        <FlamesList flames={flames} initialSessions={sessions} date={today} />
+        <FlamesList flames={flames} initialSessions={sessions} />
       )}
     </div>
   );
