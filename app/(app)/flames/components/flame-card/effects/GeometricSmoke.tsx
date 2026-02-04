@@ -93,7 +93,7 @@ export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
   const speedMultiplier = isActive ? 1 : 1.8; // Slower when idle
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0">
       <AnimatePresence>
         {particles.map((particle) => {
           const particleColor = particle.isGrey

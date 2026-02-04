@@ -97,89 +97,100 @@ export function FlameCard({
     : {};
 
   return (
-    <motion.button
-      type="button"
-      onClick={toggle}
-      disabled={isDisabled}
-      aria-label={getAriaLabel()}
-      className={cn(
-        'relative flex w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-linear-to-b from-slate-900 to-slate-950 text-white transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
-        isCompleted && 'cursor-default opacity-60',
-        isBlocked && 'cursor-default opacity-40',
-        isLoading && 'cursor-wait',
-      )}
-      style={borderGlowStyle}
-      initial="rest"
-      whileTap={isDisabled ? 'rest' : 'pressed'}
-      variants={cardVariants}
-      transition={cardTransition}
-    >
-      {/* Header - Name */}
-      <div className="px-2 pt-2 sm:px-3 sm:pt-3">
-        <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
-          {flame.name}
-        </h3>
+    <div className="relative w-full">
+      {/* Smoke overlay - positioned outside button to avoid clipping */}
+      <div className="pointer-events-none absolute inset-0 z-10">
+        <div className="relative h-full w-full">
+          {/* Position smoke to align with flame visual area */}
+          <div className="absolute left-0 right-0 top-[2rem] h-28 sm:top-[2.5rem] sm:h-40 md:h-52">
+            <GeometricSmoke
+              state={isBlocked ? 'untended' : state}
+              color={colors.medium}
+              level={level}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Flame visual area */}
-      <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
-        <GeometricSmoke
-          state={isBlocked ? 'untended' : state}
-          color={colors.medium}
-          level={level}
-        />
-        <ParticleEmbers
-          state={isBlocked ? 'untended' : state}
-          color={colors.light}
-        />
-        <GeometricFlame
-          state={isBlocked ? 'untended' : state}
-          level={level}
-          colors={colors}
-        />
-      </div>
-
-      {/* Footer - Level, Timer, Progress, State */}
-      <div className="flex flex-col gap-1 bg-black/30 px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
-        {/* Level info */}
-        <div
-          className="text-center text-[10px] font-medium sm:text-xs"
-          style={{ color: colors.medium }}
-        >
-          Lv. {levelInfo.level} · {levelInfo.name}
+      <motion.button
+        type="button"
+        onClick={toggle}
+        disabled={isDisabled}
+        aria-label={getAriaLabel()}
+        className={cn(
+          'relative flex w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-linear-to-b from-slate-900 to-slate-950 text-white transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
+          isCompleted && 'cursor-default opacity-60',
+          isBlocked && 'cursor-default opacity-40',
+          isLoading && 'cursor-wait',
+        )}
+        style={borderGlowStyle}
+        initial="rest"
+        whileTap={isDisabled ? 'rest' : 'pressed'}
+        variants={cardVariants}
+        transition={cardTransition}
+      >
+        {/* Header - Name */}
+        <div className="px-2 pt-2 sm:px-3 sm:pt-3">
+          <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
+            {flame.name}
+          </h3>
         </div>
 
-        {/* Timer display */}
-        {flame.tracking_type === 'time' && targetSeconds > 0 && (
-          <TimerDisplay
-            elapsedSeconds={elapsedSeconds}
-            targetSeconds={targetSeconds}
-            state={state}
+        {/* Flame visual area */}
+        <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
+          <ParticleEmbers
+            state={isBlocked ? 'untended' : state}
             color={colors.light}
           />
-        )}
-
-        {/* Progress bar */}
-        {flame.tracking_type === 'time' && targetSeconds > 0 && (
-          <ProgressBar progress={progress} state={state} colors={colors} />
-        )}
-
-        {/* State text */}
-        <div className="text-center text-[10px] text-white/50 sm:text-xs">
-          {getStateText()}
-        </div>
-      </div>
-
-      {/* Loading overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <div
-            className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
-            style={{ borderColor: `${colors.medium} transparent` }}
+          <GeometricFlame
+            state={isBlocked ? 'untended' : state}
+            level={level}
+            colors={colors}
           />
         </div>
-      )}
-    </motion.button>
+
+        {/* Footer - Level, Timer, Progress, State */}
+        <div className="flex flex-col gap-1 bg-black/30 px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
+          {/* Level info */}
+          <div
+            className="text-center text-[10px] font-medium sm:text-xs"
+            style={{ color: colors.medium }}
+          >
+            Lv. {levelInfo.level} · {levelInfo.name}
+          </div>
+
+          {/* Timer display */}
+          {flame.tracking_type === 'time' && targetSeconds > 0 && (
+            <TimerDisplay
+              elapsedSeconds={elapsedSeconds}
+              targetSeconds={targetSeconds}
+              state={state}
+              color={colors.light}
+            />
+          )}
+
+          {/* Progress bar */}
+          {flame.tracking_type === 'time' && targetSeconds > 0 && (
+            <ProgressBar progress={progress} state={state} colors={colors} />
+          )}
+
+          {/* State text */}
+          <div className="text-center text-[10px] text-white/50 sm:text-xs">
+            {getStateText()}
+          </div>
+        </div>
+
+        {/* Loading overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <div
+              className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
+              style={{ borderColor: `${colors.medium} transparent` }}
+            />
+          </div>
+        )}
+      </motion.button>
+    </div>
   );
 }
