@@ -1,9 +1,5 @@
 import type { FlameComponentProps, FlameDefinition } from '../types';
 
-function InfernoBase() {
-  return null;
-}
-
 function InfernoFlame({ colors }: FlameComponentProps) {
   return (
     <>
@@ -63,6 +59,5 @@ function InfernoFlame({ colors }: FlameComponentProps) {
 }
 
 export const Inferno: FlameDefinition = {
-  Base: InfernoBase,
   Flame: InfernoFlame,
 };

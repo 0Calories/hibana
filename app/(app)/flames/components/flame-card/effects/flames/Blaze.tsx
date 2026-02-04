@@ -1,9 +1,5 @@
 import type { FlameComponentProps, FlameDefinition } from '../types';
 
-function BlazeBase() {
-  return null;
-}
-
 function BlazeFlame({ colors }: FlameComponentProps) {
   return (
     <>
@@ -47,6 +43,5 @@ function BlazeFlame({ colors }: FlameComponentProps) {
 }
 
 export const Blaze: FlameDefinition = {
-  Base: BlazeBase,
   Flame: BlazeFlame,
 };

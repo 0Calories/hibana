@@ -1,9 +1,5 @@
 import type { FlameComponentProps, FlameDefinition } from '../types';
 
-function WispBase() {
-  return null;
-}
-
 function WispFlame({ colors }: FlameComponentProps) {
   return (
     <>
@@ -16,6 +12,5 @@ function WispFlame({ colors }: FlameComponentProps) {
 }
 
 export const Wisp: FlameDefinition = {
-  Base: WispBase,
   Flame: WispFlame,
 };

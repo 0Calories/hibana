@@ -1,9 +1,5 @@
 import type { FlameComponentProps, FlameDefinition } from '../types';
 
-function StarBase() {
-  return null;
-}
-
 function StarFlame({ colors }: FlameComponentProps) {
   return (
     <>
@@ -32,7 +28,6 @@ function StarFlame({ colors }: FlameComponentProps) {
 }
 
 export const Star: FlameDefinition = {
-  Base: StarBase,
   Flame: StarFlame,
   isCelestial: true,
 };

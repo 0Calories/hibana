@@ -47,7 +47,6 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
         animate={stateVariants[state]}
         transition={transition}
       >
-        <Base />
         <Flame colors={colors} />
       </motion.svg>
     );
@@ -64,7 +63,7 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
       transition={transition}
     >
       {/* Static base - not animated */}
-      <Base />
+      {Base && <Base />}
       {/* Animated flame/celestial body */}
       <motion.g
         style={{ originX: '50%', originY: isCelestial ? '50%' : '100%' }}

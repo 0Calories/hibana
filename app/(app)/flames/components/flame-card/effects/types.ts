@@ -16,8 +16,8 @@ export interface FlameParticlesProps {
 }
 
 export interface FlameDefinition {
-  Base: React.FC;
   Flame: React.FC<FlameComponentProps>;
+  Base?: React.FC;
   Particles?: React.FC<FlameParticlesProps>;
   /** Whether this flame type uses radiate animation instead of flicker */
   isCelestial?: boolean;

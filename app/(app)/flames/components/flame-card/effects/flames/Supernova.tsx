@@ -1,9 +1,5 @@
 import type { FlameComponentProps, FlameDefinition } from '../types';
 
-function SupernovaBase() {
-  return null;
-}
-
 function SupernovaFlame({ colors }: FlameComponentProps) {
   return (
     <>
@@ -54,7 +50,6 @@ function SupernovaFlame({ colors }: FlameComponentProps) {
 }
 
 export const Supernova: FlameDefinition = {
-  Base: SupernovaBase,
   Flame: SupernovaFlame,
   isCelestial: true,
 };
