@@ -157,7 +157,7 @@ export function FlameCard({
           {/* Level info */}
           <div
             className="text-center text-[10px] font-medium sm:text-xs"
-            style={{ color: colors.medium }}
+            style={{ color: levelInfo.color }}
           >
             Lv. {levelInfo.level} · {levelInfo.name}
           </div>
