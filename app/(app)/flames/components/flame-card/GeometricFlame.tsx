@@ -20,7 +20,7 @@ interface ShapeColors {
 }
 
 const stateVariants = {
-  idle: {
+  untended: {
     scale: 0.9,
     opacity: 0.7,
     y: 0,
@@ -43,7 +43,7 @@ const stateVariants = {
 };
 
 const flickerVariants = {
-  idle: {
+  untended: {
     scaleY: [1, 0.95, 1.02, 0.98, 1],
     scaleX: [1, 1.02, 0.98, 1.01, 1],
   },
