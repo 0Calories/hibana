@@ -78,19 +78,20 @@ export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
   const sizeMultiplier = isActive ? 1.5 : 1;
 
   // Generate different particle counts based on state
+  // Use state directly in deps to ensure re-generation on state change
   const particles = useMemo(() => {
     if (isCelestial) return [];
-    if (isActive) {
+    if (state === 'active') {
       return generateParticles(15, 42, baseSize * sizeMultiplier); // Many large particles when active
     }
-    if (isPaused) {
+    if (state === 'paused') {
       return generateParticles(4, 42, baseSize); // Few particles when paused
     }
-    if (isUntended) {
+    if (state === 'untended') {
       return generateParticles(2, 42, baseSize); // Very few particles when untended
     }
     return [];
-  }, [isActive, isUntended, isPaused, isCelestial, baseSize, sizeMultiplier]);
+  }, [state, isCelestial, baseSize, sizeMultiplier]);
 
   if (shouldReduceMotion || !showSmoke) {
     return null;
@@ -101,7 +102,10 @@ export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
   const speedMultiplier = isActive ? 1 : isPaused ? 2.2 : 3;
 
   return (
-    <div className="pointer-events-none absolute inset-0 scale-75 md:scale-100">
+    <div
+      key={`smoke-${state}`}
+      className="pointer-events-none absolute inset-0 scale-75 md:scale-100"
+    >
       <AnimatePresence>
         {particles.map((particle) => {
           const particleColor = particle.isGrey
@@ -110,7 +114,7 @@ export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
 
           return (
             <motion.div
-              key={`smoke-${particle.id}-${state}`}
+              key={particle.id}
               className="absolute"
               style={{
                 left: `${particle.x}%`,

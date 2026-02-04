@@ -35,18 +35,19 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
   const showEmbers = isActive || isPaused || isUntended;
 
   // Different particle counts and sizes based on state
+  // Use state directly in deps to ensure re-generation on state change
   const particles = useMemo(() => {
-    if (isActive) {
+    if (state === 'active') {
       return generateParticles(8, 1.4); // Many large particles when active
     }
-    if (isPaused) {
+    if (state === 'paused') {
       return generateParticles(3, 1); // Few particles when paused
     }
-    if (isUntended) {
+    if (state === 'untended') {
       return generateParticles(2, 1); // Very few particles when untended
     }
     return [];
-  }, [isActive, isPaused, isUntended]);
+  }, [state]);
 
   if (shouldReduceMotion || !showEmbers) {
     return null;
@@ -58,11 +59,14 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
   const speedMultiplier = isActive ? 1 : isPaused ? 2 : 2.5;
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden scale-75 md:scale-100">
+    <div
+      key={`embers-${state}`}
+      className="pointer-events-none absolute inset-0 scale-75 md:scale-100"
+    >
       <AnimatePresence>
         {particles.map((particle) => (
           <motion.div
-            key={`${particle.id}-${state}`}
+            key={particle.id}
             className="absolute rounded-full"
             style={{
               left: `${particle.x}%`,
