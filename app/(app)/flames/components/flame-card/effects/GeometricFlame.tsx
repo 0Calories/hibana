@@ -15,8 +15,7 @@ interface GeometricFlameProps {
 export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
   const shouldReduceMotion = useReducedMotion();
   const clampedLevel = Math.max(1, Math.min(8, level));
-  const flameDefinition = FLAME_REGISTRY[clampedLevel];
-  const { Base, Flame, isCelestial } = flameDefinition;
+  const { Base, Flame, isCelestial } = FLAME_REGISTRY[clampedLevel];
 
   const transition = {
     type: 'spring' as const,
@@ -47,6 +46,7 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
         animate={stateVariants[state]}
         transition={transition}
       >
+        {Base && <Base />}
         <Flame colors={colors} />
       </motion.svg>
     );
