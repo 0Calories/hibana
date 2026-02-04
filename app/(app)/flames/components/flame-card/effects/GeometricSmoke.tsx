@@ -89,7 +89,7 @@ export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
     return null;
   }
 
-  const baseOpacity = isActive ? 0.45 : 0.25;
+  const baseOpacity = isActive ? 0.85 : 0.55;
   const speedMultiplier = isActive ? 1 : 1.8; // Slower when idle
 
   return (

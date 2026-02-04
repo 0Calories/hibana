@@ -22,23 +22,23 @@ interface ShapeColors {
 const stateVariants = {
   untended: {
     scale: 0.9,
-    opacity: 0.95,
+    opacity: 0.88,
     y: 0,
   },
   active: {
-    scale: 1.15,
+    scale: 1.1,
     opacity: 1,
     y: -4,
   },
   paused: {
     scale: 0.8,
-    opacity: 0.5,
+    opacity: 0.95,
     y: 0,
   },
   completed: {
     scale: 0,
-    opacity: 0,
-    y: -10,
+    opacity: 1,
+    y: 0.9,
   },
 };
 
