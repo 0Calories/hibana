@@ -50,7 +50,7 @@ export function FlameCard({
     const baseName = flame.name;
     if (isBlocked) return `${baseName}. ${t('blocked')}`;
     switch (state) {
-      case 'idle':
+      case 'untended':
         return `${baseName}. ${t('ready')}`;
       case 'active':
         return `${baseName}. ${t('burning')}`;
@@ -64,7 +64,7 @@ export function FlameCard({
   const getStateText = () => {
     if (isBlocked) return t('blocked');
     switch (state) {
-      case 'idle':
+      case 'untended':
         return t('ready');
       case 'active':
         return t('burning');
@@ -124,11 +124,11 @@ export function FlameCard({
       {/* Flame visual area */}
       <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
         <ParticleEmbers
-          state={isBlocked ? 'idle' : state}
+          state={isBlocked ? 'untended' : state}
           color={colors.light}
         />
         <GeometricFlame
-          state={isBlocked ? 'idle' : state}
+          state={isBlocked ? 'untended' : state}
           level={level}
           colors={colors}
         />
