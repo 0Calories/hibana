@@ -20,7 +20,7 @@ export function ProgressBar({ progress, state, colors }: ProgressBarProps) {
   const percentage = Math.round(progress * 100);
 
   return (
-    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/10 sm:h-2">
+    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10 sm:h-2">
       <motion.div
         className="absolute inset-y-0 left-0 rounded-full"
         style={{

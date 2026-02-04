@@ -118,7 +118,9 @@ export function FlameCard({
         disabled={isDisabled}
         aria-label={getAriaLabel()}
         className={cn(
-          'relative flex w-full flex-col overflow-hidden rounded-xl border border-white/10 bg-linear-to-b from-slate-900 to-slate-950 text-white transition-colors',
+          'relative flex w-full flex-col overflow-hidden rounded-xl border transition-colors',
+          'border-slate-200 bg-linear-to-b from-white to-slate-50 text-slate-900',
+          'dark:border-white/10 dark:from-slate-900 dark:to-slate-950 dark:text-white',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
           isCompleted && 'cursor-default opacity-60',
           isBlocked && 'cursor-default opacity-40',
@@ -151,7 +153,7 @@ export function FlameCard({
         </div>
 
         {/* Footer - Level, Timer, Progress, State */}
-        <div className="flex flex-col gap-1 bg-black/30 px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
+        <div className="flex flex-col gap-1 bg-slate-200/70 px-2 py-2 dark:bg-black/30 sm:gap-1.5 sm:px-3 sm:py-3">
           {/* Level info */}
           <div
             className="text-center text-[10px] font-medium sm:text-xs"
@@ -176,14 +178,14 @@ export function FlameCard({
           )}
 
           {/* State text */}
-          <div className="text-center text-[10px] text-white/50 sm:text-xs">
+          <div className="text-center text-[10px] text-slate-500 dark:text-white/50 sm:text-xs">
             {getStateText()}
           </div>
         </div>
 
         {/* Loading overlay */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-black/30">
             <div
               className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
               style={{ borderColor: `${colors.medium} transparent` }}

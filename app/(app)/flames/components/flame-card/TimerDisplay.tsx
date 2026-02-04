@@ -51,12 +51,15 @@ export function TimerDisplay({
     ease: 'easeInOut' as const,
   };
 
+  const textColorClass =
+    state === 'completed'
+      ? '' // Use inline color prop for completed state
+      : 'text-slate-700 dark:text-white/80';
+
   return (
     <motion.div
-      className="text-center font-mono text-[10px] tracking-tight sm:text-xs md:text-sm"
-      style={{
-        color: state === 'completed' ? color : 'rgba(255, 255, 255, 0.8)',
-      }}
+      className={`text-center font-mono text-[10px] tracking-tight sm:text-xs md:text-sm ${textColorClass}`}
+      style={state === 'completed' ? { color } : undefined}
       animate={pulseAnimation}
       transition={pulseTransition}
     >
