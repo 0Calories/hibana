@@ -15,16 +15,25 @@ interface Particle {
   size: number;
   delay: number;
   duration: number;
+  drift: number;
 }
 
+// Deterministic particle generation to avoid hydration mismatch
 function generateParticles(count: number, sizeMultiplier: number): Particle[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: 35 + Math.random() * 30, // 35-65% horizontal position
-    size: (3 + Math.random() * 3) * sizeMultiplier, // 3-6px base, scaled
-    delay: Math.random() * 1.5, // 0-1.5s staggered delay
-    duration: 1.5 + Math.random() * 1, // 1.5-2.5s float duration
-  }));
+  const particles: Particle[] = [];
+  const seed = 42;
+  for (let i = 0; i < count; i++) {
+    const hash = (seed * (i + 1) * 9973) % 10000;
+    particles.push({
+      id: i,
+      x: 35 + (hash % 30), // 35-65% horizontal position
+      size: (3 + (hash % 30) / 10) * sizeMultiplier, // 3-6px base, scaled
+      delay: (hash % 1500) / 1000, // 0-1.5s staggered delay
+      duration: 1.5 + (hash % 1000) / 1000, // 1.5-2.5s float duration
+      drift: (hash % 20) - 10, // -10 to 10px horizontal drift
+    });
+  }
+  return particles;
 }
 
 export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
@@ -79,7 +88,7 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
             animate={{
               opacity: [0, opacityMultiplier, opacityMultiplier, 0],
               y: -80,
-              x: [0, (Math.random() - 0.5) * 20],
+              x: [0, particle.drift],
             }}
             exit={{ opacity: 0 }}
             transition={{

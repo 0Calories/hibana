@@ -102,7 +102,7 @@ export function FlameCard({
       <div className="pointer-events-none absolute inset-0 z-10">
         <div className="relative h-full w-full">
           {/* Position smoke to align with flame visual area */}
-          <div className="absolute left-0 right-0 top-[2rem] h-28 sm:top-[2.5rem] sm:h-40 md:h-52">
+          <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
             <GeometricSmoke
               state={isBlocked ? 'untended' : state}
               color={colors.medium}
