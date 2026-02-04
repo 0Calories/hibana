@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import type { FlameState } from '../hooks/useFlameTimer';
+import type { FlameState } from '../../hooks/useFlameTimer';
 
 interface GeometricFlameProps {
   state: FlameState;
@@ -22,7 +22,7 @@ interface ShapeColors {
 const stateVariants = {
   untended: {
     scale: 0.9,
-    opacity: 0.7,
+    opacity: 0.88,
     y: 0,
   },
   active: {

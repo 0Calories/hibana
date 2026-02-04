@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { getFlameColors } from '../utils/colors';
 import { getFlameLevel } from '../utils/levels';
-import { GeometricFlame } from './flame-card/GeometricFlame';
+import { GeometricFlame } from './flame-card/effects/GeometricFlame';
+import { GeometricSmoke } from './flame-card/effects/GeometricSmoke';
 import { ParticleEmbers } from './flame-card/ParticleEmbers';
 import { ProgressBar } from './flame-card/ProgressBar';
 import { TimerDisplay } from './flame-card/TimerDisplay';
@@ -123,6 +124,10 @@ export function FlameCard({
 
       {/* Flame visual area */}
       <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
+        <GeometricSmoke
+          state={isBlocked ? 'untended' : state}
+          color={colors.medium}
+        />
         <ParticleEmbers
           state={isBlocked ? 'untended' : state}
           color={colors.light}
