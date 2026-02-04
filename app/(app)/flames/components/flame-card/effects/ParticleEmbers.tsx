@@ -17,11 +17,11 @@ interface Particle {
   duration: number;
 }
 
-function generateParticles(count: number): Particle[] {
+function generateParticles(count: number, sizeMultiplier: number): Particle[] {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     x: 35 + Math.random() * 30, // 35-65% horizontal position
-    size: 3 + Math.random() * 3, // 3-6px
+    size: (3 + Math.random() * 3) * sizeMultiplier, // 3-6px base, scaled
     delay: Math.random() * 1.5, // 0-1.5s staggered delay
     duration: 1.5 + Math.random() * 1, // 1.5-2.5s float duration
   }));
@@ -34,16 +34,28 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
   const isUntended = state === 'untended';
   const showEmbers = isActive || isPaused || isUntended;
 
-  // Fewer particles for compact cards
-  const particles = useMemo(() => generateParticles(6), []);
+  // Different particle counts and sizes based on state
+  const particles = useMemo(() => {
+    if (isActive) {
+      return generateParticles(8, 1.4); // Many large particles when active
+    }
+    if (isPaused) {
+      return generateParticles(3, 1); // Few particles when paused
+    }
+    if (isUntended) {
+      return generateParticles(2, 1); // Very few particles when untended
+    }
+    return [];
+  }, [isActive, isPaused, isUntended]);
 
   if (shouldReduceMotion || !showEmbers) {
     return null;
   }
 
   // Adjust intensity based on state
-  const opacityMultiplier = isActive ? 1 : 0.5;
-  const speedMultiplier = isActive ? 1 : 1.5;
+  const opacityMultiplier = isActive ? 1 : 0.4;
+  // Speed: active = normal, paused = slower, untended = very slow
+  const speedMultiplier = isActive ? 1 : isPaused ? 2 : 2.5;
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden scale-75 md:scale-100">

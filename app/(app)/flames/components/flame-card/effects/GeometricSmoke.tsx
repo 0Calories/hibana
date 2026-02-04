@@ -74,24 +74,31 @@ export function GeometricSmoke({ state, color, level }: GeometricSmokeProps) {
 
   const baseSize = getBaseSizeForLevel(level);
 
+  // Size multiplier - larger when actively burning
+  const sizeMultiplier = isActive ? 1.5 : 1;
+
   // Generate different particle counts based on state
   const particles = useMemo(() => {
     if (isCelestial) return [];
     if (isActive) {
-      return generateParticles(12, 42, baseSize); // More particles when active
+      return generateParticles(15, 42, baseSize * sizeMultiplier); // Many large particles when active
     }
-    if (isUntended || isPaused) {
-      return generateParticles(5, 42, baseSize); // Fewer particles when idle/paused
+    if (isPaused) {
+      return generateParticles(4, 42, baseSize); // Few particles when paused
+    }
+    if (isUntended) {
+      return generateParticles(2, 42, baseSize); // Very few particles when untended
     }
     return [];
-  }, [isActive, isUntended, isPaused, isCelestial, baseSize]);
+  }, [isActive, isUntended, isPaused, isCelestial, baseSize, sizeMultiplier]);
 
   if (shouldReduceMotion || !showSmoke) {
     return null;
   }
 
-  const baseOpacity = isActive ? 0.85 : 0.55;
-  const speedMultiplier = isActive ? 1 : 1.8; // Slower when idle/paused
+  const baseOpacity = isActive ? 0.85 : 0.45;
+  // Speed: active = normal, paused = slower, untended = very slow
+  const speedMultiplier = isActive ? 1 : isPaused ? 2.2 : 3;
 
   return (
     <div className="pointer-events-none absolute inset-0 scale-75 md:scale-100">
