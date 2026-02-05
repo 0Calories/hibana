@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Fuel } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface FuelMeterProps {
@@ -28,26 +28,28 @@ function formatTime(totalSeconds: number): string {
 /** Number of faint segments to display inside the bar */
 const SEGMENT_COUNT = 20;
 
-/** Number of spark particles at the bar tip */
-const PARTICLE_COUNT = 6;
-
-interface SparkParticle {
+/** Fuel droplet particles — deterministic to avoid hydration mismatch */
+const DROPLETS: {
   id: string;
   duration: number;
   delay: number;
   xDrift: number;
-  size: number;
-}
-
-function generateParticles(): SparkParticle[] {
-  return Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-    id: `spark-${i}`,
-    duration: 0.8 + Math.random() * 0.6,
-    delay: (i / PARTICLE_COUNT) * 1.2,
-    xDrift: -4 + Math.random() * 8,
-    size: 2 + Math.random() * 2,
-  }));
-}
+  width: number;
+  height: number;
+}[] = [
+  { id: 'drop-0', duration: 1.4, delay: 0, xDrift: -2, width: 2.5, height: 4 },
+  { id: 'drop-1', duration: 1.6, delay: 0.3, xDrift: 1, width: 2, height: 3.5 },
+  { id: 'drop-2', duration: 1.2, delay: 0.6, xDrift: -1, width: 3, height: 5 },
+  { id: 'drop-3', duration: 1.5, delay: 0.9, xDrift: 2, width: 2, height: 3 },
+  {
+    id: 'drop-4',
+    duration: 1.3,
+    delay: 1.2,
+    xDrift: -3,
+    width: 2.5,
+    height: 4.5,
+  },
+];
 
 export function FuelMeter({
   budgetSeconds,
@@ -61,9 +63,6 @@ export function FuelMeter({
   // Track when burning starts so we can fire the ripple once
   const wasBurningRef = useRef(isBurning);
   const [showRipple, setShowRipple] = useState(false);
-
-  // Stable particle definitions so they don't regenerate every render
-  const particles = useMemo(() => generateParticles(), []);
 
   useEffect(() => {
     if (isBurning && !wasBurningRef.current) {
@@ -234,38 +233,40 @@ export function FuelMeter({
               </AnimatePresence>
             </div>
 
-            {/* Tip spark particles — positioned at the leading edge of the fill */}
+            {/* Fuel droplets — drip downward from the bar tip */}
             {isBurning && !isDepleted && !shouldReduceMotion && (
               <div
                 className="pointer-events-none absolute top-0 h-full"
                 style={{ left: `${fraction * 100}%` }}
               >
-                {particles.map((p) => (
+                {DROPLETS.map((d) => (
                   <motion.div
-                    key={p.id}
+                    key={d.id}
                     className={cn(
                       'absolute rounded-full',
                       isLow
-                        ? 'bg-red-400 dark:bg-red-300'
-                        : 'bg-amber-400 dark:bg-amber-300',
+                        ? 'bg-red-400/80 dark:bg-red-300/80'
+                        : 'bg-amber-500/70 dark:bg-amber-300/70',
                     )}
                     style={{
-                      width: p.size,
-                      height: p.size,
-                      left: -p.size / 2,
+                      width: d.width,
+                      height: d.height,
+                      left: -d.width / 2,
                       top: '50%',
+                      borderRadius: '40% 40% 50% 50%',
                     }}
-                    initial={{ opacity: 0, y: 0, x: 0 }}
+                    initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
                     animate={{
-                      opacity: [0, 0.8, 0],
-                      y: [0, -(10 + Math.random() * 8)],
-                      x: [0, p.xDrift],
+                      opacity: [0, 0.7, 0.5, 0],
+                      y: [0, 6, 16, 24],
+                      x: [0, d.xDrift * 0.5, d.xDrift],
+                      scale: [1, 1, 0.8, 0.4],
                     }}
                     transition={{
-                      duration: p.duration,
-                      delay: p.delay,
+                      duration: d.duration,
+                      delay: d.delay,
                       repeat: Number.POSITIVE_INFINITY,
-                      ease: 'easeOut',
+                      ease: 'easeIn',
                     }}
                   />
                 ))}
