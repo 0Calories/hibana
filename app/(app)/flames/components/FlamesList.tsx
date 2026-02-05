@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import type { FuelBudgetStatus } from '../actions/fuel-actions';
 import { endSession, getAllSessionsForDate } from '../session-actions';
@@ -22,7 +22,6 @@ export function FlamesList({
   initialFuelBudget,
 }: FlamesListProps) {
   const [sessions, setSessions] = useState<FlameSession[]>(initialSessions);
-  const refetchFuelRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
   const handleFuelDepleted = useCallback(
     async (activeFlameId: string) => {
@@ -31,7 +30,6 @@ export function FlamesList({
       if (result.success && result.data) {
         setSessions(result.data);
       }
-      await refetchFuelRef.current();
     },
     [date],
   );
@@ -49,9 +47,6 @@ export function FlamesList({
     onFuelDepleted: handleFuelDepleted,
   });
 
-  // Keep ref in sync
-  refetchFuelRef.current = refetchFuel;
-
   const refreshSessions = useCallback(async () => {
     const result = await getAllSessionsForDate(date);
     if (result.success && result.data) {
@@ -59,10 +54,6 @@ export function FlamesList({
     }
     await refetchFuel();
   }, [date, refetchFuel]);
-
-  useEffect(() => {
-    refreshSessions();
-  }, [refreshSessions]);
 
   const getSessionForFlame = (flameId: string): FlameSession | null => {
     return sessions.find((s) => s.flame_id === flameId) ?? null;

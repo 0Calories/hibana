@@ -46,7 +46,7 @@ export function useFuel({
     ? serverBudget.remainingMinutes * 60
     : 0;
 
-  // Find the active session (started but not ended)
+  // Active session can be reliably determined by checking that it has an empty end time
   const activeSession = sessions.find((s) => s.started_at && !s.ended_at);
 
   // Reset depletion guard when sessions change (e.g. after auto-stop resolves)
@@ -93,13 +93,20 @@ export function useFuel({
 
   const isFuelDepleted = hasBudget && remainingSeconds <= 0;
 
-  // Auto-stop when fuel depleted
+  // Auto-stop when fuel depleted, then refetch to sync server state
   useEffect(() => {
     if (isFuelDepleted && activeSession && !hasFiredDepletedRef.current) {
       hasFiredDepletedRef.current = true;
-      onFuelDepletedRef.current?.(activeSession.flame_id);
+      const flameId = activeSession.flame_id;
+      (async () => {
+        await onFuelDepletedRef.current?.(flameId);
+        const result = await getRemainingFuelBudget(date);
+        if (result.success) {
+          setServerBudget(result.data);
+        }
+      })();
     }
-  }, [isFuelDepleted, activeSession]);
+  }, [isFuelDepleted, activeSession, date]);
 
   const refetchFuel = useCallback(async () => {
     const result = await getRemainingFuelBudget(date);
