@@ -83,7 +83,6 @@ export async function getRemainingFuelBudget(
     return { success: false, error: fuelBudgetError };
   }
 
-  // No budget set for this day of week
   if (!fuelBudgetData) {
     return { success: true, data: null };
   }

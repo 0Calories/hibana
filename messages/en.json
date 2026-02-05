@@ -89,6 +89,7 @@
       "success": "Flame created!"
     },
     "fuel": {
+      "label": "Fuel",
       "remaining": "{time} remaining",
       "depleted": "No fuel remaining",
       "noBudget": "No fuel budget set"

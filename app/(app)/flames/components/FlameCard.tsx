@@ -68,7 +68,7 @@ export function FlameCard({
 
   const getStateText = () => {
     if (isFuelBlocked) return t('noFuel');
-    if (isBlocked) return t('blocked');
+    if (isBlocked) return null;
     switch (state) {
       case 'untended':
         return t('ready');
@@ -183,7 +183,7 @@ export function FlameCard({
 
           {/* State text */}
           <div className="text-center text-[10px] text-slate-500 dark:text-white/50 sm:text-xs">
-            {getStateText()}
+            {getStateText() ?? '\u00A0'}
           </div>
         </div>
 
