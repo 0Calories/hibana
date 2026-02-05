@@ -9,12 +9,12 @@ import {
   getFlamesForDay,
   setFlameCompletion,
   setFlameSchedule,
-} from '../flame-actions';
+} from '../actions/flame-actions';
 import {
   getFuelBudget,
   getRemainingFuelBudget,
   setFuelBudget,
-} from '../fuel-actions';
+} from '../actions/fuel-actions';
 import {
   endSession,
   getAllSessionsForDate,

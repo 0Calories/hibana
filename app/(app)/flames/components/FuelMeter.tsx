@@ -1,0 +1,461 @@
+'use client';
+
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { Fuel } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
+
+interface FuelMeterProps {
+  budgetSeconds: number | null;
+  remainingSeconds: number;
+  hasBudget: boolean;
+  isBurning: boolean;
+}
+
+function formatTime(totalSeconds: number): string {
+  const s = Math.max(0, Math.round(totalSeconds));
+  const hours = Math.floor(s / 3600);
+  const minutes = Math.floor((s % 3600) / 60);
+  const seconds = s % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+/** Fuel droplet particles — deterministic to avoid hydration mismatch */
+const DROPLETS: {
+  id: string;
+  duration: number;
+  delay: number;
+  xDrift: number;
+  width: number;
+  height: number;
+}[] = [
+  { id: 'drop-0', duration: 1.4, delay: 0, xDrift: -2, width: 2.5, height: 4 },
+  { id: 'drop-1', duration: 1.6, delay: 0.3, xDrift: 1, width: 2, height: 3.5 },
+  { id: 'drop-2', duration: 1.2, delay: 0.6, xDrift: -1, width: 3, height: 5 },
+  { id: 'drop-3', duration: 1.5, delay: 0.9, xDrift: 2, width: 2, height: 3 },
+  {
+    id: 'drop-4',
+    duration: 1.3,
+    delay: 1.2,
+    xDrift: -3,
+    width: 2.5,
+    height: 4.5,
+  },
+];
+
+/**
+ * Smoke puffs — each is a soft blurred circle that drifts upward.
+ * Multiple overlapping puffs at staggered timings create a smoky effect
+ * through accumulation rather than any single shape looking like smoke.
+ */
+const SMOKE_PUFFS: {
+  id: string;
+  size: number;
+  blur: number;
+  duration: number;
+  delay: number;
+  xPath: [number, number, number, number];
+  yEnd: number;
+  peakOpacity: number;
+}[] = [
+  // cluster 1 — drifts left
+  {
+    id: 'pf-0',
+    size: 5,
+    blur: 2,
+    duration: 2.0,
+    delay: 0,
+    xPath: [0, -2, -4, -6],
+    yEnd: -28,
+    peakOpacity: 0.4,
+  },
+  {
+    id: 'pf-1',
+    size: 3,
+    blur: 1.5,
+    duration: 1.8,
+    delay: 0.1,
+    xPath: [1, -1, -3, -4],
+    yEnd: -22,
+    peakOpacity: 0.3,
+  },
+  {
+    id: 'pf-2',
+    size: 4,
+    blur: 2.5,
+    duration: 2.2,
+    delay: 0.2,
+    xPath: [-1, -3, -2, -5],
+    yEnd: -32,
+    peakOpacity: 0.25,
+  },
+  // cluster 2 — drifts right
+  {
+    id: 'pf-3',
+    size: 4,
+    blur: 2,
+    duration: 2.2,
+    delay: 0.8,
+    xPath: [0, 3, 5, 4],
+    yEnd: -26,
+    peakOpacity: 0.35,
+  },
+  {
+    id: 'pf-4',
+    size: 6,
+    blur: 3,
+    duration: 2.4,
+    delay: 0.9,
+    xPath: [-1, 2, 4, 7],
+    yEnd: -30,
+    peakOpacity: 0.25,
+  },
+  {
+    id: 'pf-5',
+    size: 3,
+    blur: 1.5,
+    duration: 2.0,
+    delay: 1.0,
+    xPath: [1, 4, 3, 5],
+    yEnd: -20,
+    peakOpacity: 0.3,
+  },
+  // cluster 3 — center-ish
+  {
+    id: 'pf-6',
+    size: 5,
+    blur: 2.5,
+    duration: 2.6,
+    delay: 1.6,
+    xPath: [0, 1, -2, 0],
+    yEnd: -34,
+    peakOpacity: 0.3,
+  },
+  {
+    id: 'pf-7',
+    size: 3,
+    blur: 2,
+    duration: 2.0,
+    delay: 1.7,
+    xPath: [0, -2, 1, -1],
+    yEnd: -24,
+    peakOpacity: 0.35,
+  },
+  {
+    id: 'pf-8',
+    size: 4,
+    blur: 3,
+    duration: 2.4,
+    delay: 1.9,
+    xPath: [1, 0, -1, 2],
+    yEnd: -30,
+    peakOpacity: 0.2,
+  },
+];
+
+export function FuelMeter({
+  budgetSeconds,
+  remainingSeconds,
+  hasBudget,
+  isBurning,
+}: FuelMeterProps) {
+  const t = useTranslations('flames.fuel');
+  const shouldReduceMotion = useReducedMotion();
+
+  // Track when burning starts so we can fire the ripple once
+  const wasBurningRef = useRef(isBurning);
+  const [showRipple, setShowRipple] = useState(false);
+
+  useEffect(() => {
+    if (isBurning && !wasBurningRef.current) {
+      setShowRipple(true);
+      const timeout = setTimeout(() => setShowRipple(false), 600);
+      return () => clearTimeout(timeout);
+    }
+    wasBurningRef.current = isBurning;
+  }, [isBurning]);
+
+  if (!hasBudget) {
+    return (
+      <div className="sticky top-0 z-20 -mx-4 mb-4 bg-white/80 px-4 pt-4 pb-0 backdrop-blur-sm dark:bg-slate-950/80">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
+          <p className="text-center text-xs text-slate-500 dark:text-white/50">
+            {t('noBudget')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const budget = budgetSeconds ?? 0;
+  const fraction = budget > 0 ? Math.max(0, remainingSeconds / budget) : 0;
+  const isDepleted = remainingSeconds <= 0;
+  const isLow = fraction > 0 && fraction <= 0.2;
+
+  // Bar color logic: normal → amber, low → shifts to orange/red, depleted → grey
+  const barColor = isDepleted
+    ? 'bg-slate-400 dark:bg-white/20'
+    : isLow
+      ? 'bg-gradient-to-r from-red-500 to-orange-400 dark:from-red-500 dark:to-orange-400'
+      : 'bg-gradient-to-r from-amber-500 to-amber-400 dark:from-amber-500 dark:to-amber-400';
+
+  const textColor = isDepleted
+    ? 'text-slate-400 dark:text-white/30'
+    : isLow
+      ? 'text-red-600 dark:text-red-400'
+      : 'text-slate-600 dark:text-white/70';
+
+  const iconColor = isDepleted
+    ? 'text-slate-400 dark:text-white/30'
+    : isLow
+      ? 'text-red-500 dark:text-red-400'
+      : 'text-amber-600 dark:text-amber-400';
+
+  // Glow color for the container when burning
+  const glowColor = isLow
+    ? 'rgba(239, 68, 68, 0.15)'
+    : 'rgba(245, 158, 11, 0.12)';
+  const glowColorStrong = isLow
+    ? 'rgba(239, 68, 68, 0.3)'
+    : 'rgba(245, 158, 11, 0.25)';
+
+  return (
+    <div className="sticky top-0 z-20 -mx-4 mb-4 bg-white/80 px-4 pt-4 pb-0 backdrop-blur-sm dark:bg-slate-950/80">
+      <motion.div
+        className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/5"
+        initial={false}
+        animate={
+          isBurning && !isDepleted && !shouldReduceMotion
+            ? {
+                boxShadow: [
+                  `0 0 8px ${glowColor}, 0 0 16px ${glowColor}`,
+                  `0 0 12px ${glowColorStrong}, 0 0 24px ${glowColor}`,
+                  `0 0 8px ${glowColor}, 0 0 16px ${glowColor}`,
+                ],
+              }
+            : { boxShadow: '0 0 0px transparent' }
+        }
+        transition={
+          isBurning && !isDepleted
+            ? {
+                duration: 3,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: 'easeInOut',
+              }
+            : { duration: 0.4 }
+        }
+      >
+        <div className="flex items-center gap-2.5">
+          {/* Fuel icon + label */}
+          <div className={cn('flex shrink-0 items-center gap-1', iconColor)}>
+            <Fuel className="h-3.5 w-3.5" />
+            <span className="text-xs font-semibold uppercase tracking-wide">
+              {t('label')}
+            </span>
+          </div>
+
+          {/* Bar container */}
+          <div className="relative h-3 flex-1 overflow-visible">
+            <div className="relative h-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+              {/* Segment ticks — repeating gradient overlay, auto-adapts to width */}
+              <div
+                className="pointer-events-none absolute inset-0 z-10 rounded-full opacity-20 dark:opacity-15"
+                aria-hidden
+                style={{
+                  backgroundImage: `
+                    repeating-linear-gradient(
+                      to right,
+                      transparent 0px,
+                      transparent 30px,
+                      rgba(0, 0, 0, 0.5) 30px,
+                      rgba(0, 0, 0, 0.5) 32px
+                    )
+                  `,
+                }}
+              />
+              {/* Fill bar */}
+              <motion.div
+                className={cn(
+                  'absolute inset-y-0 left-0 rounded-full',
+                  barColor,
+                )}
+                initial={false}
+                animate={{ width: `${fraction * 100}%` }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0.2 }
+                    : { type: 'spring', stiffness: 300, damping: 30 }
+                }
+              >
+                {/* Glowing tip — hot-spot at the leading edge while burning */}
+                {isBurning && !isDepleted && (
+                  <motion.div
+                    className="absolute top-0 right-0 bottom-0 w-3 rounded-full"
+                    style={{
+                      background: isLow
+                        ? 'linear-gradient(to left, rgba(255,200,180,0.9), transparent)'
+                        : 'linear-gradient(to left, rgba(255,240,200,0.9), transparent)',
+                      boxShadow: isLow
+                        ? '0 0 6px rgba(239,68,68,0.6), 0 0 12px rgba(239,68,68,0.3)'
+                        : '0 0 6px rgba(251,191,36,0.6), 0 0 12px rgba(251,191,36,0.3)',
+                    }}
+                    initial={false}
+                    animate={
+                      shouldReduceMotion
+                        ? {}
+                        : {
+                            opacity: [0.7, 1, 0.7],
+                          }
+                    }
+                    transition={{
+                      duration: 1.5,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                )}
+
+                {/* Consumption shimmer */}
+                {isBurning && !isDepleted && !shouldReduceMotion && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full opacity-30"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 40%, transparent 60%)',
+                      backgroundSize: '200% 100%',
+                    }}
+                    animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+                    transition={{
+                      duration: 2.5,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'linear',
+                    }}
+                  />
+                )}
+              </motion.div>
+
+              {/* Low-fuel pulse overlay */}
+              <AnimatePresence>
+                {isLow && !isDepleted && !shouldReduceMotion && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full bg-red-500/10 dark:bg-red-400/10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 0.4, 0] }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                )}
+              </AnimatePresence>
+
+              {/* Burn-start ripple */}
+              <AnimatePresence>
+                {showRipple && !shouldReduceMotion && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full bg-amber-300/30 dark:bg-amber-400/20"
+                    initial={{ opacity: 0.6, scale: 1 }}
+                    animate={{ opacity: 0, scale: 1.05 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Tip effects — positioned at the leading edge of the fill */}
+            {isBurning && !isDepleted && !shouldReduceMotion && (
+              <div
+                className="pointer-events-none absolute top-0 h-full"
+                style={{ left: `${fraction * 100}%` }}
+              >
+                {/* Fuel droplets — drip downward */}
+                {DROPLETS.map((d) => (
+                  <motion.div
+                    key={d.id}
+                    className={cn(
+                      'absolute',
+                      isLow
+                        ? 'bg-red-400/80 dark:bg-red-300/80'
+                        : 'bg-amber-500/70 dark:bg-amber-300/70',
+                    )}
+                    style={{
+                      width: d.width,
+                      height: d.height,
+                      left: -d.width / 2,
+                      top: '50%',
+                      borderRadius: '40% 40% 50% 50%',
+                    }}
+                    initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
+                    animate={{
+                      opacity: [0, 0.7, 0.5, 0],
+                      y: [0, 6, 16, 24],
+                      x: [0, d.xDrift * 0.5, d.xDrift],
+                      scale: [1, 1, 0.8, 0.4],
+                    }}
+                    transition={{
+                      duration: d.duration,
+                      delay: d.delay,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeIn',
+                    }}
+                  />
+                ))}
+
+                {/* Smoke puffs — soft blurred circles that accumulate into smoke */}
+                {SMOKE_PUFFS.map((p) => (
+                  <motion.div
+                    key={p.id}
+                    className="absolute rounded-full"
+                    style={{
+                      width: p.size,
+                      height: p.size,
+                      left: -p.size / 2,
+                      top: '50%',
+                      filter: `blur(${p.blur}px)`,
+                      background: isLow
+                        ? 'rgba(252, 165, 165, 0.8)'
+                        : 'rgba(220, 180, 100, 0.7)',
+                    }}
+                    initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
+                    animate={{
+                      opacity: [0, p.peakOpacity, p.peakOpacity * 0.5, 0],
+                      y: [0, p.yEnd * 0.3, p.yEnd * 0.7, p.yEnd],
+                      x: p.xPath,
+                      scale: [0.6, 1, 1.4, 1.8],
+                    }}
+                    transition={{
+                      duration: p.duration,
+                      delay: p.delay,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeOut',
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Time label */}
+          <span
+            className={cn(
+              'shrink-0 text-xs font-medium tabular-nums',
+              textColor,
+            )}
+          >
+            {isDepleted
+              ? t('depleted')
+              : t('remaining', { time: formatTime(remainingSeconds) })}
+          </span>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

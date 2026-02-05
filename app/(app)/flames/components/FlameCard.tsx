@@ -19,6 +19,7 @@ interface FlameCardProps {
   date: string;
   onSessionUpdate?: () => void;
   isBlocked?: boolean;
+  isFuelDepleted?: boolean;
   level?: number;
 }
 
@@ -28,6 +29,7 @@ export function FlameCard({
   date,
   onSessionUpdate,
   isBlocked = false,
+  isFuelDepleted = false,
   level = 1,
 }: FlameCardProps) {
   const t = useTranslations('flames.card');
@@ -45,10 +47,12 @@ export function FlameCard({
 
   const isActive = state === 'active';
   const isCompleted = state === 'completed';
-  const isDisabled = isLoading || isCompleted || isBlocked;
+  const isFuelBlocked = isFuelDepleted && !isActive;
+  const isDisabled = isLoading || isCompleted || isBlocked || isFuelBlocked;
 
   const getAriaLabel = () => {
     const baseName = flame.name;
+    if (isFuelBlocked) return `${baseName}. ${t('noFuel')}`;
     if (isBlocked) return `${baseName}. ${t('blocked')}`;
     switch (state) {
       case 'untended':
@@ -63,7 +67,8 @@ export function FlameCard({
   };
 
   const getStateText = () => {
-    if (isBlocked) return t('blocked');
+    if (isFuelBlocked) return t('noFuel');
+    if (isBlocked) return null;
     switch (state) {
       case 'untended':
         return t('ready');
@@ -123,6 +128,7 @@ export function FlameCard({
           'dark:border-white/10 dark:from-slate-900 dark:to-slate-950 dark:text-white',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
           isCompleted && 'cursor-default opacity-60',
+          isFuelBlocked && 'cursor-default opacity-40',
           isBlocked && 'cursor-default opacity-40',
           isLoading && 'cursor-wait',
         )}
@@ -177,7 +183,7 @@ export function FlameCard({
 
           {/* State text */}
           <div className="text-center text-[10px] text-slate-500 dark:text-white/50 sm:text-xs">
-            {getStateText()}
+            {getStateText() ?? '\u00A0'}
           </div>
         </div>
 
