@@ -25,9 +25,6 @@ function formatTime(totalSeconds: number): string {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-/** Number of faint segments to display inside the bar */
-const SEGMENT_COUNT = 20;
-
 /** Fuel droplet particles — deterministic to avoid hydration mismatch */
 const DROPLETS: {
   id: string;
@@ -265,20 +262,22 @@ export function FuelMeter({
           {/* Bar container */}
           <div className="relative h-3 flex-1 overflow-visible">
             <div className="relative h-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-              {/* Segment lines */}
+              {/* Segment ticks — repeating gradient overlay, auto-adapts to width */}
               <div
-                className="pointer-events-none absolute inset-0 z-10"
+                className="pointer-events-none absolute inset-0 z-10 rounded-full opacity-20 dark:opacity-15"
                 aria-hidden
-              >
-                {Array.from({ length: SEGMENT_COUNT - 1 }, (_, i) => (
-                  <div
-                    key={`seg-${i + 1}`}
-                    className="absolute top-0 bottom-0 w-px bg-slate-300/40 dark:bg-white/[0.06]"
-                    style={{ left: `${((i + 1) / SEGMENT_COUNT) * 100}%` }}
-                  />
-                ))}
-              </div>
-
+                style={{
+                  backgroundImage: `
+                    repeating-linear-gradient(
+                      to right,
+                      transparent 0px,
+                      transparent 30px,
+                      rgba(0, 0, 0, 0.5) 30px,
+                      rgba(0, 0, 0, 0.5) 32px
+                    )
+                  `,
+                }}
+              />
               {/* Fill bar */}
               <motion.div
                 className={cn(
