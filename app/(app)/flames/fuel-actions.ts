@@ -53,9 +53,14 @@ export async function setFuelBudget(
   };
 }
 
+export type FuelBudgetStatus = {
+  budgetMinutes: number;
+  remainingMinutes: number;
+} | null;
+
 export async function getRemainingFuelBudget(
   date: string,
-): ActionResult<{ remainingFuel: number }> {
+): ActionResult<FuelBudgetStatus> {
   const { supabase, user } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {
@@ -72,10 +77,15 @@ export async function getRemainingFuelBudget(
     .select('minutes')
     .eq('user_id', user.id)
     .eq('day_of_week', dayOfWeek)
-    .single();
+    .maybeSingle();
 
   if (fuelBudgetError) {
     return { success: false, error: fuelBudgetError };
+  }
+
+  // No budget set for this day of week
+  if (!fuelBudgetData) {
+    return { success: true, data: null };
   }
 
   const { data: sessions, error: fuelSpentError } = await supabase
@@ -92,7 +102,10 @@ export async function getRemainingFuelBudget(
     0,
   );
   const totalMinutes = totalSeconds / 60;
-  const remainingFuel = fuelBudgetData.minutes - totalMinutes;
+  const remainingMinutes = fuelBudgetData.minutes - totalMinutes;
 
-  return { success: true, data: { remainingFuel } };
+  return {
+    success: true,
+    data: { budgetMinutes: fuelBudgetData.minutes, remainingMinutes },
+  };
 }

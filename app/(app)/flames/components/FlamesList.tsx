@@ -1,25 +1,64 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
-import { getAllSessionsForDate } from '../session-actions';
+import type { FuelBudgetStatus } from '../fuel-actions';
+import { endSession, getAllSessionsForDate } from '../session-actions';
 import { FlameCard } from './FlameCard';
+import { FuelMeter } from './FuelMeter';
+import { useFuel } from './hooks/useFuel';
 
 interface FlamesListProps {
   flames: Flame[];
   initialSessions: FlameSession[];
   date: string;
+  initialFuelBudget: FuelBudgetStatus;
 }
 
-export function FlamesList({ flames, initialSessions, date }: FlamesListProps) {
+export function FlamesList({
+  flames,
+  initialSessions,
+  date,
+  initialFuelBudget,
+}: FlamesListProps) {
   const [sessions, setSessions] = useState<FlameSession[]>(initialSessions);
+  const refetchFuelRef = useRef<() => Promise<void>>(() => Promise.resolve());
+
+  const handleFuelDepleted = useCallback(
+    async (activeFlameId: string) => {
+      await endSession(activeFlameId, date);
+      const result = await getAllSessionsForDate(date);
+      if (result.success && result.data) {
+        setSessions(result.data);
+      }
+      await refetchFuelRef.current();
+    },
+    [date],
+  );
+
+  const {
+    budgetSeconds,
+    remainingSeconds,
+    isFuelDepleted,
+    hasBudget,
+    refetchFuel,
+  } = useFuel({
+    initialFuelBudget,
+    sessions,
+    date,
+    onFuelDepleted: handleFuelDepleted,
+  });
+
+  // Keep ref in sync
+  refetchFuelRef.current = refetchFuel;
 
   const refreshSessions = useCallback(async () => {
     const result = await getAllSessionsForDate(date);
     if (result.success && result.data) {
       setSessions(result.data);
     }
-  }, [date]);
+    await refetchFuel();
+  }, [date, refetchFuel]);
 
   useEffect(() => {
     refreshSessions();
@@ -34,18 +73,26 @@ export function FlamesList({ flames, initialSessions, date }: FlamesListProps) {
     sessions.find((s) => s.started_at && !s.ended_at)?.flame_id ?? null;
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-      {flames.map((flame, index) => (
-        <FlameCard
-          key={flame.id}
-          flame={flame}
-          session={getSessionForFlame(flame.id)}
-          date={date}
-          onSessionUpdate={refreshSessions}
-          isBlocked={activeFlameId !== null && activeFlameId !== flame.id}
-          level={(index % 8) + 1} // Demo: cycle through levels 1-8
-        />
-      ))}
+    <div>
+      <FuelMeter
+        budgetSeconds={budgetSeconds}
+        remainingSeconds={remainingSeconds}
+        hasBudget={hasBudget}
+      />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+        {flames.map((flame, index) => (
+          <FlameCard
+            key={flame.id}
+            flame={flame}
+            session={getSessionForFlame(flame.id)}
+            date={date}
+            onSessionUpdate={refreshSessions}
+            isBlocked={activeFlameId !== null && activeFlameId !== flame.id}
+            isFuelDepleted={isFuelDepleted || !hasBudget}
+            level={(index % 8) + 1} // Demo: cycle through levels 1-8
+          />
+        ))}
+      </div>
     </div>
   );
 }

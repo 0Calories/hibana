@@ -88,12 +88,18 @@
       "loading": "Creating flame...",
       "success": "Flame created!"
     },
+    "fuel": {
+      "remaining": "{time} remaining",
+      "depleted": "No fuel remaining",
+      "noBudget": "No fuel budget set"
+    },
     "card": {
       "ready": "Ready",
       "burning": "Burning ...",
       "resting": "Resting",
       "tended": "Tended",
-      "blocked": "Idle"
+      "blocked": "Idle",
+      "noFuel": "No fuel"
     },
     "empty": "No flames yet. Create one to get started!"
   },
