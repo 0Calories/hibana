@@ -293,6 +293,34 @@ export function FuelMeter({
                     : { type: 'spring', stiffness: 300, damping: 30 }
                 }
               >
+                {/* Glowing tip — hot-spot at the leading edge while burning */}
+                {isBurning && !isDepleted && (
+                  <motion.div
+                    className="absolute top-0 right-0 bottom-0 w-3 rounded-full"
+                    style={{
+                      background: isLow
+                        ? 'linear-gradient(to left, rgba(255,200,180,0.9), transparent)'
+                        : 'linear-gradient(to left, rgba(255,240,200,0.9), transparent)',
+                      boxShadow: isLow
+                        ? '0 0 6px rgba(239,68,68,0.6), 0 0 12px rgba(239,68,68,0.3)'
+                        : '0 0 6px rgba(251,191,36,0.6), 0 0 12px rgba(251,191,36,0.3)',
+                    }}
+                    initial={false}
+                    animate={
+                      shouldReduceMotion
+                        ? {}
+                        : {
+                            opacity: [0.7, 1, 0.7],
+                          }
+                    }
+                    transition={{
+                      duration: 1.5,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                )}
+
                 {/* Consumption shimmer */}
                 {isBurning && !isDepleted && !shouldReduceMotion && (
                   <motion.div
