@@ -2,70 +2,38 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useMemo } from 'react';
-import type { FlameState } from '../../hooks/useFlameTimer';
+import type { BaseParticleProps, ParticleStateConfig } from './particles';
+import {
+  generateBaseParticle,
+  generateParticles,
+  getAnimationIntensity,
+  shouldShowParticles,
+} from './particles';
 
-interface ParticleEmbersProps {
-  state: FlameState;
-  color: string;
-}
+const EMBER_STATE_CONFIG: ParticleStateConfig = {
+  active: { count: 8, sizeMultiplier: 1.4 },
+  paused: { count: 3, sizeMultiplier: 1 },
+  untended: { count: 2, sizeMultiplier: 1 },
+};
 
-interface Particle {
-  id: number;
-  x: number;
-  size: number;
-  delay: number;
-  duration: number;
-  drift: number;
-}
-
-// Deterministic particle generation to avoid hydration mismatch
-function generateParticles(count: number, sizeMultiplier: number): Particle[] {
-  const particles: Particle[] = [];
-  const seed = 42;
-  for (let i = 0; i < count; i++) {
-    const hash = (seed * (i + 1) * 9973) % 10000;
-    particles.push({
-      id: i,
-      x: 35 + (hash % 30), // 35-65% horizontal position
-      size: (3 + (hash % 30) / 10) * sizeMultiplier, // 3-6px base, scaled
-      delay: (hash % 1500) / 1000, // 0-1.5s staggered delay
-      duration: 1.5 + (hash % 1000) / 1000, // 1.5-2.5s float duration
-      drift: (hash % 20) - 10, // -10 to 10px horizontal drift
-    });
-  }
-  return particles;
-}
-
-export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
+export function ParticleEmbers({ state, color }: BaseParticleProps) {
   const shouldReduceMotion = useReducedMotion();
-  const isActive = state === 'active';
-  const isPaused = state === 'paused';
-  const isUntended = state === 'untended';
-  const showEmbers = isActive || isPaused || isUntended;
+  const showEmbers = shouldShowParticles(state);
 
-  // Different particle counts and sizes based on state
-  // Use state directly in deps to ensure re-generation on state change
-  const particles = useMemo(() => {
-    if (state === 'active') {
-      return generateParticles(8, 1.4); // Many large particles when active
-    }
-    if (state === 'paused') {
-      return generateParticles(3, 1); // Few particles when paused
-    }
-    if (state === 'untended') {
-      return generateParticles(2, 1); // Very few particles when untended
-    }
-    return [];
-  }, [state]);
+  const particles = useMemo(
+    () =>
+      generateParticles(state, EMBER_STATE_CONFIG, (index, sizeMultiplier) => {
+        const base = generateBaseParticle(index);
+        return { ...base, size: base.size * sizeMultiplier };
+      }),
+    [state],
+  );
 
   if (shouldReduceMotion || !showEmbers) {
     return null;
   }
 
-  // Adjust intensity based on state
-  const opacityMultiplier = isActive ? 1 : 0.4;
-  // Speed: active = normal, paused = slower, untended = very slow
-  const speedMultiplier = isActive ? 1 : isPaused ? 2 : 2.5;
+  const { opacity, speed } = getAnimationIntensity(state);
 
   return (
     <div
@@ -86,13 +54,13 @@ export function ParticleEmbers({ state, color }: ParticleEmbersProps) {
             }}
             initial={{ opacity: 0, y: 0 }}
             animate={{
-              opacity: [0, opacityMultiplier, opacityMultiplier, 0],
+              opacity: [0, opacity, opacity, 0],
               y: -80,
               x: [0, particle.drift],
             }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: particle.duration * speedMultiplier,
+              duration: particle.duration * speed,
               delay: particle.delay,
               repeat: Infinity,
               ease: 'easeOut',
