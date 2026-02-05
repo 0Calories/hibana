@@ -122,7 +122,9 @@ export function SignupForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid || signupFailed}>
-                  <FieldLabel htmlFor={field.name}>{tCommon('email')}</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    {tCommon('email')}
+                  </FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
@@ -143,7 +145,9 @@ export function SignupForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>{tCommon('password')}</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    {tCommon('password')}
+                  </FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
@@ -163,7 +167,9 @@ export function SignupForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>{t('confirmPassword')}</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    {t('confirmPassword')}
+                  </FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
