@@ -5,7 +5,7 @@ import type { FlameSession } from '@/utils/supabase/rows';
 import {
   type FuelBudgetStatus,
   getRemainingFuelBudget,
-} from '../../fuel-actions';
+} from '../../actions/fuel-actions';
 
 interface UseFuelOptions {
   initialFuelBudget: FuelBudgetStatus;

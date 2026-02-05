@@ -34,7 +34,7 @@ import {
   createFlameSchema,
 } from '@/lib/schemas/flame';
 import { cn } from '@/lib/utils';
-import { createFlame } from '../flame-actions';
+import { createFlame } from '../actions/flame-actions';
 import { FLAME_GRADIENT_CLASSES, type FlameColorName } from '../utils/colors';
 
 interface CreateFlameDialogProps {

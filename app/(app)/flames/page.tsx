@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
+import { getFlamesForDay } from './actions/flame-actions';
+import { getRemainingFuelBudget } from './actions/fuel-actions';
 import { FlamesList } from './components/FlamesList';
-import { getFlamesForDay } from './flame-actions';
-import { getRemainingFuelBudget } from './fuel-actions';
 import { getAllSessionsForDate } from './session-actions';
 import { getTodayDateString } from './utils/utils';
 
