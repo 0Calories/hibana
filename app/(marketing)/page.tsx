@@ -1,4 +1,5 @@
 import { Brain, Sparkles, StickyNote } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { AnimatedDiv, AnimatedSection } from './components/AnimatedSection';
 import { EmberFloat } from './components/EmberFloat';
 import { FlameShowcase } from './components/FlameShowcase';
@@ -7,7 +8,37 @@ import { HeroSection } from './components/HeroSection';
 import { NewsletterForm } from './components/NewsletterForm';
 import { SparkleEffect } from './components/SparkleEffect';
 
-export default function MarketingPage() {
+const EMBER_TAGS = [
+  { key: 'ember.tagPlanDay' as const, color: '#0ea5e9' },
+  { key: 'ember.tagTakeNotes' as const, color: '#facc15' },
+  { key: 'ember.tagManageTodos' as const, color: '#22c55e' },
+  { key: 'ember.tagJustChat' as const, color: '#a78bfa' },
+];
+
+const ECOSYSTEM_FEATURES = [
+  {
+    icon: Brain,
+    titleKey: 'ecosystem.scienceTitle' as const,
+    bodyKey: 'ecosystem.scienceBody' as const,
+    color: '#a78bfa',
+  },
+  {
+    icon: Sparkles,
+    titleKey: 'ecosystem.sparksTitle' as const,
+    bodyKey: 'ecosystem.sparksBody' as const,
+    color: '#f97316',
+  },
+  {
+    icon: StickyNote,
+    titleKey: 'ecosystem.notesTitle' as const,
+    bodyKey: 'ecosystem.notesBody' as const,
+    color: '#22c55e',
+  },
+];
+
+export default async function MarketingPage() {
+  const t = await getTranslations('marketing');
+
   return (
     <div className="relative overflow-x-hidden">
       {/* ═══ JSON-LD Structured Data ═══ */}
@@ -21,8 +52,7 @@ export default function MarketingPage() {
             name: 'Hibana',
             applicationCategory: 'LifestyleApplication',
             operatingSystem: 'Web',
-            description:
-              'A gamified habit tracker where your habits are living flames. Track time, earn rewards, and grow with AI companion Ember.',
+            description: t('jsonLdDescription'),
             offers: {
               '@type': 'Offer',
               price: '0',
@@ -56,14 +86,13 @@ export default function MarketingPage() {
               id="progression-heading"
               className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl"
             >
-              Habits that{' '}
+              {t('progression.headlinePrefix')}{' '}
               <span className="bg-linear-to-r from-orange-400 to-rose-400 bg-clip-text text-transparent">
-                grow with you
+                {t('progression.headlineAccent')}
               </span>
             </h2>
             <p className="mx-auto max-w-lg text-white/35">
-              Your time and energy is the fuel to your Flames. Even a meager
-              Wisp can grow all the way to a stunningly radiant Supernova
+              {t('progression.body')}
             </p>
           </div>
 
@@ -89,28 +118,21 @@ export default function MarketingPage() {
                 id="ember-heading"
                 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl"
               >
-                Meet{' '}
+                {t('ember.headlinePrefix')}{' '}
                 <SparkleEffect>
                   <span className="bg-linear-to-r from-amber-300 via-orange-400 to-violet-400 bg-clip-text text-transparent">
-                    Ember
+                    {t('ember.headlineAccent')}
                   </span>
                 </SparkleEffect>
               </h2>
               <p className="mb-6 max-w-md text-lg leading-relaxed text-white/40">
-                Your bright and cheery flame-sprite companion. She&apos;ll help
-                you organize your thoughts and can perform any action available
-                in the app on your behalf; All through natural conversation.
+                {t('ember.body')}
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-                {[
-                  { label: 'Plan your day', color: '#0ea5e9' },
-                  { label: 'Take notes', color: '#facc15' },
-                  { label: 'Manage todos', color: '#22c55e' },
-                  { label: 'Just chat', color: '#a78bfa' },
-                ].map((tag) => (
+                {EMBER_TAGS.map((tag) => (
                   <span
-                    key={tag.label}
+                    key={tag.key}
                     className="rounded-full px-3.5 py-1.5 text-xs font-medium"
                     style={{
                       backgroundColor: `${tag.color}12`,
@@ -118,7 +140,7 @@ export default function MarketingPage() {
                       color: `${tag.color}cc`,
                     }}
                   >
-                    {tag.label}
+                    {t(tag.key)}
                   </span>
                 ))}
               </div>
@@ -140,36 +162,17 @@ export default function MarketingPage() {
               id="ecosystem-heading"
               className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl"
             >
-              More than just a{' '}
+              {t('ecosystem.headlinePrefix')}{' '}
               <span className="bg-linear-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-                habit tracker
+                {t('ecosystem.headlineAccent')}
               </span>
             </h2>
           </AnimatedSection>
 
           <div className="grid gap-6 sm:grid-cols-3">
-            {[
-              {
-                icon: Brain,
-                title: 'Science',
-                body: 'Leverages concepts based on behavioral psychology and neuroscience research to keep you motivated towards your goals.',
-                color: '#a78bfa',
-              },
-              {
-                icon: Sparkles,
-                title: 'Sparks',
-                body: 'The currency of effort. Sessions, streaks, and completed todos earn Sparks. Spend them on dashboard widgets, cosmetics, and upgrades.',
-                color: '#f97316',
-              },
-              {
-                icon: StickyNote,
-                title: 'Sticky Notes & Todos',
-                body: 'Capture thoughts and track tasks without leaving. Everything feeds back into your flames.',
-                color: '#22c55e',
-              },
-            ].map((feature, i) => (
+            {ECOSYSTEM_FEATURES.map((feature, i) => (
               <AnimatedDiv
-                key={feature.title}
+                key={feature.titleKey}
                 delay={i * 0.08}
                 className="group relative overflow-hidden rounded-2xl border border-white/6 bg-white/2 p-6 transition-colors hover:border-white/12 hover:bg-white/4"
               >
@@ -198,10 +201,10 @@ export default function MarketingPage() {
                   />
                 </div>
                 <h3 className="relative mb-2 text-sm font-bold uppercase tracking-wider text-white/90">
-                  {feature.title}
+                  {t(feature.titleKey)}
                 </h3>
                 <p className="relative text-sm leading-relaxed text-white/35">
-                  {feature.body}
+                  {t(feature.bodyKey)}
                 </p>
               </AnimatedDiv>
             ))}
@@ -229,10 +232,10 @@ export default function MarketingPage() {
             id="cta-heading"
             className="mb-3 text-3xl font-extrabold tracking-tight sm:text-4xl"
           >
-            Ready to light your first flame?
+            {t('cta.headline')}
           </h2>
           <p className="mb-6 max-w-md text-white/35">
-            Sign up to get notified when we launch!
+            {t('cta.body')}
           </p>
           <div className="w-full max-w-md">
             <NewsletterForm />

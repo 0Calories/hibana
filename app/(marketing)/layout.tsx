@@ -38,6 +38,7 @@ export default async function MarketingLayout({
   children: React.ReactNode;
 }>) {
   const t = await getTranslations('navigation');
+  const m = await getTranslations('marketing');
 
   return (
     <div className="dark relative min-h-svh bg-[#090b14] text-white">
@@ -76,10 +77,10 @@ export default async function MarketingLayout({
           <div className="text-sm text-white/30">
             <span className="font-medium text-white/50">火花 Hibana</span>
             {' · '}
-            Ignite your motivation
+            {m('footer.tagline')}
           </div>
           <div className="text-xs text-white/20">
-            &copy; {new Date().getFullYear()} Hibana. All rights reserved.
+            {m('footer.copyright', { year: String(new Date().getFullYear()) })}
           </div>
         </div>
       </footer>

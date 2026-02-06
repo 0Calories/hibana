@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useInView, useReducedMotion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 import { GeometricFlame } from '@/app/(app)/flames/components/flame-card/effects/GeometricFlame';
 import { GeometricSmoke } from '@/app/(app)/flames/components/flame-card/effects/GeometricSmoke';
@@ -29,6 +30,7 @@ export function FlameShowcase() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const shouldReduceMotion = useReducedMotion();
+  const t = useTranslations('marketing.progression');
 
   return (
     <div ref={ref} className="space-y-8">
@@ -88,7 +90,7 @@ export function FlameShowcase() {
                         className="text-sm font-bold"
                         style={{ color: `${colors.medium}40` }}
                       >
-                        ?
+                        {t('mysteryLabel')}
                       </span>
                     </div>
                   </div>
@@ -100,7 +102,7 @@ export function FlameShowcase() {
                   color: revealed ? colors.medium : `${colors.medium}50`,
                 }}
               >
-                Lv. {level.level}
+                {t('levelPrefix')} {level.level}
               </span>
               <span
                 className="mt-0.5 text-sm font-semibold"
@@ -162,7 +164,7 @@ export function FlameShowcase() {
                           className="text-xs font-bold"
                           style={{ color: `${colors.medium}40` }}
                         >
-                          ?
+                          {t('mysteryLabel')}
                         </span>
                       </div>
                     </div>
@@ -174,7 +176,7 @@ export function FlameShowcase() {
                     color: revealed ? colors.medium : `${colors.medium}50`,
                   }}
                 >
-                  Lv. {level.level}
+                  {t('levelPrefix')} {level.level}
                 </span>
                 <span
                   className="mt-0.5 text-xs font-semibold"

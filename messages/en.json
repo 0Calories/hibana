@@ -118,64 +118,58 @@
     "description": "Your habits are living flames. Tend them, fuel them, watch them grow."
   },
   "marketing": {
+    "jsonLdDescription": "A gamified habit tracker where your habits are living flames. Track time, earn rewards, and grow with AI companion Ember.",
     "hero": {
-      "badge": "Coming soon",
-      "headline": "Your habits, alive.",
-      "subtitle": "Flames. Fuel. AI. Rewards. One system that turns consistency into something you can see.",
-      "notifyHint": "Get notified when we launch. No spam, just sparks."
+      "badge": "Currently in development",
+      "headlineLine1": "Set your motivation",
+      "headlineAccent": "ablaze",
+      "subtitleHighlight": "(火花) Hibana",
+      "subtitleBody": "is a gamified productivity and habit tracking app built on insights from behavioral psychology and neuroscience to help you build lasting habits and achieve your goals.",
+      "waitlistHint": "Join the waitlist for early access and get notified when we launch",
+      "scrollLabel": "Scroll"
     },
-    "pills": {
-      "flames": "Flames",
-      "fuel": "Fuel",
-      "ember": "Ember AI",
-      "sparks": "Sparks",
-      "shop": "Shop",
-      "notes": "Notes",
-      "todos": "Todos"
+    "newsletter": {
+      "placeholder": "your@email.com",
+      "ariaLabel": "Email address for newsletter",
+      "submit": "Join Waitlist"
     },
     "progression": {
-      "headline": "Habits that grow with you",
-      "body": "Eight stages. Wisp to Supernova. Every flame earns its evolution."
+      "headlinePrefix": "Habits that",
+      "headlineAccent": "grow with you",
+      "body": "Your time and energy is the fuel to your Flames. Even a meager Wisp can grow all the way to a stunningly radiant Supernova",
+      "levelPrefix": "Lv.",
+      "mysteryLabel": "?"
     },
     "fuel": {
-      "headline": "Time is fuel",
-      "line1": "Set a daily fuel budget.",
-      "line2": "Start a flame. Watch it burn.",
-      "line3": "Your hours become visible progress.",
-      "stat1Label": "8 levels",
-      "stat2Label": "Daily fuel",
-      "stat3Label": "Real-time",
-      "remaining": "remaining",
-      "fuelLabel": "FUEL"
+      "label": "Fuel",
+      "remaining": "4:32:01 remaining"
     },
     "ember": {
-      "headline": "This is Ember",
-      "body": "Your flame-sprite. She creates flames, organizes thoughts, and keeps you going.",
-      "tag1": "Create flames",
-      "tag2": "Take notes",
-      "tag3": "Manage todos",
-      "tag4": "Plan your day",
-      "tag5": "Just chat"
+      "headlinePrefix": "Meet",
+      "headlineAccent": "Ember",
+      "body": "Your bright and cheery flame-sprite companion. She''ll help you organize your thoughts and can perform any action available in the app on your behalf; All through natural conversation.",
+      "tagPlanDay": "Plan your day",
+      "tagTakeNotes": "Take notes",
+      "tagManageTodos": "Manage todos",
+      "tagJustChat": "Just chat"
     },
     "ecosystem": {
-      "headline": "More than a habit tracker",
-      "sparksTitle": "Sparks",
-      "sparksBody": "The currency of effort. Sessions, streaks, and completed todos earn sparks — proof of work you can spend.",
-      "shopTitle": "Shop",
-      "shopBody": "Spend sparks on flame colors, card themes, and dashboard widgets. Effort unlocks upgrades.",
-      "notesTitle": "Notes & Todos",
-      "notesBody": "Capture thoughts and track tasks without leaving. Everything feeds back into your flames.",
+      "headlinePrefix": "More than just a",
+      "headlineAccent": "habit tracker",
       "scienceTitle": "Science",
-      "scienceBody": "Every mechanic — streaks, progression, variable rewards — is informed by behavioral psychology."
-    },
-    "whyHibana": {
-      "headline": "Why Hibana?",
-      "body1": "Spark. In Japanese, hibana means spark.",
-      "body2": "Every fire started as one."
+      "scienceBody": "Leverages concepts based on behavioral psychology and neuroscience research to keep you motivated towards your goals.",
+      "sparksTitle": "Sparks",
+      "sparksBody": "The currency of effort. Sessions, streaks, and completed todos earn Sparks. Spend them on dashboard widgets, cosmetics, and upgrades.",
+      "notesTitle": "Sticky Notes & Todos",
+      "notesBody": "Capture thoughts and track tasks without leaving. Everything feeds back into your flames."
     },
     "cta": {
       "headline": "Ready to light your first flame?",
-      "body": "Join the waitlist. Your Wisp is waiting."
+      "body": "Sign up to get notified when we launch!"
+    },
+    "footer": {
+      "tagline": "Ignite your motivation",
+      "copyright": "© {year} Hibana. All rights reserved."
     }
   }
 }

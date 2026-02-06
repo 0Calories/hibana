@@ -2,6 +2,7 @@
 
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { Fuel } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 
 /**
@@ -38,6 +39,7 @@ export function ShowcaseFuelBar() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   const shouldReduceMotion = useReducedMotion();
+  const t = useTranslations('marketing.fuel');
 
   const glowColor = 'rgba(245, 158, 11, 0.12)';
   const glowColorStrong = 'rgba(245, 158, 11, 0.25)';
@@ -68,7 +70,7 @@ export function ShowcaseFuelBar() {
           <div className="flex shrink-0 items-center gap-1 text-amber-400">
             <Fuel className="h-3.5 w-3.5" />
             <span className="text-xs font-semibold uppercase tracking-wide">
-              Fuel
+              {t('label')}
             </span>
           </div>
 
@@ -203,7 +205,7 @@ export function ShowcaseFuelBar() {
 
           {/* Time label */}
           <span className="shrink-0 text-xs font-medium tabular-nums text-white/70">
-            4:32:01 remaining
+            {t('remaining')}
           </span>
         </div>
       </motion.div>
