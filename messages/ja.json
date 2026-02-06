@@ -7,7 +7,8 @@
     "discord": "Discord",
     "orContinueWith": "Or continue with",
     "somethingWentWrong": "Something went wrong. Please try again.",
-    "unexpectedError": "An unexpected error occurred"
+    "unexpectedError": "An unexpected error occurred",
+    "emberName": "エンバー"
   },
   "validation": {
     "emailInvalid": "Please enter a valid email address",
@@ -136,7 +137,7 @@
     "progression": {
       "headlinePrefix": "あなたと共に",
       "headlineAccent": "成長する習慣",
-      "body": "あなたの時間とエネルギーがFlameの燃料になります。小さなWispでさえ、眩いほどに輝くSupernovaまで成長できます",
+      "body": "あなたの時間とエネルギーが炎の燃料になります。小さなウィスプでさえ、眩いほどに輝くスーパーノヴァまで成長できます",
       "levelPrefix": "Lv.",
       "mysteryLabel": "?"
     },
@@ -146,7 +147,7 @@
     },
     "ember": {
       "headlinePrefix": "こちらが",
-      "headlineAccent": "Ember",
+      "headlineAccent": "エンバー",
       "body": "明るく元気なフレームスプライトの相棒。あなたの考えを整理し、アプリ内のあらゆる操作をあなたに代わって実行してくれます。すべて自然な会話を通じて。",
       "tagPlanDay": "一日を計画する",
       "tagTakeNotes": "メモを取る",
@@ -164,7 +165,7 @@
       "notesBody": "アプリを離れずに思いついたことをメモし、タスクを管理。すべてがFlameにフィードバックされます。"
     },
     "cta": {
-      "headline": "最初のFlameに火を灯す準備はできましたか？",
+      "headline": "最初の炎に火を灯す準備はできましたか？",
       "body": "登録してリリース時のお知らせを受け取りましょう！"
     },
     "footer": {

@@ -7,7 +7,8 @@
     "discord": "Discord",
     "orContinueWith": "Or continue with",
     "somethingWentWrong": "Something went wrong. Please try again.",
-    "unexpectedError": "An unexpected error occurred"
+    "unexpectedError": "An unexpected error occurred",
+    "emberName": "Ember"
   },
   "validation": {
     "emailInvalid": "Please enter a valid email address",
