@@ -4,9 +4,9 @@ import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-  title: 'Hibana — Habit Tracking That Feels Alive',
+  title: 'Hibana — Set your motivation ablaze',
   description:
-    'Hibana is a gamified habit tracker where your habits are living flames. Tend them with time and effort, watch them grow from wisps to supernovae. With AI assistant Ember, sparks rewards, and tools grounded in behavioral psychology.',
+    'Hibana is a gamified productivity and habit tracking app built on insights from behavioral psychology and neuroscience to help you build lasting habits and achieve your goals.',
   keywords: [
     'habit tracker',
     'gamified productivity',
@@ -17,18 +17,18 @@ export const metadata: Metadata = {
     'personal improvement app',
   ],
   openGraph: {
-    title: 'Hibana — Habit Tracking That Feels Alive',
+    title: 'Hibana — Set your motivation ablaze',
     description:
-      'Your habits are living flames. Tend them, fuel them, watch them grow. A gamified productivity app with an AI companion, rewards, and tools grounded in how your brain actually works.',
+      'Hibana is a gamified productivity and habit tracking app built on insights from behavioral psychology and neuroscience to help you build lasting habits and achieve your goals.',
     type: 'website',
     siteName: 'Hibana',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hibana — Habit Tracking That Feels Alive',
+    title: 'Hibana — Set your motivation ablaze',
     description:
-      'Your habits are living flames. Tend them, fuel them, watch them grow.',
+      'Hibana is a gamified productivity and habit tracking app built on insights from behavioral psychology and neuroscience to help you build lasting habits and achieve your goals.',
   },
 };
 
@@ -48,10 +48,7 @@ export default async function MarketingLayout({
 
       {/* ── Fixed nav ── */}
       <nav className="fixed top-0 z-50 flex w-full items-center justify-between bg-[#090b14]/80 px-6 py-4 backdrop-blur-md">
-        <Link
-          href="/"
-          className="group text-lg font-bold tracking-tight"
-        >
+        <Link href="/" className="group text-lg font-bold tracking-tight">
           <span className="bg-linear-to-r from-amber-300 via-orange-400 to-rose-500 bg-clip-text text-transparent transition-opacity group-hover:opacity-80">
             火花
           </span>{' '}
