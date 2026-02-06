@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
+import { setFlameCompletion } from '../../actions/flame-actions';
 import { endSession, startSession } from '../../session-actions';
 
 export type FlameState = 'untended' | 'active' | 'paused' | 'completed';
@@ -20,6 +21,9 @@ interface UseFlameTimerReturn {
   progress: number;
   toggle: () => Promise<void>;
   isLoading: boolean;
+  isCompleting: boolean;
+  markComplete: () => Promise<void>;
+  resetCompleting: () => void;
 }
 
 export function useFlameTimer({
@@ -30,6 +34,7 @@ export function useFlameTimer({
 }: UseFlameTimerOptions): UseFlameTimerReturn {
   const [state, setState] = useState<FlameState>('untended');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const [localElapsed, setLocalElapsed] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -130,6 +135,21 @@ export function useFlameTimer({
     }
   };
 
+  const markComplete = async () => {
+    setIsCompleting(true);
+    try {
+      await setFlameCompletion(flame.id, date, true);
+      setState('completed');
+      onSessionUpdate?.();
+    } catch (error) {
+      console.error('Failed to mark flame as complete:', error);
+    }
+  };
+
+  const resetCompleting = () => {
+    setIsCompleting(false);
+  };
+
   const progress =
     targetSeconds > 0 ? Math.min(localElapsed / targetSeconds, 1) : 0;
 
@@ -140,5 +160,8 @@ export function useFlameTimer({
     progress,
     toggle,
     isLoading,
+    isCompleting,
+    markComplete,
+    resetCompleting,
   };
 }

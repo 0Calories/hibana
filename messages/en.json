@@ -100,7 +100,23 @@
       "resting": "Resting",
       "tended": "Tended",
       "blocked": "Idle",
-      "noFuel": "No fuel"
+      "noFuel": "No fuel",
+      "markComplete": "Mark complete",
+      "completing": "Completing...",
+      "confirmTitle": "Mark as tended?",
+      "confirmDescription": "This will lock in your progress for the day. You won't be able to tend this flame anymore once it's done.",
+      "confirmAction": "Mark complete",
+      "confirmCancel": "Cancel"
+    },
+    "completion": {
+      "title": "Flame Tended!",
+      "timeSpent": "Time spent",
+      "target": "Target",
+      "progress": "Progress",
+      "overburned": "Overburned",
+      "xpEarned": "XP earned",
+      "xpComingSoon": "Coming soon",
+      "dismiss": "Dismiss"
     },
     "empty": "No flames yet. Create one to get started!"
   },
