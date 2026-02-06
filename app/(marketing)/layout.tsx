@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
@@ -47,8 +47,7 @@ export default async function MarketingLayout({
           href="/"
           className="text-lg font-bold tracking-tight text-white/90"
         >
-          火花{' '}
-          <span className="font-extrabold text-white">Hibana</span>
+          火花 <span className="font-extrabold text-white">Hibana</span>
         </Link>
         <div className="flex items-center gap-2">
           <Button
@@ -71,12 +70,12 @@ export default async function MarketingLayout({
       <main>{children}</main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-white/[0.04] px-6 py-10">
+      <footer className="border-t border-white/4 px-6 py-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-sm text-white/30">
             <span className="font-medium text-white/50">火花 Hibana</span>
             {' · '}
-            Habit tracking that feels alive
+            Ignite your motivation
           </div>
           <div className="text-xs text-white/20">
             &copy; {new Date().getFullYear()} Hibana. All rights reserved.

@@ -1,10 +1,12 @@
 'use client';
 
 import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { GeometricFlame } from '@/app/(app)/flames/components/flame-card/effects/GeometricFlame';
+import { ParticleEmbers } from '@/app/(app)/flames/components/flame-card/effects/ParticleEmbers';
 import { FLAME_HEX_COLORS } from '@/app/(app)/flames/utils/colors';
 import { FLAME_LEVELS } from '@/app/(app)/flames/utils/levels';
+import { ShowcaseFuelBar } from './ShowcaseFuelBar';
 
 const EASE_OUT_EXPO = [0.21, 0.47, 0.32, 0.98] as const;
 
@@ -19,145 +21,171 @@ const SHOWCASE_COLORS = [
   FLAME_HEX_COLORS.blue,
 ] as const;
 
+// Only reveal the first 3 flame shapes — the rest are a surprise
+const REVEALED_COUNT = 3;
+
 export function FlameShowcase() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const shouldReduceMotion = useReducedMotion();
-  const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
 
   return (
-    <div ref={ref} className="relative">
-      {/* Desktop: journey path with connecting SVG line */}
-      <div className="hidden lg:block">
-        {/* SVG connecting line */}
-        <svg
-          className="pointer-events-none absolute left-0 top-1/2 h-[2px] w-full -translate-y-1/2"
-          preserveAspectRatio="none"
-        >
-          <motion.line
-            x1="6%"
-            y1="1"
-            x2="94%"
-            y2="1"
-            stroke="rgba(255,255,255,0.06)"
-            strokeWidth="2"
-            strokeDasharray="800"
-            initial={{ strokeDashoffset: shouldReduceMotion ? 0 : 800 }}
-            animate={inView ? { strokeDashoffset: 0 } : {}}
-            transition={{ duration: 2, delay: 0.3, ease: 'easeOut' }}
-          />
-        </svg>
+    <div ref={ref} className="space-y-8">
+      {/* Fuel bar — above the flames */}
+      <div className="mx-auto max-w-md">
+        <ShowcaseFuelBar />
+      </div>
 
-        <div className="relative grid grid-cols-8 gap-4">
-          {FLAME_LEVELS.map((level, i) => (
+      {/* Desktop / tablet grid */}
+      <div className="hidden sm:grid sm:grid-cols-4 lg:grid-cols-8 gap-4">
+        {FLAME_LEVELS.map((level, i) => {
+          const revealed = i < REVEALED_COUNT;
+          const colors = SHOWCASE_COLORS[i];
+
+          return (
             <motion.div
               key={level.level}
               initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{
                 duration: 0.5,
-                delay: 0.4 + i * 0.1,
+                delay: 0.2 + i * 0.08,
                 ease: EASE_OUT_EXPO,
               }}
-              className="group relative flex flex-col items-center"
-              onMouseEnter={() => setHoveredLevel(level.level)}
-              onMouseLeave={() => setHoveredLevel(null)}
-            >
-              <div className="relative mb-3 flex h-32 w-24 items-center justify-center">
-                {/* Hover glow */}
-                <div
-                  className="pointer-events-none absolute inset-0 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
-                  style={{
-                    background: `radial-gradient(circle, ${SHOWCASE_COLORS[i].medium}30 0%, transparent 70%)`,
-                  }}
-                />
-                <GeometricFlame
-                  state="active"
-                  level={level.level}
-                  colors={SHOWCASE_COLORS[i]}
-                />
-              </div>
-              {/* Dot on the line */}
-              <div
-                className="mb-2 h-2 w-2 rounded-full transition-colors duration-300"
-                style={{
-                  backgroundColor:
-                    hoveredLevel === level.level
-                      ? SHOWCASE_COLORS[i].medium
-                      : 'rgba(255,255,255,0.1)',
-                }}
-              />
-              <span
-                className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: SHOWCASE_COLORS[i].medium }}
-              >
-                Lv. {level.level}
-              </span>
-              <span className="mt-0.5 text-sm font-semibold text-white/80">
-                {level.name}
-              </span>
-              {/* Description on hover */}
-              <motion.span
-                initial={{ opacity: 0, height: 0 }}
-                animate={
-                  hoveredLevel === level.level
-                    ? { opacity: 1, height: 'auto' }
-                    : { opacity: 0, height: 0 }
-                }
-                className="mt-1 overflow-hidden text-center text-[11px] leading-tight text-white/30"
-              >
-                {level.description}
-              </motion.span>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Mobile/Tablet: horizontal scrollable row */}
-      <div className="lg:hidden">
-        <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4">
-          {FLAME_LEVELS.map((level, i) => (
-            <motion.button
-              type="button"
-              key={level.level}
-              initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{
-                duration: 0.5,
-                delay: i * 0.06,
-                ease: EASE_OUT_EXPO,
-              }}
-              className="flex shrink-0 snap-center flex-col items-center"
-              onClick={() =>
-                setHoveredLevel(
-                  hoveredLevel === level.level ? null : level.level,
-                )
-              }
+              className="flex flex-col items-center"
             >
               <div className="relative mb-3 flex h-28 w-20 items-center justify-center">
-                <GeometricFlame
-                  state="active"
-                  level={level.level}
-                  colors={SHOWCASE_COLORS[i]}
-                />
+                {revealed ? (
+                  <>
+                    <GeometricFlame
+                      state="active"
+                      level={level.level}
+                      colors={colors}
+                    />
+                    <ParticleEmbers
+                      state="active"
+                      color={colors.medium}
+                    />
+                  </>
+                ) : (
+                  <div className="relative flex h-full w-full items-center justify-center">
+                    <div
+                      className="absolute h-12 w-12 rounded-full blur-xl"
+                      style={{ backgroundColor: `${colors.medium}15` }}
+                    />
+                    <div
+                      className="flex h-10 w-10 items-center justify-center rounded-full border"
+                      style={{
+                        borderColor: `${colors.medium}20`,
+                        backgroundColor: `${colors.medium}08`,
+                      }}
+                    >
+                      <span
+                        className="text-sm font-bold"
+                        style={{ color: `${colors.medium}40` }}
+                      >
+                        ?
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
               <span
                 className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: SHOWCASE_COLORS[i].medium }}
+                style={{
+                  color: revealed ? colors.medium : `${colors.medium}50`,
+                }}
               >
                 Lv. {level.level}
               </span>
-              <span className="mt-0.5 text-sm font-semibold text-white/80">
+              <span
+                className="mt-0.5 text-sm font-semibold"
+                style={{
+                  color: revealed
+                    ? 'rgba(255,255,255,0.8)'
+                    : 'rgba(255,255,255,0.25)',
+                }}
+              >
                 {level.name}
               </span>
-              {hoveredLevel === level.level && (
-                <span className="mt-1 max-w-[120px] text-center text-[11px] leading-tight text-white/30">
-                  {level.description}
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Mobile: scrollable row */}
+      <div className="sm:hidden">
+        <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-2 pb-4">
+          {FLAME_LEVELS.map((level, i) => {
+            const revealed = i < REVEALED_COUNT;
+            const colors = SHOWCASE_COLORS[i];
+
+            return (
+              <motion.div
+                key={level.level}
+                initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{
+                  duration: 0.5,
+                  delay: i * 0.06,
+                  ease: EASE_OUT_EXPO,
+                }}
+                className="flex shrink-0 snap-center flex-col items-center"
+              >
+                <div className="relative mb-3 flex h-24 w-18 items-center justify-center">
+                  {revealed ? (
+                    <>
+                      <GeometricFlame
+                        state="active"
+                        level={level.level}
+                        colors={colors}
+                      />
+                      <ParticleEmbers
+                        state="active"
+                        color={colors.medium}
+                      />
+                    </>
+                  ) : (
+                    <div className="relative flex h-full w-full items-center justify-center">
+                      <div
+                        className="flex h-8 w-8 items-center justify-center rounded-full border"
+                        style={{
+                          borderColor: `${colors.medium}20`,
+                          backgroundColor: `${colors.medium}08`,
+                        }}
+                      >
+                        <span
+                          className="text-xs font-bold"
+                          style={{ color: `${colors.medium}40` }}
+                        >
+                          ?
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <span
+                  className="text-[10px] font-bold uppercase tracking-widest"
+                  style={{
+                    color: revealed ? colors.medium : `${colors.medium}50`,
+                  }}
+                >
+                  Lv. {level.level}
                 </span>
-              )}
-            </motion.button>
-          ))}
+                <span
+                  className="mt-0.5 text-xs font-semibold"
+                  style={{
+                    color: revealed
+                      ? 'rgba(255,255,255,0.8)'
+                      : 'rgba(255,255,255,0.25)',
+                  }}
+                >
+                  {level.name}
+                </span>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </div>
