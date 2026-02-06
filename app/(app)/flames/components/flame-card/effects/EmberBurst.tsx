@@ -11,7 +11,7 @@ interface EmberBurstProps {
   onComplete?: () => void;
 }
 
-const PARTICLE_COUNT = 24;
+const PARTICLE_COUNT = 36;
 const AMBER_COLORS = ['#fbbf24', '#f59e0b'];
 
 interface BurstParticle {
@@ -38,11 +38,11 @@ function generateBurstParticles(
     return {
       id: i,
       angle: (hash % 360),
-      distance: 60 + (hash2 % 80),
-      size: 3 + (hash3 % 100) / 25,
+      distance: 80 + (hash2 % 100),
+      size: 3 + (hash3 % 100) / 20,
       color: colors[hash % colors.length],
-      delay: (hash2 % 100) / 1000,
-      duration: 0.6 + (hash3 % 100) / 166,
+      delay: (hash2 % 80) / 1000,
+      duration: 0.8 + (hash3 % 100) / 140,
     };
   });
 }

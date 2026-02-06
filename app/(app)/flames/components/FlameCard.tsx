@@ -74,6 +74,7 @@ export function FlameCard({
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [flameFlareUp, setFlameFlareUp] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [completionStats, setCompletionStats] =
     useState<CompletionStats | null>(null);
@@ -84,6 +85,13 @@ export function FlameCard({
   const isPaused = state === 'paused';
   const isFuelBlocked = isFuelDepleted && !isActive;
   const isDisabled = isLoading || isCompleted || isBlocked || isFuelBlocked;
+
+  // During flare-up pulse, feed 'active' for intense flickering
+  const flameVisualState = flameFlareUp
+    ? 'active'
+    : isBlocked
+      ? 'untended'
+      : state;
 
   const handleConfirmComplete = useCallback(async () => {
     setShowConfirm(false);
@@ -98,14 +106,18 @@ export function FlameCard({
     });
 
     setShowCelebration(true);
+    setFlameFlareUp(true);
     await markComplete();
 
-    // Show summary dialog after celebration animation
+    // End flare-up when the pulse animation finishes
+    setTimeout(() => setFlameFlareUp(false), 900);
+
+    // Show summary dialog after savoring the celebration
     summaryTimeoutRef.current = setTimeout(() => {
       setShowSummary(true);
       setShowCelebration(false);
       resetCompleting();
-    }, 1200);
+    }, 2400);
   }, [
     flame.name,
     colors.medium,
@@ -184,20 +196,18 @@ export function FlameCard({
   return (
     <div className="relative w-full">
       {/* Smoke overlay - positioned outside button to avoid clipping */}
-      {!isCompleted && (
-        <div className="pointer-events-none absolute inset-0 z-10">
-          <div className="relative h-full w-full">
-            {/* Position smoke to align with flame visual area */}
-            <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
-              <GeometricSmoke
-                state={isBlocked ? 'untended' : state}
-                color={colors.medium}
-                level={level}
-              />
-            </div>
+      <div className="pointer-events-none absolute inset-0 z-10">
+        <div className="relative h-full w-full">
+          {/* Position smoke to align with flame visual area */}
+          <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
+            <GeometricSmoke
+              state={flameVisualState}
+              color={colors.medium}
+              level={level}
+            />
           </div>
         </div>
-      )}
+      </div>
 
       {/* Celebration effects */}
       <EmberBurst
@@ -268,41 +278,41 @@ export function FlameCard({
 
         {/* Flame visual area */}
         <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
-          {isCompleted ? (
+          <ParticleEmbers
+            state={flameVisualState}
+            color={isCompleted && !flameFlareUp ? '#fbbf24' : colors.light}
+          />
+          <motion.div
+            key={flameFlareUp ? 'flare' : 'rest'}
+            animate={
+              flameFlareUp
+                ? { scale: [1, 1.3, 1] }
+                : {}
+            }
+            transition={
+              flameFlareUp
+                ? { duration: 0.9, ease: [0.22, 1, 0.36, 1] }
+                : {}
+            }
+          >
+            <GeometricFlame
+              state={flameVisualState}
+              level={level}
+              colors={colors}
+            />
+          </motion.div>
+          {/* Golden warmth overlay for completed flames */}
+          {isCompleted && (
             <motion.div
-              className="flex items-center justify-center rounded-full"
+              className="pointer-events-none absolute inset-0 rounded-lg"
               style={{
-                width: 64,
-                height: 64,
-                backgroundColor: `${colors.medium}20`,
+                background:
+                  'radial-gradient(circle at 50% 60%, rgba(251, 191, 36, 0.12) 0%, transparent 70%)',
               }}
-              initial={
-                shouldReduceMotion ? { opacity: 1 } : { scale: 0, opacity: 0 }
-              }
-              animate={{ scale: 1, opacity: 1 }}
-              transition={
-                shouldReduceMotion
-                  ? { duration: 0.1 }
-                  : { type: 'spring', stiffness: 300, damping: 20 }
-              }
-            >
-              <Check
-                className="h-8 w-8"
-                style={{ color: `${colors.medium}80` }}
-              />
-            </motion.div>
-          ) : (
-            <>
-              <ParticleEmbers
-                state={isBlocked ? 'untended' : state}
-                color={colors.light}
-              />
-              <GeometricFlame
-                state={isBlocked ? 'untended' : state}
-                level={level}
-                colors={colors}
-              />
-            </>
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            />
           )}
         </div>
 

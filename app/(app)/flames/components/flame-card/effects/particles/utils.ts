@@ -87,21 +87,31 @@ export function getAnimationIntensity(
 ): AnimationIntensity {
   const isActive = state === 'active';
   const isPaused = state === 'paused';
+  const isCompleted = state === 'completed';
 
   return {
     opacity: isActive
       ? (config?.activeOpacity ?? 1)
       : isPaused
         ? (config?.pausedOpacity ?? 0.4)
-        : (config?.untendedOpacity ?? 0.4),
+        : isCompleted
+          ? 0.3
+          : (config?.untendedOpacity ?? 0.4),
     speed: isActive
       ? (config?.activeSpeed ?? 1)
       : isPaused
         ? (config?.pausedSpeed ?? 2)
-        : (config?.untendedSpeed ?? 2.5),
+        : isCompleted
+          ? 3
+          : (config?.untendedSpeed ?? 2.5),
   };
 }
 
 export function shouldShowParticles(state: FlameState): boolean {
-  return state === 'active' || state === 'paused' || state === 'untended';
+  return (
+    state === 'active' ||
+    state === 'paused' ||
+    state === 'untended' ||
+    state === 'completed'
+  );
 }

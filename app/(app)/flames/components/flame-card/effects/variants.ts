@@ -18,9 +18,9 @@ export const stateVariants: Record<FlameState, TargetAndTransition> = {
     y: 0,
   },
   completed: {
-    scale: 0,
-    opacity: 1,
-    y: 0.9,
+    scale: 0.85,
+    opacity: 0.7,
+    y: 0,
   },
 };
 
