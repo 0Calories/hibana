@@ -1,0 +1,175 @@
+{
+  "common": {
+    "save": "Save",
+    "email": "Email",
+    "password": "Password",
+    "google": "Google",
+    "discord": "Discord",
+    "orContinueWith": "Or continue with",
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "unexpectedError": "An unexpected error occurred"
+  },
+  "validation": {
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Please enter your password",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordMaxLength": "Password cannot be longer than 32 characters",
+    "passwordUppercase": "Must contain at least one uppercase letter",
+    "passwordLowercase": "Must contain at least one lowercase letter",
+    "passwordNumber": "Must contain at least one number",
+    "passwordSpecialChar": "Must contain at least one special character",
+    "passwordsNoMatch": "Passwords don't match",
+    "titleRequired": "Title must not be empty"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back!",
+      "description": "Enter your credentials to log in",
+      "submit": "Log In",
+      "loading": "Logging in...",
+      "success": "Welcome back!",
+      "error": "Login failed: {error}",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create an account",
+      "description": "Enter your information below to get started",
+      "confirmPassword": "Confirm password",
+      "submit": "Create Account",
+      "loading": "Signing up...",
+      "success": "Welcome to Hibana!",
+      "error": "Signup failed: {error}",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Login"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "flames": "Flames",
+    "habits": "Habits",
+    "tasks": "Tasks",
+    "signUp": "Sign Up",
+    "logIn": "Log In"
+  },
+  "dashboard": {
+    "chatPlaceholder": "Ask Ember to do something ...",
+    "emberAlt": "Ember",
+    "createNew": "Create new",
+    "creation": {
+      "titlePlaceholder": "Title",
+      "detailsPlaceholder": "Add optional details ...",
+      "loading": "Creating {mode} ...",
+      "success": "{mode} created successfully!",
+      "error": "Failed to create {mode}: {error}",
+      "defaultTitle": "New {mode}"
+    },
+    "modes": {
+      "flame": "Flame",
+      "habit": "Habit",
+      "task": "Task",
+      "note": "Note",
+      "schedule": "Schedule"
+    }
+  },
+  "flames": {
+    "pageTitle": "Your Flames",
+    "loading": "Loading ...",
+    "create": {
+      "namePlaceholder": "New Flame",
+      "trackingType": "Tracking Type",
+      "trackingTime": "Time",
+      "trackingRepetitions": "Repetitions",
+      "fuelBudget": "Fuel Budget",
+      "targetCount": "Target Count",
+      "unitMinutes": "min",
+      "unitTimes": "times",
+      "daily": "Daily",
+      "loading": "Creating flame...",
+      "success": "Flame created!"
+    },
+    "fuel": {
+      "label": "Fuel",
+      "remaining": "{time} remaining",
+      "depleted": "No fuel remaining",
+      "noBudget": "No fuel budget set"
+    },
+    "card": {
+      "ready": "Ready",
+      "burning": "Burning ...",
+      "resting": "Resting",
+      "tended": "Tended",
+      "blocked": "Idle",
+      "noFuel": "No fuel"
+    },
+    "empty": "No flames yet. Create one to get started!"
+  },
+  "pages": {
+    "tasks": "Tasks",
+    "habits": "Habits",
+    "schedule": "Schedule"
+  },
+  "metadata": {
+    "title": "Hibana",
+    "description": "Ignite your good habits and extinguish the bad"
+  },
+  "MarketingPage": {
+    "title": "Hibana — Habit Tracking That Feels Alive",
+    "description": "Your habits are living flames. Tend them, fuel them, watch them grow."
+  },
+  "marketing": {
+    "jsonLdDescription": "習慣が生きた炎になるゲーミフィケーション型習慣トラッカー。時間を記録し、報酬を獲得し、AIコンパニオンEmberと共に成長しましょう。",
+    "hero": {
+      "badge": "現在開発中",
+      "headlineLine1": "やる気に",
+      "headlineAccent": "火をつけろ",
+      "subtitleHighlight": "(火花) Hibana",
+      "subtitleBody": "は、行動心理学と神経科学の知見を活かしたゲーミフィケーション型の生産性向上・習慣管理アプリです。持続的な習慣づくりと目標達成をサポートします。",
+      "waitlistHint": "ウェイトリストに登録して、リリース時にお知らせを受け取りましょう",
+      "scrollLabel": "スクロール"
+    },
+    "newsletter": {
+      "placeholder": "your@email.com",
+      "ariaLabel": "ニュースレター用メールアドレス",
+      "submit": "登録する"
+    },
+    "progression": {
+      "headlinePrefix": "あなたと共に",
+      "headlineAccent": "成長する習慣",
+      "body": "あなたの時間とエネルギーがFlameの燃料になります。小さなWispでさえ、眩いほどに輝くSupernovaまで成長できます",
+      "levelPrefix": "Lv.",
+      "mysteryLabel": "?"
+    },
+    "fuel": {
+      "label": "燃料",
+      "remaining": "残り 4:32:01"
+    },
+    "ember": {
+      "headlinePrefix": "こちらが",
+      "headlineAccent": "Ember",
+      "body": "明るく元気なフレームスプライトの相棒。あなたの考えを整理し、アプリ内のあらゆる操作をあなたに代わって実行してくれます。すべて自然な会話を通じて。",
+      "tagPlanDay": "一日を計画する",
+      "tagTakeNotes": "メモを取る",
+      "tagManageTodos": "タスクを管理する",
+      "tagJustChat": "おしゃべりする"
+    },
+    "ecosystem": {
+      "headlinePrefix": "習慣トラッカーの",
+      "headlineAccent": "その先へ",
+      "scienceTitle": "サイエンス",
+      "scienceBody": "行動心理学と神経科学の研究に基づいたコンセプトを活用し、目標に向かうモチベーションを維持します。",
+      "sparksTitle": "スパーク",
+      "sparksBody": "努力の通貨。セッション、連続記録、完了したタスクでスパークを獲得。ウィジェット、コスメティック、アップグレードに使えます。",
+      "notesTitle": "メモ & タスク",
+      "notesBody": "アプリを離れずに思いついたことをメモし、タスクを管理。すべてがFlameにフィードバックされます。"
+    },
+    "cta": {
+      "headline": "最初のFlameに火を灯す準備はできましたか？",
+      "body": "登録してリリース時のお知らせを受け取りましょう！"
+    },
+    "footer": {
+      "tagline": "やる気に火をつけろ",
+      "copyright": "© {year} Hibana. All rights reserved."
+    }
+  }
+}
