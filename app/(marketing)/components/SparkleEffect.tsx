@@ -3,14 +3,14 @@
 import { motion, useReducedMotion } from 'framer-motion';
 
 /** Deterministic star-shaped sparkle particles for decorative elements */
-const SPARKLES = Array.from({ length: 10 }, (_, i) => ({
+const SPARKLES = Array.from({ length: 5 }, (_, i) => ({
   id: i,
-  x: 5 + ((i * 2741) % 90),
-  y: 5 + ((i * 1723) % 90),
-  size: 4 + ((i * 937) % 4),
+  x: 1 + ((i * 2741) % 90),
+  y: 1 + ((i * 1723) % 90),
+  size: 3 + ((i * 937) % 3),
   delay: ((i * 571) % 3000) / 1000,
-  duration: 1.5 + ((i * 1291) % 2000) / 1000,
-  rotation: ((i * 433) % 30),
+  duration: 5 + ((i * 1291) % 5000) / 1000,
+  rotation: (i * 433) % 30,
   color: i % 3 === 0 ? '#fde68a' : i % 2 === 0 ? '#fbbf24' : '#ffffff',
 }));
 

@@ -32,7 +32,6 @@ export function FlameShowcase() {
 
   return (
     <div ref={ref} className="space-y-8">
-      {/* Fuel bar — above the flames */}
       <div className="mx-auto max-w-md">
         <ShowcaseFuelBar />
       </div>
@@ -63,17 +62,12 @@ export function FlameShowcase() {
                       level={level.level}
                       colors={colors}
                     />
-                    {level.level > 1 && (
-                      <ParticleEmbers
-                        state="paused"
-                        color={colors.medium}
-                      />
-                    )}
+                    <ParticleEmbers state="active" color={colors.light} />
                     {level.level > 1 && (
                       <GeometricSmoke
                         state="paused"
-                        color={colors.medium}
-                        level={level.level}
+                        color={colors.light}
+                        level={1}
                       />
                     )}
                   </>
@@ -152,10 +146,7 @@ export function FlameShowcase() {
                         colors={colors}
                       />
                       {level.level > 1 && (
-                        <ParticleEmbers
-                          state="paused"
-                          color={colors.medium}
-                        />
+                        <ParticleEmbers state="paused" color={colors.medium} />
                       )}
                     </>
                   ) : (

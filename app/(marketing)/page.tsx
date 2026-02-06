@@ -78,14 +78,6 @@ export default function MarketingPage() {
         aria-labelledby="ember-heading"
         className="relative overflow-hidden"
       >
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, transparent 0%, rgba(251,146,60,0.04) 20%, rgba(251,146,60,0.06) 50%, rgba(251,146,60,0.04) 80%, transparent 100%)',
-          }}
-        />
-
         <div className="relative mx-auto max-w-5xl px-6 py-20 sm:py-24">
           <AnimatedSection className="flex flex-col items-center gap-10 lg:flex-row lg:gap-16">
             <div className="shrink-0">
