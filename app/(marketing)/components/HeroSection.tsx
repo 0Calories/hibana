@@ -24,7 +24,7 @@ export function HeroSection() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1.5 text-xs font-medium text-orange-300"
           >
             <Flame className="h-3.5 w-3.5" />
-            In Development
+            Currently in development
           </motion.div>
 
           {/* Headline */}
