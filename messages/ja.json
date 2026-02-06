@@ -8,7 +8,7 @@
     "orContinueWith": "Or continue with",
     "somethingWentWrong": "Something went wrong. Please try again.",
     "unexpectedError": "An unexpected error occurred",
-    "emberName": "Ember"
+    "emberName": "エンバー"
   },
   "validation": {
     "emailInvalid": "Please enter a valid email address",
@@ -119,57 +119,57 @@
     "description": "Your habits are living flames. Tend them, fuel them, watch them grow."
   },
   "marketing": {
-    "jsonLdDescription": "A gamified habit tracker where your habits are living flames. Track time, earn rewards, and grow with AI companion Ember.",
+    "jsonLdDescription": "習慣が生きた炎になるゲーミフィケーション型習慣トラッカー。時間を記録し、報酬を獲得し、AIコンパニオンEmberと共に成長しましょう。",
     "hero": {
-      "badge": "Currently in development",
-      "headlineLine1": "Set your motivation",
-      "headlineAccent": "ablaze",
+      "badge": "現在開発中",
+      "headlineLine1": "やる気に",
+      "headlineAccent": "火をつけろ",
       "subtitleHighlight": "(火花) Hibana",
-      "subtitleBody": "is a gamified productivity and habit tracking app built on insights from behavioral psychology and neuroscience to help you build lasting habits and achieve your goals.",
-      "waitlistHint": "Join the waitlist for early access and get notified when we launch",
-      "scrollLabel": "Scroll"
+      "subtitleBody": "は、行動心理学と神経科学の知見を活かしたゲーミフィケーション型の生産性向上・習慣管理アプリです。持続的な習慣づくりと目標達成をサポートします。",
+      "waitlistHint": "ウェイトリストに登録して、リリース時にお知らせを受け取りましょう",
+      "scrollLabel": "スクロール"
     },
     "newsletter": {
       "placeholder": "your@email.com",
-      "ariaLabel": "Email address for newsletter",
-      "submit": "Join Waitlist"
+      "ariaLabel": "ニュースレター用メールアドレス",
+      "submit": "登録する"
     },
     "progression": {
-      "headlinePrefix": "Habits that",
-      "headlineAccent": "grow with you",
-      "body": "Your time and energy is the fuel to your Flames. Even a meager Wisp can grow all the way to a stunningly radiant Supernova",
+      "headlinePrefix": "あなたと共に",
+      "headlineAccent": "成長する習慣",
+      "body": "あなたの時間とエネルギーが炎の燃料になります。小さなウィスプでさえ、眩いほどに輝くスーパーノヴァまで成長できます",
       "levelPrefix": "Lv.",
       "mysteryLabel": "?"
     },
     "fuel": {
-      "label": "Fuel",
-      "remaining": "4:32:01 remaining"
+      "label": "燃料",
+      "remaining": "残り 4:32:01"
     },
     "ember": {
-      "headlinePrefix": "Meet",
-      "headlineAccent": "Ember",
-      "body": "Your bright and cheery flame-sprite companion. She''ll help you organize your thoughts and can perform any action available in the app on your behalf; All through natural conversation.",
-      "tagPlanDay": "Plan your day",
-      "tagTakeNotes": "Take notes",
-      "tagManageTodos": "Manage todos",
-      "tagJustChat": "Just chat"
+      "headlinePrefix": "こちらが",
+      "headlineAccent": "エンバー",
+      "body": "明るく元気なフレームスプライトの相棒。あなたの考えを整理し、アプリ内のあらゆる操作をあなたに代わって実行してくれます。すべて自然な会話を通じて。",
+      "tagPlanDay": "一日を計画する",
+      "tagTakeNotes": "メモを取る",
+      "tagManageTodos": "タスクを管理する",
+      "tagJustChat": "おしゃべりする"
     },
     "ecosystem": {
-      "headlinePrefix": "More than just a",
-      "headlineAccent": "habit tracker",
-      "scienceTitle": "Science",
-      "scienceBody": "Leverages concepts based on behavioral psychology and neuroscience research to keep you motivated towards your goals.",
-      "sparksTitle": "Sparks",
-      "sparksBody": "The currency of effort. Sessions, streaks, and completed todos earn Sparks. Spend them on dashboard widgets, cosmetics, and upgrades.",
-      "notesTitle": "Sticky Notes & Todos",
-      "notesBody": "Capture thoughts and track tasks without leaving. Everything feeds back into your flames."
+      "headlinePrefix": "習慣トラッカーの",
+      "headlineAccent": "その先へ",
+      "scienceTitle": "サイエンス",
+      "scienceBody": "行動心理学と神経科学の研究に基づいたコンセプトを活用し、目標に向かうモチベーションを維持します。",
+      "sparksTitle": "スパーク",
+      "sparksBody": "努力の通貨。セッション、連続記録、完了したタスクでスパークを獲得。ウィジェット、コスメティック、アップグレードに使えます。",
+      "notesTitle": "メモ & タスク",
+      "notesBody": "アプリを離れずに思いついたことをメモし、タスクを管理。すべてがFlameにフィードバックされます。"
     },
     "cta": {
-      "headline": "Ready to light your first flame?",
-      "body": "Sign up to get notified when we launch!"
+      "headline": "最初の炎に火を灯す準備はできましたか？",
+      "body": "登録してリリース時のお知らせを受け取りましょう！"
     },
     "footer": {
-      "tagline": "Ignite your motivation",
+      "tagline": "やる気に火をつけろ",
       "copyright": "© {year} Hibana. All rights reserved."
     }
   }
