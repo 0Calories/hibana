@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 
-const EMBER_DATA = Array.from({ length: 50 }, (_, i) => ({
+const EMBER_DATA = Array.from({ length: 15 }, (_, i) => ({
   id: i,
   x: (i * 2741) % 100,
   size: 1.5 + ((i * 1723) % 5),

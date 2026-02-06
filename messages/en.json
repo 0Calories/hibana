@@ -116,5 +116,66 @@
   "MarketingPage": {
     "title": "Hibana — Habit Tracking That Feels Alive",
     "description": "Your habits are living flames. Tend them, fuel them, watch them grow."
+  },
+  "marketing": {
+    "hero": {
+      "badge": "Coming soon",
+      "headline": "Your habits, alive.",
+      "subtitle": "Flames. Fuel. AI. Rewards. One system that turns consistency into something you can see.",
+      "notifyHint": "Get notified when we launch. No spam, just sparks."
+    },
+    "pills": {
+      "flames": "Flames",
+      "fuel": "Fuel",
+      "ember": "Ember AI",
+      "sparks": "Sparks",
+      "shop": "Shop",
+      "notes": "Notes",
+      "todos": "Todos"
+    },
+    "progression": {
+      "headline": "Habits that grow with you",
+      "body": "Eight stages. Wisp to Supernova. Every flame earns its evolution."
+    },
+    "fuel": {
+      "headline": "Time is fuel",
+      "line1": "Set a daily fuel budget.",
+      "line2": "Start a flame. Watch it burn.",
+      "line3": "Your hours become visible progress.",
+      "stat1Label": "8 levels",
+      "stat2Label": "Daily fuel",
+      "stat3Label": "Real-time",
+      "remaining": "remaining",
+      "fuelLabel": "FUEL"
+    },
+    "ember": {
+      "headline": "This is Ember",
+      "body": "Your flame-sprite. She creates flames, organizes thoughts, and keeps you going.",
+      "tag1": "Create flames",
+      "tag2": "Take notes",
+      "tag3": "Manage todos",
+      "tag4": "Plan your day",
+      "tag5": "Just chat"
+    },
+    "ecosystem": {
+      "headline": "More than a habit tracker",
+      "sparksTitle": "Sparks",
+      "sparksBody": "The currency of effort. Sessions, streaks, and completed todos earn sparks — proof of work you can spend.",
+      "shopTitle": "Shop",
+      "shopBody": "Spend sparks on flame colors, card themes, and dashboard widgets. Effort unlocks upgrades.",
+      "notesTitle": "Notes & Todos",
+      "notesBody": "Capture thoughts and track tasks without leaving. Everything feeds back into your flames.",
+      "scienceTitle": "Science",
+      "scienceBody": "Every mechanic — streaks, progression, variable rewards — is informed by behavioral psychology."
+    },
+    "whyHibana": {
+      "headline": "Why Hibana?",
+      "body1": "Spark. In Japanese, hibana means spark.",
+      "body2": "Every fire started as one."
+    },
+    "cta": {
+      "headline": "Ready to light your first flame?",
+      "body": "Join the waitlist. Your Wisp is waiting."
+    }
   }
 }
