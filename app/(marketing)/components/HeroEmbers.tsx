@@ -2,24 +2,22 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 
-const EMBER_DATA = Array.from({ length: 15 }, (_, i) => ({
+const EMBER_DATA = Array.from({ length: 40 }, (_, i) => ({
   id: i,
   x: (i * 2741) % 100,
-  size: 1.5 + ((i * 1723) % 5),
-  delay: ((i * 937) % 10000) / 1000,
-  duration: 5 + ((i * 1291) % 8),
-  drift: -40 + ((i * 571) % 80),
+  size: 2 + ((i * 1723) % 4),
+  delay: ((i * 937) % 8000) / 1000,
+  duration: 4 + ((i * 1291) % 6),
+  drift: -30 + ((i * 571) % 60),
   color:
-    i % 7 === 0
-      ? '#f43f5e'
-      : i % 5 === 0
-        ? '#f97316'
-        : i % 3 === 0
-          ? '#f59e0b'
-          : i % 2 === 0
-            ? '#fbbf24'
-            : '#fb923c',
-  opacity: 0.1 + ((i * 317) % 50) / 100,
+    i % 5 === 0
+      ? '#f97316'
+      : i % 3 === 0
+        ? '#f59e0b'
+        : i % 2 === 0
+          ? '#fbbf24'
+          : '#fb923c',
+  opacity: 0.15 + ((i * 317) % 45) / 100,
 }));
 
 export function HeroEmbers() {
@@ -38,12 +36,11 @@ export function HeroEmbers() {
             width: ember.size,
             height: ember.size,
             backgroundColor: ember.color,
-            boxShadow: `0 0 ${ember.size * 2}px ${ember.color}`,
           }}
           animate={{
             y: '-120vh',
-            x: [0, ember.drift, ember.drift * 0.5],
-            opacity: [0, ember.opacity, ember.opacity * 0.8, 0],
+            x: [0, ember.drift],
+            opacity: [0, ember.opacity, ember.opacity, 0],
           }}
           transition={{
             duration: ember.duration,

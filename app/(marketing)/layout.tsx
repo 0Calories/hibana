@@ -45,9 +45,12 @@ export default async function MarketingLayout({
       <nav className="fixed top-0 z-50 flex w-full items-center justify-between px-6 py-4">
         <Link
           href="/"
-          className="text-lg font-bold tracking-tight text-white/90"
+          className="group text-lg font-bold tracking-tight"
         >
-          火花 <span className="font-extrabold text-white">Hibana</span>
+          <span className="bg-linear-to-r from-amber-300 via-orange-400 to-rose-500 bg-clip-text text-transparent transition-opacity group-hover:opacity-80">
+            火花
+          </span>{' '}
+          <span className="font-extrabold text-white">Hibana</span>
         </Link>
         <div className="flex items-center gap-2">
           <Button
@@ -56,12 +59,6 @@ export default async function MarketingLayout({
             asChild
           >
             <Link href="/login">{t('logIn')}</Link>
-          </Button>
-          <Button
-            className="bg-orange-500 text-white hover:bg-orange-400 border-none shadow-[0_0_20px_rgba(249,115,22,0.2)]"
-            asChild
-          >
-            <Link href="/signup">{t('signUp')}</Link>
           </Button>
         </div>
       </nav>

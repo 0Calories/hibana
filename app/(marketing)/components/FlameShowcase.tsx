@@ -3,6 +3,7 @@
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useRef } from 'react';
 import { GeometricFlame } from '@/app/(app)/flames/components/flame-card/effects/GeometricFlame';
+import { GeometricSmoke } from '@/app/(app)/flames/components/flame-card/effects/GeometricSmoke';
 import { ParticleEmbers } from '@/app/(app)/flames/components/flame-card/effects/ParticleEmbers';
 import { FLAME_HEX_COLORS } from '@/app/(app)/flames/utils/colors';
 import { FLAME_LEVELS } from '@/app/(app)/flames/utils/levels';
@@ -65,6 +66,11 @@ export function FlameShowcase() {
                     <ParticleEmbers
                       state="active"
                       color={colors.medium}
+                    />
+                    <GeometricSmoke
+                      state="active"
+                      color={colors.medium}
+                      level={level.level}
                     />
                   </>
                 ) : (

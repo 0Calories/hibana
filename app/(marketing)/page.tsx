@@ -5,6 +5,7 @@ import { FlameShowcase } from './components/FlameShowcase';
 import { HeroEmbers } from './components/HeroEmbers';
 import { HeroSection } from './components/HeroSection';
 import { NewsletterForm } from './components/NewsletterForm';
+import { SparkleEffect } from './components/SparkleEffect';
 
 export default function MarketingPage() {
   return (
@@ -106,9 +107,11 @@ export default function MarketingPage() {
                 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl"
               >
                 Meet{' '}
-                <span className="bg-linear-to-r from-amber-300 via-orange-400 to-violet-400 bg-clip-text text-transparent">
-                  Ember
-                </span>
+                <SparkleEffect>
+                  <span className="bg-linear-to-r from-amber-300 via-orange-400 to-violet-400 bg-clip-text text-transparent">
+                    Ember
+                  </span>
+                </SparkleEffect>
               </h2>
               <p className="mb-6 max-w-md text-lg leading-relaxed text-white/40">
                 Your bright and cheery flame-sprite companion. She&apos;ll help
@@ -154,7 +157,10 @@ export default function MarketingPage() {
               id="ecosystem-heading"
               className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl"
             >
-              More than just a habit tracker
+              More than just a{' '}
+              <span className="bg-linear-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                habit tracker
+              </span>
             </h2>
           </AnimatedSection>
 
@@ -182,16 +188,36 @@ export default function MarketingPage() {
               <AnimatedDiv
                 key={feature.title}
                 delay={i * 0.08}
-                className="group rounded-2xl border border-white/6 bg-white/2 p-5 transition-colors hover:border-white/12 hover:bg-white/4"
+                className="group relative overflow-hidden rounded-2xl border border-white/6 bg-white/2 p-6 transition-colors hover:border-white/12 hover:bg-white/4"
               >
-                <feature.icon
-                  className="mb-3 h-5 w-5"
-                  style={{ color: feature.color }}
+                {/* Colored top accent line */}
+                <div
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, ${feature.color}60, transparent)`,
+                  }}
                 />
-                <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-white/90">
+                {/* Subtle glow on hover */}
+                <div
+                  className="pointer-events-none absolute -top-20 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100"
+                  style={{ backgroundColor: `${feature.color}15` }}
+                />
+                <div
+                  className="relative mb-4 flex h-10 w-10 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor: `${feature.color}12`,
+                    border: `1px solid ${feature.color}20`,
+                  }}
+                >
+                  <feature.icon
+                    className="h-5 w-5"
+                    style={{ color: feature.color }}
+                  />
+                </div>
+                <h3 className="relative mb-2 text-sm font-bold uppercase tracking-wider text-white/90">
                   {feature.title}
                 </h3>
-                <p className="text-xs leading-relaxed text-white/35">
+                <p className="relative text-sm leading-relaxed text-white/35">
                   {feature.body}
                 </p>
               </AnimatedDiv>

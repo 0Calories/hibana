@@ -35,11 +35,12 @@ export function HeroSection() {
             transition={{ duration: 0.8, ease: EASE_OUT_EXPO }}
             className="mb-4 text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl"
           >
-            <span className="bg-linear-to-r from-amber-300 via-orange-400 to-rose-500 bg-clip-text text-transparent">
-              Ignite
-            </span>
+            Set your motivation
             <br />
-            your motivation.
+            <span className="bg-linear-to-r from-amber-300 via-orange-400 to-rose-500 bg-clip-text text-transparent">
+              ablaze
+            </span>
+            .
           </motion.h1>
 
           {/* Subtitle */}
