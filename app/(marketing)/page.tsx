@@ -39,15 +39,6 @@ export default function MarketingPage() {
         aria-labelledby="hero-heading"
         className="relative flex min-h-svh flex-col items-center justify-center px-6 pt-20"
       >
-        <div
-          className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2"
-          style={{
-            width: '900px',
-            height: '700px',
-            background:
-              'radial-gradient(ellipse at center, rgba(249,115,22,0.07) 0%, rgba(249,115,22,0.02) 40%, transparent 70%)',
-          }}
-        />
         <HeroEmbers />
         <HeroSection />
       </section>

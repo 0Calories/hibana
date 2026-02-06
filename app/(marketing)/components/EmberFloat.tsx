@@ -3,14 +3,16 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 
-/** Sparkles that orbit around Ember */
-const EMBER_SPARKLES = Array.from({ length: 8 }, (_, i) => ({
+/** Star-shaped sparkles scattered around Ember — white/violet to contrast against orange */
+const EMBER_SPARKLES = Array.from({ length: 10 }, (_, i) => ({
   id: i,
-  x: 15 + ((i * 2741) % 70),
-  y: 10 + ((i * 1723) % 75),
-  size: 2 + ((i * 937) % 3),
-  delay: ((i * 571) % 4000) / 1000,
-  duration: 2 + ((i * 1291) % 2000) / 1000,
+  x: 10 + ((i * 2741) % 80),
+  y: 5 + ((i * 1723) % 85),
+  size: 4 + ((i * 937) % 5),
+  delay: ((i * 571) % 5000) / 1000,
+  duration: 2.5 + ((i * 1291) % 2000) / 1000,
+  rotation: ((i * 433) % 45),
+  color: i % 3 === 0 ? '#e9d5ff' : i % 2 === 0 ? '#ffffff' : '#c4b5fd',
 }));
 
 export function EmberFloat() {
@@ -26,22 +28,25 @@ export function EmberFloat() {
         }}
       />
 
-      {/* Sparkle particles around Ember */}
+      {/* Star sparkles around Ember */}
       {!shouldReduceMotion &&
         EMBER_SPARKLES.map((s) => (
           <motion.div
             key={s.id}
-            className="pointer-events-none absolute rounded-full bg-amber-300"
+            className="pointer-events-none absolute"
             style={{
               width: s.size,
               height: s.size,
               left: `${s.x}%`,
               top: `${s.y}%`,
-              boxShadow: `0 0 ${s.size * 2}px rgba(251,191,36,0.5)`,
+              backgroundColor: s.color,
+              transform: `rotate(45deg)`,
+              boxShadow: `0 0 ${s.size * 2}px ${s.color}80`,
             }}
             animate={{
-              opacity: [0, 0.8, 0],
-              scale: [0.5, 1.3, 0.5],
+              opacity: [0, 0.9, 0],
+              scale: [0.3, 1.2, 0.3],
+              rotate: [45, 45 + s.rotation, 45],
             }}
             transition={{
               duration: s.duration,
@@ -65,7 +70,8 @@ export function EmberFloat() {
           alt="Ember — Hibana's AI flame-sprite companion"
           width={180}
           height={270}
-          className="relative drop-shadow-[0_0_60px_rgba(251,146,60,0.35)]"
+          className="relative select-none drop-shadow-[0_0_60px_rgba(251,146,60,0.35)]"
+          draggable={false}
           priority={false}
         />
       </motion.div>

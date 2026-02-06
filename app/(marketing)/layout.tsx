@@ -41,6 +41,10 @@ export default async function MarketingLayout({
 
   return (
     <div className="dark relative min-h-svh bg-[#090b14] text-white">
+      {/* Match html/body bg to prevent overscroll color mismatch on Mac */}
+      {/* eslint-disable-next-line @next/next/no-css-tags */}
+      <style>{`html, body { background-color: #090b14; }`}</style>
+
       {/* ── Fixed nav ── */}
       <nav className="fixed top-0 z-50 flex w-full items-center justify-between px-6 py-4">
         <Link

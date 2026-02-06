@@ -40,7 +40,6 @@ export function HeroSection() {
             <span className="bg-linear-to-r from-amber-300 via-orange-400 to-rose-500 bg-clip-text text-transparent">
               ablaze
             </span>
-            .
           </motion.h1>
 
           {/* Subtitle */}
@@ -98,7 +97,8 @@ export function HeroSection() {
                 alt="Ember — Hibana's AI companion"
                 width={240}
                 height={360}
-                className="relative drop-shadow-[0_0_60px_rgba(251,146,60,0.3)]"
+                className="relative select-none drop-shadow-[0_0_60px_rgba(251,146,60,0.3)]"
+                draggable={false}
                 priority
               />
             </motion.div>

@@ -63,15 +63,19 @@ export function FlameShowcase() {
                       level={level.level}
                       colors={colors}
                     />
-                    <ParticleEmbers
-                      state="active"
-                      color={colors.medium}
-                    />
-                    <GeometricSmoke
-                      state="active"
-                      color={colors.medium}
-                      level={level.level}
-                    />
+                    {level.level > 1 && (
+                      <ParticleEmbers
+                        state="paused"
+                        color={colors.medium}
+                      />
+                    )}
+                    {level.level > 1 && (
+                      <GeometricSmoke
+                        state="paused"
+                        color={colors.medium}
+                        level={level.level}
+                      />
+                    )}
                   </>
                 ) : (
                   <div className="relative flex h-full w-full items-center justify-center">
@@ -147,10 +151,12 @@ export function FlameShowcase() {
                         level={level.level}
                         colors={colors}
                       />
-                      <ParticleEmbers
-                        state="active"
-                        color={colors.medium}
-                      />
+                      {level.level > 1 && (
+                        <ParticleEmbers
+                          state="paused"
+                          color={colors.medium}
+                        />
+                      )}
                     </>
                   ) : (
                     <div className="relative flex h-full w-full items-center justify-center">
