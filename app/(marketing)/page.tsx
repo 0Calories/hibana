@@ -67,7 +67,7 @@ export default async function MarketingPage() {
       ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="hero-heading"
-        className="relative flex min-h-svh flex-col items-center justify-center px-6 pt-20"
+        className="relative flex min-h-svh flex-col items-center justify-center px-6 pt-20 pb-24"
       >
         <HeroEmbers />
         <HeroSection />

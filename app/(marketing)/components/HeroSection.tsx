@@ -71,13 +71,13 @@ export function HeroSection() {
         </motion.div>
       </motion.div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — hidden on short viewports to avoid overlapping the form */}
       {!shouldReduceMotion && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5, duration: 1 }}
-          className="absolute bottom-10 flex flex-col items-center gap-2"
+          className="absolute bottom-8 flex flex-col items-center gap-2"
         >
           <span className="text-[11px] uppercase tracking-[0.2em] text-white/20">
             {t('hero.scrollLabel')}

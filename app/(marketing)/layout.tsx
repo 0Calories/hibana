@@ -47,7 +47,7 @@ export default async function MarketingLayout({
       <style>{`html, body { background-color: #090b14; }`}</style>
 
       {/* ── Fixed nav ── */}
-      <nav className="fixed top-0 z-50 flex w-full items-center justify-between px-6 py-4">
+      <nav className="fixed top-0 z-50 flex w-full items-center justify-between bg-[#090b14]/80 px-6 py-4 backdrop-blur-md">
         <Link
           href="/"
           className="group text-lg font-bold tracking-tight"
