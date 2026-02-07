@@ -121,7 +121,7 @@ export function FlameShowcase() {
 
       {/* Mobile: scrollable row */}
       <div className="sm:hidden -my-16">
-        <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden px-2 py-16">
+        <div className="flex snap-x snap-mandatory gap-6 overflow-x-scroll overflow-y-hidden px-2 pt-16 pb-4">
           {FLAME_LEVELS.map((level, i) => {
             const revealed = i < REVEALED_COUNT;
             const colors = SHOWCASE_COLORS[i];
