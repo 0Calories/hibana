@@ -148,8 +148,13 @@ export function FlameShowcase() {
                         colors={colors}
                       />
                       {level.level > 1 && (
-                        <ParticleEmbers state="paused" color={colors.medium} />
+                        <ParticleEmbers state="active" color={colors.light} />
                       )}
+                      <GeometricSmoke
+                        state="paused"
+                        color={colors.light}
+                        level={1}
+                      />
                     </>
                   ) : (
                     <div className="relative flex h-full w-full items-center justify-center">
