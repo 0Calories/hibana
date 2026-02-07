@@ -16,7 +16,7 @@ export function AnimatedSection({
 } & Omit<HTMLMotionProps<'section'>, 'children' | 'className'>) {
   return (
     <motion.section
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 1, y: 0 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: 0.7, delay, ease: EASE_OUT_EXPO }}
@@ -40,7 +40,7 @@ export function AnimatedDiv({
 } & Omit<HTMLMotionProps<'div'>, 'children' | 'className'>) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 1, y: 0 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.6, delay, ease: EASE_OUT_EXPO }}

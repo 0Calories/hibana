@@ -121,7 +121,7 @@ export function FlameShowcase() {
 
       {/* Mobile: scrollable row */}
       <div className="sm:hidden">
-        <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-2 pb-4">
+        <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden px-2 pb-4">
           {FLAME_LEVELS.map((level, i) => {
             const revealed = i < REVEALED_COUNT;
             const colors = SHOWCASE_COLORS[i];
@@ -147,14 +147,14 @@ export function FlameShowcase() {
                         level={level.level}
                         colors={colors}
                       />
+                      <ParticleEmbers state="active" color={colors.light} />
                       {level.level > 1 && (
-                        <ParticleEmbers state="active" color={colors.light} />
+                        <GeometricSmoke
+                          state="active"
+                          color={colors.light}
+                          level={1}
+                        />
                       )}
-                      <GeometricSmoke
-                        state="paused"
-                        color={colors.light}
-                        level={1}
-                      />
                     </>
                   ) : (
                     <div className="relative flex h-full w-full items-center justify-center">
