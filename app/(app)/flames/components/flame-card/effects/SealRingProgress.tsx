@@ -7,8 +7,8 @@ interface SealRingProgressProps {
   visible: boolean;
 }
 
-const RING_SIZE = 120;
-const STROKE_WIDTH = 3;
+const RING_SIZE = 240;
+const STROKE_WIDTH = 4;
 const RADIUS = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 const SEAL_COLOR = '#fbbf24';
@@ -57,6 +57,7 @@ export function SealRingProgress({ progress, visible }: SealRingProgressProps) {
               style={{
                 filter: `drop-shadow(0 0 6px ${SEAL_COLOR}80)`,
               }}
+              initial={{ strokeDashoffset: CIRCUMFERENCE }}
               animate={{ strokeDashoffset: offset }}
               transition={{ duration: 0.05, ease: 'linear' }}
             />
