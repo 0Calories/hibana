@@ -41,10 +41,8 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
     ease: 'easeInOut' as const,
   };
 
-  // Sealed state: special rendering
   if (state === 'sealed') {
     if (isCelestial) {
-      // Celestial sealed: ghost afterglow pulse
       return (
         <motion.svg
           viewBox="0 0 100 100"

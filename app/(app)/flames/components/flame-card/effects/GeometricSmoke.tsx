@@ -89,9 +89,9 @@ export function GeometricSmoke({
     return null;
   }
 
-  const isCompleted = state === 'sealed';
+  const isSealed = state === 'sealed';
 
-  const { opacity, speed } = isCompleted
+  const { opacity, speed } = isSealed
     ? { opacity: 0.25, speed: 3.5 }
     : getAnimationIntensity(state, {
         activeOpacity: 0.85,
