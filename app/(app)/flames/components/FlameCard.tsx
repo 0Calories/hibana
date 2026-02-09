@@ -248,6 +248,7 @@ export function FlameCard({
             state={isBlocked ? 'untended' : state}
             level={level}
             colors={colors}
+            sealProgress={isSealing ? longPress.progress : 0}
           />
 
           {/* Seal ring progress overlay */}
