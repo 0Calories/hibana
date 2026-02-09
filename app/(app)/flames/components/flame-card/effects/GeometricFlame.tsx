@@ -25,7 +25,7 @@ export function GeometricFlame({
   const clampedLevel = Math.max(1, Math.min(8, level));
   const { Base, Flame, isCelestial } = FLAME_REGISTRY[clampedLevel];
 
-  const transition = {
+  const springTransition = {
     type: 'spring' as const,
     stiffness: 200,
     damping: 20,
@@ -67,9 +67,7 @@ export function GeometricFlame({
 
     const tick = () => {
       const p = sealProgressRef.current;
-      // Amplitude: baseline → 4px at full progress
       const amp = 1 + p * 1;
-      // Frequency: starts at 5Hz, accelerates to 10Hz
       const freq = 8 + p * 2;
       const elapsed = (Date.now() - startTime) / 1000;
       shakeX.set(Math.sin(elapsed * freq * 2 * Math.PI) * amp);
@@ -81,6 +79,7 @@ export function GeometricFlame({
     return () => cancelAnimationFrame(rafId);
   }, [state, shouldReduceMotion, shakeX, shakeY]);
 
+  // Sealed state has genuinely different rendering (no flame / ghost glow)
   if (state === 'sealed') {
     if (isCelestial) {
       return (
@@ -91,7 +90,7 @@ export function GeometricFlame({
           aria-hidden="true"
           initial={false}
           animate={{ scale: 0.85, opacity: 1, y: 0 }}
-          transition={transition}
+          transition={springTransition}
         >
           {Base && <Base />}
           <motion.g
@@ -121,51 +120,14 @@ export function GeometricFlame({
         aria-hidden="true"
         initial={false}
         animate={{ scale: 0.85, opacity: 0.7, y: 0 }}
-        transition={transition}
+        transition={springTransition}
       >
         {Base && <Base />}
       </motion.svg>
     );
   }
 
-  // Sealing state: gradual growth + shake driven by sealProgress
-  if (state === 'sealing') {
-    const scale = 0.8 + sealProgress * 0.35; // 0.8 → 1.15
-    const y = sealProgress * -6;
-
-    return (
-      <motion.div style={{ x: shakeX, y: shakeY }}>
-        <motion.svg
-          viewBox="0 0 100 100"
-          className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
-          role="img"
-          aria-hidden="true"
-          initial={false}
-          animate={{ scale, y }}
-          transition={{ type: 'tween', duration: 0.1, ease: 'linear' }}
-        >
-          {Base && <Base />}
-          {!shouldReduceMotion ? (
-            <motion.g
-              style={{
-                originX: '50%',
-                originY: isCelestial ? '50%' : '100%',
-              }}
-              animate={
-                isCelestial ? radiateVariants[state] : flickerVariants[state]
-              }
-              transition={isCelestial ? radiateTransition : flickerTransition}
-            >
-              <Flame colors={colors} />
-            </motion.g>
-          ) : (
-            <Flame colors={colors} />
-          )}
-        </motion.svg>
-      </motion.div>
-    );
-  }
-
+  // Reduced motion: simple static rendering, no shake wrapper needed
   if (shouldReduceMotion) {
     return (
       <motion.svg
@@ -175,7 +137,7 @@ export function GeometricFlame({
         aria-hidden="true"
         initial={false}
         animate={stateVariants[state]}
-        transition={transition}
+        transition={springTransition}
       >
         {Base && <Base />}
         <Flame colors={colors} />
@@ -183,24 +145,43 @@ export function GeometricFlame({
     );
   }
 
+  // Compute SVG animate values: dynamic for sealing, from stateVariants otherwise
+  const isSealing = state === 'sealing';
+  const svgAnimate = isSealing
+    ? {
+        scale: 0.8 + sealProgress * 0.35,
+        y: sealProgress * -6,
+        opacity: 1,
+      }
+    : stateVariants[state];
+  // Sealing uses fast tween to follow progress; other states spring back naturally
+  const svgTransition = isSealing
+    ? { type: 'tween' as const, duration: 0.1, ease: 'linear' as const }
+    : springTransition;
+
+  // Stable DOM tree: always motion.div > motion.svg so spring-back works on release
   return (
-    <motion.svg
-      viewBox="0 0 100 100"
-      className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
-      role="img"
-      aria-hidden="true"
-      initial={false}
-      animate={stateVariants[state]}
-      transition={transition}
-    >
-      {Base && <Base />}
-      <motion.g
-        style={{ originX: '50%', originY: isCelestial ? '50%' : '100%' }}
-        animate={isCelestial ? radiateVariants[state] : flickerVariants[state]}
-        transition={isCelestial ? radiateTransition : flickerTransition}
+    <motion.div style={{ x: shakeX, y: shakeY }}>
+      <motion.svg
+        viewBox="0 0 100 100"
+        className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
+        role="img"
+        aria-hidden="true"
+        initial={false}
+        animate={svgAnimate}
+        transition={svgTransition}
       >
-        <Flame colors={colors} />
-      </motion.g>
-    </motion.svg>
+        {Base && <Base />}
+        <motion.g
+          style={{ originX: '50%', originY: isCelestial ? '50%' : '100%' }}
+          animate={
+            isCelestial ? radiateVariants[state] : flickerVariants[state]
+          }
+          transition={isCelestial ? radiateTransition : flickerTransition}
+        >
+          <Flame colors={colors} />
+        </motion.g>
+      </motion.svg>
+    </motion.div>
   );
 }
