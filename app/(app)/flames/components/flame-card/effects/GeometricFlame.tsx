@@ -50,8 +50,8 @@ export function GeometricFlame({
   };
 
   // Continuous shake driven by rAF + sin()
-  const shakeX = useMotionValue(20);
-  const shakeY = useMotionValue(20);
+  const shakeX = useMotionValue(0);
+  const shakeY = useMotionValue(0);
   const sealProgressRef = useRef(sealProgress);
   sealProgressRef.current = sealProgress;
 
