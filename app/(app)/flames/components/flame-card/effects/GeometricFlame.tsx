@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import type { FlameState } from '../../hooks/useFlameTimer';
+import type { FlameState } from '../../../utils/types';
 import { FLAME_REGISTRY } from './flames';
 import type { ShapeColors } from './types';
 import { flickerVariants, radiateVariants, stateVariants } from './variants';

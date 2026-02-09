@@ -1,4 +1,4 @@
-import type { FlameState } from '../../hooks/useFlameTimer';
+import type { FlameState } from '../../../utils/types';
 
 export interface ShapeColors {
   light: string;

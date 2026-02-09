@@ -1,5 +1,5 @@
 import type { TargetAndTransition } from 'framer-motion';
-import type { FlameState } from '../../hooks/useFlameTimer';
+import type { FlameState } from '../../../utils/types';
 
 export const stateVariants: Record<FlameState, TargetAndTransition> = {
   untended: {

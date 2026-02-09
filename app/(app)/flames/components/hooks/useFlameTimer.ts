@@ -5,13 +5,6 @@ import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { setFlameCompletion } from '../../actions/flame-actions';
 import { endSession, startSession } from '../../session-actions';
 
-export type FlameState =
-  | 'untended'
-  | 'active'
-  | 'paused'
-  | 'sealing'
-  | 'completed';
-
 interface UseFlameTimerOptions {
   flame: Flame;
   session: FlameSession | null;

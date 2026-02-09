@@ -1,4 +1,4 @@
-import type { FlameState } from '../../../hooks/useFlameTimer';
+import type { FlameState } from '@/app/(app)/flames/utils/types';
 
 /** Base particle properties shared by all particle types */
 export interface Particle {

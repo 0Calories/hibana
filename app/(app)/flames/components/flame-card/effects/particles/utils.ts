@@ -1,4 +1,4 @@
-import type { FlameState } from '../../../hooks/useFlameTimer';
+import type { FlameState } from '@/app/(app)/flames/utils/types';
 import type {
   AnimationIntensity,
   Particle,
