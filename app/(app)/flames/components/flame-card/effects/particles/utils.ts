@@ -103,5 +103,10 @@ export function getAnimationIntensity(
 }
 
 export function shouldShowParticles(state: FlameState): boolean {
-  return state === 'active' || state === 'paused' || state === 'untended';
+  return (
+    state === 'active' ||
+    state === 'paused' ||
+    state === 'untended' ||
+    state === 'sealing'
+  );
 }

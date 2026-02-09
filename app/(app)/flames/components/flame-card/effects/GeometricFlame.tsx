@@ -23,17 +23,74 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
     damping: 20,
   };
 
+  const flickerDuration =
+    state === 'sealing' ? 0.5 : state === 'active' ? 0.8 : 2;
+
   const flickerTransition = {
-    duration: state === 'active' ? 0.8 : 2,
+    duration: flickerDuration,
     repeat: Infinity,
     ease: 'easeInOut' as const,
   };
 
+  const radiateDuration =
+    state === 'sealing' ? 1.2 : state === 'active' ? 2 : 3;
+
   const radiateTransition = {
-    duration: state === 'active' ? 2 : 3,
+    duration: radiateDuration,
     repeat: Infinity,
     ease: 'easeInOut' as const,
   };
+
+  // Sealed state: special rendering
+  if (state === 'completed') {
+    if (isCelestial) {
+      // Celestial sealed: ghost afterglow pulse
+      return (
+        <motion.svg
+          viewBox="0 0 100 100"
+          className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
+          role="img"
+          aria-hidden="true"
+          initial={false}
+          animate={{ scale: 0.85, opacity: 1, y: 0 }}
+          transition={transition}
+        >
+          {Base && <Base />}
+          <motion.g
+            style={{ originX: '50%', originY: '50%' }}
+            animate={
+              shouldReduceMotion
+                ? { opacity: 0.17 }
+                : { opacity: [0.12, 0.22, 0.12] }
+            }
+            transition={
+              shouldReduceMotion
+                ? { duration: 0.3 }
+                : { duration: 4, repeat: Infinity, ease: 'easeInOut' }
+            }
+          >
+            <Flame colors={colors} />
+          </motion.g>
+        </motion.svg>
+      );
+    }
+
+    // Earthly sealed: flame hidden, base remains
+    return (
+      <motion.svg
+        viewBox="0 0 100 100"
+        className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
+        role="img"
+        aria-hidden="true"
+        initial={false}
+        animate={{ scale: 0.85, opacity: 0.7, y: 0 }}
+        transition={transition}
+      >
+        {Base && <Base />}
+        {/* No Flame rendered - it's been sealed */}
+      </motion.svg>
+    );
+  }
 
   if (shouldReduceMotion) {
     return (

@@ -14,6 +14,8 @@ export interface ParticleStateConfig {
   active: { count: number; sizeMultiplier: number };
   paused: { count: number; sizeMultiplier: number };
   untended: { count: number; sizeMultiplier: number };
+  sealing?: { count: number; sizeMultiplier: number };
+  completed?: { count: number; sizeMultiplier: number };
 }
 
 export interface AnimationIntensity {
