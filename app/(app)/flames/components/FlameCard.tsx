@@ -194,7 +194,6 @@ export function FlameCard({
         </div>
       </div>
 
-      {/* Seal celebration burst */}
       <SealCelebration
         active={celebrationActive}
         color={colors.medium}
@@ -250,13 +249,13 @@ export function FlameCard({
             level={level}
             colors={colors}
           />
+
           {/* Seal ring progress overlay */}
           <SealRingProgress progress={longPress.progress} visible={isSealing} />
         </div>
 
         {/* Footer - Timer, Progress, State */}
         <div className="flex flex-col gap-1 bg-slate-200/70 px-2 py-2 dark:bg-black/30 sm:gap-1.5 sm:px-3 sm:py-3">
-          {/* Timer display */}
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
             <TimerDisplay
               elapsedSeconds={elapsedSeconds}
@@ -265,13 +264,9 @@ export function FlameCard({
               color={colors.light}
             />
           )}
-
-          {/* Progress bar */}
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
             <ProgressBar progress={progress} state={state} colors={colors} />
           )}
-
-          {/* State text */}
           <div
             className={cn(
               'text-center text-[10px] sm:text-xs',
@@ -295,7 +290,6 @@ export function FlameCard({
         )}
       </motion.button>
 
-      {/* Seal summary modal */}
       <SealSummaryModal
         open={showSummary}
         onOpenChange={setShowSummary}
