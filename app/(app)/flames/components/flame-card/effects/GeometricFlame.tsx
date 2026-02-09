@@ -79,22 +79,31 @@ export function GeometricFlame({
     return () => cancelAnimationFrame(rafId);
   }, [state, shouldReduceMotion, shakeX, shakeY]);
 
-  // Sealed state has genuinely different rendering (no flame / ghost glow)
+  // Sealed state: bounce from sealing peak then settle into resting visual.
+  // The SealCelebration burst overlay masks the render branch switch.
   if (state === 'sealed') {
+    const sealBounceTransition = {
+      type: 'spring' as const,
+      stiffness: 120,
+      damping: 12,
+    };
+
     if (isCelestial) {
+      // Celestial: bounce-settle, flame transitions to ghost glow
       return (
         <motion.svg
           viewBox="0 0 100 100"
           className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
           role="img"
           aria-hidden="true"
-          initial={false}
+          initial={{ scale: 1.2, y: -6 }}
           animate={{ scale: 0.85, opacity: 1, y: 0 }}
-          transition={springTransition}
+          transition={sealBounceTransition}
         >
           {Base && <Base />}
           <motion.g
             style={{ originX: '50%', originY: '50%' }}
+            initial={{ opacity: 1 }}
             animate={
               shouldReduceMotion
                 ? { opacity: 0.17 }
@@ -103,7 +112,12 @@ export function GeometricFlame({
             transition={
               shouldReduceMotion
                 ? { duration: 0.3 }
-                : { duration: 4, repeat: Infinity, ease: 'easeInOut' }
+                : {
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 0.4,
+                  }
             }
           >
             <Flame colors={colors} />
@@ -112,17 +126,26 @@ export function GeometricFlame({
       );
     }
 
+    // Earthly: bounce-settle, flame fades out during bounce, base remains
     return (
       <motion.svg
         viewBox="0 0 100 100"
         className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
         role="img"
         aria-hidden="true"
-        initial={false}
+        initial={{ scale: 1.2, opacity: 1, y: -6 }}
         animate={{ scale: 0.85, opacity: 0.7, y: 0 }}
-        transition={springTransition}
+        transition={sealBounceTransition}
       >
         {Base && <Base />}
+        {/* Flame fades out during the bounce-down */}
+        <motion.g
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0, scale: 2 }}
+          transition={{ ...sealBounceTransition, duration: 1.5 }}
+        >
+          <Flame colors={colors} />
+        </motion.g>
       </motion.svg>
     );
   }
