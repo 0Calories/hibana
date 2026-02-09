@@ -31,6 +31,7 @@ export function SealRingProgress({ progress, visible }: SealRingProgressProps) {
             height={RING_SIZE}
             className="h-24 w-24 sm:h-32 sm:w-32 md:h-36 md:w-36"
             viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+            role="graphics-symbol"
           >
             {/* Background track */}
             <circle
@@ -43,7 +44,7 @@ export function SealRingProgress({ progress, visible }: SealRingProgressProps) {
               opacity={0.15}
             />
             {/* Progress ring */}
-            <circle
+            <motion.circle
               cx={RING_SIZE / 2}
               cy={RING_SIZE / 2}
               r={RADIUS}
@@ -51,13 +52,13 @@ export function SealRingProgress({ progress, visible }: SealRingProgressProps) {
               stroke={SEAL_COLOR}
               strokeWidth={STROKE_WIDTH}
               strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={offset}
               strokeLinecap="round"
               transform={`rotate(-90 ${RING_SIZE / 2} ${RING_SIZE / 2})`}
               style={{
                 filter: `drop-shadow(0 0 6px ${SEAL_COLOR}80)`,
-                transition: 'stroke-dashoffset 50ms linear',
               }}
+              animate={{ strokeDashoffset: offset }}
+              transition={{ duration: 0.05, ease: 'linear' }}
             />
           </svg>
         </motion.div>

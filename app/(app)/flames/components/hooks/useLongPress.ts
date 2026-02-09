@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseLongPressOptions {
   duration: number;
@@ -13,6 +13,7 @@ interface UseLongPressOptions {
 interface UseLongPressReturn {
   progress: number;
   isPressed: boolean;
+  longPressTriggered: boolean;
   handlers: {
     onPointerDown: (e: React.PointerEvent) => void;
     onPointerUp: () => void;
@@ -30,9 +31,25 @@ export function useLongPress({
 }: UseLongPressOptions): UseLongPressReturn {
   const startTimeRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
-  const progressRef = useRef(0);
-  const isPressedRef = useRef(false);
   const completedRef = useRef(false);
+  const [progress, setProgress] = useState(0);
+  const [isPressed, setIsPressed] = useState(false);
+  const longPressTriggeredRef = useRef(false);
+
+  // Store latest callbacks in refs to avoid stale closures in rAF loop
+  const onProgressRef = useRef(onProgress);
+  const onCompleteRef = useRef(onComplete);
+  const onCancelRef = useRef(onCancel);
+
+  useEffect(() => {
+    onProgressRef.current = onProgress;
+  }, [onProgress]);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+  useEffect(() => {
+    onCancelRef.current = onCancel;
+  }, [onCancel]);
 
   const cleanup = useCallback(() => {
     if (rafRef.current !== null) {
@@ -40,8 +57,6 @@ export function useLongPress({
       rafRef.current = null;
     }
     startTimeRef.current = null;
-    isPressedRef.current = false;
-    completedRef.current = false;
   }, []);
 
   const tick = useCallback(() => {
@@ -49,51 +64,54 @@ export function useLongPress({
 
     const elapsed = Date.now() - startTimeRef.current;
     const newProgress = Math.min(elapsed / duration, 1);
-    progressRef.current = newProgress;
-    onProgress?.(newProgress);
+    setProgress(newProgress);
+    onProgressRef.current?.(newProgress);
 
     if (newProgress >= 1) {
       completedRef.current = true;
-      isPressedRef.current = false;
-      onComplete();
+      setIsPressed(false);
+      longPressTriggeredRef.current = true;
+      onCompleteRef.current();
       return;
     }
 
     rafRef.current = requestAnimationFrame(tick);
-  }, [duration, onComplete, onProgress]);
+  }, [duration]);
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!enabled) return;
-      // Only respond to primary pointer (left click / touch)
       if (e.button !== 0) return;
 
-      e.preventDefault();
       startTimeRef.current = Date.now();
-      isPressedRef.current = true;
+      setIsPressed(true);
       completedRef.current = false;
-      progressRef.current = 0;
-      onProgress?.(0);
+      longPressTriggeredRef.current = false;
+      setProgress(0);
+      onProgressRef.current?.(0);
 
       rafRef.current = requestAnimationFrame(tick);
     },
-    [enabled, tick, onProgress],
+    [enabled, tick],
   );
 
   const handleRelease = useCallback(() => {
-    if (!isPressedRef.current && !completedRef.current) return;
+    if (!startTimeRef.current) return;
     const wasCompleted = completedRef.current;
     cleanup();
-    progressRef.current = 0;
-    onProgress?.(0);
+    setIsPressed(false);
+    setProgress(0);
+    onProgressRef.current?.(0);
     if (!wasCompleted) {
-      onCancel?.();
+      longPressTriggeredRef.current = progress > 0.05;
+      onCancelRef.current?.();
     }
-  }, [cleanup, onCancel, onProgress]);
+  }, [cleanup, progress]);
 
   return {
-    progress: progressRef.current,
-    isPressed: isPressedRef.current,
+    progress,
+    isPressed,
+    longPressTriggered: longPressTriggeredRef.current,
     handlers: {
       onPointerDown: handlePointerDown,
       onPointerUp: handleRelease,

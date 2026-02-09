@@ -2,13 +2,12 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { getFlameColors } from '../utils/colors';
 import { getFlameLevel } from '../utils/levels';
-import { SealSummaryModal } from './SealSummaryModal';
 import { GeometricFlame } from './flame-card/effects/GeometricFlame';
 import { GeometricSmoke } from './flame-card/effects/GeometricSmoke';
 import { ParticleEmbers } from './flame-card/effects/ParticleEmbers';
@@ -18,6 +17,7 @@ import { ProgressBar } from './flame-card/ProgressBar';
 import { TimerDisplay } from './flame-card/TimerDisplay';
 import { useFlameTimer } from './hooks/useFlameTimer';
 import { useLongPress } from './hooks/useLongPress';
+import { SealSummaryModal } from './SealSummaryModal';
 
 interface FlameCardProps {
   flame: Flame;
@@ -64,10 +64,11 @@ export function FlameCard({
     onSessionUpdate,
   });
 
-  const [sealProgress, setSealProgress] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [celebrationActive, setCelebrationActive] = useState(false);
-  const longPressOccurredRef = useRef(false);
+
+  // Threshold: only treat as "long press" after 5% of duration (~100ms)
+  const SEAL_INTENT_THRESHOLD = 0.05;
 
   const handleSealComplete = useCallback(async () => {
     const success = await completeSeal();
@@ -83,31 +84,28 @@ export function FlameCard({
     setShowSummary(true);
   }, []);
 
+  const canSeal = isSealReady && !isBlocked;
+
   const longPress = useLongPress({
     duration: SEAL_DURATION_MS,
-    enabled: isSealReady,
+    enabled: canSeal,
     onProgress: (p) => {
-      setSealProgress(p);
-      if (p > 0 && state !== 'sealing') {
+      // Only enter sealing state after meaningful hold
+      if (p > SEAL_INTENT_THRESHOLD && state !== 'sealing') {
         beginSealing();
-        longPressOccurredRef.current = true;
       }
     },
     onComplete: handleSealComplete,
     onCancel: () => {
-      setSealProgress(0);
       cancelSealing();
     },
   });
 
   const handleClick = useCallback(() => {
-    // Suppress click if a long press just occurred
-    if (longPressOccurredRef.current) {
-      longPressOccurredRef.current = false;
-      return;
-    }
+    // Suppress click if a long press just occurred (user held long enough to show intent)
+    if (longPress.longPressTriggered) return;
     toggle();
-  }, [toggle]);
+  }, [toggle, longPress.longPressTriggered]);
 
   const isActive = state === 'active';
   const isSealing = state === 'sealing';
@@ -126,7 +124,7 @@ export function FlameCard({
       case 'active':
         return `${baseName}. ${t('burning')}`;
       case 'paused':
-        return isSealReady
+        return canSeal
           ? `${baseName}. ${t('readyToSeal')}`
           : `${baseName}. ${t('resting')}`;
       case 'sealing':
@@ -145,7 +143,7 @@ export function FlameCard({
       case 'active':
         return t('burning');
       case 'paused':
-        return isSealReady ? t('readyToSeal') : t('resting');
+        return canSeal ? t('readyToSeal') : t('resting');
       case 'sealing':
         return t('sealing');
       case 'completed':
@@ -171,7 +169,7 @@ export function FlameCard({
         boxShadow: `0 0 15px ${colors.medium}50, 0 0 30px ${colors.medium}25`,
         borderColor: colors.medium,
       }
-    : isSealReady || isSealing
+    : canSeal || isSealing
       ? {
           boxShadow: '0 0 15px #fbbf2450, 0 0 30px #fbbf2425',
           borderColor: '#fbbf24',
@@ -220,13 +218,13 @@ export function FlameCard({
         )}
         style={{
           ...borderGlowStyle,
-          ...(isSealReady ? { touchAction: 'none' } : {}),
+          ...(canSeal ? { touchAction: 'none' } : {}),
         }}
         initial="rest"
         whileTap={isDisabled ? 'rest' : 'pressed'}
         variants={cardVariants}
         transition={cardTransition}
-        {...(isSealReady || isSealing ? longPress.handlers : {})}
+        {...(canSeal || isSealing ? longPress.handlers : {})}
       >
         {/* Header - Name and Level */}
         <div className="px-2 pt-2 sm:px-3 sm:pt-3">
@@ -253,7 +251,7 @@ export function FlameCard({
             colors={colors}
           />
           {/* Seal ring progress overlay */}
-          <SealRingProgress progress={sealProgress} visible={isSealing} />
+          <SealRingProgress progress={longPress.progress} visible={isSealing} />
         </div>
 
         {/* Footer - Timer, Progress, State */}
@@ -277,7 +275,7 @@ export function FlameCard({
           <div
             className={cn(
               'text-center text-[10px] sm:text-xs',
-              isSealReady || isSealing
+              canSeal || isSealing
                 ? 'font-medium text-amber-500'
                 : 'text-slate-500 dark:text-white/50',
             )}
