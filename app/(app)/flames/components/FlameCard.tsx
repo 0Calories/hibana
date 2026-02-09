@@ -15,7 +15,7 @@ import { SealCelebration } from './flame-card/effects/SealCelebration';
 import { SealRingProgress } from './flame-card/effects/SealRingProgress';
 import { ProgressBar } from './flame-card/ProgressBar';
 import { TimerDisplay } from './flame-card/TimerDisplay';
-import { useFlameTimer } from './hooks/useFlameTimer';
+import { useFlameState } from './hooks/useFlameState';
 import { useLongPress } from './hooks/useLongPress';
 import { SealSummaryModal } from './SealSummaryModal';
 
@@ -57,7 +57,7 @@ export function FlameCard({
     beginSealing,
     cancelSealing,
     completeSeal,
-  } = useFlameTimer({
+  } = useFlameState({
     flame,
     session,
     date,

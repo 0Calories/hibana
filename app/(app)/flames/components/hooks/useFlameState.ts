@@ -26,7 +26,7 @@ interface UseFlameTimerReturn {
   completeSeal: () => Promise<boolean>;
 }
 
-export function useFlameTimer({
+export function useFlameState({
   flame,
   session,
   date,
