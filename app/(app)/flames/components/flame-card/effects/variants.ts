@@ -22,7 +22,7 @@ export const stateVariants: Record<FlameState, TargetAndTransition> = {
     opacity: 1,
     y: -6,
   },
-  completed: {
+  sealed: {
     scale: 0,
     opacity: 1,
     y: 0.9,
@@ -46,7 +46,7 @@ export const flickerVariants: Record<FlameState, TargetAndTransition> = {
     scaleY: [1, 1.12, 0.88, 1.15, 0.85, 1.1, 1],
     scaleX: [1, 0.9, 1.1, 0.88, 1.12, 0.92, 1],
   },
-  completed: {
+  sealed: {
     scaleY: 1,
     scaleX: 1,
   },
@@ -69,7 +69,7 @@ export const radiateVariants: Record<FlameState, TargetAndTransition> = {
     scale: [1, 1.18, 1.05, 1.2, 1.08, 1.15, 1],
     rotate: [0, 6, -4, 5, -3, 4, 0],
   },
-  completed: {
+  sealed: {
     scale: 1,
     rotate: 0,
   },

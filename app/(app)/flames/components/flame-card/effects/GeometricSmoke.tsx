@@ -72,7 +72,7 @@ export function GeometricSmoke({
   const isCelestial = level >= 7;
   // Show smoke for active states AND for completed (sealed) earthly flames
   const showSmoke =
-    (shouldShowParticles(state) || state === 'completed') && !isCelestial;
+    (shouldShowParticles(state) || state === 'sealed') && !isCelestial;
   const baseSize = LEVEL_BASE_SIZES[level] ?? 5;
 
   const particles = useMemo(() => {
@@ -89,7 +89,7 @@ export function GeometricSmoke({
     return null;
   }
 
-  const isCompleted = state === 'completed';
+  const isCompleted = state === 'sealed';
 
   const { opacity, speed } = isCompleted
     ? { opacity: 0.25, speed: 3.5 }

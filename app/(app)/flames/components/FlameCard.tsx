@@ -109,7 +109,7 @@ export function FlameCard({
 
   const isActive = state === 'active';
   const isSealing = state === 'sealing';
-  const isCompleted = state === 'completed';
+  const isCompleted = state === 'sealed';
   const isFuelBlocked = isFuelDepleted && !isActive;
   const isDisabled =
     isLoading || isCompleted || isBlocked || isFuelBlocked || isSealing;
@@ -129,7 +129,7 @@ export function FlameCard({
           : `${baseName}. ${t('resting')}`;
       case 'sealing':
         return `${baseName}. ${t('sealing')}`;
-      case 'completed':
+      case 'sealed':
         return `${baseName}. ${t('sealed')}`;
     }
   };
@@ -146,7 +146,7 @@ export function FlameCard({
         return canSeal ? t('readyToSeal') : t('resting');
       case 'sealing':
         return t('sealing');
-      case 'completed':
+      case 'sealed':
         return t('sealed');
     }
   };

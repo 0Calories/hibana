@@ -42,7 +42,7 @@ export function GeometricFlame({ state, level, colors }: GeometricFlameProps) {
   };
 
   // Sealed state: special rendering
-  if (state === 'completed') {
+  if (state === 'sealed') {
     if (isCelestial) {
       // Celestial sealed: ghost afterglow pulse
       return (

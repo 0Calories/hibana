@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { setFlameCompletion } from '../../actions/flame-actions';
 import { endSession, startSession } from '../../session-actions';
+import type { FlameState } from '../../utils/types';
 
 interface UseFlameTimerOptions {
   flame: Flame;
@@ -45,7 +46,7 @@ export function useFlameTimer({
 
   const deriveState = useCallback((): FlameState => {
     if (!session) return 'untended';
-    if (session.is_completed) return 'completed';
+    if (session.is_completed) return 'sealed';
     if (session.started_at && !session.ended_at) return 'active';
     if (session.ended_at) return 'paused';
     return 'untended';
@@ -128,7 +129,7 @@ export function useFlameTimer({
           setState('active');
           break;
 
-        case 'completed':
+        case 'sealed':
         case 'sealing':
           // No action
           break;
@@ -163,7 +164,7 @@ export function useFlameTimer({
     try {
       const result = await setFlameCompletion(flame.id, date, true);
       if (result.success) {
-        setState('completed');
+        setState('sealed');
         onSessionUpdate?.();
         return true;
       }
