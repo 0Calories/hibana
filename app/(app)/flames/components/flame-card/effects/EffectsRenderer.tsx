@@ -25,7 +25,7 @@ export function EffectsRenderer({
               <ParticleEmbers
                 key={effect.type}
                 state={state}
-                color={colors.light}
+                colors={colors}
                 config={effect}
               />
             );
@@ -34,7 +34,7 @@ export function EffectsRenderer({
               <GeometricSmoke
                 key={effect.type}
                 state={state}
-                color={colors.medium}
+                colors={colors}
                 config={effect}
               />
             );
