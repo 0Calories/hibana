@@ -83,16 +83,12 @@ export function FlameShowcase() {
             >
               <div className="relative mb-3 flex h-28 w-20 items-center justify-center">
                 {revealed ? (
-                  <>
-                    <FlameRenderer
-                      state="burning"
-                      level={level.level}
-                      colors={colors}
-                      className="h-24 w-20"
-                    />
-
-                    {/* <FlameEffects state="burning" level={level.level} colors={colors} /> */}
-                  </>
+                  <FlameRenderer
+                    state="burning"
+                    level={level.level}
+                    colors={colors}
+                    className="h-24 w-20"
+                  />
                 ) : (
                   <div className="relative flex h-full w-full items-center justify-center">
                     <div
@@ -161,19 +157,12 @@ export function FlameShowcase() {
               >
                 <div className="relative mb-3 flex h-24 w-18 items-center justify-center">
                   {revealed ? (
-                    <>
-                      <FlameRenderer
-                        state="burning"
-                        level={level.level}
-                        colors={colors}
-                        className="h-20 w-16"
-                      />
-                      {/* <FlameEffects
-                        state="burning"
-                        level={level.level}
-                        colors={colors}
-                      /> */}
-                    </>
+                    <FlameRenderer
+                      state="burning"
+                      level={level.level}
+                      colors={colors}
+                      className="h-20 w-16"
+                    />
                   ) : (
                     <div className="relative flex h-full w-full items-center justify-center">
                       <div
