@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useMemo } from 'react';
-import type { BaseParticleProps, Particle, ParticleStateConfig } from './particles';
+import type { BaseParticleProps, Particle } from './particles';
 import {
   generateBaseParticle,
   generateHash,

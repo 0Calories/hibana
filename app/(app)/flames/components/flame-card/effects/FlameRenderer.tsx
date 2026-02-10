@@ -17,9 +17,17 @@ const stateVariants: Record<FlameState, TargetAndTransition> = {
 
 const SVG_CLASS = 'h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36';
 
-const springTransition = { type: 'spring' as const, stiffness: 200, damping: 20 };
+const springTransition = {
+  type: 'spring' as const,
+  stiffness: 200,
+  damping: 20,
+};
 const fadeInTransition = { duration: 0.4, ease: 'easeOut' as const };
-const sealBounceTransition = { type: 'spring' as const, stiffness: 120, damping: 12 };
+const sealBounceTransition = {
+  type: 'spring' as const,
+  stiffness: 120,
+  damping: 12,
+};
 
 interface FlameRendererProps {
   state: FlameState;
@@ -36,8 +44,7 @@ export function FlameRenderer({
 }: FlameRendererProps) {
   const shouldReduceMotion = useReducedMotion();
   const clampedLevel = Math.max(1, Math.min(8, level));
-  const def = FLAME_REGISTRY[clampedLevel];
-  const { Base, Flame, SealedFlame, animation } = def;
+  const { Base, Flame, SealedFlame, animation } = FLAME_REGISTRY[clampedLevel];
 
   const fadeInInitial = shouldReduceMotion ? {} : { opacity: 0 };
 
@@ -104,7 +111,10 @@ export function FlameRenderer({
   };
 
   return (
-    <ShakeWrapper active={isSealing && !shouldReduceMotion} progress={sealProgress}>
+    <ShakeWrapper
+      active={isSealing && !shouldReduceMotion}
+      progress={sealProgress}
+    >
       <motion.svg
         viewBox="0 0 100 100"
         className={SVG_CLASS}
