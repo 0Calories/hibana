@@ -4,6 +4,8 @@ import { motion, useMotionValue, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import type { FlameState } from '../../../utils/types';
 import { FLAME_REGISTRY } from './flames';
+import { SealedSmokeWisps } from './SealedSmokeWisps';
+import { SmolderingEmbers } from './SmolderingEmbers';
 import type { ShapeColors } from './types';
 import { flickerVariants, radiateVariants, stateVariants } from './variants';
 
@@ -126,6 +128,13 @@ export function GeometricFlame({
       );
     }
 
+    // Wick Y positions per level for smoke wisps (where flame meets base)
+    const wickPositions: Record<number, number> = {
+      2: 62, // Candle wick top
+      3: 65, // Torch rim
+      4: 72, // Bonfire log top
+    };
+
     // Earthly: bounce-settle, flame fades out during bounce, base remains
     return (
       <motion.svg
@@ -146,6 +155,12 @@ export function GeometricFlame({
         >
           <Flame colors={colors} />
         </motion.g>
+        {/* Level 1 (Wisp): smoldering embers scattered on the ground */}
+        {clampedLevel === 1 && <SmolderingEmbers color={colors.medium} />}
+        {/* Levels 2-4 (Candle/Torch/Bonfire): blown-out smoke wisps from wick */}
+        {wickPositions[clampedLevel] != null && (
+          <SealedSmokeWisps wickY={wickPositions[clampedLevel]} />
+        )}
       </motion.svg>
     );
   }
