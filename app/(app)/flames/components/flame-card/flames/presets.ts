@@ -1,7 +1,11 @@
 import type { TargetAndTransition } from 'framer-motion';
 import type { FlameState } from '../../../utils/types';
 import type { ParticleStateConfig } from '../effects/particles';
-import type { EmberEffectConfig, SmokeEffectConfig } from '../effects/types';
+import type {
+  EmberEffectConfig,
+  SealedSmokeEffectConfig,
+  SmokeEffectConfig,
+} from '../effects/types';
 
 // ---------------------------------------------------------------------------
 // Animation variant maps
@@ -107,4 +111,11 @@ export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
 
 export function smokeEffect(baseSize: number): SmokeEffectConfig {
   return { type: 'smoke', states: STANDARD_SMOKE_STATES, baseSize };
+}
+
+export function sealedSmokeEffect(
+  wickY: number,
+  wickX?: number,
+): SealedSmokeEffectConfig {
+  return { type: 'sealedSmoke', wickY, wickX };
 }

@@ -27,7 +27,16 @@ export interface SmokeEffectConfig {
   baseSize: number;
 }
 
-export type EffectConfig = EmberEffectConfig | SmokeEffectConfig;
+export interface SealedSmokeEffectConfig {
+  type: 'sealedSmoke';
+  wickY: number;
+  wickX?: number;
+}
+
+export type EffectConfig =
+  | EmberEffectConfig
+  | SmokeEffectConfig
+  | SealedSmokeEffectConfig;
 
 export interface FlameDefinition {
   Flame: React.FC<FlameComponentProps>;
