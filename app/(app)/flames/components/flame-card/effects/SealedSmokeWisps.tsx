@@ -10,15 +10,55 @@ interface SealedSmokeWispsProps {
   wickX?: number;
 }
 
-const SMOKE_COLOR = '#94a3b8';
-const RISE_HEIGHT = 80;
-const REVEAL_DURATION = 3;
-const BASE_STRAND_SPEED = 2;
+// ---------------------------------------------------------------------------
+// Tuning constants — adjust these to dial in the look
+// ---------------------------------------------------------------------------
 
-// Gust parameters
-const GUST_CHANCE_PER_FRAME = 0.003; // ~every 5.5s at 60fps
-const GUST_STRENGTH = 10;
-const GUST_DECAY = 0.985;
+// General
+const SMOKE_COLOR = '#94a3b8';
+const RISE_HEIGHT = 120; // total height of smoke column in SVG units
+const REVEAL_DURATION = 3; // seconds for initial bottom-to-top reveal
+
+// Strand appearance
+const STRAND_A_WIDTH = 2;
+const STRAND_B_WIDTH = 1.2;
+const STRAND_A_OPACITY = 0.4;
+const STRAND_B_OPACITY = 0.35;
+const FILL_OPACITY = 0.08;
+
+// Shared snake motion — lateral sway that moves both strands as a column
+const SNAKE_LOW_FREQ = 1.3; // oscillation speed near the base
+const SNAKE_LOW_AMP = 2; // lateral amplitude near the base
+const SNAKE_MID_FREQ = 0.9; // oscillation speed at midpoint
+const SNAKE_MID_AMP = 4; // lateral amplitude at midpoint
+const SNAKE_MID_PHASE = 0.5; // phase offset for mid oscillation
+const SNAKE_HIGH_FREQ = 0.7; // oscillation speed near the top
+const SNAKE_HIGH_AMP = 5; // lateral amplitude near the top
+const SNAKE_HIGH_PHASE = 1.2; // phase offset for top oscillation
+
+// Per-strand crossover drift — independent lateral motion at the midpoint
+const CROSSOVER_FREQ = 0.45; // how fast strands drift apart / cross
+const CROSSOVER_AMP = 6; // max lateral offset per strand at midpoint
+const CROSSOVER_PHASE_B = 2.2; // phase offset between strand A and B
+
+// Strand spread — static spacing between strands at base and top
+const SPREAD_BASE = 0.5; // spacing at the wick (near 0 = start together)
+const SPREAD_TOP = 0.2; // spacing at the top endpoint
+
+// Control point Y positions (as fraction of RISE_HEIGHT from wick)
+const CP1_Y_FRAC = 0.4; // first control point height
+const CP2_Y_FRAC = 0.7; // second control point height
+
+// Opacity taper gradient stops
+const TAPER_MID_OFFSET = '65%'; // where opacity starts fading faster
+const TAPER_MID_OPACITY = 0.5; // opacity at mid-taper point
+const TAPER_END_OPACITY = 0; // opacity at the very top
+
+// Wind gust
+const BASE_STRAND_SPEED = 2; // normal phase accumulation speed
+const GUST_CHANCE_PER_FRAME = 0.003; // probability per frame (~every 5.5s at 60fps)
+const GUST_STRENGTH = 10; // how much faster snaking gets during a gust
+const GUST_DECAY = 0.985; // exponential decay per frame (lower = faster fade)
 
 // ---------------------------------------------------------------------------
 // Path builder — two strands + fill, snaking over time
@@ -28,31 +68,29 @@ function buildPaths(wickX: number, wickY: number, t: number) {
   const endY = wickY - RISE_HEIGHT;
 
   // Shared snake motion — both strands move together as a column
-  const snakeLow = Math.sin(t * 1.3) * 2;
-  const snakeMid = Math.sin(t * 0.9 + 0.5) * 4;
-  const snakeHigh = Math.sin(t * 0.7 + 1.2) * 5;
+  const snakeLow = Math.sin(t * SNAKE_LOW_FREQ) * SNAKE_LOW_AMP;
+  const snakeMid =
+    Math.sin(t * SNAKE_MID_FREQ + SNAKE_MID_PHASE) * SNAKE_MID_AMP;
+  const snakeHigh =
+    Math.sin(t * SNAKE_HIGH_FREQ + SNAKE_HIGH_PHASE) * SNAKE_HIGH_AMP;
 
   // Per-strand lateral oscillation at midpoint — enables crossover
-  // Different frequencies + phase offset means they periodically swap sides
-  const strandADrift = Math.sin(t * 0.45) * 6;
-  const strandBDrift = Math.sin(t * 0.45 + 2.2) * 6;
+  const strandADrift = Math.sin(t * CROSSOVER_FREQ) * CROSSOVER_AMP;
+  const strandBDrift =
+    Math.sin(t * CROSSOVER_FREQ + CROSSOVER_PHASE_B) * CROSSOVER_AMP;
 
-  // Base spread (symmetric) + per-strand drift = crossover when drifts overlap
-  const spreadBase = 0.5;
-  const spreadTop = 0.2;
-
-  const cpY1 = wickY - RISE_HEIGHT * 0.4;
-  const cpY2 = wickY - RISE_HEIGHT * 0.7;
+  const cpY1 = wickY - RISE_HEIGHT * CP1_Y_FRAC;
+  const cpY2 = wickY - RISE_HEIGHT * CP2_Y_FRAC;
 
   // Left strand — shared snake + its own drift
-  const aCP1x = wickX + snakeLow - spreadBase;
+  const aCP1x = wickX + snakeLow - SPREAD_BASE;
   const aCP2x = wickX + snakeMid + strandADrift;
-  const aEndX = wickX + snakeHigh - spreadTop;
+  const aEndX = wickX + snakeHigh - SPREAD_TOP;
 
   // Right strand — shared snake + its own drift
-  const bCP1x = wickX + snakeLow + spreadBase;
+  const bCP1x = wickX + snakeLow + SPREAD_BASE;
   const bCP2x = wickX + snakeMid + strandBDrift;
-  const bEndX = wickX + snakeHigh + spreadTop;
+  const bEndX = wickX + snakeHigh + SPREAD_TOP;
 
   const strandA = `M ${wickX} ${wickY} C ${aCP1x} ${cpY1}, ${aCP2x} ${cpY2}, ${aEndX} ${endY}`;
   const strandB = `M ${wickX} ${wickY} C ${bCP1x} ${cpY1}, ${bCP2x} ${cpY2}, ${bEndX} ${endY}`;
@@ -137,7 +175,7 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
         <path
           d={initial.strandA}
           stroke={SMOKE_COLOR}
-          strokeWidth={1.5}
+          strokeWidth={STRAND_A_WIDTH}
           fill="none"
           opacity={0.3}
           strokeLinecap="round"
@@ -159,8 +197,16 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
           y2={endY}
         >
           <stop offset="0%" stopColor="white" stopOpacity="1" />
-          <stop offset="65%" stopColor="white" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="white" stopOpacity="0" />
+          <stop
+            offset={TAPER_MID_OFFSET}
+            stopColor="white"
+            stopOpacity={TAPER_MID_OPACITY}
+          />
+          <stop
+            offset="100%"
+            stopColor="white"
+            stopOpacity={TAPER_END_OPACITY}
+          />
         </linearGradient>
 
         {/* Mask combines the taper gradient with an initial bottom-to-top reveal */}
@@ -182,7 +228,7 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
           ref={fillRef}
           d={initial.fillPath}
           fill={SMOKE_COLOR}
-          opacity={0.08}
+          opacity={FILL_OPACITY}
         />
 
         {/* Left strand */}
@@ -190,9 +236,9 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
           ref={strandARef}
           d={initial.strandA}
           stroke={SMOKE_COLOR}
-          strokeWidth={1.5}
+          strokeWidth={STRAND_A_WIDTH}
           fill="none"
-          opacity={0.4}
+          opacity={STRAND_A_OPACITY}
           strokeLinecap="round"
         />
 
@@ -201,9 +247,9 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
           ref={strandBRef}
           d={initial.strandB}
           stroke={SMOKE_COLOR}
-          strokeWidth={1.2}
+          strokeWidth={STRAND_B_WIDTH}
           fill="none"
-          opacity={0.35}
+          opacity={STRAND_B_OPACITY}
           strokeLinecap="round"
         />
       </g>
