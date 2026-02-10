@@ -1,8 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { generateHash } from './particles';
+import { useEffect, useId, useMemo, useRef } from 'react';
 
 interface SealedSmokeWispsProps {
   /** Y coordinate of the wick / emission point in the 0-100 SVG viewBox */
@@ -11,102 +10,51 @@ interface SealedSmokeWispsProps {
   wickX?: number;
 }
 
-interface ChildClump {
-  id: number;
-  strandA: string;
-  strandB: string;
-  fillPath: string;
-  duration: number;
-  strokeWidth: number;
-  startY: number;
-  endY: number;
-}
-
 const SMOKE_COLOR = '#94a3b8';
-const FILL_COLOR = '#94a3b8';
-const PARENT_RISE = 12;
-const CHILD_DURATION = 3.5;
-const SPAWN_INTERVAL_MS = 2800;
-const MAX_CLUMPS = 3;
+const RISE_HEIGHT = 80;
+const REVEAL_DURATION = 3;
 
 // ---------------------------------------------------------------------------
-// Parent wisp — continuous snaking motion from the wick
+// Path builder — two strands + fill, snaking over time
 // ---------------------------------------------------------------------------
 
-function getParentTip(wickX: number, wickY: number, t: number) {
-  const x = wickX + Math.sin(t * 1.3) * 4 + Math.sin(t * 0.7) * 2.5;
-  const y = wickY - PARENT_RISE - Math.sin(t * 0.9) * 1.5;
-  return { x, y };
-}
+function buildPaths(wickX: number, wickY: number, t: number) {
+  const endY = wickY - RISE_HEIGHT;
 
-function buildParentPath(
-  wickX: number,
-  wickY: number,
-  tipX: number,
-  tipY: number,
-) {
-  const cp1x = wickX + (tipX - wickX) * 0.3;
-  const cp1y = wickY - (wickY - tipY) * 0.4;
-  const cp2x = tipX - (tipX - wickX) * 0.2;
-  const cp2y = tipY + (wickY - tipY) * 0.2;
-  return `M ${wickX} ${wickY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${tipX} ${tipY}`;
-}
+  // Shared snake motion at different heights along the column
+  const snakeLow = Math.sin(t * 1.3) * 2;
+  const snakeMid = Math.sin(t * 0.9 + 0.5) * 4;
+  const snakeHigh = Math.sin(t * 0.7 + 1.2) * 5;
 
-// ---------------------------------------------------------------------------
-// Child clumps — paired strands that offshoot from the parent tip
-// ---------------------------------------------------------------------------
+  // Spread between strands: tight at base, widens at mid, narrows toward top
+  const spreadMid = 7;
+  const spreadTop = 0.2;
 
-function createChildClump(
-  spawnX: number,
-  spawnY: number,
-  id: number,
-): ChildClump {
-  const h1 = generateHash(id, 193);
-  const h2 = generateHash(id, 311);
-  const h3 = generateHash(id, 457);
+  const cpY1 = wickY - RISE_HEIGHT * 0.4;
+  const cpY2 = wickY - RISE_HEIGHT * 0.7;
 
-  const driftDir = id % 2 === 0 ? 1 : -1;
-  const driftMag = 5 + (h1 % 6);
-  const riseHeight = 25 + (h2 % 12);
+  // Left strand
+  const aCP1x = wickX + snakeLow - 0.5;
+  const aCP2x = wickX + snakeMid - spreadMid;
+  const aEndX = wickX + snakeHigh - spreadTop;
 
-  const startX = spawnX;
-  const startY = spawnY;
+  // Right strand
+  const bCP1x = wickX + snakeLow + 0.5;
+  const bCP2x = wickX + snakeMid + spreadMid;
+  const bEndX = wickX + snakeHigh + spreadTop;
 
-  const midDrift = driftDir * (driftMag * 0.3);
-  const cp1x = startX + midDrift;
-  const cp1y = startY - riseHeight * 0.3;
-  const cp2x = startX - driftDir * (driftMag * 0.15);
-  const cp2y = startY - riseHeight * 0.6;
-
-  const spread = 6 + (h3 % 5);
-  const endY = startY - riseHeight;
-  const endBaseX = startX + driftDir * driftMag;
-  const endXa = endBaseX - spread * 0.5;
-  const endXb = endBaseX + spread * 0.5;
-
-  const cp2xB = cp2x + driftDir * (spread * 0.3);
-
-  const strandA = `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endXa} ${endY}`;
-  const strandB = `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2xB} ${cp2y}, ${endXb} ${endY}`;
+  const strandA = `M ${wickX} ${wickY} C ${aCP1x} ${cpY1}, ${aCP2x} ${cpY2}, ${aEndX} ${endY}`;
+  const strandB = `M ${wickX} ${wickY} C ${bCP1x} ${cpY1}, ${bCP2x} ${cpY2}, ${bEndX} ${endY}`;
 
   const fillPath = [
-    `M ${startX} ${startY}`,
-    `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endXa} ${endY}`,
-    `L ${endXb} ${endY}`,
-    `C ${cp2xB} ${cp2y}, ${cp1x} ${cp1y}, ${startX} ${startY}`,
+    `M ${wickX} ${wickY}`,
+    `C ${aCP1x} ${cpY1}, ${aCP2x} ${cpY2}, ${aEndX} ${endY}`,
+    `L ${bEndX} ${endY}`,
+    `C ${bCP2x} ${cpY2}, ${bCP1x} ${cpY1}, ${wickX} ${wickY}`,
     'Z',
   ].join(' ');
 
-  return {
-    id,
-    strandA,
-    strandB,
-    fillPath,
-    duration: CHILD_DURATION,
-    strokeWidth: 1.2 + ((h2 % 100) / 100) * 0.4,
-    startY,
-    endY,
-  };
+  return { strandA, strandB, fillPath };
 }
 
 // ---------------------------------------------------------------------------
@@ -115,12 +63,20 @@ function createChildClump(
 
 export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
   const shouldReduceMotion = useReducedMotion();
-  const parentPathRef = useRef<SVGPathElement>(null);
-  const parentTipRef = useRef(getParentTip(wickX, wickY, 0));
-  const [childClumps, setChildClumps] = useState<ChildClump[]>([]);
-  const clumpIdRef = useRef(0);
+  const rawId = useId();
+  const id = rawId.replace(/:/g, '');
 
-  // Drive parent wisp snaking via rAF (no React re-renders)
+  const strandARef = useRef<SVGPathElement>(null);
+  const strandBRef = useRef<SVGPathElement>(null);
+  const fillRef = useRef<SVGPathElement>(null);
+
+  const initial = useMemo(() => buildPaths(wickX, wickY, 0), [wickX, wickY]);
+  const endY = wickY - RISE_HEIGHT;
+
+  const gradientId = `smoke-grad-${id}`;
+  const maskId = `smoke-mask-${id}`;
+
+  // Animate snaking via rAF (no React re-renders)
   useEffect(() => {
     if (shouldReduceMotion) return;
 
@@ -129,15 +85,11 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
 
     const tick = () => {
       const t = (performance.now() - startTime) / 1000;
-      const tip = getParentTip(wickX, wickY, t);
-      parentTipRef.current = tip;
+      const paths = buildPaths(wickX, wickY, t);
 
-      if (parentPathRef.current) {
-        parentPathRef.current.setAttribute(
-          'd',
-          buildParentPath(wickX, wickY, tip.x, tip.y),
-        );
-      }
+      strandARef.current?.setAttribute('d', paths.strandA);
+      strandBRef.current?.setAttribute('d', paths.strandB);
+      fillRef.current?.setAttribute('d', paths.fillPath);
 
       rafId = requestAnimationFrame(tick);
     };
@@ -146,40 +98,13 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
     return () => cancelAnimationFrame(rafId);
   }, [wickX, wickY, shouldReduceMotion]);
 
-  // Spawn child clumps from the parent tip at regular intervals
-  useEffect(() => {
-    if (shouldReduceMotion) return;
-
-    const spawnClump = () => {
-      const tip = parentTipRef.current;
-      const id = clumpIdRef.current++;
-      const clump = createChildClump(tip.x, tip.y, id);
-      setChildClumps((prev) => [...prev.slice(-(MAX_CLUMPS - 1)), clump]);
-    };
-
-    // First clump spawns immediately
-    spawnClump();
-    const interval = setInterval(spawnClump, SPAWN_INTERVAL_MS);
-    return () => clearInterval(interval);
-  }, [shouldReduceMotion]);
-
-  // Deterministic initial path for SSR hydration
-  const initialTip = useMemo(
-    () => getParentTip(wickX, wickY, 0),
-    [wickX, wickY],
-  );
-  const initialParentPath = useMemo(
-    () => buildParentPath(wickX, wickY, initialTip.x, initialTip.y),
-    [wickX, wickY, initialTip],
-  );
-
   if (shouldReduceMotion) {
     return (
       <g>
         <path
-          d={initialParentPath}
+          d={initial.strandA}
           stroke={SMOKE_COLOR}
-          strokeWidth={1.2}
+          strokeWidth={1.5}
           fill="none"
           opacity={0.3}
           strokeLinecap="round"
@@ -188,88 +113,67 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
     );
   }
 
-  const childTransition = { duration: CHILD_DURATION, ease: 'linear' as const };
-
   return (
     <g>
-      {/* Parent wisp — always visible, snaking from wick */}
-      <path
-        ref={parentPathRef}
-        d={initialParentPath}
-        stroke={SMOKE_COLOR}
-        strokeWidth={1.2}
-        fill="none"
-        opacity={0.4}
-        strokeLinecap="round"
-      />
+      <defs>
+        {/* Gradient for position-based opacity taper: opaque at base → transparent at top */}
+        <linearGradient
+          id={gradientId}
+          gradientUnits="userSpaceOnUse"
+          x1={wickX}
+          y1={wickY}
+          x2={wickX}
+          y2={endY}
+        >
+          <stop offset="0%" stopColor="white" stopOpacity="1" />
+          <stop offset="65%" stopColor="white" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="white" stopOpacity="0" />
+        </linearGradient>
 
-      {/* Child clumps — offshoot from parent tip, animate once then replaced */}
-      {childClumps.map((clump) => {
-        const clipId = `smoke-clip-${clump.id}`;
-        const riseHeight = clump.startY - clump.endY;
+        {/* Mask combines the taper gradient with an initial bottom-to-top reveal */}
+        <mask id={maskId}>
+          <motion.rect
+            x={-20}
+            width={140}
+            fill={`url(#${gradientId})`}
+            initial={{ y: wickY, height: 0 }}
+            animate={{ y: endY, height: RISE_HEIGHT }}
+            transition={{ duration: REVEAL_DURATION, ease: 'easeOut' }}
+          />
+        </mask>
+      </defs>
 
-        return (
-          <g key={clump.id}>
-            <defs>
-              <clipPath id={clipId}>
-                <motion.rect
-                  x={0}
-                  width={100}
-                  initial={{ y: clump.startY, height: 0 }}
-                  animate={{
-                    y: [
-                      clump.startY,
-                      clump.startY - riseHeight * 0.6,
-                      clump.endY,
-                    ],
-                    height: [0, riseHeight * 0.6, riseHeight],
-                  }}
-                  transition={childTransition}
-                />
-              </clipPath>
-            </defs>
+      <g mask={`url(#${maskId})`}>
+        {/* Grey fill between strands */}
+        <path
+          ref={fillRef}
+          d={initial.fillPath}
+          fill={SMOKE_COLOR}
+          opacity={0.08}
+        />
 
-            {/* Grey fill between strands, clipped to reveal bottom-to-top */}
-            <motion.path
-              d={clump.fillPath}
-              fill={FILL_COLOR}
-              stroke="none"
-              clipPath={`url(#${clipId})`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.1, 0.06, 0] }}
-              transition={childTransition}
-            />
+        {/* Left strand */}
+        <path
+          ref={strandARef}
+          d={initial.strandA}
+          stroke={SMOKE_COLOR}
+          strokeWidth={1.5}
+          fill="none"
+          opacity={0.4}
+          strokeLinecap="round"
+        />
 
-            {/* Both strands — identical timing */}
-            <motion.path
-              d={clump.strandA}
-              stroke={SMOKE_COLOR}
-              strokeWidth={clump.strokeWidth}
-              fill="none"
-              strokeLinecap="round"
-              initial={{ opacity: 0, pathLength: 0 }}
-              animate={{
-                opacity: [0, 0.45, 0.3, 0],
-                pathLength: [0, 0.6, 0.9, 1],
-              }}
-              transition={childTransition}
-            />
-            <motion.path
-              d={clump.strandB}
-              stroke={SMOKE_COLOR}
-              strokeWidth={clump.strokeWidth * 0.8}
-              fill="none"
-              strokeLinecap="round"
-              initial={{ opacity: 0, pathLength: 0 }}
-              animate={{
-                opacity: [0, 0.35, 0.2, 0],
-                pathLength: [0, 0.6, 0.9, 1],
-              }}
-              transition={childTransition}
-            />
-          </g>
-        );
-      })}
+        {/* Right strand */}
+        <path
+          ref={strandBRef}
+          d={initial.strandB}
+          stroke={SMOKE_COLOR}
+          strokeWidth={1.2}
+          fill="none"
+          opacity={0.35}
+          strokeLinecap="round"
+        />
+      </g>
     </g>
   );
 }
