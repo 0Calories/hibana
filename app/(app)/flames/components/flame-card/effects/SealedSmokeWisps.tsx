@@ -16,7 +16,7 @@ interface SealedSmokeWispsProps {
 
 // General
 const SMOKE_COLOR = '#94a3b8';
-const RISE_HEIGHT = 120; // total height of smoke column in SVG units
+const RISE_HEIGHT = 90; // total height of smoke column in SVG units
 const REVEAL_DURATION = 3; // seconds for initial bottom-to-top reveal
 
 // Strand appearance
@@ -37,7 +37,7 @@ const SNAKE_HIGH_AMP = 5; // lateral amplitude near the top
 const SNAKE_HIGH_PHASE = 1.2; // phase offset for top oscillation
 
 // Per-strand crossover drift — independent lateral motion at the midpoint
-const CROSSOVER_FREQ = 0.45; // how fast strands drift apart / cross
+const CROSSOVER_FREQ = 0.1; // how fast strands drift apart / cross
 const CROSSOVER_AMP = 6; // max lateral offset per strand at midpoint
 const CROSSOVER_PHASE_B = 2.2; // phase offset between strand A and B
 
@@ -46,13 +46,13 @@ const SPREAD_BASE = 0.5; // spacing at the wick (near 0 = start together)
 const SPREAD_TOP = 0.2; // spacing at the top endpoint
 
 // Control point Y positions (as fraction of RISE_HEIGHT from wick)
-const CP1_Y_FRAC = 0.4; // first control point height
-const CP2_Y_FRAC = 0.7; // second control point height
+const CP1_Y_FRAC = 0.2; // first control point height
+const CP2_Y_FRAC = 0.9; // second control point height
 
 // Opacity taper gradient stops
 const TAPER_MID_OFFSET = '65%'; // where opacity starts fading faster
 const TAPER_MID_OPACITY = 0.5; // opacity at mid-taper point
-const TAPER_END_OPACITY = 0; // opacity at the very top
+const TAPER_END_OPACITY = 0.1; // opacity at the very top
 
 // Wind gust
 const BASE_STRAND_SPEED = 2; // normal phase accumulation speed
