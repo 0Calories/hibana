@@ -11,7 +11,7 @@ import {
   generateBaseParticle,
   generateHash,
   generateParticles,
-  getAnimationIntensity,
+  getParticleIntensity,
   shouldShowParticles,
 } from './particles';
 
@@ -27,7 +27,7 @@ const SMOKE_STATE_CONFIG: ParticleStateConfig = {
   paused: { count: 4, sizeMultiplier: 1 },
   untended: { count: 2, sizeMultiplier: 1 },
   sealing: { count: 10, sizeMultiplier: 1.3 },
-  completed: { count: 3, sizeMultiplier: 0.7 },
+  sealed: { count: 0, sizeMultiplier: 0 },
 };
 
 const SMOKE_PARTICLE_CONFIG = {
@@ -89,17 +89,7 @@ export function GeometricSmoke({
     return null;
   }
 
-  const isSealed = state === 'sealed';
-
-  const { opacity, speed } = isSealed
-    ? { opacity: 0.25, speed: 3.5 }
-    : getAnimationIntensity(state, {
-        activeOpacity: 0.85,
-        pausedOpacity: 0.45,
-        untendedOpacity: 0.45,
-        pausedSpeed: 2.2,
-        untendedSpeed: 3,
-      });
+  const { opacity, speed } = getParticleIntensity(state);
 
   return (
     <div

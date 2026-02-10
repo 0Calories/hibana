@@ -72,34 +72,32 @@ export function generateParticles<T extends Particle>(
 }
 
 /**
- * Get animation intensity values based on flame state.
+ * Get particle opacity and animation speed values based on flame state.
  */
-export function getAnimationIntensity(
+export function getParticleIntensity(
   state: FlameState,
   config?: {
     activeOpacity?: number;
-    pausedOpacity?: number;
-    untendedOpacity?: number;
+    inactiveOpacity?: number;
     activeSpeed?: number;
-    pausedSpeed?: number;
-    untendedSpeed?: number;
+    inactiveSpeed?: number;
   },
 ): AnimationIntensity {
-  const isActive = state === 'burning';
-  const isPaused = state === 'paused';
-
-  return {
-    opacity: isActive
-      ? (config?.activeOpacity ?? 1)
-      : isPaused
-        ? (config?.pausedOpacity ?? 0.4)
-        : (config?.untendedOpacity ?? 0.4),
-    speed: isActive
-      ? (config?.activeSpeed ?? 1)
-      : isPaused
-        ? (config?.pausedSpeed ?? 2)
-        : (config?.untendedSpeed ?? 2.5),
-  };
+  switch (state) {
+    case 'burning':
+      return {
+        opacity: config?.activeOpacity ?? 1,
+        speed: config?.activeSpeed ?? 1,
+      };
+    case 'untended':
+    case 'paused':
+    case 'sealed':
+    case 'sealing':
+      return {
+        opacity: config?.inactiveOpacity ?? 0.4,
+        speed: config?.inactiveSpeed ?? 1,
+      };
+  }
 }
 
 export function shouldShowParticles(state: FlameState): boolean {

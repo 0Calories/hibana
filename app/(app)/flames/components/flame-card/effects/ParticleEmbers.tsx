@@ -6,15 +6,16 @@ import type { BaseParticleProps, ParticleStateConfig } from './particles';
 import {
   generateBaseParticle,
   generateParticles,
-  getAnimationIntensity,
+  getParticleIntensity,
   shouldShowParticles,
 } from './particles';
 
 const EMBER_STATE_CONFIG: ParticleStateConfig = {
   burning: { count: 8, sizeMultiplier: 1.4 },
   paused: { count: 3, sizeMultiplier: 1 },
-  untended: { count: 2, sizeMultiplier: 1 },
+  untended: { count: 1, sizeMultiplier: 1 },
   sealing: { count: 12, sizeMultiplier: 1.6 },
+  sealed: { count: 1, sizeMultiplier: 1 },
 };
 
 export function ParticleEmbers({ state, color }: BaseParticleProps) {
@@ -34,7 +35,7 @@ export function ParticleEmbers({ state, color }: BaseParticleProps) {
     return null;
   }
 
-  const { opacity, speed } = getAnimationIntensity(state);
+  const { opacity, speed } = getParticleIntensity(state, {});
 
   return (
     <div

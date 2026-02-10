@@ -185,11 +185,7 @@ export function FlameCard({
         <div className="relative h-full w-full">
           {/* Position smoke to align with flame visual area */}
           <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
-            <GeometricSmoke
-              state={isBlocked ? 'untended' : state}
-              color={colors.medium}
-              level={level}
-            />
+            <GeometricSmoke state={state} color={colors.medium} level={level} />
           </div>
         </div>
       </div>
@@ -240,12 +236,9 @@ export function FlameCard({
 
         {/* Flame visual area */}
         <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
-          <ParticleEmbers
-            state={isBlocked ? 'untended' : state}
-            color={colors.light}
-          />
+          <ParticleEmbers state={state} color={colors.light} />
           <GeometricFlame
-            state={isBlocked ? 'untended' : state}
+            state={state}
             level={level}
             colors={colors}
             sealProgress={isSealing ? longPress.progress : 0}
