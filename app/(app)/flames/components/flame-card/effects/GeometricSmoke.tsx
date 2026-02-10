@@ -2,11 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useMemo } from 'react';
-import type {
-  LevelAwareParticleProps,
-  Particle,
-  ParticleStateConfig,
-} from './particles';
+import type { BaseParticleProps, Particle, ParticleStateConfig } from './particles';
 import {
   generateBaseParticle,
   generateHash,
@@ -14,6 +10,7 @@ import {
   getParticleIntensity,
   shouldShowParticles,
 } from './particles';
+import type { SmokeEffectConfig } from './types';
 
 interface SmokeParticle extends Particle {
   rotation: number;
@@ -22,14 +19,6 @@ interface SmokeParticle extends Particle {
 
 const GREY_COLORS = ['#6b7280', '#9ca3af', '#4b5563', '#d1d5db'];
 
-const SMOKE_STATE_CONFIG: ParticleStateConfig = {
-  burning: { count: 15, sizeMultiplier: 1.5 },
-  paused: { count: 4, sizeMultiplier: 1 },
-  untended: { count: 2, sizeMultiplier: 1 },
-  sealing: { count: 10, sizeMultiplier: 1.3 },
-  sealed: { count: 0, sizeMultiplier: 0 },
-};
-
 const SMOKE_PARTICLE_CONFIG = {
   xRange: { min: 30, max: 70 },
   sizeRange: { min: 0.7, max: 1.3 },
@@ -37,16 +26,6 @@ const SMOKE_PARTICLE_CONFIG = {
   durationRange: { min: 2.5, max: 4.5 },
   driftRange: { min: -15, max: 15 },
 } as const;
-
-// Particle size based on flame level (bigger flames = bigger smoke)
-const LEVEL_BASE_SIZES: Record<number, number> = {
-  1: 3,
-  2: 4,
-  3: 5,
-  4: 6,
-  5: 7,
-  6: 9,
-};
 
 function createSmokeParticle(
   index: number,
@@ -63,27 +42,22 @@ function createSmokeParticle(
   };
 }
 
-export function GeometricSmoke({
-  state,
-  color,
-  level,
-}: LevelAwareParticleProps) {
-  const shouldReduceMotion = useReducedMotion();
-  const isCelestial = level >= 7;
-  // Show smoke for burning states AND for completed (sealed) earthly flames
-  const showSmoke =
-    (shouldShowParticles(state) || state === 'sealed') && !isCelestial;
-  const baseSize = LEVEL_BASE_SIZES[level] ?? 5;
+interface GeometricSmokeProps extends BaseParticleProps {
+  config: SmokeEffectConfig;
+}
 
-  const particles = useMemo(() => {
-    if (isCelestial) return [];
-    return generateParticles(
-      state,
-      SMOKE_STATE_CONFIG,
-      (index, sizeMultiplier) =>
+export function GeometricSmoke({ state, color, config }: GeometricSmokeProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const showSmoke = shouldShowParticles(state) || state === 'sealed';
+  const { baseSize, states } = config;
+
+  const particles = useMemo(
+    () =>
+      generateParticles(state, states, (index, sizeMultiplier) =>
         createSmokeParticle(index, sizeMultiplier, baseSize),
-    );
-  }, [state, isCelestial, baseSize]);
+      ),
+    [state, states, baseSize],
+  );
 
   if (shouldReduceMotion || !showSmoke) {
     return null;

@@ -3,9 +3,8 @@
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import { GeometricFlame } from '@/app/(app)/flames/components/flame-card/effects/GeometricFlame';
-import { GeometricSmoke } from '@/app/(app)/flames/components/flame-card/effects/GeometricSmoke';
-import { ParticleEmbers } from '@/app/(app)/flames/components/flame-card/effects/ParticleEmbers';
+import { FlameEffects } from '@/app/(app)/flames/components/flame-card/effects/FlameEffects';
+import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
 import { FLAME_HEX_COLORS } from '@/app/(app)/flames/utils/colors';
 import { FLAME_LEVELS } from '@/app/(app)/flames/utils/levels';
 import { ShowcaseFuelBar } from './ShowcaseFuelBar';
@@ -59,19 +58,12 @@ export function FlameShowcase() {
               <div className="relative mb-3 flex h-28 w-20 items-center justify-center">
                 {revealed ? (
                   <>
-                    <GeometricFlame
+                    <FlameRenderer
                       state="burning"
                       level={level.level}
                       colors={colors}
                     />
-                    <ParticleEmbers state="burning" color={colors.light} />
-                    {level.level > 1 && (
-                      <GeometricSmoke
-                        state="paused"
-                        color={colors.light}
-                        level={1}
-                      />
-                    )}
+                    <FlameEffects state="burning" level={level.level} colors={colors} />
                   </>
                 ) : (
                   <div className="relative flex h-full w-full items-center justify-center">
@@ -142,19 +134,12 @@ export function FlameShowcase() {
                 <div className="relative mb-3 flex h-24 w-18 items-center justify-center">
                   {revealed ? (
                     <>
-                      <GeometricFlame
+                      <FlameRenderer
                         state="burning"
                         level={level.level}
                         colors={colors}
                       />
-                      <ParticleEmbers state="burning" color={colors.light} />
-                      {level.level > 1 && (
-                        <GeometricSmoke
-                          state="burning"
-                          color={colors.light}
-                          level={1}
-                        />
-                      )}
+                      <FlameEffects state="burning" level={level.level} colors={colors} />
                     </>
                   ) : (
                     <div className="relative flex h-full w-full items-center justify-center">
