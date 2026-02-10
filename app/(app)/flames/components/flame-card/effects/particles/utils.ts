@@ -43,6 +43,9 @@ export function generateBaseParticle(
   const durationRange = config?.durationRange ?? { min: 1.5, max: 2.5 };
   const driftRange = config?.driftRange ?? { min: -10, max: 10 };
 
+  // Use a different seed for color so it doesn't correlate with position/size
+  const colorHash = generateHash(index, seed + 77);
+
   return {
     id: index,
     x: xRange.min + (hash % (xRange.max - xRange.min)),
@@ -55,6 +58,7 @@ export function generateBaseParticle(
       durationRange.min +
       ((hash % 1000) / 1000) * (durationRange.max - durationRange.min),
     drift: driftRange.min + (hash % (driftRange.max - driftRange.min + 1)),
+    colorIndex: colorHash,
   };
 }
 

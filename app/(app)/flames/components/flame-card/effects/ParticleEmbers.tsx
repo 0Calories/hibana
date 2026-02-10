@@ -9,13 +9,19 @@ import {
   getParticleIntensity,
   shouldShowParticles,
 } from './particles';
-import type { EmberEffectConfig } from './types';
+import type { EmberEffectConfig, ShapeColors } from './types';
 
 interface ParticleEmbersProps extends BaseParticleProps {
   config: EmberEffectConfig;
 }
 
-export function ParticleEmbers({ state, color, config }: ParticleEmbersProps) {
+const EMBER_PALETTE = (colors: ShapeColors) => [
+  colors.light,
+  colors.light,
+  colors.medium,
+] as const;
+
+export function ParticleEmbers({ state, colors, config }: ParticleEmbersProps) {
   const shouldReduceMotion = useReducedMotion();
   const showEmbers = shouldShowParticles(state);
   const { states } = config;
@@ -34,6 +40,7 @@ export function ParticleEmbers({ state, color, config }: ParticleEmbersProps) {
   }
 
   const { opacity, speed } = getParticleIntensity(state, {});
+  const palette = EMBER_PALETTE(colors);
 
   return (
     <div
@@ -50,7 +57,7 @@ export function ParticleEmbers({ state, color, config }: ParticleEmbersProps) {
               bottom: '40%',
               width: particle.size,
               height: particle.size,
-              backgroundColor: color,
+              backgroundColor: palette[particle.colorIndex % palette.length],
             }}
             initial={{ opacity: 0, y: 0 }}
             animate={{
