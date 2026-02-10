@@ -11,7 +11,7 @@ import {
 } from './particles';
 
 const EMBER_STATE_CONFIG: ParticleStateConfig = {
-  active: { count: 8, sizeMultiplier: 1.4 },
+  burning: { count: 8, sizeMultiplier: 1.4 },
   paused: { count: 3, sizeMultiplier: 1 },
   untended: { count: 2, sizeMultiplier: 1 },
   sealing: { count: 12, sizeMultiplier: 1.6 },

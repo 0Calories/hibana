@@ -107,7 +107,7 @@ export function FlameCard({
     toggle();
   }, [toggle, longPress.longPressTriggered]);
 
-  const isActive = state === 'active';
+  const isActive = state === 'burning';
   const isSealing = state === 'sealing';
   const isCompleted = state === 'sealed';
   const isFuelBlocked = isFuelDepleted && !isActive;
@@ -121,7 +121,7 @@ export function FlameCard({
     switch (state) {
       case 'untended':
         return `${baseName}. ${t('ready')}`;
-      case 'active':
+      case 'burning':
         return `${baseName}. ${t('burning')}`;
       case 'paused':
         return canSeal
@@ -140,7 +140,7 @@ export function FlameCard({
     switch (state) {
       case 'untended':
         return t('ready');
-      case 'active':
+      case 'burning':
         return t('burning');
       case 'paused':
         return canSeal ? t('readyToSeal') : t('resting');

@@ -28,7 +28,7 @@ export function TimerDisplay({
   color,
 }: TimerDisplayProps) {
   const shouldReduceMotion = useReducedMotion();
-  const isActive = state === 'active';
+  const isActive = state === 'burning';
 
   const elapsedFormatted = formatTimeCompact(elapsedSeconds);
   const targetFormatted = formatTimeCompact(targetSeconds);
