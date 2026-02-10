@@ -13,6 +13,12 @@ interface SealedSmokeWispsProps {
 const SMOKE_COLOR = '#94a3b8';
 const RISE_HEIGHT = 80;
 const REVEAL_DURATION = 3;
+const BASE_STRAND_SPEED = 2;
+
+// Gust parameters
+const GUST_CHANCE_PER_FRAME = 0.003; // ~every 5.5s at 60fps
+const GUST_STRENGTH = 10;
+const GUST_DECAY = 0.985;
 
 // ---------------------------------------------------------------------------
 // Path builder — two strands + fill, snaking over time
@@ -21,26 +27,31 @@ const REVEAL_DURATION = 3;
 function buildPaths(wickX: number, wickY: number, t: number) {
   const endY = wickY - RISE_HEIGHT;
 
-  // Shared snake motion at different heights along the column
+  // Shared snake motion — both strands move together as a column
   const snakeLow = Math.sin(t * 1.3) * 2;
   const snakeMid = Math.sin(t * 0.9 + 0.5) * 4;
   const snakeHigh = Math.sin(t * 0.7 + 1.2) * 5;
 
-  // Spread between strands: tight at base, widens at mid, narrows toward top
-  const spreadMid = 7;
+  // Per-strand lateral oscillation at midpoint — enables crossover
+  // Different frequencies + phase offset means they periodically swap sides
+  const strandADrift = Math.sin(t * 0.45) * 6;
+  const strandBDrift = Math.sin(t * 0.45 + 2.2) * 6;
+
+  // Base spread (symmetric) + per-strand drift = crossover when drifts overlap
+  const spreadBase = 0.5;
   const spreadTop = 0.2;
 
   const cpY1 = wickY - RISE_HEIGHT * 0.4;
   const cpY2 = wickY - RISE_HEIGHT * 0.7;
 
-  // Left strand
-  const aCP1x = wickX + snakeLow - 0.5;
-  const aCP2x = wickX + snakeMid - spreadMid;
+  // Left strand — shared snake + its own drift
+  const aCP1x = wickX + snakeLow - spreadBase;
+  const aCP2x = wickX + snakeMid + strandADrift;
   const aEndX = wickX + snakeHigh - spreadTop;
 
-  // Right strand
-  const bCP1x = wickX + snakeLow + 0.5;
-  const bCP2x = wickX + snakeMid + spreadMid;
+  // Right strand — shared snake + its own drift
+  const bCP1x = wickX + snakeLow + spreadBase;
+  const bCP2x = wickX + snakeMid + strandBDrift;
   const bEndX = wickX + snakeHigh + spreadTop;
 
   const strandA = `M ${wickX} ${wickY} C ${aCP1x} ${cpY1}, ${aCP2x} ${cpY2}, ${aEndX} ${endY}`;
@@ -70,22 +81,44 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
   const strandBRef = useRef<SVGPathElement>(null);
   const fillRef = useRef<SVGPathElement>(null);
 
+  // Wind gust state — accumulated phase + gust multiplier
+  const phaseRef = useRef(0);
+  const gustRef = useRef(0);
+  const lastTimeRef = useRef(0);
+
   const initial = useMemo(() => buildPaths(wickX, wickY, 0), [wickX, wickY]);
   const endY = wickY - RISE_HEIGHT;
 
   const gradientId = `smoke-grad-${id}`;
   const maskId = `smoke-mask-${id}`;
 
-  // Animate snaking via rAF (no React re-renders)
+  // Animate snaking via rAF with variable-speed phase accumulation
   useEffect(() => {
     if (shouldReduceMotion) return;
 
     let rafId: number;
-    const startTime = performance.now();
+    lastTimeRef.current = performance.now();
+    phaseRef.current = 0;
+    gustRef.current = 0;
 
     const tick = () => {
-      const t = (performance.now() - startTime) / 1000;
-      const paths = buildPaths(wickX, wickY, t);
+      const now = performance.now();
+      const dt = (now - lastTimeRef.current) / 1000;
+      lastTimeRef.current = now;
+
+      // Decay gust strength exponentially
+      gustRef.current *= GUST_DECAY;
+
+      // Random gust trigger
+      if (Math.random() < GUST_CHANCE_PER_FRAME) {
+        gustRef.current = GUST_STRENGTH;
+      }
+
+      // Accumulate phase at variable speed (higher during gusts)
+      const speed = BASE_STRAND_SPEED + gustRef.current;
+      phaseRef.current += dt * speed;
+
+      const paths = buildPaths(wickX, wickY, phaseRef.current);
 
       strandARef.current?.setAttribute('d', paths.strandA);
       strandBRef.current?.setAttribute('d', paths.strandB);
