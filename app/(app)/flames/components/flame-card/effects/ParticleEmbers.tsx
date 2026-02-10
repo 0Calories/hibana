@@ -2,29 +2,31 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useMemo } from 'react';
-import type { BaseParticleProps, ParticleStateConfig } from './particles';
+import type { BaseParticleProps } from './particles';
 import {
   generateBaseParticle,
   generateParticles,
   getParticleIntensity,
   shouldShowParticles,
 } from './particles';
+import type { EmberEffectConfig } from './types';
 
 interface ParticleEmbersProps extends BaseParticleProps {
-  config: ParticleStateConfig;
+  config: EmberEffectConfig;
 }
 
 export function ParticleEmbers({ state, color, config }: ParticleEmbersProps) {
   const shouldReduceMotion = useReducedMotion();
   const showEmbers = shouldShowParticles(state);
+  const { states } = config;
 
   const particles = useMemo(
     () =>
-      generateParticles(state, config, (index, sizeMultiplier) => {
+      generateParticles(state, states, (index, sizeMultiplier) => {
         const base = generateBaseParticle(index);
         return { ...base, size: base.size * sizeMultiplier };
       }),
-    [state, config],
+    [state, states],
   );
 
   if (shouldReduceMotion || !showEmbers) {

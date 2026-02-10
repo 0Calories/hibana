@@ -15,7 +15,7 @@ const stateVariants: Record<FlameState, TargetAndTransition> = {
   sealed: { scale: 0, opacity: 1, y: 0.9 },
 };
 
-const SVG_CLASS = 'h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36';
+const DEFAULT_SVG_CLASS = 'h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36';
 
 const springTransition = {
   type: 'spring' as const,
@@ -34,6 +34,7 @@ interface FlameRendererProps {
   level: number;
   colors: ShapeColors;
   sealProgress?: number;
+  className?: string;
 }
 
 export function FlameRenderer({
@@ -41,10 +42,12 @@ export function FlameRenderer({
   level,
   colors,
   sealProgress = 0,
+  className,
 }: FlameRendererProps) {
   const shouldReduceMotion = useReducedMotion();
   const clampedLevel = Math.max(1, Math.min(8, level));
   const { Base, Flame, SealedFlame, animation } = FLAME_REGISTRY[clampedLevel];
+  const svgClass = className ?? DEFAULT_SVG_CLASS;
 
   const fadeInInitial = shouldReduceMotion ? {} : { opacity: 0 };
 
@@ -54,7 +57,7 @@ export function FlameRenderer({
     return (
       <motion.svg
         viewBox="0 0 100 100"
-        className={SVG_CLASS}
+        className={svgClass}
         role="img"
         aria-hidden="true"
         initial={{ scale: 1.2, y: -6, ...fadeInInitial }}
@@ -82,7 +85,7 @@ export function FlameRenderer({
     return (
       <motion.svg
         viewBox="0 0 100 100"
-        className={SVG_CLASS}
+        className={svgClass}
         role="img"
         aria-hidden="true"
         animate={stateVariants[state]}
@@ -117,7 +120,7 @@ export function FlameRenderer({
     >
       <motion.svg
         viewBox="0 0 100 100"
-        className={SVG_CLASS}
+        className={svgClass}
         role="img"
         aria-hidden="true"
         initial={{ ...svgAnimate, ...fadeInInitial }}

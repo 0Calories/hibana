@@ -8,8 +8,9 @@ import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { getFlameColors } from '../utils/colors';
 import { getFlameLevel } from '../utils/levels';
-import { FlameEffects } from './flame-card/effects/FlameEffects';
+import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
 import { FlameRenderer } from './flame-card/effects/FlameRenderer';
+import { FLAME_REGISTRY } from './flame-card/effects/flames';
 import { SealCelebration } from './flame-card/effects/SealCelebration';
 import { SealRingProgress } from './flame-card/effects/SealRingProgress';
 import { ProgressBar } from './flame-card/ProgressBar';
@@ -177,13 +178,15 @@ export function FlameCard({
 
   const fuelMinutes = Math.floor(elapsedSeconds / 60);
 
+  const { effects } = FLAME_REGISTRY[level];
+
   return (
     <div className="relative w-full">
-      {/* Smoke overlay - positioned outside button to avoid clipping */}
+      {/* Particle effects overlay - positioned outside button to avoid clipping */}
       <div className="pointer-events-none absolute inset-0 z-10">
         <div className="relative h-full w-full">
           <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
-            <FlameEffects level={level} state={state} colors={colors} />
+            <EffectsRenderer effects={effects} state={state} colors={colors} />
           </div>
         </div>
       </div>

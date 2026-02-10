@@ -3,8 +3,9 @@
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import { FlameEffects } from '@/app/(app)/flames/components/flame-card/effects/FlameEffects';
+import { EffectsRenderer } from '@/app/(app)/flames/components/flame-card/effects/EffectsRenderer';
 import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
+import { FLAME_REGISTRY } from '@/app/(app)/flames/components/flame-card/effects/flames';
 import { FLAME_HEX_COLORS } from '@/app/(app)/flames/utils/colors';
 import { FLAME_LEVELS } from '@/app/(app)/flames/utils/levels';
 import { ShowcaseFuelBar } from './ShowcaseFuelBar';
@@ -62,8 +63,13 @@ export function FlameShowcase() {
                       state="burning"
                       level={level.level}
                       colors={colors}
+                      className="h-24 w-20"
                     />
-                    <FlameEffects state="burning" level={level.level} colors={colors} />
+                    <EffectsRenderer
+                      effects={FLAME_REGISTRY[level.level].effects}
+                      state="paused"
+                      colors={colors}
+                    />
                   </>
                 ) : (
                   <div className="relative flex h-full w-full items-center justify-center">
@@ -138,8 +144,13 @@ export function FlameShowcase() {
                         state="burning"
                         level={level.level}
                         colors={colors}
+                        className="h-20 w-16"
                       />
-                      <FlameEffects state="burning" level={level.level} colors={colors} />
+                      <EffectsRenderer
+                        effects={FLAME_REGISTRY[level.level].effects}
+                        state="paused"
+                        colors={colors}
+                      />
                     </>
                   ) : (
                     <div className="relative flex h-full w-full items-center justify-center">
