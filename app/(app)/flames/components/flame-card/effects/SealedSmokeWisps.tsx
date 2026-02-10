@@ -26,29 +26,6 @@ const STRAND_A_OPACITY = 0.4;
 const STRAND_B_OPACITY = 0.35;
 const FILL_OPACITY = 0.08;
 
-// Shared snake motion — lateral sway that moves both strands as a column
-const SNAKE_LOW_FREQ = 1.3; // oscillation speed near the base
-const SNAKE_LOW_AMP = 2; // lateral amplitude near the base
-const SNAKE_MID_FREQ = 0.9; // oscillation speed at midpoint
-const SNAKE_MID_AMP = 4; // lateral amplitude at midpoint
-const SNAKE_MID_PHASE = 0.5; // phase offset for mid oscillation
-const SNAKE_HIGH_FREQ = 0.7; // oscillation speed near the top
-const SNAKE_HIGH_AMP = 5; // lateral amplitude near the top
-const SNAKE_HIGH_PHASE = 1.2; // phase offset for top oscillation
-
-// Per-strand crossover drift — independent lateral motion at the midpoint
-const CROSSOVER_FREQ = 0.1; // how fast strands drift apart / cross
-const CROSSOVER_AMP = 6; // max lateral offset per strand at midpoint
-const CROSSOVER_PHASE_B = 2.2; // phase offset between strand A and B
-
-// Strand spread — static spacing between strands at base and top
-const SPREAD_BASE = 0.5; // spacing at the wick (near 0 = start together)
-const SPREAD_TOP = 0.2; // spacing at the top endpoint
-
-// Control point Y positions (as fraction of RISE_HEIGHT from wick)
-const CP1_Y_FRAC = 0.2; // first control point height
-const CP2_Y_FRAC = 0.9; // second control point height
-
 // Opacity taper gradient stops
 const TAPER_MID_OFFSET = '65%'; // where opacity starts fading faster
 const TAPER_MID_OPACITY = 0.5; // opacity at mid-taper point
@@ -60,48 +37,118 @@ const GUST_CHANCE_PER_FRAME = 0.003; // probability per frame (~every 5.5s at 60
 const GUST_STRENGTH = 10; // how much faster snaking gets during a gust
 const GUST_DECAY = 0.985; // exponential decay per frame (lower = faster fade)
 
+// Phase offset between strand A and B for crossover drift
+const DRIFT_PHASE_B = 2.2;
+
 // ---------------------------------------------------------------------------
-// Path builder — two strands + fill, snaking over time
+// Anchor points — define the smoke path skeleton
+// Points are denser toward the top for realistic dispersal detail.
+// Each anchor specifies oscillation and spread parameters at that height.
+// ---------------------------------------------------------------------------
+
+const ANCHORS = [
+  //           frac   snakeFreq  snakeAmp  snakePhase  driftFreq  driftAmp  spread  yOscAmp  yOscFreq
+  { frac: 0,    sf: 1.3, sa: 0,   sp: 0,   df: 0,   da: 0,   spread: 0.3, ya: 0,   yf: 0 },
+  { frac: 0.18, sf: 1.3, sa: 1.8, sp: 0.2, df: 0.3, da: 0,   spread: 0.4, ya: 0,   yf: 0 },
+  { frac: 0.38, sf: 1.1, sa: 3.5, sp: 0.5, df: 0.4, da: 1.5, spread: 0.6, ya: 0,   yf: 0 },
+  { frac: 0.58, sf: 0.9, sa: 4.5, sp: 0.9, df: 0.5, da: 3,   spread: 1.0, ya: 0.5, yf: 0.4 },
+  { frac: 0.72, sf: 0.8, sa: 5,   sp: 1.3, df: 0.8, da: 6,   spread: 2.5, ya: 1.5, yf: 0.6 },
+  { frac: 0.83, sf: 0.7, sa: 5,   sp: 1.6, df: 1.1, da: 8,   spread: 4,   ya: 2.5, yf: 0.8 },
+  { frac: 0.92, sf: 0.65,sa: 4.5, sp: 2.0, df: 1.4, da: 10,  spread: 4.5, ya: 3,   yf: 1.0 },
+  { frac: 1.0,  sf: 0.6, sa: 3.5, sp: 2.4, df: 1.7, da: 11,  spread: 4,   ya: 3.5, yf: 1.2 },
+];
+
+// ---------------------------------------------------------------------------
+// Catmull-Rom spline → cubic Bézier conversion
+// ---------------------------------------------------------------------------
+
+type Pt = [number, number];
+
+interface BezSeg {
+  cp1: Pt;
+  cp2: Pt;
+  end: Pt;
+}
+
+function catmullRomSegments(points: Pt[]): BezSeg[] {
+  const segs: BezSeg[] = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(0, i - 1)];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[Math.min(points.length - 1, i + 2)];
+    segs.push({
+      cp1: [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6],
+      cp2: [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6],
+      end: [p2[0], p2[1]],
+    });
+  }
+  return segs;
+}
+
+function segsToPathStr(start: Pt, segs: BezSeg[]): string {
+  let d = `M ${start[0]} ${start[1]}`;
+  for (const s of segs) {
+    d += ` C ${s.cp1[0]} ${s.cp1[1]}, ${s.cp2[0]} ${s.cp2[1]}, ${s.end[0]} ${s.end[1]}`;
+  }
+  return d;
+}
+
+function reverseSegs(start: Pt, segs: BezSeg[]): BezSeg[] {
+  const starts: Pt[] = [start, ...segs.slice(0, -1).map((s) => s.end)];
+  const rev: BezSeg[] = [];
+  for (let i = segs.length - 1; i >= 0; i--) {
+    rev.push({ cp1: segs[i].cp2, cp2: segs[i].cp1, end: starts[i] });
+  }
+  return rev;
+}
+
+// ---------------------------------------------------------------------------
+// Path builder — two multi-segment strands + fill, snaking over time
 // ---------------------------------------------------------------------------
 
 function buildPaths(wickX: number, wickY: number, t: number) {
-  const endY = wickY - RISE_HEIGHT;
+  const pointsA: Pt[] = [];
+  const pointsB: Pt[] = [];
 
-  // Shared snake motion — both strands move together as a column
-  const snakeLow = Math.sin(t * SNAKE_LOW_FREQ) * SNAKE_LOW_AMP;
-  const snakeMid =
-    Math.sin(t * SNAKE_MID_FREQ + SNAKE_MID_PHASE) * SNAKE_MID_AMP;
-  const snakeHigh =
-    Math.sin(t * SNAKE_HIGH_FREQ + SNAKE_HIGH_PHASE) * SNAKE_HIGH_AMP;
+  for (const a of ANCHORS) {
+    // Vertical position with subtle Y oscillation at upper points
+    const y =
+      wickY -
+      RISE_HEIGHT * a.frac +
+      (a.ya > 0 ? Math.sin(t * a.yf + a.frac * 3) * a.ya : 0);
 
-  // Per-strand lateral oscillation at midpoint — enables crossover
-  const strandADrift = Math.sin(t * CROSSOVER_FREQ) * CROSSOVER_AMP;
-  const strandBDrift =
-    Math.sin(t * CROSSOVER_FREQ + CROSSOVER_PHASE_B) * CROSSOVER_AMP;
+    // Shared column sway (moves both strands together)
+    const snake = Math.sin(t * a.sf + a.sp) * a.sa;
 
-  const cpY1 = wickY - RISE_HEIGHT * CP1_Y_FRAC;
-  const cpY2 = wickY - RISE_HEIGHT * CP2_Y_FRAC;
+    // Per-strand independent drift — creates crossovers
+    const driftA =
+      a.da > 0 ? Math.sin(t * a.df + a.frac * 1.5) * a.da : 0;
+    const driftB =
+      a.da > 0
+        ? Math.sin(t * a.df + a.frac * 1.5 + DRIFT_PHASE_B) * a.da
+        : 0;
 
-  // Left strand — shared snake + its own drift
-  const aCP1x = wickX + snakeLow - SPREAD_BASE;
-  const aCP2x = wickX + snakeMid + strandADrift;
-  const aEndX = wickX + snakeHigh - SPREAD_TOP;
+    pointsA.push([wickX + snake + driftA - a.spread, y]);
+    pointsB.push([wickX + snake + driftB + a.spread, y]);
+  }
 
-  // Right strand — shared snake + its own drift
-  const bCP1x = wickX + snakeLow + SPREAD_BASE;
-  const bCP2x = wickX + snakeMid + strandBDrift;
-  const bEndX = wickX + snakeHigh + SPREAD_TOP;
+  // Build strand paths via Catmull-Rom interpolation
+  const segA = catmullRomSegments(pointsA);
+  const segB = catmullRomSegments(pointsB);
 
-  const strandA = `M ${wickX} ${wickY} C ${aCP1x} ${cpY1}, ${aCP2x} ${cpY2}, ${aEndX} ${endY}`;
-  const strandB = `M ${wickX} ${wickY} C ${bCP1x} ${cpY1}, ${bCP2x} ${cpY2}, ${bEndX} ${endY}`;
+  const strandA = segsToPathStr(pointsA[0], segA);
+  const strandB = segsToPathStr(pointsB[0], segB);
 
-  const fillPath = [
-    `M ${wickX} ${wickY}`,
-    `C ${aCP1x} ${cpY1}, ${aCP2x} ${cpY2}, ${aEndX} ${endY}`,
-    `L ${bEndX} ${endY}`,
-    `C ${bCP2x} ${cpY2}, ${bCP1x} ${cpY1}, ${wickX} ${wickY}`,
-    'Z',
-  ].join(' ');
+  // Fill: forward along A → line to B end → reverse along B → close
+  const revB = reverseSegs(pointsB[0], segB);
+  let fillPath = segsToPathStr(pointsA[0], segA);
+  const bEnd = pointsB[pointsB.length - 1];
+  fillPath += ` L ${bEnd[0]} ${bEnd[1]}`;
+  for (const s of revB) {
+    fillPath += ` C ${s.cp1[0]} ${s.cp1[1]}, ${s.cp2[0]} ${s.cp2[1]}, ${s.end[0]} ${s.end[1]}`;
+  }
+  fillPath += ' Z';
 
   return { strandA, strandB, fillPath };
 }
