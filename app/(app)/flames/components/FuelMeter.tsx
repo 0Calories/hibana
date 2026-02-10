@@ -284,12 +284,12 @@ export function FuelMeter({
                   'absolute inset-y-0 left-0 rounded-full',
                   barColor,
                 )}
-                initial={false}
+                initial={{ width: 0 }}
                 animate={{ width: `${fraction * 100}%` }}
                 transition={
                   shouldReduceMotion
                     ? { duration: 0.2 }
-                    : { type: 'spring', stiffness: 300, damping: 30 }
+                    : { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as const }
                 }
               >
                 {/* Glowing tip — hot-spot at the leading edge while burning */}
