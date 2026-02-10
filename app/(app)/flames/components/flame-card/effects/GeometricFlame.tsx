@@ -33,6 +33,9 @@ export function GeometricFlame({
     damping: 20,
   };
 
+  const fadeInInitial = shouldReduceMotion ? {} : { opacity: 0 };
+  const fadeInTransition = { duration: 0.4, ease: 'easeOut' as const };
+
   const flickerDuration =
     state === 'sealing' ? 0 : state === 'active' ? 0.8 : 2;
 
@@ -98,9 +101,9 @@ export function GeometricFlame({
           className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
           role="img"
           aria-hidden="true"
-          initial={{ scale: 1.2, y: -6 }}
+          initial={{ scale: 1.2, y: -6, ...fadeInInitial }}
           animate={{ scale: 0.85, opacity: 1, y: 0 }}
-          transition={sealBounceTransition}
+          transition={{ ...sealBounceTransition, opacity: fadeInTransition }}
         >
           {Base && <Base />}
           <motion.g
@@ -142,9 +145,9 @@ export function GeometricFlame({
         className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
         role="img"
         aria-hidden="true"
-        initial={{ scale: 1.2, opacity: 1, y: -6 }}
+        initial={{ scale: 1.2, y: -6, ...fadeInInitial }}
         animate={{ scale: 0.85, opacity: 0.7, y: 0 }}
-        transition={sealBounceTransition}
+        transition={{ ...sealBounceTransition, opacity: fadeInTransition }}
       >
         {Base && <Base />}
         {/* Flame fades out during the bounce-down */}
@@ -173,7 +176,6 @@ export function GeometricFlame({
         className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
         role="img"
         aria-hidden="true"
-        initial={false}
         animate={stateVariants[state]}
         transition={springTransition}
       >
@@ -205,9 +207,9 @@ export function GeometricFlame({
         className="h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36"
         role="img"
         aria-hidden="true"
-        initial={false}
+        initial={{ ...svgAnimate, ...fadeInInitial }}
         animate={svgAnimate}
-        transition={svgTransition}
+        transition={{ ...svgTransition, opacity: fadeInTransition }}
       >
         {Base && <Base />}
         <motion.g
