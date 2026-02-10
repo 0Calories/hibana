@@ -1,6 +1,10 @@
 import { motion } from 'framer-motion';
-import { SealedSmokeWisps } from '../SealedSmokeWisps';
-import type { FlameComponentProps, FlameDefinition, SealedFlameProps } from '../types';
+import { SealedSmokeWisps } from '../effects/SealedSmokeWisps';
+import type {
+  FlameComponentProps,
+  FlameDefinition,
+  SealedFlameProps,
+} from '../effects/types';
 import {
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
@@ -45,7 +49,12 @@ function TorchSealed({ colors }: SealedFlameProps) {
       <motion.g
         initial={{ opacity: 1 }}
         animate={{ opacity: 0, scale: 2 }}
-        transition={{ type: 'spring', stiffness: 120, damping: 12, duration: 1.5 }}
+        transition={{
+          type: 'spring',
+          stiffness: 120,
+          damping: 12,
+          duration: 1.5,
+        }}
       >
         <TorchFlame colors={colors} />
       </motion.g>

@@ -1,4 +1,4 @@
-import type { FlameComponentProps, FlameDefinition } from '../types';
+import type { FlameComponentProps, FlameDefinition } from '../effects/types';
 import {
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,

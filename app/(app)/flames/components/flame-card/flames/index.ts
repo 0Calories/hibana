@@ -1,4 +1,4 @@
-import type { FlameDefinition } from '../types';
+import type { FlameDefinition } from '../effects/types';
 import { Blaze } from './Blaze';
 import { Bonfire } from './Bonfire';
 import { Candle } from './Candle';

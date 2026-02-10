@@ -3,7 +3,7 @@
 import type { TargetAndTransition } from 'framer-motion';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { FlameState } from '../../../utils/types';
-import { FLAME_REGISTRY } from './flames';
+import { FLAME_REGISTRY } from '../flames';
 import { ShakeWrapper } from './ShakeWrapper';
 import type { ShapeColors } from './types';
 

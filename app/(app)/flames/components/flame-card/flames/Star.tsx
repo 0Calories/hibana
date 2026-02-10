@@ -1,5 +1,9 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import type { FlameComponentProps, FlameDefinition, SealedFlameProps } from '../types';
+import type {
+  FlameComponentProps,
+  FlameDefinition,
+  SealedFlameProps,
+} from '../effects/types';
 import {
   RADIATE_DURATIONS,
   RADIATE_ORIGIN,
@@ -41,9 +45,7 @@ function StarSealed({ colors }: SealedFlameProps) {
       style={{ originX: '50%', originY: '50%' }}
       initial={{ opacity: 1 }}
       animate={
-        shouldReduceMotion
-          ? { opacity: 0.17 }
-          : { opacity: [0.12, 0.22, 0.12] }
+        shouldReduceMotion ? { opacity: 0.17 } : { opacity: [0.12, 0.22, 0.12] }
       }
       transition={
         shouldReduceMotion
