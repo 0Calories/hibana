@@ -1,6 +1,5 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
 import { useCallback, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import type { FuelBudgetStatus } from '../actions/fuel-actions';
@@ -64,22 +63,14 @@ export function FlamesList({
   const activeFlameId =
     sessions.find((s) => s.started_at && !s.ended_at)?.flame_id ?? null;
 
-  const shouldReduceMotion = useReducedMotion();
-
   return (
     <div>
-      <motion.div
-        initial={shouldReduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        <FuelMeter
-          budgetSeconds={budgetSeconds}
-          remainingSeconds={remainingSeconds}
-          hasBudget={hasBudget}
-          isBurning={activeFlameId !== null}
-        />
-      </motion.div>
+      <FuelMeter
+        budgetSeconds={budgetSeconds}
+        remainingSeconds={remainingSeconds}
+        hasBudget={hasBudget}
+        isBurning={activeFlameId !== null}
+      />
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {flames.map((flame, index) => (
           <FlameCard
