@@ -8,10 +8,9 @@ import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { getFlameColors } from '../utils/colors';
 import { getFlameLevel } from '../utils/levels';
+import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
 import { FlameRenderer } from './flame-card/effects/FlameRenderer';
 import { FLAME_REGISTRY } from './flame-card/effects/flames';
-import { GeometricSmoke } from './flame-card/effects/GeometricSmoke';
-import { ParticleEmbers } from './flame-card/effects/ParticleEmbers';
 import { SealCelebration } from './flame-card/effects/SealCelebration';
 import { SealRingProgress } from './flame-card/effects/SealRingProgress';
 import { ProgressBar } from './flame-card/ProgressBar';
@@ -180,8 +179,6 @@ export function FlameCard({
   const fuelMinutes = Math.floor(elapsedSeconds / 60);
 
   const { effects } = FLAME_REGISTRY[level];
-  const emberEffect = effects.find((effect) => effect.type === 'embers');
-  const smokeEffect = effects.find((effect) => effect.type === 'smoke');
 
   return (
     <div className="relative w-full">
@@ -189,20 +186,7 @@ export function FlameCard({
       <div className="pointer-events-none absolute inset-0 z-10">
         <div className="relative h-full w-full">
           <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
-            {emberEffect && (
-              <ParticleEmbers
-                state={state}
-                color={colors.light}
-                config={emberEffect}
-              />
-            )}
-            {smokeEffect && (
-              <GeometricSmoke
-                state={state}
-                color={colors.light}
-                config={smokeEffect}
-              />
-            )}
+            <EffectsRenderer effects={effects} state={state} colors={colors} />
           </div>
         </div>
       </div>
