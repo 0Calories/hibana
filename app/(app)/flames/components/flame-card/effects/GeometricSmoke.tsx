@@ -23,7 +23,7 @@ interface SmokeParticle extends Particle {
 const GREY_COLORS = ['#6b7280', '#9ca3af', '#4b5563', '#d1d5db'];
 
 const SMOKE_STATE_CONFIG: ParticleStateConfig = {
-  active: { count: 15, sizeMultiplier: 1.5 },
+  burning: { count: 15, sizeMultiplier: 1.5 },
   paused: { count: 4, sizeMultiplier: 1 },
   untended: { count: 2, sizeMultiplier: 1 },
   sealing: { count: 10, sizeMultiplier: 1.3 },
@@ -70,7 +70,7 @@ export function GeometricSmoke({
 }: LevelAwareParticleProps) {
   const shouldReduceMotion = useReducedMotion();
   const isCelestial = level >= 7;
-  // Show smoke for active states AND for completed (sealed) earthly flames
+  // Show smoke for burning states AND for completed (sealed) earthly flames
   const showSmoke =
     (shouldShowParticles(state) || state === 'sealed') && !isCelestial;
   const baseSize = LEVEL_BASE_SIZES[level] ?? 5;

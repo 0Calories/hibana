@@ -11,7 +11,7 @@ export interface Particle {
 }
 
 export interface ParticleStateConfig {
-  active: { count: number; sizeMultiplier: number };
+  burning: { count: number; sizeMultiplier: number };
   paused: { count: number; sizeMultiplier: number };
   untended: { count: number; sizeMultiplier: number };
   sealing?: { count: number; sizeMultiplier: number };

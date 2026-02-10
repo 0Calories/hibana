@@ -85,7 +85,7 @@ export function getAnimationIntensity(
     untendedSpeed?: number;
   },
 ): AnimationIntensity {
-  const isActive = state === 'active';
+  const isActive = state === 'burning';
   const isPaused = state === 'paused';
 
   return {
@@ -104,7 +104,7 @@ export function getAnimationIntensity(
 
 export function shouldShowParticles(state: FlameState): boolean {
   return (
-    state === 'active' ||
+    state === 'burning' ||
     state === 'paused' ||
     state === 'untended' ||
     state === 'sealing'

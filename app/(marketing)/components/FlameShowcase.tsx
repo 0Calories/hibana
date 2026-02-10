@@ -60,11 +60,11 @@ export function FlameShowcase() {
                 {revealed ? (
                   <>
                     <GeometricFlame
-                      state="active"
+                      state="burning"
                       level={level.level}
                       colors={colors}
                     />
-                    <ParticleEmbers state="active" color={colors.light} />
+                    <ParticleEmbers state="burning" color={colors.light} />
                     {level.level > 1 && (
                       <GeometricSmoke
                         state="paused"
@@ -143,14 +143,14 @@ export function FlameShowcase() {
                   {revealed ? (
                     <>
                       <GeometricFlame
-                        state="active"
+                        state="burning"
                         level={level.level}
                         colors={colors}
                       />
-                      <ParticleEmbers state="active" color={colors.light} />
+                      <ParticleEmbers state="burning" color={colors.light} />
                       {level.level > 1 && (
                         <GeometricSmoke
-                          state="active"
+                          state="burning"
                           color={colors.light}
                           level={1}
                         />

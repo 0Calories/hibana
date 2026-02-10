@@ -59,7 +59,7 @@ export function FlamesList({
     return sessions.find((s) => s.flame_id === flameId) ?? null;
   };
 
-  // Find which flame is currently active (has a session with started_at but no ended_at)
+  // Find which flame is currently burning (has a session with started_at but no ended_at)
   const activeFlameId =
     sessions.find((s) => s.started_at && !s.ended_at)?.flame_id ?? null;
 

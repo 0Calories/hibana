@@ -1,6 +1,6 @@
 export type FlameState =
   | 'untended'
-  | 'active'
+  | 'burning'
   | 'paused'
   | 'sealing'
   | 'sealed';

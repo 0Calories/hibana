@@ -37,7 +37,7 @@ export function GeometricFlame({
   const fadeInTransition = { duration: 0.4, ease: 'easeOut' as const };
 
   const flickerDuration =
-    state === 'sealing' ? 0 : state === 'active' ? 0.8 : 2;
+    state === 'sealing' ? 0 : state === 'burning' ? 0.8 : 2;
 
   const flickerTransition = {
     duration: flickerDuration,
@@ -46,7 +46,7 @@ export function GeometricFlame({
   };
 
   const radiateDuration =
-    state === 'sealing' ? 1.2 : state === 'active' ? 2 : 3;
+    state === 'sealing' ? 1.2 : state === 'burning' ? 2 : 3;
 
   const radiateTransition = {
     duration: radiateDuration,

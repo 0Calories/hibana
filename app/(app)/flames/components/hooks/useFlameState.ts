@@ -47,7 +47,7 @@ export function useFlameState({
   const deriveState = useCallback((): FlameState => {
     if (!session) return 'untended';
     if (session.is_completed) return 'sealed';
-    if (session.started_at && !session.ended_at) return 'active';
+    if (session.started_at && !session.ended_at) return 'burning';
     if (session.ended_at) return 'paused';
     return 'untended';
   }, [session]);
@@ -79,7 +79,7 @@ export function useFlameState({
 
   // Timer interval for active state
   useEffect(() => {
-    if (state === 'active') {
+    if (state === 'burning') {
       intervalRef.current = setInterval(() => {
         setLocalElapsed((prev) => {
           const newElapsed = prev + 1;
@@ -116,17 +116,17 @@ export function useFlameState({
       switch (state) {
         case 'untended':
           await startSession(flame.id, date);
-          setState('active');
+          setState('burning');
           break;
 
-        case 'active':
+        case 'burning':
           await endSession(flame.id, date);
           setState('paused');
           break;
 
         case 'paused':
           await startSession(flame.id, date);
-          setState('active');
+          setState('burning');
           break;
 
         case 'sealed':

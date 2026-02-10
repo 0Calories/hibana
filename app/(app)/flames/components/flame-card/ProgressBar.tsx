@@ -15,7 +15,7 @@ interface ProgressBarProps {
 
 export function ProgressBar({ progress, state, colors }: ProgressBarProps) {
   const shouldReduceMotion = useReducedMotion();
-  const isActive = state === 'active';
+  const isActive = state === 'burning';
 
   const percentage = Math.round(progress * 100);
 
