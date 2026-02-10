@@ -2,6 +2,8 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { getFlameColors } from '../utils/colors';
@@ -9,9 +11,13 @@ import { getFlameLevel } from '../utils/levels';
 import { GeometricFlame } from './flame-card/effects/GeometricFlame';
 import { GeometricSmoke } from './flame-card/effects/GeometricSmoke';
 import { ParticleEmbers } from './flame-card/effects/ParticleEmbers';
+import { SealCelebration } from './flame-card/effects/SealCelebration';
+import { SealRingProgress } from './flame-card/effects/SealRingProgress';
 import { ProgressBar } from './flame-card/ProgressBar';
 import { TimerDisplay } from './flame-card/TimerDisplay';
-import { useFlameTimer } from './hooks/useFlameTimer';
+import { useFlameState } from './hooks/useFlameState';
+import { useLongPress } from './hooks/useLongPress';
+import { SealSummaryModal } from './SealSummaryModal';
 
 interface FlameCardProps {
   flame: Flame;
@@ -23,6 +29,8 @@ interface FlameCardProps {
   level?: number;
 }
 
+const SEAL_DURATION_MS = 2000;
+
 export function FlameCard({
   flame,
   session,
@@ -33,22 +41,78 @@ export function FlameCard({
   level = 1,
 }: FlameCardProps) {
   const t = useTranslations('flames.card');
+  const tSeal = useTranslations('flames.seal');
   const shouldReduceMotion = useReducedMotion();
   const colors = getFlameColors(flame.color);
   const levelInfo = getFlameLevel(level);
 
-  const { state, elapsedSeconds, targetSeconds, progress, toggle, isLoading } =
-    useFlameTimer({
-      flame,
-      session,
-      date,
-      onSessionUpdate,
-    });
+  const {
+    state,
+    elapsedSeconds,
+    targetSeconds,
+    progress,
+    toggle,
+    isLoading,
+    isSealReady,
+    beginSealing,
+    cancelSealing,
+    completeSeal,
+  } = useFlameState({
+    flame,
+    session,
+    date,
+    onSessionUpdate,
+  });
+
+  const [showSummary, setShowSummary] = useState(false);
+  const [celebrationActive, setCelebrationActive] = useState(false);
+
+  // Threshold: only treat as "long press" after 5% of duration (~100ms)
+  const SEAL_INTENT_THRESHOLD = 0.05;
+
+  const handleSealComplete = useCallback(async () => {
+    const success = await completeSeal();
+    if (success) {
+      setCelebrationActive(true);
+    } else {
+      toast.error(tSeal('error'), { position: 'top-center' });
+    }
+  }, [completeSeal, tSeal]);
+
+  const handleCelebrationComplete = useCallback(() => {
+    setCelebrationActive(false);
+    setShowSummary(true);
+  }, []);
+
+  const canSeal = isSealReady && !isBlocked;
+
+  const longPress = useLongPress({
+    duration: SEAL_DURATION_MS,
+    enabled: canSeal,
+    onProgress: (p) => {
+      // Only enter sealing state after meaningful hold
+      if (p > SEAL_INTENT_THRESHOLD && state !== 'sealing') {
+        beginSealing();
+      }
+    },
+    onComplete: handleSealComplete,
+    onCancel: () => {
+      cancelSealing();
+    },
+  });
+
+  const handleClick = useCallback(() => {
+    // Suppress click if a long press just occurred (user held long enough to show intent)
+    if (longPress.longPressTriggered) return;
+    toggle();
+  }, [toggle, longPress.longPressTriggered]);
 
   const isActive = state === 'active';
-  const isCompleted = state === 'completed';
+  const isSealing = state === 'sealing';
+  const isCompleted = state === 'sealed';
   const isFuelBlocked = isFuelDepleted && !isActive;
-  const isDisabled = isLoading || isCompleted || isBlocked || isFuelBlocked;
+  const isDisabled =
+    isLoading || isCompleted || isBlocked || isFuelBlocked || isSealing;
 
   const getAriaLabel = () => {
     const baseName = flame.name;
@@ -60,9 +124,13 @@ export function FlameCard({
       case 'active':
         return `${baseName}. ${t('burning')}`;
       case 'paused':
-        return `${baseName}. ${t('resting')}`;
-      case 'completed':
-        return `${baseName}. ${t('tended')}`;
+        return canSeal
+          ? `${baseName}. ${t('readyToSeal')}`
+          : `${baseName}. ${t('resting')}`;
+      case 'sealing':
+        return `${baseName}. ${t('sealing')}`;
+      case 'sealed':
+        return `${baseName}. ${t('sealed')}`;
     }
   };
 
@@ -75,9 +143,11 @@ export function FlameCard({
       case 'active':
         return t('burning');
       case 'paused':
-        return t('resting');
-      case 'completed':
-        return t('tended');
+        return canSeal ? t('readyToSeal') : t('resting');
+      case 'sealing':
+        return t('sealing');
+      case 'sealed':
+        return t('sealed');
     }
   };
 
@@ -99,7 +169,14 @@ export function FlameCard({
         boxShadow: `0 0 15px ${colors.medium}50, 0 0 30px ${colors.medium}25`,
         borderColor: colors.medium,
       }
-    : {};
+    : canSeal || isSealing
+      ? {
+          boxShadow: '0 0 15px #fbbf2450, 0 0 30px #fbbf2425',
+          borderColor: '#fbbf24',
+        }
+      : {};
+
+  const fuelMinutes = Math.floor(elapsedSeconds / 60);
 
   return (
     <div className="relative w-full">
@@ -117,9 +194,15 @@ export function FlameCard({
         </div>
       </div>
 
+      <SealCelebration
+        active={celebrationActive}
+        color={colors.medium}
+        onComplete={handleCelebrationComplete}
+      />
+
       <motion.button
         type="button"
-        onClick={toggle}
+        onClick={handleClick}
         disabled={isDisabled}
         aria-label={getAriaLabel()}
         className={cn(
@@ -132,11 +215,15 @@ export function FlameCard({
           isBlocked && 'cursor-default opacity-40',
           isLoading && 'cursor-wait',
         )}
-        style={borderGlowStyle}
+        style={{
+          ...borderGlowStyle,
+          ...(canSeal ? { touchAction: 'none' } : {}),
+        }}
         initial="rest"
         whileTap={isDisabled ? 'rest' : 'pressed'}
         variants={cardVariants}
         transition={cardTransition}
+        {...(canSeal || isSealing ? longPress.handlers : {})}
       >
         {/* Header - Name and Level */}
         <div className="px-2 pt-2 sm:px-3 sm:pt-3">
@@ -161,12 +248,15 @@ export function FlameCard({
             state={isBlocked ? 'untended' : state}
             level={level}
             colors={colors}
+            sealProgress={isSealing ? longPress.progress : 0}
           />
+
+          {/* Seal ring progress overlay */}
+          <SealRingProgress progress={longPress.progress} visible={isSealing} />
         </div>
 
         {/* Footer - Timer, Progress, State */}
         <div className="flex flex-col gap-1 bg-slate-200/70 px-2 py-2 dark:bg-black/30 sm:gap-1.5 sm:px-3 sm:py-3">
-          {/* Timer display */}
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
             <TimerDisplay
               elapsedSeconds={elapsedSeconds}
@@ -175,14 +265,17 @@ export function FlameCard({
               color={colors.light}
             />
           )}
-
-          {/* Progress bar */}
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
             <ProgressBar progress={progress} state={state} colors={colors} />
           )}
-
-          {/* State text */}
-          <div className="text-center text-[10px] text-slate-500 dark:text-white/50 sm:text-xs">
+          <div
+            className={cn(
+              'text-center text-[10px] sm:text-xs',
+              canSeal || isSealing
+                ? 'font-medium text-amber-500'
+                : 'text-slate-500 dark:text-white/50',
+            )}
+          >
             {getStateText() ?? '\u00A0'}
           </div>
         </div>
@@ -197,6 +290,13 @@ export function FlameCard({
           </div>
         )}
       </motion.button>
+
+      <SealSummaryModal
+        open={showSummary}
+        onOpenChange={setShowSummary}
+        minutes={fuelMinutes}
+        level={level}
+      />
     </div>
   );
 }

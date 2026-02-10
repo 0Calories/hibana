@@ -26,6 +26,8 @@ const SMOKE_STATE_CONFIG: ParticleStateConfig = {
   active: { count: 15, sizeMultiplier: 1.5 },
   paused: { count: 4, sizeMultiplier: 1 },
   untended: { count: 2, sizeMultiplier: 1 },
+  sealing: { count: 10, sizeMultiplier: 1.3 },
+  completed: { count: 3, sizeMultiplier: 0.7 },
 };
 
 const SMOKE_PARTICLE_CONFIG = {
@@ -68,7 +70,9 @@ export function GeometricSmoke({
 }: LevelAwareParticleProps) {
   const shouldReduceMotion = useReducedMotion();
   const isCelestial = level >= 7;
-  const showSmoke = shouldShowParticles(state) && !isCelestial;
+  // Show smoke for active states AND for completed (sealed) earthly flames
+  const showSmoke =
+    (shouldShowParticles(state) || state === 'sealed') && !isCelestial;
   const baseSize = LEVEL_BASE_SIZES[level] ?? 5;
 
   const particles = useMemo(() => {
@@ -85,13 +89,17 @@ export function GeometricSmoke({
     return null;
   }
 
-  const { opacity, speed } = getAnimationIntensity(state, {
-    activeOpacity: 0.85,
-    pausedOpacity: 0.45,
-    untendedOpacity: 0.45,
-    pausedSpeed: 2.2,
-    untendedSpeed: 3,
-  });
+  const isSealed = state === 'sealed';
+
+  const { opacity, speed } = isSealed
+    ? { opacity: 0.25, speed: 3.5 }
+    : getAnimationIntensity(state, {
+        activeOpacity: 0.85,
+        pausedOpacity: 0.45,
+        untendedOpacity: 0.45,
+        pausedSpeed: 2.2,
+        untendedSpeed: 3,
+      });
 
   return (
     <div

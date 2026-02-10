@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import type { FlameState } from '../hooks/useFlameTimer';
+import type { FlameState } from '../../utils/types';
 
 interface ProgressBarProps {
   progress: number;

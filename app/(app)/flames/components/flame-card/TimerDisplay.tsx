@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import type { FlameState } from '../hooks/useFlameTimer';
+import type { FlameState } from '../../utils/types';
 
 interface TimerDisplayProps {
   elapsedSeconds: number;
@@ -52,14 +52,14 @@ export function TimerDisplay({
   };
 
   const textColorClass =
-    state === 'completed'
+    state === 'sealed'
       ? '' // Use inline color prop for completed state
       : 'text-slate-700 dark:text-white/80';
 
   return (
     <motion.div
       className={`text-center font-mono text-[10px] tracking-tight sm:text-xs md:text-sm ${textColorClass}`}
-      style={state === 'completed' ? { color } : undefined}
+      style={state === 'sealed' ? { color } : undefined}
       animate={pulseAnimation}
       transition={pulseTransition}
     >

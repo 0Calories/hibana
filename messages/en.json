@@ -101,7 +101,20 @@
       "resting": "Resting",
       "tended": "Tended",
       "blocked": "Idle",
-      "noFuel": "No fuel"
+      "noFuel": "No fuel",
+      "sealing": "Sealing ...",
+      "sealed": "Sealed",
+      "readyToSeal": "Ready to Seal"
+    },
+    "seal": {
+      "title": "Flame Sealed!",
+      "subtitle": "Another step forward. Keep the momentum going.",
+      "fuelSpent": "Fuel Spent",
+      "sparksEarned": "Sparks Earned",
+      "xpEarned": "XP Earned",
+      "minutes": "{count} min",
+      "dismiss": "Keep it up!",
+      "error": "Failed to seal flame. Please try again."
     },
     "empty": "No flames yet. Create one to get started!"
   },

@@ -1,5 +1,5 @@
 import type { TargetAndTransition } from 'framer-motion';
-import type { FlameState } from '../../hooks/useFlameTimer';
+import type { FlameState } from '../../../utils/types';
 
 export const stateVariants: Record<FlameState, TargetAndTransition> = {
   untended: {
@@ -17,7 +17,12 @@ export const stateVariants: Record<FlameState, TargetAndTransition> = {
     opacity: 0.95,
     y: 0,
   },
-  completed: {
+  sealing: {
+    scale: 1.15,
+    opacity: 1,
+    y: -6,
+  },
+  sealed: {
     scale: 0,
     opacity: 1,
     y: 0.9,
@@ -37,7 +42,11 @@ export const flickerVariants: Record<FlameState, TargetAndTransition> = {
     scaleY: [1, 0.98, 1.01, 0.99, 1],
     scaleX: [1, 1.01, 0.99, 1.005, 1],
   },
-  completed: {
+  sealing: {
+    scaleY: [1, 1.12, 0.88, 1.15, 0.85, 1.1, 1],
+    scaleX: [1, 0.9, 1.1, 0.88, 1.12, 0.92, 1],
+  },
+  sealed: {
     scaleY: 1,
     scaleX: 1,
   },
@@ -56,7 +65,11 @@ export const radiateVariants: Record<FlameState, TargetAndTransition> = {
     scale: [1, 1.05, 1.02, 1.04, 1],
     rotate: [0, 2, -1, 1, 0],
   },
-  completed: {
+  sealing: {
+    scale: [1, 1.18, 1.05, 1.2, 1.08, 1.15, 1],
+    rotate: [0, 6, -4, 5, -3, 4, 0],
+  },
+  sealed: {
     scale: 1,
     rotate: 0,
   },

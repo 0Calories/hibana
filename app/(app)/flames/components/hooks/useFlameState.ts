@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
+import { setFlameCompletion } from '../../actions/flame-actions';
 import { endSession, startSession } from '../../session-actions';
-
-export type FlameState = 'untended' | 'active' | 'paused' | 'completed';
+import type { FlameState } from '../../utils/types';
 
 interface UseFlameTimerOptions {
   flame: Flame;
@@ -20,9 +20,13 @@ interface UseFlameTimerReturn {
   progress: number;
   toggle: () => Promise<void>;
   isLoading: boolean;
+  isSealReady: boolean;
+  beginSealing: () => void;
+  cancelSealing: () => void;
+  completeSeal: () => Promise<boolean>;
 }
 
-export function useFlameTimer({
+export function useFlameState({
   flame,
   session,
   date,
@@ -35,9 +39,14 @@ export function useFlameTimer({
 
   const targetSeconds = (flame.time_budget_minutes ?? 0) * 60;
 
+  const sealThresholdSeconds =
+    'seal_threshold_minutes' in flame && flame.seal_threshold_minutes
+      ? (flame.seal_threshold_minutes as number) * 60
+      : (flame.time_budget_minutes ?? 0) * 30; // 50% of budget as default
+
   const deriveState = useCallback((): FlameState => {
     if (!session) return 'untended';
-    if (session.is_completed) return 'completed';
+    if (session.is_completed) return 'sealed';
     if (session.started_at && !session.ended_at) return 'active';
     if (session.ended_at) return 'paused';
     return 'untended';
@@ -59,9 +68,12 @@ export function useFlameTimer({
     return total;
   }, [session]);
 
-  // Update state when session changes
+  // Update state when session changes, but don't override transient 'sealing' state
   useEffect(() => {
-    setState(deriveState());
+    setState((prev) => {
+      if (prev === 'sealing') return prev;
+      return deriveState();
+    });
     setLocalElapsed(calculateElapsed());
   }, [deriveState, calculateElapsed]);
 
@@ -117,8 +129,9 @@ export function useFlameTimer({
           setState('active');
           break;
 
-        case 'completed':
-          // Already completed, no action
+        case 'sealed':
+        case 'sealing':
+          // No action
           break;
       }
 
@@ -127,6 +140,40 @@ export function useFlameTimer({
       console.error('Failed to toggle flame timer:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const isSealReady =
+    state === 'paused' &&
+    sealThresholdSeconds > 0 &&
+    localElapsed >= sealThresholdSeconds;
+
+  const beginSealing = () => {
+    if (isSealReady) {
+      setState('sealing');
+    }
+  };
+
+  const cancelSealing = () => {
+    if (state === 'sealing') {
+      setState('paused');
+    }
+  };
+
+  const completeSeal = async (): Promise<boolean> => {
+    try {
+      const result = await setFlameCompletion(flame.id, date, true);
+      if (result.success) {
+        setState('sealed');
+        onSessionUpdate?.();
+        return true;
+      }
+      // Fall back to paused on failure
+      setState('paused');
+      return false;
+    } catch {
+      setState('paused');
+      return false;
     }
   };
 
@@ -140,5 +187,9 @@ export function useFlameTimer({
     progress,
     toggle,
     isLoading,
+    isSealReady,
+    beginSealing,
+    cancelSealing,
+    completeSeal,
   };
 }

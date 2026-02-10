@@ -101,7 +101,20 @@
       "resting": "Resting",
       "tended": "Tended",
       "blocked": "Idle",
-      "noFuel": "No fuel"
+      "noFuel": "No fuel",
+      "sealing": "封印中 ...",
+      "sealed": "封印済み",
+      "readyToSeal": "封印可能"
+    },
+    "seal": {
+      "title": "炎を封印しました！",
+      "subtitle": "また一歩前進。この勢いを続けよう。",
+      "fuelSpent": "消費した燃料",
+      "sparksEarned": "獲得スパーク",
+      "xpEarned": "獲得XP",
+      "minutes": "{count}分",
+      "dismiss": "この調子で！",
+      "error": "封印に失敗しました。もう一度お試しください。"
     },
     "empty": "No flames yet. Create one to get started!"
   },
