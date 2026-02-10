@@ -1,4 +1,13 @@
-import type { FlameComponentProps, FlameDefinition } from '../types';
+import { motion } from 'framer-motion';
+import { SealedSmokeWisps } from '../SealedSmokeWisps';
+import type { FlameComponentProps, FlameDefinition, SealedFlameProps } from '../types';
+import {
+  FLICKER_DURATIONS,
+  FLICKER_ORIGIN,
+  FLICKER_VARIANTS,
+  STANDARD_EMBERS,
+  smokeEffect,
+} from './presets';
 
 function BonfireBase() {
   return (
@@ -73,7 +82,30 @@ function BonfireFlame({ colors }: FlameComponentProps) {
   );
 }
 
+function BonfireSealed({ colors }: SealedFlameProps) {
+  return (
+    <>
+      <BonfireBase />
+      <motion.g
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0, scale: 2 }}
+        transition={{ type: 'spring', stiffness: 120, damping: 12, duration: 1.5 }}
+      >
+        <BonfireFlame colors={colors} />
+      </motion.g>
+      <SealedSmokeWisps wickY={72} />
+    </>
+  );
+}
+
 export const Bonfire: FlameDefinition = {
   Base: BonfireBase,
   Flame: BonfireFlame,
+  SealedFlame: BonfireSealed,
+  animation: {
+    origin: FLICKER_ORIGIN,
+    variants: FLICKER_VARIANTS,
+    durations: FLICKER_DURATIONS,
+  },
+  effects: [STANDARD_EMBERS, smokeEffect(6)],
 };

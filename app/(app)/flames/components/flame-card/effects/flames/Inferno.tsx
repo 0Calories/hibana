@@ -1,4 +1,11 @@
 import type { FlameComponentProps, FlameDefinition } from '../types';
+import {
+  FLICKER_DURATIONS,
+  FLICKER_ORIGIN,
+  FLICKER_VARIANTS,
+  STANDARD_EMBERS,
+  smokeEffect,
+} from './presets';
 
 function InfernoFlame({ colors }: FlameComponentProps) {
   return (
@@ -60,4 +67,10 @@ function InfernoFlame({ colors }: FlameComponentProps) {
 
 export const Inferno: FlameDefinition = {
   Flame: InfernoFlame,
+  animation: {
+    origin: FLICKER_ORIGIN,
+    variants: FLICKER_VARIANTS,
+    durations: FLICKER_DURATIONS,
+  },
+  effects: [STANDARD_EMBERS, smokeEffect(9)],
 };

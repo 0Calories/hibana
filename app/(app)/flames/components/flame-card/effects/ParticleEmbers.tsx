@@ -10,25 +10,21 @@ import {
   shouldShowParticles,
 } from './particles';
 
-const EMBER_STATE_CONFIG: ParticleStateConfig = {
-  burning: { count: 8, sizeMultiplier: 1.4 },
-  paused: { count: 3, sizeMultiplier: 1 },
-  untended: { count: 1, sizeMultiplier: 1 },
-  sealing: { count: 12, sizeMultiplier: 1.6 },
-  sealed: { count: 1, sizeMultiplier: 1 },
-};
+interface ParticleEmbersProps extends BaseParticleProps {
+  config: ParticleStateConfig;
+}
 
-export function ParticleEmbers({ state, color }: BaseParticleProps) {
+export function ParticleEmbers({ state, color, config }: ParticleEmbersProps) {
   const shouldReduceMotion = useReducedMotion();
   const showEmbers = shouldShowParticles(state);
 
   const particles = useMemo(
     () =>
-      generateParticles(state, EMBER_STATE_CONFIG, (index, sizeMultiplier) => {
+      generateParticles(state, config, (index, sizeMultiplier) => {
         const base = generateBaseParticle(index);
         return { ...base, size: base.size * sizeMultiplier };
       }),
-    [state],
+    [state, config],
   );
 
   if (shouldReduceMotion || !showEmbers) {

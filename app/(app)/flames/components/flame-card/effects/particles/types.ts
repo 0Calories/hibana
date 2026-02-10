@@ -27,7 +27,3 @@ export interface BaseParticleProps {
   state: FlameState;
   color: string;
 }
-
-export interface LevelAwareParticleProps extends BaseParticleProps {
-  level: number;
-}

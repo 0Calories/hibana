@@ -1,4 +1,13 @@
-import type { FlameComponentProps, FlameDefinition } from '../types';
+import { motion } from 'framer-motion';
+import { SealedSmokeWisps } from '../SealedSmokeWisps';
+import type { FlameComponentProps, FlameDefinition, SealedFlameProps } from '../types';
+import {
+  FLICKER_DURATIONS,
+  FLICKER_ORIGIN,
+  FLICKER_VARIANTS,
+  STANDARD_EMBERS,
+  smokeEffect,
+} from './presets';
 
 function CandleBase() {
   return (
@@ -29,7 +38,30 @@ function CandleFlame({ colors }: FlameComponentProps) {
   );
 }
 
+function CandleSealed({ colors }: SealedFlameProps) {
+  return (
+    <>
+      <CandleBase />
+      <motion.g
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0, scale: 2 }}
+        transition={{ type: 'spring', stiffness: 120, damping: 12, duration: 1.5 }}
+      >
+        <CandleFlame colors={colors} />
+      </motion.g>
+      <SealedSmokeWisps wickY={62} />
+    </>
+  );
+}
+
 export const Candle: FlameDefinition = {
   Base: CandleBase,
   Flame: CandleFlame,
+  SealedFlame: CandleSealed,
+  animation: {
+    origin: FLICKER_ORIGIN,
+    variants: FLICKER_VARIANTS,
+    durations: FLICKER_DURATIONS,
+  },
+  effects: [STANDARD_EMBERS, smokeEffect(4)],
 };

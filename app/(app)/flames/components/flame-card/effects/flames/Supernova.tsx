@@ -1,4 +1,11 @@
-import type { FlameComponentProps, FlameDefinition } from '../types';
+import { motion, useReducedMotion } from 'framer-motion';
+import type { FlameComponentProps, FlameDefinition, SealedFlameProps } from '../types';
+import {
+  RADIATE_DURATIONS,
+  RADIATE_ORIGIN,
+  RADIATE_VARIANTS,
+  STANDARD_EMBERS,
+} from './presets';
 
 function SupernovaFlame({ colors }: FlameComponentProps) {
   return (
@@ -49,7 +56,35 @@ function SupernovaFlame({ colors }: FlameComponentProps) {
   );
 }
 
+function SupernovaSealed({ colors }: SealedFlameProps) {
+  const shouldReduceMotion = useReducedMotion();
+  return (
+    <motion.g
+      style={{ originX: '50%', originY: '50%' }}
+      initial={{ opacity: 1 }}
+      animate={
+        shouldReduceMotion
+          ? { opacity: 0.17 }
+          : { opacity: [0.12, 0.22, 0.12] }
+      }
+      transition={
+        shouldReduceMotion
+          ? { duration: 0.3 }
+          : { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }
+      }
+    >
+      <SupernovaFlame colors={colors} />
+    </motion.g>
+  );
+}
+
 export const Supernova: FlameDefinition = {
   Flame: SupernovaFlame,
-  isCelestial: true,
+  SealedFlame: SupernovaSealed,
+  animation: {
+    origin: RADIATE_ORIGIN,
+    variants: RADIATE_VARIANTS,
+    durations: RADIATE_DURATIONS,
+  },
+  effects: [STANDARD_EMBERS],
 };

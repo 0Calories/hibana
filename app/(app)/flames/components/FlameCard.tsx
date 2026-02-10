@@ -8,9 +8,8 @@ import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { getFlameColors } from '../utils/colors';
 import { getFlameLevel } from '../utils/levels';
-import { GeometricFlame } from './flame-card/effects/GeometricFlame';
-import { GeometricSmoke } from './flame-card/effects/GeometricSmoke';
-import { ParticleEmbers } from './flame-card/effects/ParticleEmbers';
+import { FlameEffects } from './flame-card/effects/FlameEffects';
+import { FlameRenderer } from './flame-card/effects/FlameRenderer';
 import { SealCelebration } from './flame-card/effects/SealCelebration';
 import { SealRingProgress } from './flame-card/effects/SealRingProgress';
 import { ProgressBar } from './flame-card/ProgressBar';
@@ -183,9 +182,8 @@ export function FlameCard({
       {/* Smoke overlay - positioned outside button to avoid clipping */}
       <div className="pointer-events-none absolute inset-0 z-10">
         <div className="relative h-full w-full">
-          {/* Position smoke to align with flame visual area */}
           <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
-            <GeometricSmoke state={state} color={colors.medium} level={level} />
+            <FlameEffects level={level} state={state} colors={colors} />
           </div>
         </div>
       </div>
@@ -236,8 +234,7 @@ export function FlameCard({
 
         {/* Flame visual area */}
         <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
-          <ParticleEmbers state={state} color={colors.light} />
-          <GeometricFlame
+          <FlameRenderer
             state={state}
             level={level}
             colors={colors}
