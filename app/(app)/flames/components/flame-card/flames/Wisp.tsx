@@ -1,9 +1,9 @@
-import { SmolderingEmbers } from '../SmolderingEmbers';
+import { SmolderingEmbers } from '../effects/SmolderingEmbers';
 import type {
   FlameComponentProps,
   FlameDefinition,
   SealedFlameProps,
-} from '../types';
+} from '../effects/types';
 import {
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,

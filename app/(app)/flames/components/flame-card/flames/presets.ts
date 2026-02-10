@@ -1,7 +1,7 @@
 import type { TargetAndTransition } from 'framer-motion';
-import type { FlameState } from '../../../../utils/types';
-import type { ParticleStateConfig } from '../particles';
-import type { EmberEffectConfig, SmokeEffectConfig } from '../types';
+import type { FlameState } from '../../../utils/types';
+import type { ParticleStateConfig } from '../effects/particles';
+import type { EmberEffectConfig, SmokeEffectConfig } from '../effects/types';
 
 // ---------------------------------------------------------------------------
 // Animation variant maps
