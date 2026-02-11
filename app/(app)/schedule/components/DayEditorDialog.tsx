@@ -7,7 +7,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { Lock } from 'lucide-react';
+import { Flame, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -60,6 +60,7 @@ export function DayEditorDialog({
   const t = useTranslations('schedule');
   const today = getLocalDateString();
   const isToday = day.date === today;
+
   // Fuel budget state (in minutes)
   const [fuelMinutes, setFuelMinutes] = useState(() => day.fuelMinutes ?? 0);
 
@@ -67,6 +68,9 @@ export function DayEditorDialog({
   const [assignedIds, setAssignedIds] = useState<string[]>(
     () => day.assignedFlameIds,
   );
+
+  // Track whether a drag is active to lock scroll
+  const [isDragging, setIsDragging] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -81,15 +85,21 @@ export function DayEditorDialog({
   // Track whether fuel is "locked" for today
   const isFuelLocked = isToday && day.fuelMinutes != null;
 
-  // Capacity calculations
+  // Capacity calculations — preserve assignment order
   const assignedFlames = useMemo(
-    () => assignedIds.map((id) => flames.find((f) => f.id === id)).filter(Boolean) as FlameWithSchedule[],
+    () =>
+      assignedIds
+        .map((id) => flames.find((f) => f.id === id))
+        .filter(Boolean) as FlameWithSchedule[],
     [flames, assignedIds],
   );
 
   const totalAllocated = useMemo(
     () =>
-      assignedFlames.reduce((sum, f) => sum + (f.time_budget_minutes ?? 0), 0),
+      assignedFlames.reduce(
+        (sum, f) => sum + (f.time_budget_minutes ?? 0),
+        0,
+      ),
     [assignedFlames],
   );
 
@@ -97,7 +107,7 @@ export function DayEditorDialog({
 
   const canAddFlame = useCallback(
     (flame: FlameWithSchedule) => {
-      if (fuelMinutes === 0) return true; // No budget set = no restriction
+      if (fuelMinutes === 0) return true;
       return remainingCapacity >= (flame.time_budget_minutes ?? 0);
     },
     [fuelMinutes, remainingCapacity],
@@ -111,10 +121,7 @@ export function DayEditorDialog({
 
   // Flames available to drag (not assigned, not daily)
   const availableFlames = useMemo(
-    () =>
-      flames.filter(
-        (f) => !f.is_daily && !assignedIds.includes(f.id),
-      ),
+    () => flames.filter((f) => !f.is_daily && !assignedIds.includes(f.id)),
     [flames, assignedIds],
   );
 
@@ -127,19 +134,18 @@ export function DayEditorDialog({
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    setIsDragging(false);
     const { active, over } = event;
     if (!over) return;
 
     const flameId = active.id as string;
 
     if (over.id === 'assigned-zone') {
-      // Dragging into assigned zone
       if (assignedIds.includes(flameId)) return;
       const flame = flames.find((f) => f.id === flameId);
       if (!flame || !canAddFlame(flame)) return;
       setAssignedIds((prev) => [...prev, flameId]);
     } else if (over.id === 'flames-zone') {
-      // Dragging back to available flames
       const flame = flames.find((f) => f.id === flameId);
       if (!flame || flame.is_daily) return;
       setAssignedIds((prev) => prev.filter((id) => id !== flameId));
@@ -205,27 +211,35 @@ export function DayEditorDialog({
     >
       <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {DAY_NAMES[day.dayOfWeek]}
-            <span className="text-xs font-normal text-muted-foreground">
-              {day.date}
-            </span>
-            {isToday && (
-              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-500">
-                {t('today')}
+          <DialogTitle>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-semibold">
+                {DAY_NAMES[day.dayOfWeek]}
               </span>
-            )}
+              <span className="text-sm font-normal text-muted-foreground">
+                {day.date}
+              </span>
+              {isToday && (
+                <span className="relative -top-px rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-500">
+                  {t('today')}
+                </span>
+              )}
+            </div>
           </DialogTitle>
         </DialogHeader>
 
         <DndContext
           sensors={sensors}
+          onDragStart={() => setIsDragging(true)}
           onDragEnd={handleDragEnd}
+          onDragCancel={() => setIsDragging(false)}
         >
-          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden">
+          <div
+            className={`flex min-h-0 flex-1 flex-col gap-5 overflow-x-hidden ${isDragging ? 'overflow-y-hidden' : 'overflow-y-auto'}`}
+          >
             {/* Fuel Budget Section */}
             <div className="space-y-2">
-              <h3 className="text-xs font-medium text-muted-foreground">
+              <h3 className="text-sm font-medium text-muted-foreground">
                 {t('fuelBudget')}
               </h3>
               {isFuelLocked ? (
@@ -234,7 +248,7 @@ export function DayEditorDialog({
                   <span className="text-sm">
                     {formatMinutes(day.fuelMinutes ?? 0)}
                   </span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {t('fuelLocked')}
                   </span>
                 </div>
@@ -247,7 +261,7 @@ export function DayEditorDialog({
                     disabled={isFuelLocked}
                   />
                   {isToday && (
-                    <p className="text-[10px] text-amber-500">
+                    <p className="text-xs text-amber-500">
                       {t('fuelLockedWarning')}
                     </p>
                   )}
@@ -257,9 +271,12 @@ export function DayEditorDialog({
 
             {/* Assigned Flames */}
             <div className="space-y-1.5">
-              <h3 className="text-xs font-medium text-muted-foreground">
-                {t('assigned')}
-              </h3>
+              <div className="flex items-center gap-2">
+                <Flame className="size-3.5 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t('assigned')}
+                </h3>
+              </div>
               <AssignedFlamesZone
                 flames={assignedFlames}
                 flameLevels={flameLevels}
@@ -268,21 +285,23 @@ export function DayEditorDialog({
             </div>
 
             {/* Available Flames Grid */}
-            <div className="space-y-1.5">
-              <h3 className="text-xs font-medium text-muted-foreground">
-                {t('flames')}
-              </h3>
-              <FlamesDropZone hasFlames={availableFlames.length > 0}>
-                {availableFlames.map((flame) => (
-                  <DraggableFlame
-                    key={flame.id}
-                    flame={flame}
-                    level={flameLevels.get(flame.id) ?? 1}
-                    disabled={!canAddFlame(flame)}
-                  />
-                ))}
-              </FlamesDropZone>
-            </div>
+            {availableFlames.length > 0 && (
+              <div className="space-y-1.5">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t('flames')}
+                </h3>
+                <FlamesDropZone>
+                  {availableFlames.map((flame) => (
+                    <DraggableFlame
+                      key={flame.id}
+                      flame={flame}
+                      level={flameLevels.get(flame.id) ?? 1}
+                      disabled={!canAddFlame(flame)}
+                    />
+                  ))}
+                </FlamesDropZone>
+              </div>
+            )}
           </div>
         </DndContext>
 
@@ -290,7 +309,7 @@ export function DayEditorDialog({
           <button
             type="button"
             onClick={handleResetToDefault}
-            className="mr-auto text-xs text-muted-foreground hover:text-foreground"
+            className="mr-auto text-sm text-muted-foreground hover:text-foreground"
           >
             {t('resetToDefault')}
           </button>

@@ -5,21 +5,31 @@ import { useTranslations } from 'next-intl';
 import { getFlameColors } from '@/app/(app)/flames/utils/colors';
 import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
 import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
+import { cn } from '@/lib/utils';
 import type { FlameWithSchedule } from '../actions';
 
 interface DraggableFlameProps {
   flame: FlameWithSchedule;
   level: number;
   disabled?: boolean;
+  showDaily?: boolean;
+  onClick?: () => void;
 }
 
-export function DraggableFlame({ flame, level, disabled = false }: DraggableFlameProps) {
+export function DraggableFlame({
+  flame,
+  level,
+  disabled = false,
+  showDaily = false,
+  onClick,
+}: DraggableFlameProps) {
   const t = useTranslations('schedule');
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: flame.id,
-    disabled,
-    data: { flame },
-  });
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: flame.id,
+      disabled,
+      data: { flame },
+    });
 
   const colors = getFlameColors(flame.color as FlameColorName);
 
@@ -44,9 +54,18 @@ export function DraggableFlame({ flame, level, disabled = false }: DraggableFlam
       {...listeners}
       {...attributes}
       style={style}
-      className={`flex flex-col items-center gap-0.5 rounded-lg p-1.5 ${
-        isDragging ? 'opacity-80 shadow-lg' : ''
-      } ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-grab active:cursor-grabbing'}`}
+      onClick={onClick}
+      className={cn(
+        'flex flex-col items-center gap-0.5 rounded-lg p-1.5',
+        isDragging && 'opacity-80 shadow-lg',
+        disabled
+          ? 'cursor-default opacity-70'
+          : onClick
+            ? 'cursor-pointer hover:bg-muted/50'
+            : 'cursor-grab active:cursor-grabbing',
+        showDaily &&
+          'border border-amber-400/30 bg-amber-50/30 dark:border-amber-500/20 dark:bg-amber-500/5',
+      )}
     >
       <FlameRenderer
         state="untended"
@@ -54,14 +73,21 @@ export function DraggableFlame({ flame, level, disabled = false }: DraggableFlam
         colors={colors}
         className="h-12 w-10"
       />
-      <span className="max-w-[6rem] truncate text-center text-xs leading-tight">
+      <span className="max-w-[6rem] truncate text-center text-sm leading-tight">
         {flame.name}
       </span>
-      {flame.time_budget_minutes != null && (
-        <span className="text-[10px] text-muted-foreground">
-          {formatMinutes(flame.time_budget_minutes)}
-        </span>
-      )}
+      <div className="flex items-center gap-1">
+        {flame.time_budget_minutes != null && (
+          <span className="text-xs text-muted-foreground">
+            {formatMinutes(flame.time_budget_minutes)}
+          </span>
+        )}
+        {showDaily && (
+          <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] font-medium text-amber-600">
+            {t('daily')}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
