@@ -1,13 +1,13 @@
 'use client';
 
-import { Fuel } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { FuelIcon } from 'lucide-react';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
 import {
   FLAME_HEX_COLORS,
   getFlameColors,
 } from '@/app/(app)/flames/utils/colors';
-import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
+import { cn } from '@/lib/utils';
 import type { FlameWithSchedule } from '../actions';
 
 const MAX_MINUTES = 720; // 12 hours
@@ -73,34 +73,44 @@ export function FuelSlider({
   const isOverCapacity = allocatedMinutes > value;
 
   // Build colored segments for the gauge from assigned flames
-  const segments = (() => {
-    const result: {
+
+  const segments = useMemo(() => {
+    type FuelSegment = {
       startFrac: number;
       endFrac: number;
-      colorLight: string;
-      colorMedium: string;
-      colorDark: string;
+      colors: {
+        light: string;
+        medium: string;
+        dark: string;
+      };
       needsOutline: boolean;
-    }[] = [];
-    let cursor = 0;
-    for (const flame of assignedFlames) {
-      const budget = flame.time_budget_minutes ?? 0;
-      if (budget <= 0) continue;
-      const startFrac = cursor / MAX_MINUTES;
-      cursor += budget;
-      const endFrac = Math.min(cursor / MAX_MINUTES, 1);
-      const hex = getFlameColors(flame.color as FlameColorName);
-      result.push({
-        startFrac,
-        endFrac,
-        colorLight: hex.light,
-        colorMedium: hex.medium,
-        colorDark: hex.dark,
-        needsOutline: WARM_COLORS.has(hex.medium),
-      });
-    }
-    return result;
-  })();
+    };
+
+    const result = assignedFlames.reduce(
+      (acc: { segments: FuelSegment[]; cursor: number }, flame) => {
+        const budget = flame.time_budget_minutes ?? 0;
+        if (budget <= 0) {
+          return acc;
+        }
+
+        const startFrac = acc.cursor / MAX_MINUTES;
+        acc.cursor += budget;
+        const endFrac = Math.min(acc.cursor / MAX_MINUTES, 1);
+        const colors = getFlameColors(flame.color as FlameColorName);
+        acc.segments.push({
+          startFrac,
+          endFrac,
+          colors,
+          needsOutline: WARM_COLORS.has(colors.medium),
+        });
+
+        return acc;
+      },
+      { segments: [], cursor: 0 },
+    );
+
+    return result.segments;
+  }, [assignedFlames]);
 
   const updateFromPointer = useCallback(
     (clientX: number) => {
@@ -162,7 +172,7 @@ export function FuelSlider({
             : 'text-amber-600 dark:text-amber-400',
         )}
       >
-        <Fuel className="h-3.5 w-3.5" />
+        <FuelIcon className="h-3.5 w-3.5" />
       </div>
 
       {/* Bar container */}
@@ -196,9 +206,9 @@ export function FuelSlider({
           />
 
           {/* Colored flame segments with gradients */}
-          {segments.map((seg, i) => (
+          {segments.map((seg) => (
             <div
-              key={i}
+              key={`segment-${seg.colors.light}`}
               className={cn(
                 'absolute inset-y-0',
                 seg.needsOutline &&
@@ -207,7 +217,7 @@ export function FuelSlider({
               style={{
                 left: `${seg.startFrac * 100}%`,
                 width: `${(seg.endFrac - seg.startFrac) * 100}%`,
-                background: `linear-gradient(to right, ${seg.colorDark}, ${seg.colorMedium}, ${seg.colorLight})`,
+                background: `linear-gradient(to right, ${seg.colors.dark}, ${seg.colors.medium}, ${seg.colors.light})`,
                 opacity: seg.endFrac <= fraction ? 1 : 0.35,
               }}
             />
@@ -223,7 +233,7 @@ export function FuelSlider({
                     'absolute inset-y-0',
                     isOverCapacity
                       ? 'bg-red-500'
-                      : 'bg-gradient-to-r from-amber-500 to-amber-400',
+                      : 'bg-linear-to-r from-amber-500 to-amber-400',
                   )}
                   style={{
                     left: `${allocFrac * 100}%`,
@@ -269,7 +279,7 @@ export function FuelSlider({
             if (e.key === 'Enter') commitEdit();
             if (e.key === 'Escape') setIsEditing(false);
           }}
-          // biome-ignore lint/jsx-a11y/no-autofocus: Editing mode
+          // biome-ignore lint/a11y/noAutofocus: Editing mode
           autoFocus
         />
       ) : (
