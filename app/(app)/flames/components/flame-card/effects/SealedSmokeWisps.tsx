@@ -19,6 +19,7 @@ const SMOKE_COLOR_COOL = '#94a3b8'; // cool grey for upper smoke
 const SMOKE_COLOR_WARM = '#b8a494'; // warm brownish tint near wick (wax vapor)
 const RISE_HEIGHT = 70; // total height of smoke column in SVG units
 const REVEAL_DURATION = 3; // seconds for initial bottom-to-top reveal
+const PHASE_SPEED = 2;
 
 // Strand appearance
 const STRAND_A_WIDTH = 2;
@@ -35,8 +36,7 @@ const TAPER_UPPER_OPACITY = 0.15;
 const TAPER_END_OPACITY = 0;
 
 // Wind gust — damped spring: impulse pushes smoke sideways, spring pulls it back
-const PHASE_SPEED = 0; // 2;
-const GUST_CHANCE_PER_FRAME = 0; // probability per frame: set to 0 for now because I'm not really liking how the wind gusts look
+const GUST_CHANCE_PER_FRAME = 0; // disabled — gusts feel too jarring
 const GUST_IMPULSE = 30;
 const GUST_SPRING = 8;
 const GUST_DAMPING = 4;
