@@ -252,12 +252,12 @@ export function FuelSlider({
         </div>
       </div>
 
-      {/* Time label — click to edit */}
+      {/* Time label — click to edit, fixed width to prevent layout shift */}
       {isEditing ? (
         <input
           type="text"
           className={cn(
-            'w-12 shrink-0 border-b border-amber-400 bg-transparent text-center text-sm font-medium tabular-nums outline-none',
+            'w-14 shrink-0 border-b border-amber-400 bg-transparent text-center text-sm font-medium tabular-nums outline-none',
             isOverCapacity
               ? 'text-red-500'
               : 'text-slate-600 dark:text-white/70',
@@ -278,7 +278,7 @@ export function FuelSlider({
           onClick={handleLabelClick}
           disabled={disabled}
           className={cn(
-            'shrink-0 cursor-text border-b border-transparent text-sm font-medium tabular-nums hover:border-amber-400/50',
+            'w-14 shrink-0 cursor-text border-b border-transparent text-center text-sm font-medium tabular-nums hover:border-amber-400/50',
             isOverCapacity
               ? 'text-red-500'
               : 'text-slate-600 dark:text-white/70',

@@ -156,8 +156,10 @@ export function DayEditorDialog({
     setAssignedIds((prev) => prev.filter((id) => id !== flameId));
   }, []);
 
+  const isOverCapacity = fuelMinutes > 0 && totalAllocated > fuelMinutes;
+
   const handleSave = async () => {
-    const toastId = toast.loading(`${t('save')}...`, {
+    const toastId = toast.loading(t('saving'), {
       position: 'top-center',
     });
 
@@ -186,7 +188,10 @@ export function DayEditorDialog({
       assignedFlameIds: assignedIds,
     });
 
-    toast.success(t('save'), { id: toastId, position: 'top-center' });
+    toast.success(t('saved', { day: DAY_NAMES[day.dayOfWeek] }), {
+      id: toastId,
+      position: 'top-center',
+    });
     onOpenChange(false);
   };
 
@@ -235,7 +240,7 @@ export function DayEditorDialog({
           onDragCancel={() => setIsDragging(false)}
         >
           <div
-            className={`flex min-h-0 flex-1 flex-col gap-5 overflow-x-hidden ${isDragging ? 'overflow-y-hidden' : 'overflow-y-auto'}`}
+            className={`flex min-h-0 flex-1 flex-col gap-5 ${isDragging ? 'overflow-visible' : 'overflow-y-auto overflow-x-hidden'}`}
           >
             {/* Fuel Budget Section */}
             <div className="space-y-2">
@@ -266,6 +271,11 @@ export function DayEditorDialog({
                     </p>
                   )}
                 </>
+              )}
+              {isOverCapacity && (
+                <p className="text-xs font-medium text-red-500">
+                  {t('overCapacity')}
+                </p>
               )}
             </div>
 
@@ -309,11 +319,11 @@ export function DayEditorDialog({
           <button
             type="button"
             onClick={handleResetToDefault}
-            className="mr-auto text-sm text-muted-foreground hover:text-foreground"
+            className="mr-auto cursor-pointer text-sm text-muted-foreground hover:text-foreground"
           >
             {t('resetToDefault')}
           </button>
-          <Button onClick={handleSave} size="sm">
+          <Button onClick={handleSave} size="sm" className="cursor-pointer">
             {t('save')}
           </Button>
         </DialogFooter>
