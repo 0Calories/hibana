@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import type { DayPlan, FlameWithSchedule } from '../actions';
 import { MiniFlame } from './MiniFlame';
 
+// TODO: Use i18n instead of this hardcoded shiet
 const DAY_ABBREVS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 interface DayCellProps {
@@ -51,7 +52,7 @@ export function DayCell({
       type="button"
       onClick={isPast ? undefined : onSelect}
       disabled={isPast}
-      className={`flex min-w-[4.5rem] flex-col items-center gap-1 rounded-xl border p-2 transition-all ${
+      className={`flex min-w-18 flex-col items-center gap-1 rounded-xl border p-2 transition-all ${
         isPast
           ? 'cursor-default opacity-50'
           : 'cursor-pointer hover:bg-muted/50 active:scale-[0.97]'
@@ -106,7 +107,7 @@ export function DayCell({
             className={`h-full rounded-full transition-all ${
               isOverAllocated
                 ? 'bg-red-500'
-                : 'bg-gradient-to-r from-amber-400 to-amber-600'
+                : 'bg-linear-to-r from-amber-400 to-amber-600'
             }`}
             style={{ width: `${Math.min(capacityRatio * 100, 100)}%` }}
           />

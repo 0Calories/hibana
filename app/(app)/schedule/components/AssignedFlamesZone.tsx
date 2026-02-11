@@ -24,14 +24,14 @@ export function AssignedFlamesZone({
     <div
       ref={setNodeRef}
       className={cn(
-        'min-h-[5rem] rounded-lg border-2 border-dashed p-2 transition-colors',
+        'min-h-20 rounded-lg border-2 border-dashed p-2 transition-colors',
         isOver
           ? 'border-amber-400 bg-amber-50/50 dark:border-amber-500/50 dark:bg-amber-500/5'
           : 'border-muted-foreground/20',
       )}
     >
       {flames.length === 0 ? (
-        <p className="flex h-full min-h-[3rem] items-center justify-center text-sm text-muted-foreground">
+        <p className="flex h-full min-h-12 items-center justify-center text-sm text-muted-foreground">
           {t('dragHere')}
         </p>
       ) : (
@@ -43,9 +43,7 @@ export function AssignedFlamesZone({
               level={flameLevels.get(flame.id) ?? 1}
               disabled={flame.is_daily}
               showDaily={flame.is_daily}
-              onClick={
-                flame.is_daily ? undefined : () => onRemove(flame.id)
-              }
+              onClick={flame.is_daily ? undefined : () => onRemove(flame.id)}
             />
           ))}
         </div>
