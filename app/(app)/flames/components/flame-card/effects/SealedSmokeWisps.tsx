@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useId, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef } from 'react';
 
 interface SealedSmokeWispsProps {
   /** Y coordinate of the wick / emission point in the 0-100 SVG viewBox */
@@ -15,7 +15,8 @@ interface SealedSmokeWispsProps {
 // ---------------------------------------------------------------------------
 
 // General
-const SMOKE_COLOR = '#94a3b8';
+const SMOKE_COLOR_COOL = '#94a3b8'; // cool grey for upper smoke
+const SMOKE_COLOR_WARM = '#b8a494'; // warm brownish tint near wick (wax vapor)
 const RISE_HEIGHT = 70; // total height of smoke column in SVG units
 const REVEAL_DURATION = 3; // seconds for initial bottom-to-top reveal
 
@@ -27,18 +28,18 @@ const STRAND_B_OPACITY = 0.35;
 const FILL_OPACITY = 0.08;
 
 // Opacity taper gradient stops — gradual fade so the top doesn't cut off abruptly
-const TAPER_MID_OFFSET = '50%'; // where opacity starts fading
-const TAPER_MID_OPACITY = 0.6; // opacity at mid-taper point
-const TAPER_UPPER_OFFSET = '80%'; // upper taper zone
-const TAPER_UPPER_OPACITY = 0.15; // mostly faded by here
-const TAPER_END_OPACITY = 0; // fully transparent at the very top
+const TAPER_MID_OFFSET = '50%';
+const TAPER_MID_OPACITY = 0.6;
+const TAPER_UPPER_OFFSET = '80%';
+const TAPER_UPPER_OPACITY = 0.15;
+const TAPER_END_OPACITY = 0;
 
 // Wind gust — damped spring: impulse pushes smoke sideways, spring pulls it back
-const PHASE_SPEED = 2; // constant phase accumulation speed
+const PHASE_SPEED = 2;
 const GUST_CHANCE_PER_FRAME = 0.003; // probability per frame (~every 5.5s at 60fps)
-const GUST_IMPULSE = 30; // velocity kick in SVG units/sec
-const GUST_SPRING = 8; // restoring force (higher = snappier return)
-const GUST_DAMPING = 4; // friction (higher = less oscillation after settling)
+const GUST_IMPULSE = 30;
+const GUST_SPRING = 8;
+const GUST_DAMPING = 4;
 
 // Phase offset between strand A and B for crossover drift
 const DRIFT_PHASE_B = 2.2;
@@ -47,12 +48,13 @@ const DRIFT_PHASE_B = 2.2;
 const WISP_FADE_SPEED = 0.12; // cycles per second (~8s per full dissolve/reform)
 const WISP_FADE_BAND = 0.15; // width of the opacity transition edge (0–1)
 
-// Dispersal wisps — extra tendrils that peel off the main column in the upper region
+// Dispersal wisps — extra tendrils that peel off the main column in the upper region.
 // Each wisp follows the column below divergeFrac, then smoothly diverges with unique drift.
 // Above collapseFrac the wisp curls back inward (X converges) and downward (Y drops),
 // creating a natural fold-over before fading out.
 const DISPERSAL_WISPS = [
   {
+    id: 'wisp-a',
     phaseOffset: 1.0,
     divergeFrac: 0.45,
     collapseFrac: 0.78,
@@ -62,6 +64,7 @@ const DISPERSAL_WISPS = [
     opacity: 0.2,
   },
   {
+    id: 'wisp-b',
     phaseOffset: 3.8,
     divergeFrac: 0.5,
     collapseFrac: 0.82,
@@ -71,6 +74,7 @@ const DISPERSAL_WISPS = [
     opacity: 0.15,
   },
   {
+    id: 'wisp-c',
     phaseOffset: 5.5,
     divergeFrac: 0.4,
     collapseFrac: 0.75,
@@ -82,90 +86,129 @@ const DISPERSAL_WISPS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Anchor points — define the smoke path skeleton
+// Anchor points — define the smoke path skeleton.
 // Points are denser toward the top for realistic dispersal detail.
 // Each anchor specifies oscillation and spread parameters at that height.
 // ---------------------------------------------------------------------------
 
-const ANCHORS = [
-  //           frac   snakeFreq  snakeAmp  snakePhase  driftFreq  driftAmp  spread  yOscAmp  yOscFreq
-  { frac: 0, sf: 1.3, sa: 0, sp: 0, df: 0, da: 0, spread: 0.3, ya: 0, yf: 0 },
+interface Anchor {
+  frac: number; // 0 = wick, 1 = top of column
+  snakeFreq: number; // shared column sway frequency
+  snakeAmp: number; // shared column sway amplitude
+  snakePhase: number; // phase offset for snake oscillation
+  driftFreq: number; // per-strand independent drift frequency
+  driftAmp: number; // per-strand independent drift amplitude
+  spread: number; // horizontal separation between strands A and B
+  yOscAmp: number; // vertical oscillation amplitude
+  yOscFreq: number; // vertical oscillation frequency
+  turbAmp: number; // fine turbulence amplitude (high-freq jitter)
+  turbFreq: number; // fine turbulence frequency
+}
+
+const ANCHORS: Anchor[] = [
+  {
+    frac: 0,
+    snakeFreq: 1.3,
+    snakeAmp: 0,
+    snakePhase: 0,
+    driftFreq: 0,
+    driftAmp: 0,
+    spread: 0.3,
+    yOscAmp: 0,
+    yOscFreq: 0,
+    turbAmp: 0,
+    turbFreq: 0,
+  },
   {
     frac: 0.18,
-    sf: 1.3,
-    sa: 1.8,
-    sp: 0.2,
-    df: 0.3,
-    da: 0,
+    snakeFreq: 1.3,
+    snakeAmp: 1.8,
+    snakePhase: 0.2,
+    driftFreq: 0.3,
+    driftAmp: 0,
     spread: 0.4,
-    ya: 0,
-    yf: 0,
+    yOscAmp: 0,
+    yOscFreq: 0,
+    turbAmp: 0,
+    turbFreq: 0,
   },
   {
     frac: 0.38,
-    sf: 1.1,
-    sa: 3.5,
-    sp: 0.5,
-    df: 0.4,
-    da: 1.5,
+    snakeFreq: 1.1,
+    snakeAmp: 3.5,
+    snakePhase: 0.5,
+    driftFreq: 0.4,
+    driftAmp: 1.5,
     spread: 0.6,
-    ya: 0,
-    yf: 0,
+    yOscAmp: 0,
+    yOscFreq: 0,
+    turbAmp: 0.3,
+    turbFreq: 3.5,
   },
   {
     frac: 0.58,
-    sf: 0.9,
-    sa: 4.5,
-    sp: 0.9,
-    df: 0.5,
-    da: 3,
+    snakeFreq: 0.9,
+    snakeAmp: 4.5,
+    snakePhase: 0.9,
+    driftFreq: 0.5,
+    driftAmp: 3,
     spread: 1.0,
-    ya: 0.5,
-    yf: 0.4,
+    yOscAmp: 0.5,
+    yOscFreq: 0.4,
+    turbAmp: 0.6,
+    turbFreq: 4.0,
   },
   {
     frac: 0.72,
-    sf: 0.8,
-    sa: 5,
-    sp: 1.3,
-    df: 0.8,
-    da: 6,
+    snakeFreq: 0.8,
+    snakeAmp: 5,
+    snakePhase: 1.3,
+    driftFreq: 0.8,
+    driftAmp: 6,
     spread: 2.5,
-    ya: 1.5,
-    yf: 0.6,
+    yOscAmp: 1.5,
+    yOscFreq: 0.6,
+    turbAmp: 1.0,
+    turbFreq: 4.5,
   },
   {
     frac: 0.83,
-    sf: 0.7,
-    sa: 5,
-    sp: 1.6,
-    df: 1.1,
-    da: 8,
+    snakeFreq: 0.7,
+    snakeAmp: 5,
+    snakePhase: 1.6,
+    driftFreq: 1.1,
+    driftAmp: 8,
     spread: 4,
-    ya: 2.5,
-    yf: 0.8,
+    yOscAmp: 2.5,
+    yOscFreq: 0.8,
+    turbAmp: 1.4,
+    turbFreq: 5.0,
   },
   {
     frac: 0.92,
-    sf: 0.65,
-    sa: 4.5,
-    sp: 2.0,
-    df: 1.4,
-    da: 10,
+    snakeFreq: 0.65,
+    snakeAmp: 4.5,
+    snakePhase: 2.0,
+    driftFreq: 1.4,
+    driftAmp: 10,
     spread: 4.5,
-    ya: 3,
-    yf: 1.0,
+    yOscAmp: 3,
+    yOscFreq: 1.0,
+    turbAmp: 1.6,
+    turbFreq: 5.5,
   },
   {
     frac: 1.0,
-    sf: 0.6,
-    sa: 3.5,
-    sp: 2.4,
-    df: 1.7,
-    da: 11,
+    snakeFreq: 0.6,
+    snakeAmp: 3.5,
+    snakePhase: 2.4,
+    driftFreq: 1.7,
+    driftAmp: 11,
     spread: 4,
-    ya: 3.5,
-    yf: 1.2,
+    yOscAmp: 3.5,
+    yOscFreq: 1.2,
+    turbAmp: 1.8,
+    turbFreq: 6.0,
   },
 ];
 
@@ -215,6 +258,35 @@ function reverseSegs(start: Pt, segs: BezSeg[]): BezSeg[] {
 }
 
 // ---------------------------------------------------------------------------
+// Shared anchor position computation
+// ---------------------------------------------------------------------------
+
+function anchorPosition(
+  anchor: Anchor,
+  wickX: number,
+  wickY: number,
+  t: number,
+  gustOffset: number,
+): { y: number; baseX: number } {
+  const y =
+    wickY -
+    RISE_HEIGHT * anchor.frac +
+    (anchor.yOscAmp > 0
+      ? Math.sin(t * anchor.yOscFreq + anchor.frac * 3) * anchor.yOscAmp
+      : 0);
+
+  const snake =
+    Math.sin(t * anchor.snakeFreq + anchor.snakePhase) * anchor.snakeAmp;
+  const gust = gustOffset * anchor.frac;
+  const turb =
+    anchor.turbAmp > 0
+      ? Math.sin(t * anchor.turbFreq + anchor.frac * 7) * anchor.turbAmp
+      : 0;
+
+  return { y, baseX: wickX + snake + gust + turb };
+}
+
+// ---------------------------------------------------------------------------
 // Path builder — two multi-segment strands + fill, snaking over time
 // ---------------------------------------------------------------------------
 
@@ -228,25 +300,20 @@ function buildPaths(
   const pointsB: Pt[] = [];
 
   for (const a of ANCHORS) {
-    // Vertical position with subtle Y oscillation at upper points
-    const y =
-      wickY -
-      RISE_HEIGHT * a.frac +
-      (a.ya > 0 ? Math.sin(t * a.yf + a.frac * 3) * a.ya : 0);
-
-    // Shared column sway (moves both strands together)
-    const snake = Math.sin(t * a.sf + a.sp) * a.sa;
-
-    // Wind gust lateral push — scales with height (base stays planted, top drifts most)
-    const gust = gustOffset * a.frac;
+    const { y, baseX } = anchorPosition(a, wickX, wickY, t, gustOffset);
 
     // Per-strand independent drift — creates crossovers
-    const driftA = a.da > 0 ? Math.sin(t * a.df + a.frac * 1.5) * a.da : 0;
+    const driftA =
+      a.driftAmp > 0
+        ? Math.sin(t * a.driftFreq + a.frac * 1.5) * a.driftAmp
+        : 0;
     const driftB =
-      a.da > 0 ? Math.sin(t * a.df + a.frac * 1.5 + DRIFT_PHASE_B) * a.da : 0;
+      a.driftAmp > 0
+        ? Math.sin(t * a.driftFreq + a.frac * 1.5 + DRIFT_PHASE_B) * a.driftAmp
+        : 0;
 
-    pointsA.push([wickX + snake + gust + driftA - a.spread, y]);
-    pointsB.push([wickX + snake + gust + driftB + a.spread, y]);
+    pointsA.push([baseX + driftA - a.spread, y]);
+    pointsB.push([baseX + driftB + a.spread, y]);
   }
 
   // Build strand paths via Catmull-Rom interpolation
@@ -270,23 +337,16 @@ function buildPaths(
   // drift outward, then collapse inward and curl downward near the top
   const wisps: string[] = [];
   for (const w of DISPERSAL_WISPS) {
-    // Only include anchors from just below the diverge point upward
     const firstAbove = ANCHORS.findIndex((a) => a.frac >= w.divergeFrac);
     const startIdx = Math.max(0, firstAbove - 1);
 
     const pts: Pt[] = [];
     for (let ai = startIdx; ai < ANCHORS.length; ai++) {
       const a = ANCHORS[ai];
-      let y =
-        wickY -
-        RISE_HEIGHT * a.frac +
-        (a.ya > 0 ? Math.sin(t * a.yf + a.frac * 3) * a.ya : 0);
-      const snake = Math.sin(t * a.sf + a.sp) * a.sa;
-      const gust = gustOffset * a.frac;
+      let { y, baseX } = anchorPosition(a, wickX, wickY, t, gustOffset);
 
       if (a.frac <= w.divergeFrac) {
-        // At/below diverge: sit on the column center (origin of the wisp)
-        pts.push([wickX + snake + gust, y]);
+        pts.push([baseX, y]);
       } else {
         // Above diverge: smoothly ramp up unique drift
         const raw = (a.frac - w.divergeFrac) / (1 - w.divergeFrac);
@@ -297,18 +357,18 @@ function buildPaths(
         let collapseScale = 1;
         if (a.frac > w.collapseFrac) {
           const cRaw = (a.frac - w.collapseFrac) / (1 - w.collapseFrac);
-          const cBlend = cRaw * cRaw; // quadratic ramp
-          collapseScale = 1 - cBlend * 0.85; // drift shrinks to ~15% at tip
-          y += cBlend * w.collapseDrop; // curl back downward (positive Y = down)
+          const cBlend = cRaw * cRaw;
+          collapseScale = 1 - cBlend * 0.85;
+          y += cBlend * w.collapseDrop;
         }
 
         const drift =
-          Math.sin(t * a.df * 1.3 + w.phaseOffset) *
-          a.da *
+          Math.sin(t * a.driftFreq * 1.3 + w.phaseOffset) *
+          a.driftAmp *
           w.ampScale *
           blend *
           collapseScale;
-        pts.push([wickX + snake + gust + drift, y]);
+        pts.push([baseX + drift, y]);
       }
     }
     wisps.push(segsToPathStr(pts[0], catmullRomSegments(pts)));
@@ -329,14 +389,8 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
   const strandARef = useRef<SVGPathElement>(null);
   const strandBRef = useRef<SVGPathElement>(null);
   const fillRef = useRef<SVGPathElement>(null);
-  const wisp0Ref = useRef<SVGPathElement>(null);
-  const wisp1Ref = useRef<SVGPathElement>(null);
-  const wisp2Ref = useRef<SVGPathElement>(null);
-  const wispRefs = [wisp0Ref, wisp1Ref, wisp2Ref];
-  const wispGrad0Ref = useRef<SVGLinearGradientElement>(null);
-  const wispGrad1Ref = useRef<SVGLinearGradientElement>(null);
-  const wispGrad2Ref = useRef<SVGLinearGradientElement>(null);
-  const wispGradRefs = [wispGrad0Ref, wispGrad1Ref, wispGrad2Ref];
+  const wispRefsRef = useRef<(SVGPathElement | null)[]>([]);
+  const wispGradRefsRef = useRef<(SVGLinearGradientElement | null)[]>([]);
 
   // Wind gust state — damped spring (position + velocity)
   const phaseRef = useRef(0);
@@ -348,8 +402,23 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
   const endY = wickY - RISE_HEIGHT;
 
   const gradientId = `smoke-grad-${id}`;
+  const colorGradId = `smoke-color-${id}`;
   const maskId = `smoke-mask-${id}`;
-  const wispGradIds = DISPERSAL_WISPS.map((_, i) => `wisp-grad-${i}-${id}`);
+  const wispGradIds = DISPERSAL_WISPS.map((w) => `wisp-grad-${w.id}-${id}`);
+
+  const setWispRef = useCallback(
+    (i: number) => (el: SVGPathElement | null) => {
+      wispRefsRef.current[i] = el;
+    },
+    [],
+  );
+
+  const setWispGradRef = useCallback(
+    (i: number) => (el: SVGLinearGradientElement | null) => {
+      wispGradRefsRef.current[i] = el;
+    },
+    [],
+  );
 
   // Animate snaking via rAF with variable-speed phase accumulation
   useEffect(() => {
@@ -389,16 +458,17 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
       strandARef.current?.setAttribute('d', paths.strandA);
       strandBRef.current?.setAttribute('d', paths.strandB);
       fillRef.current?.setAttribute('d', paths.fillPath);
+
       for (let i = 0; i < paths.wisps.length; i++) {
-        wispRefs[i].current?.setAttribute('d', paths.wisps[i]);
+        wispRefsRef.current[i]?.setAttribute('d', paths.wisps[i]);
 
         // Animate wisp fade: sweep transparency from bottom to top
-        const grad = wispGradRefs[i].current;
+        const grad = wispGradRefsRef.current[i];
         if (grad) {
           const w = DISPERSAL_WISPS[i];
           // Sawtooth: -0.3→1.3 range so wisp is fully visible briefly, then fades, then reforms
           const rawPhase =
-            ((phaseRef.current * WISP_FADE_SPEED + w.phaseOffset * 0.15) % 1);
+            (phaseRef.current * WISP_FADE_SPEED + w.phaseOffset * 0.15) % 1;
           const fadePos = rawPhase * 1.6 - 0.3;
           const fadeEdge = Math.max(0, Math.min(1, fadePos));
           const peakEdge = Math.max(0, Math.min(1, fadePos + WISP_FADE_BAND));
@@ -420,7 +490,7 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
       <g>
         <path
           d={initial.strandA}
-          stroke={SMOKE_COLOR}
+          stroke={SMOKE_COLOR_COOL}
           strokeWidth={STRAND_A_WIDTH}
           fill="none"
           opacity={0.3}
@@ -433,7 +503,7 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
   return (
     <g>
       <defs>
-        {/* Gradient for position-based opacity taper: opaque at base → transparent at top */}
+        {/* Opacity taper gradient: opaque at base → transparent at top */}
         <linearGradient
           id={gradientId}
           gradientUnits="userSpaceOnUse"
@@ -460,11 +530,25 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
           />
         </linearGradient>
 
+        {/* Color gradient: warm brownish near wick → cool grey higher up */}
+        <linearGradient
+          id={colorGradId}
+          gradientUnits="userSpaceOnUse"
+          x1={wickX}
+          y1={wickY}
+          x2={wickX}
+          y2={endY}
+        >
+          <stop offset="0%" stopColor={SMOKE_COLOR_WARM} />
+          <stop offset="30%" stopColor={SMOKE_COLOR_COOL} />
+          <stop offset="100%" stopColor={SMOKE_COLOR_COOL} />
+        </linearGradient>
+
         {/* Per-wisp stroke gradients: 4-stop with animated fade sweep */}
         {DISPERSAL_WISPS.map((w, i) => (
           <linearGradient
-            key={i}
-            ref={wispGradRefs[i]}
+            key={w.id}
+            ref={setWispGradRef(i)}
             id={wispGradIds[i]}
             gradientUnits="objectBoundingBox"
             x1="0.5"
@@ -473,13 +557,17 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
             y2="0"
           >
             {/* stop 0: anchor at bottom — always transparent (faded zone) */}
-            <stop offset="0" stopColor={SMOKE_COLOR} stopOpacity={0} />
+            <stop offset="0" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
             {/* stop 1: fade edge — animated, sweeps upward */}
-            <stop offset="0" stopColor={SMOKE_COLOR} stopOpacity={0} />
+            <stop offset="0" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
             {/* stop 2: peak edge — animated, just above fade edge */}
-            <stop offset={WISP_FADE_BAND} stopColor={SMOKE_COLOR} stopOpacity={w.opacity} />
+            <stop
+              offset={WISP_FADE_BAND}
+              stopColor={SMOKE_COLOR_COOL}
+              stopOpacity={w.opacity}
+            />
             {/* stop 3: anchor at tip — always transparent */}
-            <stop offset="1" stopColor={SMOKE_COLOR} stopOpacity={0} />
+            <stop offset="1" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
           </linearGradient>
         ))}
 
@@ -497,30 +585,30 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
       </defs>
 
       <g mask={`url(#${maskId})`}>
-        {/* Grey fill between strands */}
+        {/* Fill between strands */}
         <path
           ref={fillRef}
           d={initial.fillPath}
-          fill={SMOKE_COLOR}
+          fill={SMOKE_COLOR_COOL}
           opacity={FILL_OPACITY}
         />
 
-        {/* Left strand */}
+        {/* Left strand — warm-to-cool color gradient */}
         <path
           ref={strandARef}
           d={initial.strandA}
-          stroke={SMOKE_COLOR}
+          stroke={`url(#${colorGradId})`}
           strokeWidth={STRAND_A_WIDTH}
           fill="none"
           opacity={STRAND_A_OPACITY}
           strokeLinecap="round"
         />
 
-        {/* Right strand */}
+        {/* Right strand — warm-to-cool color gradient */}
         <path
           ref={strandBRef}
           d={initial.strandB}
-          stroke={SMOKE_COLOR}
+          stroke={`url(#${colorGradId})`}
           strokeWidth={STRAND_B_WIDTH}
           fill="none"
           opacity={STRAND_B_OPACITY}
@@ -530,8 +618,8 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
         {/* Dispersal wisps — thinner tendrils that peel off and fade out */}
         {DISPERSAL_WISPS.map((w, i) => (
           <path
-            key={i}
-            ref={wispRefs[i]}
+            key={w.id}
+            ref={setWispRef(i)}
             d={initial.wisps[i]}
             stroke={`url(#${wispGradIds[i]})`}
             strokeWidth={w.width}
