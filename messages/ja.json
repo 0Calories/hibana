@@ -104,7 +104,8 @@
       "noFuel": "No fuel",
       "sealing": "封印中 ...",
       "sealed": "封印済み",
-      "readyToSeal": "封印可能"
+      "readyToSeal": "封印可能",
+      "overburning": "超過燃焼"
     },
     "seal": {
       "title": "炎を封印しました！",

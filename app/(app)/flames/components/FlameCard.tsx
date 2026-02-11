@@ -51,6 +51,7 @@ export function FlameCard({
     elapsedSeconds,
     targetSeconds,
     progress,
+    isOverburning,
     toggle,
     isLoading,
     isSealReady,
@@ -141,7 +142,7 @@ export function FlameCard({
       case 'untended':
         return t('ready');
       case 'burning':
-        return t('burning');
+        return isOverburning ? t('overburning') : t('burning');
       case 'paused':
         return canSeal ? t('readyToSeal') : t('resting');
       case 'sealing':
@@ -165,10 +166,15 @@ export function FlameCard({
       };
 
   const borderGlowStyle = isActive
-    ? {
-        boxShadow: `0 0 15px ${colors.medium}50, 0 0 30px ${colors.medium}25`,
-        borderColor: colors.medium,
-      }
+    ? isOverburning
+      ? {
+          boxShadow: '0 0 15px #ef444450, 0 0 30px #ef444425',
+          borderColor: '#ef4444',
+        }
+      : {
+          boxShadow: `0 0 15px ${colors.medium}50, 0 0 30px ${colors.medium}25`,
+          borderColor: colors.medium,
+        }
     : canSeal || isSealing
       ? {
           boxShadow: '0 0 15px #fbbf2450, 0 0 30px #fbbf2425',
@@ -188,7 +194,7 @@ export function FlameCard({
       <div className="pointer-events-none absolute inset-0 z-10">
         <div className="relative h-full w-full">
           <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
-            <EffectsRenderer effects={effects} state={state} colors={colors} />
+            <EffectsRenderer effects={effects} state={state} colors={colors} isOverburning={isOverburning} />
           </div>
         </div>
       </div>
@@ -246,6 +252,7 @@ export function FlameCard({
             level={level}
             colors={colors}
             sealProgress={isSealing ? longPress.progress : 0}
+            isOverburning={isOverburning}
           />
 
           {/* Seal ring progress overlay */}
@@ -261,20 +268,23 @@ export function FlameCard({
                 targetSeconds={targetSeconds}
                 state={state}
                 color={colors.light}
+                isOverburning={isOverburning}
               />
             </div>
           )}
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
-            <ProgressBar progress={progress} state={state} colors={colors} />
+            <ProgressBar progress={progress} state={state} colors={colors} isOverburning={isOverburning} />
           )}
           <div
             className={cn(
               'text-center text-[10px] sm:text-xs',
               canSeal || isSealing
                 ? 'font-medium text-amber-500'
-                : isSealed
-                  ? 'font-medium'
-                  : 'text-slate-500 dark:text-white/50',
+                : isOverburning
+                  ? 'font-medium text-red-500'
+                  : isSealed
+                    ? 'font-medium'
+                    : 'text-slate-500 dark:text-white/50',
             )}
           >
             {isSealed ? (

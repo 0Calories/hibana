@@ -10,12 +10,14 @@ interface EffectsRendererProps {
   effects: EffectConfig[];
   state: FlameState;
   colors: ShapeColors;
+  isOverburning?: boolean;
 }
 
 export function EffectsRenderer({
   effects,
   state,
   colors,
+  isOverburning = false,
 }: EffectsRendererProps) {
   return (
     <>
@@ -37,6 +39,7 @@ export function EffectsRenderer({
                 state={state}
                 colors={colors}
                 config={effect}
+                isOverburning={isOverburning}
               />
             );
           case 'sealedSmoke':

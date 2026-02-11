@@ -18,6 +18,7 @@ interface UseFlameTimerReturn {
   elapsedSeconds: number;
   targetSeconds: number;
   progress: number;
+  isOverburning: boolean;
   toggle: () => Promise<void>;
   isLoading: boolean;
   isSealReady: boolean;
@@ -84,9 +85,6 @@ export function useFlameState({
         setLocalElapsed((prev) => {
           const newElapsed = prev + 1;
           // Indicates overburn (going above budgeted time)
-          if (targetSeconds > 0 && newElapsed >= targetSeconds) {
-            // TODO: Add overburn warning state handling here
-          }
           return newElapsed;
         });
       }, 1000);
@@ -180,11 +178,15 @@ export function useFlameState({
   const progress =
     targetSeconds > 0 ? Math.min(localElapsed / targetSeconds, 1) : 0;
 
+  const isOverburning =
+    state === 'burning' && targetSeconds > 0 && localElapsed > targetSeconds;
+
   return {
     state,
     elapsedSeconds: localElapsed,
     targetSeconds,
     progress,
+    isOverburning,
     toggle,
     isLoading,
     isSealReady,
