@@ -4,8 +4,8 @@ import { useDroppable } from '@dnd-kit/core';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { FlameWithSchedule } from '../actions';
-import { ASSIGNED_FLAME_ZONE_ID } from './constants';
+import type { FlameWithSchedule } from '../../actions';
+import { ASSIGNED_FLAME_ZONE_ID } from '../constants';
 import { DraggableFlame } from './DraggableFlame';
 
 interface AssignedFlamesZoneProps {

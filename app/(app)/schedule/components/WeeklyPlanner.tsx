@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import type { DayPlan, WeeklySchedule } from '../actions';
-import { DayEditorDialog } from './DayEditorDialog';
+import { DayEditorDialog } from './dialog/DayEditorDialog';
 import { WeekStrip } from './WeekStrip';
 
 interface WeeklyPlannerProps {
