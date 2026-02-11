@@ -50,6 +50,7 @@
     "flames": "Flames",
     "habits": "Habits",
     "tasks": "Tasks",
+    "schedule": "Schedule",
     "signUp": "Sign Up",
     "logIn": "Log In"
   },
@@ -118,6 +119,25 @@
       "error": "Failed to seal flame. Please try again."
     },
     "empty": "No flames yet. Create one to get started!"
+  },
+  "schedule": {
+    "pageTitle": "Weekly Plan",
+    "today": "Today",
+    "fuelBudget": "Fuel Budget",
+    "fuelLocked": "Budget locked for today",
+    "fuelLockedWarning": "This can't be changed once set",
+    "noFuel": "No budget",
+    "flames": "Flames",
+    "assigned": "Assigned",
+    "capacity": "Capacity",
+    "full": "Full",
+    "exceeds": "Exceeds budget",
+    "alreadyBurning": "Already burning",
+    "daily": "Daily",
+    "save": "Save",
+    "resetToDefault": "Reset to default",
+    "hours": "hr",
+    "minutes": "min"
   },
   "pages": {
     "tasks": "Tasks",

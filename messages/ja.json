@@ -50,6 +50,7 @@
     "flames": "Flames",
     "habits": "Habits",
     "tasks": "Tasks",
+    "schedule": "スケジュール",
     "signUp": "Sign Up",
     "logIn": "Log In"
   },
@@ -118,6 +119,25 @@
       "error": "封印に失敗しました。もう一度お試しください。"
     },
     "empty": "No flames yet. Create one to get started!"
+  },
+  "schedule": {
+    "pageTitle": "週間プラン",
+    "today": "今日",
+    "fuelBudget": "燃料予算",
+    "fuelLocked": "今日の予算はロック済み",
+    "fuelLockedWarning": "一度設定すると変更できません",
+    "noFuel": "未設定",
+    "flames": "フレイム",
+    "assigned": "割り当て済み",
+    "capacity": "容量",
+    "full": "満杯",
+    "exceeds": "予算超過",
+    "alreadyBurning": "燃焼中",
+    "daily": "毎日",
+    "save": "保存",
+    "resetToDefault": "デフォルトに戻す",
+    "hours": "時間",
+    "minutes": "分"
   },
   "pages": {
     "tasks": "Tasks",
