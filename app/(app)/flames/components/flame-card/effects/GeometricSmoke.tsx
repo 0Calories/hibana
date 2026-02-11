@@ -48,21 +48,46 @@ function createSmokeParticle(
   };
 }
 
+const OVERBURN_GREY_PALETTE = [
+  '#6b7280',
+  '#9ca3af',
+  '#4b5563',
+  '#78716c',
+  '#a8a29e',
+  '#57534e',
+  '#d1d5db',
+] as const;
+
 interface GeometricSmokeProps extends BaseParticleProps {
   config: SmokeEffectConfig;
+  isOverburning?: boolean;
 }
 
-export function GeometricSmoke({ state, colors, config }: GeometricSmokeProps) {
+export function GeometricSmoke({
+  state,
+  colors,
+  config,
+  isOverburning = false,
+}: GeometricSmokeProps) {
   const shouldReduceMotion = useReducedMotion();
   const showSmoke = shouldShowParticles(state) || state === 'sealed';
   const { baseSize, states } = config;
 
+  // When overburning, boost smoke particle count and size
+  const effectiveStates = useMemo(() => {
+    if (!isOverburning) return states;
+    return {
+      ...states,
+      burning: { count: 25, sizeMultiplier: 1.8 },
+    };
+  }, [states, isOverburning]);
+
   const particles = useMemo(
     () =>
-      generateParticles(state, states, (index, sizeMultiplier) =>
+      generateParticles(state, effectiveStates, (index, sizeMultiplier) =>
         createSmokeParticle(index, sizeMultiplier, baseSize),
       ),
-    [state, states, baseSize],
+    [state, effectiveStates, baseSize],
   );
 
   if (shouldReduceMotion || !showSmoke) {
@@ -70,7 +95,8 @@ export function GeometricSmoke({ state, colors, config }: GeometricSmokeProps) {
   }
 
   const { opacity, speed } = getParticleIntensity(state);
-  const palette = SMOKE_PALETTE(colors);
+  const palette = isOverburning ? OVERBURN_GREY_PALETTE : SMOKE_PALETTE(colors);
+  const effectiveSpeed = isOverburning ? speed * 0.65 : speed;
 
   return (
     <div
@@ -105,7 +131,7 @@ export function GeometricSmoke({ state, colors, config }: GeometricSmokeProps) {
               scale: [0.5, 1, 1.3, 0.8],
             }}
             transition={{
-              duration: particle.duration * speed,
+              duration: particle.duration * effectiveSpeed,
               delay: particle.delay,
               repeat: Infinity,
               ease: 'easeOut',

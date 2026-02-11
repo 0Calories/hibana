@@ -35,6 +35,7 @@ interface FlameRendererProps {
   colors: ShapeColors;
   sealProgress?: number;
   className?: string;
+  isOverburning?: boolean;
 }
 
 export function FlameRenderer({
@@ -43,6 +44,7 @@ export function FlameRenderer({
   colors,
   sealProgress = 0,
   className,
+  isOverburning = false,
 }: FlameRendererProps) {
   const shouldReduceMotion = useReducedMotion();
   const clampedLevel = Math.max(1, Math.min(8, level));
@@ -101,12 +103,15 @@ export function FlameRenderer({
   const isSealing = state === 'sealing';
   const svgAnimate = isSealing
     ? { scale: 0.8 + sealProgress * 0.35, y: sealProgress * -6, opacity: 1 }
-    : stateVariants[state];
+    : isOverburning
+      ? { scale: 1.25, opacity: 1, y: -6 }
+      : stateVariants[state];
   const svgTransition = isSealing
     ? { type: 'tween' as const, duration: 0.1, ease: 'linear' as const }
     : springTransition;
 
-  const animDuration = animation.durations[state];
+  const animDuration =
+    animation.durations[state] * (isOverburning ? 0.55 : 1);
   const animTransition = {
     duration: animDuration,
     repeat: Infinity,

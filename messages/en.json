@@ -104,7 +104,8 @@
       "noFuel": "No fuel",
       "sealing": "Sealing ...",
       "sealed": "Sealed",
-      "readyToSeal": "Ready to Seal"
+      "readyToSeal": "Ready to Seal",
+      "overburning": "Overburn"
     },
     "seal": {
       "title": "Flame Sealed!",
