@@ -137,7 +137,8 @@
     "save": "保存",
     "resetToDefault": "デフォルトに戻す",
     "hours": "時間",
-    "minutes": "分"
+    "minutes": "分",
+    "dragHere": "ここにフレイムをドラッグ"
   },
   "pages": {
     "tasks": "Tasks",

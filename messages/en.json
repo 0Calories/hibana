@@ -137,7 +137,8 @@
     "save": "Save",
     "resetToDefault": "Reset to default",
     "hours": "hr",
-    "minutes": "min"
+    "minutes": "min",
+    "dragHere": "Drag flames here"
   },
   "pages": {
     "tasks": "Tasks",

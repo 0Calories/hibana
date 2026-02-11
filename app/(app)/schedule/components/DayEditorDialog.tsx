@@ -1,9 +1,21 @@
 'use client';
 
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
 import { Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { getFlameColors } from '@/app/(app)/flames/utils/colors';
+import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
+import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,14 +24,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { getLocalDateString } from '@/lib/utils';
 import {
   type DayPlan,
   type FlameWithSchedule,
   setWeeklyOverride,
 } from '../actions';
-import { FlameToggleRow } from './FlameToggleRow';
+import { AssignedFlamesZone } from './AssignedFlamesZone';
+import { DraggableFlame } from './DraggableFlame';
+import { FuelSlider } from './FuelSlider';
 
 const DAY_NAMES = [
   'Sunday',
@@ -52,30 +65,30 @@ export function DayEditorDialog({
   const today = getLocalDateString();
   const isToday = day.date === today;
 
-  // Fuel budget state
-  const [hours, setHours] = useState(() =>
-    day.fuelMinutes != null ? Math.floor(day.fuelMinutes / 60) : 0,
-  );
-  const [mins, setMins] = useState(() =>
-    day.fuelMinutes != null ? day.fuelMinutes % 60 : 0,
-  );
+  // Fuel budget state (in minutes)
+  const [fuelMinutes, setFuelMinutes] = useState(() => day.fuelMinutes ?? 0);
 
   // Flame assignments state
   const [assignedIds, setAssignedIds] = useState<string[]>(
     () => day.assignedFlameIds,
   );
 
+  // Drag state
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
   // Reset state when day changes
   const resetState = useCallback(() => {
-    setHours(day.fuelMinutes != null ? Math.floor(day.fuelMinutes / 60) : 0);
-    setMins(day.fuelMinutes != null ? day.fuelMinutes % 60 : 0);
+    setFuelMinutes(day.fuelMinutes ?? 0);
     setAssignedIds(day.assignedFlameIds);
+    setActiveDragId(null);
   }, [day]);
 
-  // Track whether fuel is "locked" for today (already set via override or default)
+  // Track whether fuel is "locked" for today
   const isFuelLocked = isToday && day.fuelMinutes != null;
-
-  const totalFuelMinutes = hours * 60 + mins;
 
   // Capacity calculations
   const assignedFlames = useMemo(
@@ -89,23 +102,63 @@ export function DayEditorDialog({
     [assignedFlames],
   );
 
-  const remainingCapacity = totalFuelMinutes - totalAllocated;
+  const remainingCapacity = fuelMinutes - totalAllocated;
 
   const canAddFlame = useCallback(
     (flame: FlameWithSchedule) => {
-      if (totalFuelMinutes === 0) return true; // No budget set = no restriction
+      if (fuelMinutes === 0) return true; // No budget set = no restriction
       return remainingCapacity >= (flame.time_budget_minutes ?? 0);
     },
-    [totalFuelMinutes, remainingCapacity],
+    [fuelMinutes, remainingCapacity],
   );
 
-  const capacityRatio =
-    totalFuelMinutes > 0 ? totalAllocated / totalFuelMinutes : 0;
+  // Map flame id → level based on index in the full flames array
+  const flameLevels = useMemo(
+    () => new Map(flames.map((f, i) => [f.id, (i % 8) + 1])),
+    [flames],
+  );
 
-  const handleToggleFlame = useCallback((flameId: string, checked: boolean) => {
-    setAssignedIds((prev) =>
-      checked ? [...prev, flameId] : prev.filter((id) => id !== flameId),
-    );
+  // Flames available to drag (not assigned, not daily)
+  const availableFlames = useMemo(
+    () =>
+      flames.filter(
+        (f) => !f.is_daily && !assignedIds.includes(f.id),
+      ),
+    [flames, assignedIds],
+  );
+
+  const formatMinutes = (total: number) => {
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    if (h > 0 && m > 0) return `${h}${t('hours')} ${m}${t('minutes')}`;
+    if (h > 0) return `${h}${t('hours')}`;
+    return `${m}${t('minutes')}`;
+  };
+
+  // Drag handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveDragId(null);
+    const { active, over } = event;
+    if (!over || over.id !== 'assigned-zone') return;
+
+    const flameId = active.id as string;
+    if (assignedIds.includes(flameId)) return;
+
+    const flame = flames.find((f) => f.id === flameId);
+    if (!flame) return;
+
+    // Check capacity
+    if (!canAddFlame(flame)) return;
+
+    setAssignedIds((prev) => [...prev, flameId]);
+  };
+
+  const handleRemoveFlame = useCallback((flameId: string) => {
+    setAssignedIds((prev) => prev.filter((id) => id !== flameId));
   }, []);
 
   const handleSave = async () => {
@@ -115,7 +168,7 @@ export function DayEditorDialog({
 
     const effectiveMinutes = isFuelLocked
       ? (day.fuelMinutes ?? 0)
-      : totalFuelMinutes;
+      : fuelMinutes;
 
     const result = await setWeeklyOverride(
       weekStart,
@@ -131,7 +184,6 @@ export function DayEditorDialog({
       return;
     }
 
-    // Optimistic update
     onUpdate({
       ...day,
       fuelMinutes: effectiveMinutes,
@@ -143,8 +195,7 @@ export function DayEditorDialog({
     onOpenChange(false);
   };
 
-  const handleResetToDefault = async () => {
-    // Compute default flames for this day
+  const handleResetToDefault = () => {
     const defaultFlameIds = flames
       .filter((f) => {
         if (f.is_daily) return true;
@@ -155,13 +206,10 @@ export function DayEditorDialog({
     setAssignedIds(defaultFlameIds);
   };
 
-  const formatMinutes = (total: number) => {
-    const h = Math.floor(total / 60);
-    const m = total % 60;
-    if (h > 0 && m > 0) return `${h}${t('hours')} ${m}${t('minutes')}`;
-    if (h > 0) return `${h}${t('hours')}`;
-    return `${m}${t('minutes')}`;
-  };
+  // Active drag flame for overlay
+  const activeDragFlame = activeDragId
+    ? flames.find((f) => f.id === activeDragId)
+    : null;
 
   return (
     <Dialog
@@ -171,7 +219,7 @@ export function DayEditorDialog({
         onOpenChange(o);
       }}
     >
-      <DialogContent className="flex max-h-[80vh] flex-col">
+      <DialogContent className="flex max-h-[85vh] flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {DAY_NAMES[day.dayOfWeek]}
@@ -186,121 +234,95 @@ export function DayEditorDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
-          {/* Fuel Budget Section */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-medium text-muted-foreground">
-              {t('fuelBudget')}
-            </h3>
-            {isFuelLocked ? (
-              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
-                <Lock className="size-3.5 text-muted-foreground" />
-                <span className="text-sm">
-                  {formatMinutes(day.fuelMinutes ?? 0)}
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  {t('fuelLocked')}
-                </span>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={23}
-                    value={hours}
-                    onChange={(e) =>
-                      setHours(
-                        Math.max(0, Number.parseInt(e.target.value, 10) || 0),
-                      )
-                    }
-                    className="w-16 text-center"
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    {t('hours')}
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+            {/* Fuel Budget Section */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-medium text-muted-foreground">
+                {t('fuelBudget')}
+              </h3>
+              {isFuelLocked ? (
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                  <Lock className="size-3.5 text-muted-foreground" />
+                  <span className="text-sm">
+                    {formatMinutes(day.fuelMinutes ?? 0)}
                   </span>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={59}
-                    value={mins}
-                    onChange={(e) =>
-                      setMins(
-                        Math.max(0, Number.parseInt(e.target.value, 10) || 0),
-                      )
-                    }
-                    className="w-16 text-center"
-                  />
-                  <span className="text-xs text-muted-foreground">
-                    {t('minutes')}
+                  <span className="text-[10px] text-muted-foreground">
+                    {t('fuelLocked')}
                   </span>
                 </div>
-                {isToday && (
-                  <p className="text-[10px] text-amber-500">
-                    {t('fuelLockedWarning')}
-                  </p>
-                )}
+              ) : (
+                <>
+                  <FuelSlider
+                    value={fuelMinutes}
+                    onChange={setFuelMinutes}
+                    allocatedMinutes={totalAllocated}
+                    disabled={isFuelLocked}
+                  />
+                  {isToday && (
+                    <p className="text-[10px] text-amber-500">
+                      {t('fuelLockedWarning')}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Assigned Flames */}
+            <div className="space-y-1.5">
+              <h3 className="text-xs font-medium text-muted-foreground">
+                {t('assigned')}
+              </h3>
+              <AssignedFlamesZone
+                flames={assignedFlames}
+                flameLevels={flameLevels}
+                onRemove={handleRemoveFlame}
+              />
+            </div>
+
+            {/* Available Flames Grid */}
+            {availableFlames.length > 0 && (
+              <div className="space-y-1.5">
+                <h3 className="text-xs font-medium text-muted-foreground">
+                  {t('flames')}
+                </h3>
+                <div className="flex flex-wrap gap-1">
+                  {availableFlames.map((flame) => (
+                    <DraggableFlame
+                      key={flame.id}
+                      flame={flame}
+                      level={flameLevels.get(flame.id) ?? 1}
+                      disabled={!canAddFlame(flame)}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Capacity indicator */}
-          {totalFuelMinutes > 0 && (
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {t('capacity')}
-                </span>
-                <span
-                  className={`text-xs font-medium ${
-                    capacityRatio > 1 ? 'text-red-500' : 'text-muted-foreground'
-                  }`}
-                >
-                  {formatMinutes(totalAllocated)} /{' '}
-                  {formatMinutes(totalFuelMinutes)}
-                  {capacityRatio >= 1 && ` — ${t('full')}`}
-                </span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className={`h-full rounded-full transition-all ${
-                    capacityRatio > 1
-                      ? 'bg-red-500'
-                      : 'bg-gradient-to-r from-amber-400 to-amber-600'
-                  }`}
-                  style={{
-                    width: `${Math.min(capacityRatio * 100, 100)}%`,
-                  }}
+          {/* Drag Overlay */}
+          <DragOverlay>
+            {activeDragFlame && (
+              <div className="flex flex-col items-center gap-0.5 opacity-80">
+                <FlameRenderer
+                  state="untended"
+                  level={flameLevels.get(activeDragFlame.id) ?? 1}
+                  colors={getFlameColors(
+                    activeDragFlame.color as FlameColorName,
+                  )}
+                  className="h-12 w-10"
                 />
+                <span className="max-w-[4.5rem] truncate text-center text-xs leading-tight">
+                  {activeDragFlame.name}
+                </span>
               </div>
-            </div>
-          )}
-
-          {/* Flame List */}
-          <div className="space-y-1">
-            <h3 className="text-xs font-medium text-muted-foreground">
-              {t('flames')}
-            </h3>
-            <div className="space-y-0.5">
-              {flames.map((flame) => {
-                const isAssigned = assignedIds.includes(flame.id);
-                const wouldExceed = !isAssigned && !canAddFlame(flame);
-
-                return (
-                  <FlameToggleRow
-                    key={flame.id}
-                    flame={flame}
-                    isAssigned={isAssigned}
-                    isDisabled={wouldExceed}
-                    disabledReason={wouldExceed ? t('exceeds') : undefined}
-                    onToggle={(checked) => handleToggleFlame(flame.id, checked)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        </div>
+            )}
+          </DragOverlay>
+        </DndContext>
 
         <DialogFooter>
           <button
