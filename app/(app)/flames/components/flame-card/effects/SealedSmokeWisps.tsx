@@ -22,7 +22,6 @@ interface SealedSmokeWispsProps {
 
 // General
 const SMOKE_COLOR_COOL = '#94a3b8'; // cool grey for upper smoke
-const SMOKE_COLOR_WARM = '#b8a494'; // warm brownish tint near wick (wax vapor)
 const RISE_HEIGHT = 70; // total height of smoke column in SVG units
 const REVEAL_DURATION = 3; // seconds for initial bottom-to-top reveal
 const PHASE_SPEED = 2;
@@ -309,7 +308,14 @@ function buildPaths(
   const pointsB: Pt[] = [];
 
   for (const a of ANCHORS) {
-    const { y, baseX } = anchorPosition(a, wickX, wickY, t, gustOffset, riseHeight);
+    const { y, baseX } = anchorPosition(
+      a,
+      wickX,
+      wickY,
+      t,
+      gustOffset,
+      riseHeight,
+    );
 
     // Per-strand independent drift — creates crossovers
     const driftA =
@@ -355,7 +361,14 @@ function buildPaths(
       const pts: Pt[] = [];
       for (let ai = startIdx; ai < ANCHORS.length; ai++) {
         const a = ANCHORS[ai];
-        let { y, baseX } = anchorPosition(a, wickX, wickY, t, gustOffset, riseHeight);
+        let { y, baseX } = anchorPosition(
+          a,
+          wickX,
+          wickY,
+          t,
+          gustOffset,
+          riseHeight,
+        );
 
         if (a.frac <= w.divergeFrac) {
           pts.push([baseX, y]);
@@ -567,37 +580,46 @@ export function SealedSmokeWisps({
           x2={wickX}
           y2={endY}
         >
-          <stop offset="0%" stopColor={color ?? SMOKE_COLOR_WARM} />
-          <stop offset="30%" stopColor={color ?? SMOKE_COLOR_COOL} stopOpacity={color ? 0.6 : 1} />
-          <stop offset="100%" stopColor={color ?? SMOKE_COLOR_COOL} stopOpacity={color ? 0.2 : 1} />
+          <stop offset="0%" stopColor={color} />
+          <stop
+            offset="30%"
+            stopColor={color ?? SMOKE_COLOR_COOL}
+            stopOpacity={color ? 0.6 : 1}
+          />
+          <stop
+            offset="100%"
+            stopColor={color ?? SMOKE_COLOR_COOL}
+            stopOpacity={color ? 0.2 : 1}
+          />
         </linearGradient>
 
         {/* Per-wisp stroke gradients: 4-stop with animated fade sweep (skipped in simple mode) */}
-        {!simple && DISPERSAL_WISPS.map((w, i) => (
-          <linearGradient
-            key={w.id}
-            ref={setWispGradRef(i)}
-            id={wispGradIds[i]}
-            gradientUnits="objectBoundingBox"
-            x1="0.5"
-            y1="1"
-            x2="0.5"
-            y2="0"
-          >
-            {/* stop 0: anchor at bottom — always transparent (faded zone) */}
-            <stop offset="0" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
-            {/* stop 1: fade edge — animated, sweeps upward */}
-            <stop offset="0" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
-            {/* stop 2: peak edge — animated, just above fade edge */}
-            <stop
-              offset={WISP_FADE_BAND}
-              stopColor={SMOKE_COLOR_COOL}
-              stopOpacity={w.opacity}
-            />
-            {/* stop 3: anchor at tip — always transparent */}
-            <stop offset="1" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
-          </linearGradient>
-        ))}
+        {!simple &&
+          DISPERSAL_WISPS.map((w, i) => (
+            <linearGradient
+              key={w.id}
+              ref={setWispGradRef(i)}
+              id={wispGradIds[i]}
+              gradientUnits="objectBoundingBox"
+              x1="0.5"
+              y1="1"
+              x2="0.5"
+              y2="0"
+            >
+              {/* stop 0: anchor at bottom — always transparent (faded zone) */}
+              <stop offset="0" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
+              {/* stop 1: fade edge — animated, sweeps upward */}
+              <stop offset="0" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
+              {/* stop 2: peak edge — animated, just above fade edge */}
+              <stop
+                offset={WISP_FADE_BAND}
+                stopColor={SMOKE_COLOR_COOL}
+                stopOpacity={w.opacity}
+              />
+              {/* stop 3: anchor at tip — always transparent */}
+              <stop offset="1" stopColor={SMOKE_COLOR_COOL} stopOpacity={0} />
+            </linearGradient>
+          ))}
 
         {/* Mask combines the taper gradient with an initial bottom-to-top reveal */}
         <mask id={maskId}>

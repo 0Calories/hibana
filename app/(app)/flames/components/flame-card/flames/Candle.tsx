@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import type {
   FlameComponentProps,
   FlameDefinition,
@@ -42,6 +42,33 @@ function CandleFlame({ colors }: FlameComponentProps) {
   );
 }
 
+function WickSmolder({ color }: { color: string }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    return (
+      <rect x={49} y={61} width={2} height={2} fill={color} opacity={0.5} />
+    );
+  }
+
+  return (
+    <motion.rect
+      x={49}
+      y={61}
+      width={2}
+      height={2}
+      fill={color}
+      initial={{ opacity: 0.4 }}
+      animate={{ opacity: [0.4, 0.9, 0.3, 0.7, 0.4] }}
+      transition={{
+        duration: 1.8,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+    />
+  );
+}
+
 function CandleSealed({ colors }: SealedFlameProps) {
   return (
     <>
@@ -58,6 +85,7 @@ function CandleSealed({ colors }: SealedFlameProps) {
       >
         <CandleFlame colors={colors} />
       </motion.g>
+      <WickSmolder color={colors.medium} />
     </>
   );
 }
@@ -71,5 +99,5 @@ export const Candle: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [STANDARD_EMBERS, smokeEffect(4), sealedSmokeEffect(62)],
+  effects: [STANDARD_EMBERS, smokeEffect(4), sealedSmokeEffect(65)],
 };
