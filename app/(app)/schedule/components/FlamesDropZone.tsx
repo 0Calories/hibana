@@ -14,7 +14,7 @@ export function FlamesDropZone({ children }: FlamesDropZoneProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        'min-h-[3rem] rounded-lg p-1 transition-colors',
+        'min-h-[6.5rem] rounded-lg p-1 transition-colors',
         isOver && 'bg-muted/40',
       )}
     >

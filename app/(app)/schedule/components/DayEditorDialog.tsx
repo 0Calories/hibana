@@ -294,24 +294,22 @@ export function DayEditorDialog({
               />
             </div>
 
-            {/* Available Flames Grid */}
-            {availableFlames.length > 0 && (
-              <div className="space-y-1.5">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  {t('flames')}
-                </h3>
-                <FlamesDropZone>
-                  {availableFlames.map((flame) => (
-                    <DraggableFlame
-                      key={flame.id}
-                      flame={flame}
-                      level={flameLevels.get(flame.id) ?? 1}
-                      disabled={!canAddFlame(flame)}
-                    />
-                  ))}
-                </FlamesDropZone>
-              </div>
-            )}
+            {/* Available Flames Grid — always rendered so drop target exists */}
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                {t('flames')}
+              </h3>
+              <FlamesDropZone>
+                {availableFlames.map((flame) => (
+                  <DraggableFlame
+                    key={flame.id}
+                    flame={flame}
+                    level={flameLevels.get(flame.id) ?? 1}
+                    disabled={!canAddFlame(flame)}
+                  />
+                ))}
+              </FlamesDropZone>
+            </div>
           </div>
         </DndContext>
 
