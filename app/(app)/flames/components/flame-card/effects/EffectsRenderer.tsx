@@ -55,7 +55,13 @@ export function EffectsRenderer({
                   overflow="visible"
                   role="graphics-symbol"
                 >
-                  <SealedSmokeWisps wickY={effect.wickY} wickX={effect.wickX} />
+                  <SealedSmokeWisps
+                    wickY={effect.wickY}
+                    wickX={effect.wickX}
+                    color={effect.useFlameColor ? colors.medium : undefined}
+                    riseHeight={effect.riseHeight}
+                    simple={effect.simple}
+                  />
                 </svg>
               </div>
             );

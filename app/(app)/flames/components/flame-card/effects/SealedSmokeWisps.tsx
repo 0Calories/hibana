@@ -8,6 +8,12 @@ interface SealedSmokeWispsProps {
   wickY: number;
   /** X coordinate of the emission origin (default: 50 = center) */
   wickX?: number;
+  /** Flame color for the tendril — defaults to grey smoke when omitted */
+  color?: string;
+  /** Height of smoke column in SVG units (default: 70) */
+  riseHeight?: number;
+  /** When true, renders only strand A — no strand B, fill, or dispersal wisps */
+  simple?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -267,10 +273,11 @@ function anchorPosition(
   wickY: number,
   t: number,
   gustOffset: number,
+  riseHeight: number = RISE_HEIGHT,
 ): { y: number; baseX: number } {
   const y =
     wickY -
-    RISE_HEIGHT * anchor.frac +
+    riseHeight * anchor.frac +
     (anchor.yOscAmp > 0
       ? Math.sin(t * anchor.yOscFreq + anchor.frac * 3) * anchor.yOscAmp
       : 0);
@@ -295,12 +302,14 @@ function buildPaths(
   wickY: number,
   t: number,
   gustOffset: number,
+  riseHeight: number = RISE_HEIGHT,
+  simple: boolean = false,
 ) {
   const pointsA: Pt[] = [];
   const pointsB: Pt[] = [];
 
   for (const a of ANCHORS) {
-    const { y, baseX } = anchorPosition(a, wickX, wickY, t, gustOffset);
+    const { y, baseX } = anchorPosition(a, wickX, wickY, t, gustOffset, riseHeight);
 
     // Per-strand independent drift — creates crossovers
     const driftA =
@@ -323,55 +332,59 @@ function buildPaths(
   const strandA = segsToPathStr(pointsA[0], segA);
   const strandB = segsToPathStr(pointsB[0], segB);
 
-  // Fill: forward along A → line to B end → reverse along B → close
-  const revB = reverseSegs(pointsB[0], segB);
-  let fillPath = segsToPathStr(pointsA[0], segA);
-  const bEnd = pointsB[pointsB.length - 1];
-  fillPath += ` L ${bEnd[0]} ${bEnd[1]}`;
-  for (const s of revB) {
-    fillPath += ` C ${s.cp1[0]} ${s.cp1[1]}, ${s.cp2[0]} ${s.cp2[1]}, ${s.end[0]} ${s.end[1]}`;
-  }
-  fillPath += ' Z';
-
-  // Dispersal wisps — start near the diverge point (broken off from column),
-  // drift outward, then collapse inward and curl downward near the top
+  let fillPath = '';
   const wisps: string[] = [];
-  for (const w of DISPERSAL_WISPS) {
-    const firstAbove = ANCHORS.findIndex((a) => a.frac >= w.divergeFrac);
-    const startIdx = Math.max(0, firstAbove - 1);
 
-    const pts: Pt[] = [];
-    for (let ai = startIdx; ai < ANCHORS.length; ai++) {
-      const a = ANCHORS[ai];
-      let { y, baseX } = anchorPosition(a, wickX, wickY, t, gustOffset);
-
-      if (a.frac <= w.divergeFrac) {
-        pts.push([baseX, y]);
-      } else {
-        // Above diverge: smoothly ramp up unique drift
-        const raw = (a.frac - w.divergeFrac) / (1 - w.divergeFrac);
-        const blend = raw * raw * (3 - 2 * raw); // smoothstep
-
-        // Collapse phase: above collapseFrac, drift shrinks back toward center
-        // and Y curls back downward
-        let collapseScale = 1;
-        if (a.frac > w.collapseFrac) {
-          const cRaw = (a.frac - w.collapseFrac) / (1 - w.collapseFrac);
-          const cBlend = cRaw * cRaw;
-          collapseScale = 1 - cBlend * 0.85;
-          y += cBlend * w.collapseDrop;
-        }
-
-        const drift =
-          Math.sin(t * a.driftFreq * 1.3 + w.phaseOffset) *
-          a.driftAmp *
-          w.ampScale *
-          blend *
-          collapseScale;
-        pts.push([baseX + drift, y]);
-      }
+  if (!simple) {
+    // Fill: forward along A → line to B end → reverse along B → close
+    const revB = reverseSegs(pointsB[0], segB);
+    fillPath = segsToPathStr(pointsA[0], segA);
+    const bEnd = pointsB[pointsB.length - 1];
+    fillPath += ` L ${bEnd[0]} ${bEnd[1]}`;
+    for (const s of revB) {
+      fillPath += ` C ${s.cp1[0]} ${s.cp1[1]}, ${s.cp2[0]} ${s.cp2[1]}, ${s.end[0]} ${s.end[1]}`;
     }
-    wisps.push(segsToPathStr(pts[0], catmullRomSegments(pts)));
+    fillPath += ' Z';
+
+    // Dispersal wisps — start near the diverge point (broken off from column),
+    // drift outward, then collapse inward and curl downward near the top
+    for (const w of DISPERSAL_WISPS) {
+      const firstAbove = ANCHORS.findIndex((a) => a.frac >= w.divergeFrac);
+      const startIdx = Math.max(0, firstAbove - 1);
+
+      const pts: Pt[] = [];
+      for (let ai = startIdx; ai < ANCHORS.length; ai++) {
+        const a = ANCHORS[ai];
+        let { y, baseX } = anchorPosition(a, wickX, wickY, t, gustOffset, riseHeight);
+
+        if (a.frac <= w.divergeFrac) {
+          pts.push([baseX, y]);
+        } else {
+          // Above diverge: smoothly ramp up unique drift
+          const raw = (a.frac - w.divergeFrac) / (1 - w.divergeFrac);
+          const blend = raw * raw * (3 - 2 * raw); // smoothstep
+
+          // Collapse phase: above collapseFrac, drift shrinks back toward center
+          // and Y curls back downward
+          let collapseScale = 1;
+          if (a.frac > w.collapseFrac) {
+            const cRaw = (a.frac - w.collapseFrac) / (1 - w.collapseFrac);
+            const cBlend = cRaw * cRaw;
+            collapseScale = 1 - cBlend * 0.85;
+            y += cBlend * w.collapseDrop;
+          }
+
+          const drift =
+            Math.sin(t * a.driftFreq * 1.3 + w.phaseOffset) *
+            a.driftAmp *
+            w.ampScale *
+            blend *
+            collapseScale;
+          pts.push([baseX + drift, y]);
+        }
+      }
+      wisps.push(segsToPathStr(pts[0], catmullRomSegments(pts)));
+    }
   }
 
   return { strandA, strandB, fillPath, wisps };
@@ -381,10 +394,18 @@ function buildPaths(
 // Component
 // ---------------------------------------------------------------------------
 
-export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
+export function SealedSmokeWisps({
+  wickY,
+  wickX = 50,
+  color,
+  riseHeight: riseHeightProp,
+  simple = false,
+}: SealedSmokeWispsProps) {
   const shouldReduceMotion = useReducedMotion();
   const rawId = useId();
   const id = rawId.replace(/:/g, '');
+
+  const effectiveRiseHeight = riseHeightProp ?? RISE_HEIGHT;
 
   const strandARef = useRef<SVGPathElement>(null);
   const strandBRef = useRef<SVGPathElement>(null);
@@ -398,8 +419,11 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
   const gustVelRef = useRef(0);
   const lastTimeRef = useRef(0);
 
-  const initial = useMemo(() => buildPaths(wickX, wickY, 0, 0), [wickX, wickY]);
-  const endY = wickY - RISE_HEIGHT;
+  const initial = useMemo(
+    () => buildPaths(wickX, wickY, 0, 0, effectiveRiseHeight, simple),
+    [wickX, wickY, effectiveRiseHeight, simple],
+  );
+  const endY = wickY - effectiveRiseHeight;
 
   const gradientId = `smoke-grad-${id}`;
   const colorGradId = `smoke-color-${id}`;
@@ -453,11 +477,15 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
         wickY,
         phaseRef.current,
         gustPosRef.current,
+        effectiveRiseHeight,
+        simple,
       );
 
       strandARef.current?.setAttribute('d', paths.strandA);
-      strandBRef.current?.setAttribute('d', paths.strandB);
-      fillRef.current?.setAttribute('d', paths.fillPath);
+      if (!simple) {
+        strandBRef.current?.setAttribute('d', paths.strandB);
+        fillRef.current?.setAttribute('d', paths.fillPath);
+      }
 
       for (let i = 0; i < paths.wisps.length; i++) {
         wispRefsRef.current[i]?.setAttribute('d', paths.wisps[i]);
@@ -483,7 +511,7 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [wickX, wickY, shouldReduceMotion]);
+  }, [wickX, wickY, shouldReduceMotion, effectiveRiseHeight, simple]);
 
   if (shouldReduceMotion) {
     return (
@@ -530,7 +558,7 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
           />
         </linearGradient>
 
-        {/* Color gradient: warm brownish near wick → cool grey higher up */}
+        {/* Color gradient: warm brownish near wick → cool grey higher up (or flame color when provided) */}
         <linearGradient
           id={colorGradId}
           gradientUnits="userSpaceOnUse"
@@ -539,13 +567,13 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
           x2={wickX}
           y2={endY}
         >
-          <stop offset="0%" stopColor={SMOKE_COLOR_WARM} />
-          <stop offset="30%" stopColor={SMOKE_COLOR_COOL} />
-          <stop offset="100%" stopColor={SMOKE_COLOR_COOL} />
+          <stop offset="0%" stopColor={color ?? SMOKE_COLOR_WARM} />
+          <stop offset="30%" stopColor={color ?? SMOKE_COLOR_COOL} stopOpacity={color ? 0.6 : 1} />
+          <stop offset="100%" stopColor={color ?? SMOKE_COLOR_COOL} stopOpacity={color ? 0.2 : 1} />
         </linearGradient>
 
-        {/* Per-wisp stroke gradients: 4-stop with animated fade sweep */}
-        {DISPERSAL_WISPS.map((w, i) => (
+        {/* Per-wisp stroke gradients: 4-stop with animated fade sweep (skipped in simple mode) */}
+        {!simple && DISPERSAL_WISPS.map((w, i) => (
           <linearGradient
             key={w.id}
             ref={setWispGradRef(i)}
@@ -578,55 +606,60 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
             width={140}
             fill={`url(#${gradientId})`}
             initial={{ y: wickY, height: 0 }}
-            animate={{ y: endY, height: RISE_HEIGHT }}
+            animate={{ y: endY, height: effectiveRiseHeight }}
             transition={{ duration: REVEAL_DURATION, ease: 'easeOut' }}
           />
         </mask>
       </defs>
 
       <g mask={`url(#${maskId})`}>
-        {/* Fill between strands */}
-        <path
-          ref={fillRef}
-          d={initial.fillPath}
-          fill={SMOKE_COLOR_COOL}
-          opacity={FILL_OPACITY}
-        />
+        {/* Fill between strands (skipped in simple mode) */}
+        {!simple && (
+          <path
+            ref={fillRef}
+            d={initial.fillPath}
+            fill={color ?? SMOKE_COLOR_COOL}
+            opacity={FILL_OPACITY}
+          />
+        )}
 
         {/* Left strand — warm-to-cool color gradient */}
         <path
           ref={strandARef}
           d={initial.strandA}
           stroke={`url(#${colorGradId})`}
-          strokeWidth={STRAND_A_WIDTH}
+          strokeWidth={simple ? STRAND_B_WIDTH : STRAND_A_WIDTH}
           fill="none"
-          opacity={STRAND_A_OPACITY}
+          opacity={simple ? STRAND_B_OPACITY : STRAND_A_OPACITY}
           strokeLinecap="round"
         />
 
-        {/* Right strand — warm-to-cool color gradient */}
-        <path
-          ref={strandBRef}
-          d={initial.strandB}
-          stroke={`url(#${colorGradId})`}
-          strokeWidth={STRAND_B_WIDTH}
-          fill="none"
-          opacity={STRAND_B_OPACITY}
-          strokeLinecap="round"
-        />
-
-        {/* Dispersal wisps — thinner tendrils that peel off and fade out */}
-        {DISPERSAL_WISPS.map((w, i) => (
+        {/* Right strand — warm-to-cool color gradient (skipped in simple mode) */}
+        {!simple && (
           <path
-            key={w.id}
-            ref={setWispRef(i)}
-            d={initial.wisps[i]}
-            stroke={`url(#${wispGradIds[i]})`}
-            strokeWidth={w.width}
+            ref={strandBRef}
+            d={initial.strandB}
+            stroke={`url(#${colorGradId})`}
+            strokeWidth={STRAND_B_WIDTH}
             fill="none"
+            opacity={STRAND_B_OPACITY}
             strokeLinecap="round"
           />
-        ))}
+        )}
+
+        {/* Dispersal wisps — thinner tendrils that peel off and fade out (skipped in simple mode) */}
+        {!simple &&
+          DISPERSAL_WISPS.map((w, i) => (
+            <path
+              key={w.id}
+              ref={setWispRef(i)}
+              d={initial.wisps[i]}
+              stroke={`url(#${wispGradIds[i]})`}
+              strokeWidth={w.width}
+              fill="none"
+              strokeLinecap="round"
+            />
+          ))}
       </g>
     </g>
   );

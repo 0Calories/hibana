@@ -31,6 +31,12 @@ export interface SealedSmokeEffectConfig {
   type: 'sealedSmoke';
   wickY: number;
   wickX?: number;
+  /** When true, uses the flame's medium color for the tendril instead of grey smoke */
+  useFlameColor?: boolean;
+  /** Height of smoke column in SVG units — passed through to SealedSmokeWisps */
+  riseHeight?: number;
+  /** When true, renders a single thin strand only — passed through to SealedSmokeWisps */
+  simple?: boolean;
 }
 
 export type EffectConfig =

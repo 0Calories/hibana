@@ -26,9 +26,10 @@ function createEmbers(): Ember[] {
   return Array.from({ length: EMBER_COUNT }, (_, i) => {
     const hash = generateHash(i, 137);
     const hash2 = generateHash(i, 251);
+    const mixed = (hash * 7 + hash2 * 13) % 1000;
     return {
       id: i,
-      cx: 22 + (hash % 56), // x: 22-78
+      cx: 30 + (mixed % 44), // x: 30-74, evenly spread around center
       cy: 66 + (hash2 % 18), // y: 66-84 (ground scatter)
       r: 1 + ((hash % 100) / 100) * 1.8, // radius: 1-2.8
       phaseDelay: ((hash2 % 100) / 100) * 3, // 0-3s stagger
