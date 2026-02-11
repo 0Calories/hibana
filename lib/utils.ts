@@ -13,6 +13,13 @@ export function isValidDateString(date: string): boolean {
   return !Number.isNaN(parsed.getTime());
 }
 
+/**
+ * Parse a YYYY-MM-DD string as local midnight (not UTC).
+ */
+export function parseLocalDate(dateStr: string): Date {
+  return new Date(`${dateStr}T00:00:00`);
+}
+
 export function getLocalDateString(d = new Date()): string {
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');

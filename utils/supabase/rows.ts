@@ -8,3 +8,5 @@ export type FlameSchedule =
 export type FlameSession =
   Database['public']['Tables']['flame_sessions']['Row'];
 export type FuelBudget = Database['public']['Tables']['fuel_budgets']['Row'];
+export type WeeklyScheduleOverride =
+  Database['public']['Tables']['weekly_schedule_overrides']['Row'];

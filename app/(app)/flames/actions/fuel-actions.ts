@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/lib/types';
-import { isValidDateString } from '@/lib/utils';
+import { isValidDateString, parseLocalDate } from '@/lib/utils';
 import type { FuelBudget } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
@@ -70,20 +70,48 @@ export async function getRemainingFuelBudget(
     };
   }
 
-  const dayOfWeek = new Date(date).getUTCDay();
+  const d = parseLocalDate(date);
+  const dayOfWeek = d.getDay();
 
-  const { data: fuelBudgetData, error: fuelBudgetError } = await supabase
-    .from('fuel_budgets')
+  // Compute week start (Sunday) for override lookup
+  const weekStartDate = new Date(d);
+  weekStartDate.setDate(weekStartDate.getDate() - weekStartDate.getDay());
+  const weekStart = `${weekStartDate.getFullYear()}-${String(weekStartDate.getMonth() + 1).padStart(2, '0')}-${String(weekStartDate.getDate()).padStart(2, '0')}`;
+
+  // Check for a weekly override first
+  const { data: override, error: overrideError } = await supabase
+    .from('weekly_schedule_overrides')
     .select('minutes')
     .eq('user_id', user.id)
+    .eq('week_start', weekStart)
     .eq('day_of_week', dayOfWeek)
     .maybeSingle();
 
-  if (fuelBudgetError) {
-    return { success: false, error: fuelBudgetError };
+  if (overrideError) {
+    return { success: false, error: overrideError };
   }
 
-  if (!fuelBudgetData) {
+  // Determine budget minutes: override takes priority over default
+  let budgetMinutes: number | null = null;
+
+  if (override) {
+    budgetMinutes = override.minutes;
+  } else {
+    const { data: fuelBudgetData, error: fuelBudgetError } = await supabase
+      .from('fuel_budgets')
+      .select('minutes')
+      .eq('user_id', user.id)
+      .eq('day_of_week', dayOfWeek)
+      .maybeSingle();
+
+    if (fuelBudgetError) {
+      return { success: false, error: fuelBudgetError };
+    }
+
+    budgetMinutes = fuelBudgetData?.minutes ?? null;
+  }
+
+  if (budgetMinutes === null) {
     return { success: true, data: null };
   }
 
@@ -101,10 +129,10 @@ export async function getRemainingFuelBudget(
     0,
   );
   const totalMinutes = totalSeconds / 60;
-  const remainingMinutes = fuelBudgetData.minutes - totalMinutes;
+  const remainingMinutes = budgetMinutes - totalMinutes;
 
   return {
     success: true,
-    data: { budgetMinutes: fuelBudgetData.minutes, remainingMinutes },
+    data: { budgetMinutes, remainingMinutes },
   };
 }
