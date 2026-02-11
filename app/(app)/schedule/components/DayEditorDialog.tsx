@@ -2,20 +2,15 @@
 
 import {
   DndContext,
-  DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
-  type DragStartEvent,
 } from '@dnd-kit/core';
 import { Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { getFlameColors } from '@/app/(app)/flames/utils/colors';
-import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
-import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -73,9 +68,6 @@ export function DayEditorDialog({
     () => day.assignedFlameIds,
   );
 
-  // Drag state
-  const [activeDragId, setActiveDragId] = useState<string | null>(null);
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
@@ -84,7 +76,6 @@ export function DayEditorDialog({
   const resetState = useCallback(() => {
     setFuelMinutes(day.fuelMinutes ?? 0);
     setAssignedIds(day.assignedFlameIds);
-    setActiveDragId(null);
   }, [day]);
 
   // Track whether fuel is "locked" for today
@@ -135,13 +126,7 @@ export function DayEditorDialog({
     return `${m}${t('minutes')}`;
   };
 
-  // Drag handlers
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveDragId(event.active.id as string);
-  };
-
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveDragId(null);
     const { active, over } = event;
     if (!over || over.id !== 'assigned-zone') return;
 
@@ -206,11 +191,6 @@ export function DayEditorDialog({
     setAssignedIds(defaultFlameIds);
   };
 
-  // Active drag flame for overlay
-  const activeDragFlame = activeDragId
-    ? flames.find((f) => f.id === activeDragId)
-    : null;
-
   return (
     <Dialog
       open={open}
@@ -236,7 +216,6 @@ export function DayEditorDialog({
 
         <DndContext
           sensors={sensors}
-          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
@@ -304,24 +283,6 @@ export function DayEditorDialog({
             )}
           </div>
 
-          {/* Drag Overlay */}
-          <DragOverlay>
-            {activeDragFlame && (
-              <div className="flex flex-col items-center gap-0.5 opacity-80">
-                <FlameRenderer
-                  state="untended"
-                  level={flameLevels.get(activeDragFlame.id) ?? 1}
-                  colors={getFlameColors(
-                    activeDragFlame.color as FlameColorName,
-                  )}
-                  className="h-12 w-10"
-                />
-                <span className="max-w-[4.5rem] truncate text-center text-xs leading-tight">
-                  {activeDragFlame.name}
-                </span>
-              </div>
-            )}
-          </DragOverlay>
         </DndContext>
 
         <DialogFooter>

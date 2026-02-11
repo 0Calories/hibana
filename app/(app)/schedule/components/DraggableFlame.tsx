@@ -15,7 +15,7 @@ interface DraggableFlameProps {
 
 export function DraggableFlame({ flame, level, disabled = false }: DraggableFlameProps) {
   const t = useTranslations('schedule');
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: flame.id,
     disabled,
     data: { flame },
@@ -31,13 +31,21 @@ export function DraggableFlame({ flame, level, disabled = false }: DraggableFlam
     return `${m}${t('minutes')}`;
   };
 
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: 50,
+      }
+    : undefined;
+
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`flex flex-col items-center gap-0.5 rounded-lg p-1.5 transition-opacity ${
-        isDragging ? 'opacity-30' : ''
+      style={style}
+      className={`flex flex-col items-center gap-0.5 rounded-lg p-1.5 ${
+        isDragging ? 'opacity-80 shadow-lg' : ''
       } ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-grab active:cursor-grabbing'}`}
     >
       <FlameRenderer
