@@ -74,7 +74,7 @@ export function AssignedFlamesZone({
                     <Lock className="absolute -top-0.5 -right-0.5 size-3 text-amber-500" />
                   )}
                 </div>
-                <span className="max-w-[4.5rem] truncate text-center text-xs leading-tight">
+                <span className="max-w-[6rem] truncate text-center text-xs leading-tight">
                   {flame.name}
                 </span>
                 <div className="flex items-center gap-1">

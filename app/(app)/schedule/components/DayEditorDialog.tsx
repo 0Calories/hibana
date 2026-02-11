@@ -27,6 +27,7 @@ import {
 } from '../actions';
 import { AssignedFlamesZone } from './AssignedFlamesZone';
 import { DraggableFlame } from './DraggableFlame';
+import { FlamesDropZone } from './FlamesDropZone';
 import { FuelSlider } from './FuelSlider';
 
 const DAY_NAMES = [
@@ -59,7 +60,6 @@ export function DayEditorDialog({
   const t = useTranslations('schedule');
   const today = getLocalDateString();
   const isToday = day.date === today;
-
   // Fuel budget state (in minutes)
   const [fuelMinutes, setFuelMinutes] = useState(() => day.fuelMinutes ?? 0);
 
@@ -83,7 +83,7 @@ export function DayEditorDialog({
 
   // Capacity calculations
   const assignedFlames = useMemo(
-    () => flames.filter((f) => assignedIds.includes(f.id)),
+    () => assignedIds.map((id) => flames.find((f) => f.id === id)).filter(Boolean) as FlameWithSchedule[],
     [flames, assignedIds],
   );
 
@@ -128,18 +128,22 @@ export function DayEditorDialog({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || over.id !== 'assigned-zone') return;
+    if (!over) return;
 
     const flameId = active.id as string;
-    if (assignedIds.includes(flameId)) return;
 
-    const flame = flames.find((f) => f.id === flameId);
-    if (!flame) return;
-
-    // Check capacity
-    if (!canAddFlame(flame)) return;
-
-    setAssignedIds((prev) => [...prev, flameId]);
+    if (over.id === 'assigned-zone') {
+      // Dragging into assigned zone
+      if (assignedIds.includes(flameId)) return;
+      const flame = flames.find((f) => f.id === flameId);
+      if (!flame || !canAddFlame(flame)) return;
+      setAssignedIds((prev) => [...prev, flameId]);
+    } else if (over.id === 'flames-zone') {
+      // Dragging back to available flames
+      const flame = flames.find((f) => f.id === flameId);
+      if (!flame || flame.is_daily) return;
+      setAssignedIds((prev) => prev.filter((id) => id !== flameId));
+    }
   };
 
   const handleRemoveFlame = useCallback((flameId: string) => {
@@ -199,7 +203,7 @@ export function DayEditorDialog({
         onOpenChange(o);
       }}
     >
-      <DialogContent className="flex max-h-[85vh] flex-col">
+      <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {DAY_NAMES[day.dayOfWeek]}
@@ -218,7 +222,7 @@ export function DayEditorDialog({
           sensors={sensors}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden">
             {/* Fuel Budget Section */}
             <div className="space-y-2">
               <h3 className="text-xs font-medium text-muted-foreground">
@@ -239,7 +243,7 @@ export function DayEditorDialog({
                   <FuelSlider
                     value={fuelMinutes}
                     onChange={setFuelMinutes}
-                    allocatedMinutes={totalAllocated}
+                    assignedFlames={assignedFlames}
                     disabled={isFuelLocked}
                   />
                   {isToday && (
@@ -264,25 +268,22 @@ export function DayEditorDialog({
             </div>
 
             {/* Available Flames Grid */}
-            {availableFlames.length > 0 && (
-              <div className="space-y-1.5">
-                <h3 className="text-xs font-medium text-muted-foreground">
-                  {t('flames')}
-                </h3>
-                <div className="flex flex-wrap gap-1">
-                  {availableFlames.map((flame) => (
-                    <DraggableFlame
-                      key={flame.id}
-                      flame={flame}
-                      level={flameLevels.get(flame.id) ?? 1}
-                      disabled={!canAddFlame(flame)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+            <div className="space-y-1.5">
+              <h3 className="text-xs font-medium text-muted-foreground">
+                {t('flames')}
+              </h3>
+              <FlamesDropZone hasFlames={availableFlames.length > 0}>
+                {availableFlames.map((flame) => (
+                  <DraggableFlame
+                    key={flame.id}
+                    flame={flame}
+                    level={flameLevels.get(flame.id) ?? 1}
+                    disabled={!canAddFlame(flame)}
+                  />
+                ))}
+              </FlamesDropZone>
+            </div>
           </div>
-
         </DndContext>
 
         <DialogFooter>

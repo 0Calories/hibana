@@ -1,9 +1,13 @@
 'use client';
 
+import { Fuel } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { getFlameColors } from '@/app/(app)/flames/utils/colors';
+import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
 import { Input } from '@/components/ui/input';
+import type { FlameWithSchedule } from '../actions';
 
 const MAX_MINUTES = 960; // 16 hours
 const SNAP_INCREMENT = 15;
@@ -11,7 +15,7 @@ const SNAP_INCREMENT = 15;
 interface FuelSliderProps {
   value: number;
   onChange: (minutes: number) => void;
-  allocatedMinutes: number;
+  assignedFlames: FlameWithSchedule[];
   disabled?: boolean;
 }
 
@@ -19,10 +23,16 @@ function snapTo(minutes: number): number {
   return Math.round(minutes / SNAP_INCREMENT) * SNAP_INCREMENT;
 }
 
+function formatTime(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${h}:${String(m).padStart(2, '0')}`;
+}
+
 export function FuelSlider({
   value,
   onChange,
-  allocatedMinutes,
+  assignedFlames,
   disabled = false,
 }: FuelSliderProps) {
   const t = useTranslations('schedule');
@@ -33,16 +43,28 @@ export function FuelSlider({
   const mins = value % 60;
 
   const fraction = MAX_MINUTES > 0 ? Math.min(value / MAX_MINUTES, 1) : 0;
-  const capacityRatio = value > 0 ? allocatedMinutes / value : 0;
-  const isOverCapacity = capacityRatio > 1;
+  const allocatedMinutes = assignedFlames.reduce(
+    (sum, f) => sum + (f.time_budget_minutes ?? 0),
+    0,
+  );
+  const isOverCapacity = value > 0 && allocatedMinutes > value;
 
-  const formatMinutes = (total: number) => {
-    const h = Math.floor(total / 60);
-    const m = total % 60;
-    if (h > 0 && m > 0) return `${h}${t('hours')} ${m}${t('minutes')}`;
-    if (h > 0) return `${h}${t('hours')}`;
-    return `${m}${t('minutes')}`;
-  };
+  // Build colored segments for the gauge from assigned flames
+  const segments = (() => {
+    if (value === 0) return [];
+    const result: { startFrac: number; endFrac: number; color: string }[] = [];
+    let cursor = 0;
+    for (const flame of assignedFlames) {
+      const budget = flame.time_budget_minutes ?? 0;
+      if (budget <= 0) continue;
+      const startFrac = cursor / MAX_MINUTES;
+      cursor += budget;
+      const endFrac = Math.min(cursor / MAX_MINUTES, 1);
+      const hex = getFlameColors(flame.color as FlameColorName);
+      result.push({ startFrac, endFrac, color: hex.medium });
+    }
+    return result;
+  })();
 
   const updateFromPointer = useCallback(
     (clientX: number) => {
@@ -117,71 +139,112 @@ export function FuelSlider({
         <span className="text-xs text-muted-foreground">{t('minutes')}</span>
       </div>
 
-      {/* Capacity label */}
-      {value > 0 && (
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">{t('capacity')}</span>
-          <span
-            className={cn(
-              'text-xs font-medium',
-              isOverCapacity ? 'text-red-500' : 'text-muted-foreground',
-            )}
-          >
-            {formatMinutes(allocatedMinutes)} / {formatMinutes(value)}
-            {capacityRatio >= 1 && ` — ${t('full')}`}
-          </span>
-        </div>
-      )}
-
-      {/* Slider bar */}
-      <div
-        ref={barRef}
-        className={cn(
-          'relative h-3 cursor-pointer touch-none select-none',
-          disabled && 'pointer-events-none opacity-50',
-        )}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-      >
-        {/* Track */}
-        <div className="relative h-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-          {/* Segment ticks */}
-          <div
-            className="pointer-events-none absolute inset-0 z-10 rounded-full opacity-20 dark:opacity-15"
-            aria-hidden
-            style={{
-              backgroundImage: `
-                repeating-linear-gradient(
-                  to right,
-                  transparent 0px,
-                  transparent 30px,
-                  rgba(0, 0, 0, 0.5) 30px,
-                  rgba(0, 0, 0, 0.5) 32px
-                )
-              `,
-            }}
-          />
-          {/* Fill */}
-          <div
-            className={cn(
-              'absolute inset-y-0 left-0 rounded-full transition-[width] duration-75',
-              isOverCapacity
-                ? 'bg-red-500'
-                : 'bg-gradient-to-r from-amber-500 to-amber-400',
-            )}
-            style={{ width: `${fraction * 100}%` }}
-          />
-        </div>
-
-        {/* Thumb */}
+      {/* Gauge bar with FUEL icon + time label */}
+      <div className="flex items-center gap-2.5">
+        {/* Fuel icon + label */}
         <div
           className={cn(
-            'absolute top-1/2 z-20 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md transition-[left] duration-75',
-            isOverCapacity ? 'bg-red-500' : 'bg-amber-500',
+            'flex shrink-0 items-center gap-1',
+            isOverCapacity
+              ? 'text-red-500'
+              : 'text-amber-600 dark:text-amber-400',
           )}
-          style={{ left: `${fraction * 100}%` }}
-        />
+        >
+          <Fuel className="h-3.5 w-3.5" />
+        </div>
+
+        {/* Bar container */}
+        <div
+          ref={barRef}
+          className={cn(
+            'relative h-3 flex-1 cursor-pointer touch-none select-none',
+            disabled && 'pointer-events-none opacity-50',
+          )}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
+          {/* Track */}
+          <div className="relative h-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+            {/* Segment ticks */}
+            <div
+              className="pointer-events-none absolute inset-0 z-10 rounded-full opacity-20 dark:opacity-15"
+              aria-hidden
+              style={{
+                backgroundImage: `
+                  repeating-linear-gradient(
+                    to right,
+                    transparent 0px,
+                    transparent 30px,
+                    rgba(0, 0, 0, 0.5) 30px,
+                    rgba(0, 0, 0, 0.5) 32px
+                  )
+                `,
+              }}
+            />
+
+            {/* Colored flame segments */}
+            {segments.map((seg, i) => (
+              <div
+                key={i}
+                className="absolute inset-y-0"
+                style={{
+                  left: `${seg.startFrac * 100}%`,
+                  width: `${(seg.endFrac - seg.startFrac) * 100}%`,
+                  backgroundColor: seg.color,
+                  opacity: seg.endFrac <= fraction ? 1 : 0.4,
+                }}
+              />
+            ))}
+
+            {/* Amber fill for unallocated portion up to the slider position */}
+            {(() => {
+              const allocFrac = Math.min(allocatedMinutes / MAX_MINUTES, 1);
+              if (fraction > allocFrac) {
+                return (
+                  <div
+                    className={cn(
+                      'absolute inset-y-0',
+                      isOverCapacity
+                        ? 'bg-red-500'
+                        : 'bg-gradient-to-r from-amber-500 to-amber-400',
+                    )}
+                    style={{
+                      left: `${allocFrac * 100}%`,
+                      width: `${(fraction - allocFrac) * 100}%`,
+                    }}
+                  />
+                );
+              }
+              return null;
+            })()}
+          </div>
+
+          {/* Thumb — pill-shaped with inner glow */}
+          <div
+            className="absolute top-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
+            style={{ left: `${fraction * 100}%` }}
+          >
+            <div
+              className={cn(
+                'h-4.5 w-2.5 rounded-full shadow-md ring-2 ring-white/90 dark:ring-white/70',
+                isOverCapacity ? 'bg-red-500' : 'bg-amber-400',
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Time label */}
+        <span
+          className={cn(
+            'shrink-0 text-xs font-medium tabular-nums',
+            isOverCapacity
+              ? 'text-red-500'
+              : 'text-slate-600 dark:text-white/70',
+          )}
+        >
+          {formatTime(value)}
+        </span>
       </div>
     </div>
   );

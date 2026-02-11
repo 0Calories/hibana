@@ -54,7 +54,7 @@ export function DraggableFlame({ flame, level, disabled = false }: DraggableFlam
         colors={colors}
         className="h-12 w-10"
       />
-      <span className="max-w-[4.5rem] truncate text-center text-xs leading-tight">
+      <span className="max-w-[6rem] truncate text-center text-xs leading-tight">
         {flame.name}
       </span>
       {flame.time_budget_minutes != null && (
