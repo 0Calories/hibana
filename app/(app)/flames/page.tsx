@@ -1,4 +1,4 @@
-import { CalendarDays } from 'lucide-react';
+import { CalendarRangeIcon } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getFlamesForDay } from './actions/flame-actions';
@@ -38,7 +38,7 @@ export default async function FlamesPage() {
           href="/schedule"
           className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-muted hover:text-slate-700"
         >
-          <CalendarDays className="size-5" />
+          <CalendarRangeIcon className="size-5" />
         </Link>
       </div>
       {flames.length === 0 ? (
