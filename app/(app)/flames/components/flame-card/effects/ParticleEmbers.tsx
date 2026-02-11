@@ -23,7 +23,8 @@ const EMBER_PALETTE = (colors: ShapeColors) => [
 
 export function ParticleEmbers({ state, colors, config }: ParticleEmbersProps) {
   const shouldReduceMotion = useReducedMotion();
-  const showEmbers = shouldShowParticles(state);
+  const sealedCount = config.states.sealed?.count ?? 0;
+  const showEmbers = shouldShowParticles(state) || (state === 'sealed' && sealedCount > 0);
   const { states } = config;
 
   const particles = useMemo(

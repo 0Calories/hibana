@@ -101,6 +101,19 @@ export const STANDARD_EMBERS: EmberEffectConfig = {
   states: STANDARD_EMBER_STATES,
 };
 
+const WISP_EMBER_STATES: ParticleStateConfig = {
+  burning: { count: 8, sizeMultiplier: 1.4 },
+  paused: { count: 3, sizeMultiplier: 1 },
+  untended: { count: 1, sizeMultiplier: 1 },
+  sealing: { count: 12, sizeMultiplier: 1.6 },
+  sealed: { count: 3, sizeMultiplier: 0.6 },
+};
+
+export const WISP_EMBERS: EmberEffectConfig = {
+  type: 'embers',
+  states: WISP_EMBER_STATES,
+};
+
 export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
   burning: { count: 15, sizeMultiplier: 1.5 },
   paused: { count: 4, sizeMultiplier: 1 },
@@ -118,4 +131,16 @@ export function sealedSmokeEffect(
   wickX?: number,
 ): SealedSmokeEffectConfig {
   return { type: 'sealedSmoke', wickY, wickX };
+}
+
+export function simpleSealedSmokeEffect(
+  wickY: number,
+): SealedSmokeEffectConfig {
+  return {
+    type: 'sealedSmoke',
+    wickY,
+    useFlameColor: true,
+    riseHeight: 70,
+    simple: true,
+  };
 }
