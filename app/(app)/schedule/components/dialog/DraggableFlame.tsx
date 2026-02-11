@@ -6,7 +6,7 @@ import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/
 import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
 import { getFlameColors } from '@/app/(app)/flames/utils/colors';
 import { cn } from '@/lib/utils';
-import type { FlameWithSchedule } from '../actions';
+import type { FlameWithSchedule } from '../../actions';
 
 interface DraggableFlameProps {
   flame: FlameWithSchedule;

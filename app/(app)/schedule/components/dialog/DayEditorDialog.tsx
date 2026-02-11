@@ -24,9 +24,9 @@ import {
   type DayPlan,
   type FlameWithSchedule,
   setWeeklyOverride,
-} from '../actions';
+} from '../../actions';
+import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from '../constants';
 import { AssignedFlamesZone } from './AssignedFlamesZone';
-import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './constants';
 import { DraggableFlame } from './DraggableFlame';
 import { FuelSlider } from './FuelSlider';
 import { MyFlamesZone } from './MyFlamesZone';
@@ -291,7 +291,7 @@ export function DayEditorDialog({
               />
             </div>
 
-            {/* Available Flames Grid — always rendered so drop target exists */}
+            {/* Available Flames Grid  */}
             <div className="space-y-1.5">
               <h3 className="text-sm font-medium text-muted-foreground">
                 {t('flames')}

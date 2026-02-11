@@ -2,7 +2,7 @@
 
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
-import { MY_FLAMES_ZONE_ID } from './constants';
+import { MY_FLAMES_ZONE_ID } from '../constants';
 
 interface FlamesDropZoneProps {
   children: React.ReactNode;
