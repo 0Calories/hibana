@@ -174,7 +174,9 @@ export function FlameCard({
           boxShadow: '0 0 15px #fbbf2450, 0 0 30px #fbbf2425',
           borderColor: '#fbbf24',
         }
-      : {};
+      : isSealed
+        ? { borderColor: '#64748b50' }
+        : {};
 
   const fuelMinutes = Math.floor(elapsedSeconds / 60);
 
@@ -207,7 +209,7 @@ export function FlameCard({
           'border-slate-200 bg-linear-to-b from-white to-slate-50 text-slate-900',
           'dark:border-white/10 dark:from-slate-900 dark:to-slate-950 dark:text-white',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
-          isSealed && 'cursor-default opacity-40',
+          isSealed && 'cursor-default',
           isFuelBlocked && 'cursor-default opacity-40',
           isBlocked && 'cursor-default opacity-40',
           isLoading && 'cursor-wait',
@@ -223,7 +225,9 @@ export function FlameCard({
         {...(canSeal || isSealing ? longPress.handlers : {})}
       >
         {/* Header - Name and Level */}
-        <div className="px-2 pt-2 sm:px-3 sm:pt-3">
+        <div
+          className={cn('px-2 pt-2 sm:px-3 sm:pt-3', isSealed && 'opacity-50')}
+        >
           <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
             {flame.name}
           </h3>
@@ -251,12 +255,14 @@ export function FlameCard({
         {/* Footer - Timer, Progress, State */}
         <div className="flex flex-col gap-1 bg-slate-200/70 px-2 py-2 dark:bg-black/30 sm:gap-1.5 sm:px-3 sm:py-3">
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
-            <TimerDisplay
-              elapsedSeconds={elapsedSeconds}
-              targetSeconds={targetSeconds}
-              state={state}
-              color={colors.light}
-            />
+            <div className={cn(isSealed && 'opacity-40')}>
+              <TimerDisplay
+                elapsedSeconds={elapsedSeconds}
+                targetSeconds={targetSeconds}
+                state={state}
+                color={colors.light}
+              />
+            </div>
           )}
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
             <ProgressBar progress={progress} state={state} colors={colors} />
@@ -266,10 +272,24 @@ export function FlameCard({
               'text-center text-[10px] sm:text-xs',
               canSeal || isSealing
                 ? 'font-medium text-amber-500'
-                : 'text-slate-500 dark:text-white/50',
+                : isSealed
+                  ? 'font-medium'
+                  : 'text-slate-500 dark:text-white/50',
             )}
           >
-            {getStateText() ?? '\u00A0'}
+            {isSealed ? (
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, #d97706, #fbbf24, #fde68a, #fbbf24, #d97706)',
+                }}
+              >
+                {getStateText()}
+              </span>
+            ) : (
+              (getStateText() ?? '\u00A0')
+            )}
           </div>
         </div>
 

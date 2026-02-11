@@ -13,21 +13,29 @@ interface ProgressBarProps {
   };
 }
 
+const SEALED_BAR_GRADIENT =
+  'linear-gradient(to right, #92400e, #d97706, #f59e0b, #fbbf24)';
+
 export function ProgressBar({ progress, state, colors }: ProgressBarProps) {
   const shouldReduceMotion = useReducedMotion();
   const isActive = state === 'burning';
+  const isSealed = state === 'sealed';
 
-  const percentage = Math.round(progress * 100);
+  const percentage = isSealed ? 100 : Math.round(progress * 100);
 
   return (
     <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10 sm:h-2">
       <motion.div
         className="absolute inset-y-0 left-0 rounded-full"
         style={{
-          background: `linear-gradient(to right, ${colors.dark}, ${colors.medium}, ${colors.light})`,
+          background: isSealed
+            ? SEALED_BAR_GRADIENT
+            : `linear-gradient(to right, ${colors.dark}, ${colors.medium}, ${colors.light})`,
           boxShadow: isActive
             ? `0 0 8px ${colors.medium}, 0 0 16px ${colors.medium}40`
-            : 'none',
+            : isSealed
+              ? '0 0 6px #d9770640'
+              : 'none',
         }}
         initial={false}
         animate={{
