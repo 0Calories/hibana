@@ -158,7 +158,7 @@ export function FuelSlider({
         className={cn(
           'flex shrink-0 items-center gap-1',
           isOverCapacity
-            ? 'text-red-500'
+            ? 'text-destructive'
             : 'text-amber-600 dark:text-amber-400',
         )}
       >
@@ -259,7 +259,7 @@ export function FuelSlider({
           className={cn(
             'w-14 shrink-0 border-b border-amber-400 bg-transparent text-center text-sm font-medium tabular-nums outline-none',
             isOverCapacity
-              ? 'text-red-500'
+              ? 'text-destructive'
               : 'text-slate-600 dark:text-white/70',
           )}
           value={editText}
@@ -280,7 +280,7 @@ export function FuelSlider({
           className={cn(
             'w-14 shrink-0 cursor-text border-b border-transparent text-center text-sm font-medium tabular-nums hover:border-amber-400/50',
             isOverCapacity
-              ? 'text-red-500'
+              ? 'text-destructive'
               : 'text-slate-600 dark:text-white/70',
           )}
         >

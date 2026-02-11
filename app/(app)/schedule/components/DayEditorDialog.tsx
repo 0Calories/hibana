@@ -272,11 +272,9 @@ export function DayEditorDialog({
                   )}
                 </>
               )}
-              {isOverCapacity && (
-                <p className="text-xs font-medium text-red-500">
-                  {t('overCapacity')}
-                </p>
-              )}
+              <p className={`text-xs font-medium text-destructive ${isOverCapacity ? 'visible' : 'invisible'}`}>
+                {t('overCapacity')}
+              </p>
             </div>
 
             {/* Assigned Flames */}
