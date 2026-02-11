@@ -28,8 +28,8 @@ import {
 import { AssignedFlamesZone } from './AssignedFlamesZone';
 import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './constants';
 import { DraggableFlame } from './DraggableFlame';
-import { FlamesDropZone } from './FlamesDropZone';
 import { FuelSlider } from './FuelSlider';
+import { MyFlamesZone } from './MyFlamesZone';
 
 const DAY_NAMES = [
   'Sunday',
@@ -296,7 +296,7 @@ export function DayEditorDialog({
               <h3 className="text-sm font-medium text-muted-foreground">
                 {t('flames')}
               </h3>
-              <FlamesDropZone>
+              <MyFlamesZone>
                 {availableFlames.map((flame) => (
                   <DraggableFlame
                     key={flame.id}
@@ -305,7 +305,7 @@ export function DayEditorDialog({
                     disabled={!canAddFlame(flame)}
                   />
                 ))}
-              </FlamesDropZone>
+              </MyFlamesZone>
             </div>
           </div>
         </DndContext>

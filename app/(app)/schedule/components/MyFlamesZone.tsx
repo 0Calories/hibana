@@ -8,7 +8,7 @@ interface FlamesDropZoneProps {
   children: React.ReactNode;
 }
 
-export function FlamesDropZone({ children }: FlamesDropZoneProps) {
+export function MyFlamesZone({ children }: FlamesDropZoneProps) {
   const { isOver, setNodeRef } = useDroppable({ id: MY_FLAMES_ZONE_ID });
 
   return (

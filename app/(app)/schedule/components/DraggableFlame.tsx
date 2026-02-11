@@ -49,7 +49,8 @@ export function DraggableFlame({
     : undefined;
 
   return (
-    <div
+    <button
+      type="button"
       ref={setNodeRef}
       {...listeners}
       {...attributes}
@@ -73,7 +74,7 @@ export function DraggableFlame({
         colors={colors}
         className="h-12 w-10"
       />
-      <span className="max-w-[6rem] truncate text-center text-sm leading-tight">
+      <span className="max-w-24 truncate text-center text-sm leading-tight">
         {flame.name}
       </span>
       <div className="flex items-center gap-1">
@@ -88,6 +89,6 @@ export function DraggableFlame({
           </span>
         )}
       </div>
-    </div>
+    </button>
   );
 }

@@ -112,6 +112,27 @@ export function FuelSlider({
     return result.segments;
   }, [assignedFlames]);
 
+  const renderRemainderSegment = () => {
+    const allocFrac = Math.min(allocatedMinutes / MAX_MINUTES, 1);
+    if (fraction > allocFrac) {
+      return (
+        <div
+          className={cn(
+            'absolute inset-y-0',
+            isOverCapacity
+              ? 'bg-red-500'
+              : 'bg-linear-to-r from-amber-500 to-amber-400',
+          )}
+          style={{
+            left: `${allocFrac * 100}%`,
+            width: `${(fraction - allocFrac) * 100}%`,
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   const updateFromPointer = useCallback(
     (clientX: number) => {
       if (!barRef.current || disabled) return;
@@ -205,7 +226,7 @@ export function FuelSlider({
             }}
           />
 
-          {/* Colored flame segments with gradients */}
+          {/* Colored flame segments */}
           {segments.map((seg) => (
             <div
               key={`segment-${seg.colors.light}`}
@@ -224,26 +245,7 @@ export function FuelSlider({
           ))}
 
           {/* Amber fill for unallocated portion up to the slider position */}
-          {(() => {
-            const allocFrac = Math.min(allocatedMinutes / MAX_MINUTES, 1);
-            if (fraction > allocFrac) {
-              return (
-                <div
-                  className={cn(
-                    'absolute inset-y-0',
-                    isOverCapacity
-                      ? 'bg-red-500'
-                      : 'bg-linear-to-r from-amber-500 to-amber-400',
-                  )}
-                  style={{
-                    left: `${allocFrac * 100}%`,
-                    width: `${(fraction - allocFrac) * 100}%`,
-                  }}
-                />
-              );
-            }
-            return null;
-          })()}
+          {renderRemainderSegment()}
         </div>
 
         {/* Thumb — pill notch */}
