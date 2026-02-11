@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { SealedSmokeWisps } from '../effects/SealedSmokeWisps';
 import type {
   FlameComponentProps,
   FlameDefinition,
@@ -10,6 +9,7 @@ import {
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
   STANDARD_EMBERS,
+  sealedSmokeEffect,
   smokeEffect,
 } from './presets';
 
@@ -58,7 +58,6 @@ function CandleSealed({ colors }: SealedFlameProps) {
       >
         <CandleFlame colors={colors} />
       </motion.g>
-      <SealedSmokeWisps wickY={62} />
     </>
   );
 }
@@ -72,5 +71,5 @@ export const Candle: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [STANDARD_EMBERS, smokeEffect(4)],
+  effects: [STANDARD_EMBERS, smokeEffect(4), sealedSmokeEffect(62)],
 };

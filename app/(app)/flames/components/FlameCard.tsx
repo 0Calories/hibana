@@ -109,10 +109,10 @@ export function FlameCard({
 
   const isActive = state === 'burning';
   const isSealing = state === 'sealing';
-  const isCompleted = state === 'sealed';
-  const isFuelBlocked = isFuelDepleted && !isActive;
+  const isSealed = state === 'sealed';
+  const isFuelBlocked = isFuelDepleted && !canSeal;
   const isDisabled =
-    isLoading || isCompleted || isBlocked || isFuelBlocked || isSealing;
+    isLoading || isSealed || isBlocked || isFuelBlocked || isSealing;
 
   const getAriaLabel = () => {
     const baseName = flame.name;
@@ -135,7 +135,7 @@ export function FlameCard({
   };
 
   const getStateText = () => {
-    if (isFuelBlocked) return t('noFuel');
+    if (isFuelBlocked && state !== 'sealed') return t('noFuel');
     if (isBlocked) return null;
     switch (state) {
       case 'untended':
@@ -207,7 +207,7 @@ export function FlameCard({
           'border-slate-200 bg-linear-to-b from-white to-slate-50 text-slate-900',
           'dark:border-white/10 dark:from-slate-900 dark:to-slate-950 dark:text-white',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
-          isCompleted && 'cursor-default opacity-60',
+          isSealed && 'cursor-default opacity-40',
           isFuelBlocked && 'cursor-default opacity-40',
           isBlocked && 'cursor-default opacity-40',
           isLoading && 'cursor-wait',

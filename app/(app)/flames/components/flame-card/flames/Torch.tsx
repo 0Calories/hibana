@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { SealedSmokeWisps } from '../effects/SealedSmokeWisps';
 import type {
   FlameComponentProps,
   FlameDefinition,
@@ -10,6 +9,7 @@ import {
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
   STANDARD_EMBERS,
+  sealedSmokeEffect,
   smokeEffect,
 } from './presets';
 
@@ -58,7 +58,6 @@ function TorchSealed({ colors }: SealedFlameProps) {
       >
         <TorchFlame colors={colors} />
       </motion.g>
-      <SealedSmokeWisps wickY={65} />
     </>
   );
 }
@@ -72,5 +71,5 @@ export const Torch: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [STANDARD_EMBERS, smokeEffect(5)],
+  effects: [STANDARD_EMBERS, smokeEffect(5), sealedSmokeEffect(65)],
 };

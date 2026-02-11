@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { SealedSmokeWisps } from '../effects/SealedSmokeWisps';
 import type {
   FlameComponentProps,
   FlameDefinition,
@@ -10,6 +9,7 @@ import {
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
   STANDARD_EMBERS,
+  sealedSmokeEffect,
   smokeEffect,
 } from './presets';
 
@@ -102,7 +102,6 @@ function BonfireSealed({ colors }: SealedFlameProps) {
       >
         <BonfireFlame colors={colors} />
       </motion.g>
-      <SealedSmokeWisps wickY={72} />
     </>
   );
 }
@@ -116,5 +115,5 @@ export const Bonfire: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [STANDARD_EMBERS, smokeEffect(6)],
+  effects: [STANDARD_EMBERS, smokeEffect(6), sealedSmokeEffect(72)],
 };
