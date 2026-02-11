@@ -16,7 +16,7 @@ interface SealedSmokeWispsProps {
 
 // General
 const SMOKE_COLOR = '#94a3b8';
-const RISE_HEIGHT = 90; // total height of smoke column in SVG units
+const RISE_HEIGHT = 70; // total height of smoke column in SVG units
 const REVEAL_DURATION = 3; // seconds for initial bottom-to-top reveal
 
 // Strand appearance
@@ -31,11 +31,12 @@ const TAPER_MID_OFFSET = '65%'; // where opacity starts fading faster
 const TAPER_MID_OPACITY = 0.5; // opacity at mid-taper point
 const TAPER_END_OPACITY = 0.1; // opacity at the very top
 
-// Wind gust
-const BASE_STRAND_SPEED = 2; // normal phase accumulation speed
+// Wind gust — damped spring: impulse pushes smoke sideways, spring pulls it back
+const PHASE_SPEED = 2; // constant phase accumulation speed
 const GUST_CHANCE_PER_FRAME = 0.003; // probability per frame (~every 5.5s at 60fps)
-const GUST_STRENGTH = 10; // how much faster snaking gets during a gust
-const GUST_DECAY = 0.985; // exponential decay per frame (lower = faster fade)
+const GUST_IMPULSE = 30; // velocity kick in SVG units/sec
+const GUST_SPRING = 8; // restoring force (higher = snappier return)
+const GUST_DAMPING = 4; // friction (higher = less oscillation after settling)
 
 // Phase offset between strand A and B for crossover drift
 const DRIFT_PHASE_B = 2.2;
@@ -48,14 +49,84 @@ const DRIFT_PHASE_B = 2.2;
 
 const ANCHORS = [
   //           frac   snakeFreq  snakeAmp  snakePhase  driftFreq  driftAmp  spread  yOscAmp  yOscFreq
-  { frac: 0,    sf: 1.3, sa: 0,   sp: 0,   df: 0,   da: 0,   spread: 0.3, ya: 0,   yf: 0 },
-  { frac: 0.18, sf: 1.3, sa: 1.8, sp: 0.2, df: 0.3, da: 0,   spread: 0.4, ya: 0,   yf: 0 },
-  { frac: 0.38, sf: 1.1, sa: 3.5, sp: 0.5, df: 0.4, da: 1.5, spread: 0.6, ya: 0,   yf: 0 },
-  { frac: 0.58, sf: 0.9, sa: 4.5, sp: 0.9, df: 0.5, da: 3,   spread: 1.0, ya: 0.5, yf: 0.4 },
-  { frac: 0.72, sf: 0.8, sa: 5,   sp: 1.3, df: 0.8, da: 6,   spread: 2.5, ya: 1.5, yf: 0.6 },
-  { frac: 0.83, sf: 0.7, sa: 5,   sp: 1.6, df: 1.1, da: 8,   spread: 4,   ya: 2.5, yf: 0.8 },
-  { frac: 0.92, sf: 0.65,sa: 4.5, sp: 2.0, df: 1.4, da: 10,  spread: 4.5, ya: 3,   yf: 1.0 },
-  { frac: 1.0,  sf: 0.6, sa: 3.5, sp: 2.4, df: 1.7, da: 11,  spread: 4,   ya: 3.5, yf: 1.2 },
+  { frac: 0, sf: 1.3, sa: 0, sp: 0, df: 0, da: 0, spread: 0.3, ya: 0, yf: 0 },
+  {
+    frac: 0.18,
+    sf: 1.3,
+    sa: 1.8,
+    sp: 0.2,
+    df: 0.3,
+    da: 0,
+    spread: 0.4,
+    ya: 0,
+    yf: 0,
+  },
+  {
+    frac: 0.38,
+    sf: 1.1,
+    sa: 3.5,
+    sp: 0.5,
+    df: 0.4,
+    da: 1.5,
+    spread: 0.6,
+    ya: 0,
+    yf: 0,
+  },
+  {
+    frac: 0.58,
+    sf: 0.9,
+    sa: 4.5,
+    sp: 0.9,
+    df: 0.5,
+    da: 3,
+    spread: 1.0,
+    ya: 0.5,
+    yf: 0.4,
+  },
+  {
+    frac: 0.72,
+    sf: 0.8,
+    sa: 5,
+    sp: 1.3,
+    df: 0.8,
+    da: 6,
+    spread: 2.5,
+    ya: 1.5,
+    yf: 0.6,
+  },
+  {
+    frac: 0.83,
+    sf: 0.7,
+    sa: 5,
+    sp: 1.6,
+    df: 1.1,
+    da: 8,
+    spread: 4,
+    ya: 2.5,
+    yf: 0.8,
+  },
+  {
+    frac: 0.92,
+    sf: 0.65,
+    sa: 4.5,
+    sp: 2.0,
+    df: 1.4,
+    da: 10,
+    spread: 4.5,
+    ya: 3,
+    yf: 1.0,
+  },
+  {
+    frac: 1.0,
+    sf: 0.6,
+    sa: 3.5,
+    sp: 2.4,
+    df: 1.7,
+    da: 11,
+    spread: 4,
+    ya: 3.5,
+    yf: 1.2,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -107,7 +178,12 @@ function reverseSegs(start: Pt, segs: BezSeg[]): BezSeg[] {
 // Path builder — two multi-segment strands + fill, snaking over time
 // ---------------------------------------------------------------------------
 
-function buildPaths(wickX: number, wickY: number, t: number) {
+function buildPaths(
+  wickX: number,
+  wickY: number,
+  t: number,
+  gustOffset: number,
+) {
   const pointsA: Pt[] = [];
   const pointsB: Pt[] = [];
 
@@ -121,16 +197,16 @@ function buildPaths(wickX: number, wickY: number, t: number) {
     // Shared column sway (moves both strands together)
     const snake = Math.sin(t * a.sf + a.sp) * a.sa;
 
-    // Per-strand independent drift — creates crossovers
-    const driftA =
-      a.da > 0 ? Math.sin(t * a.df + a.frac * 1.5) * a.da : 0;
-    const driftB =
-      a.da > 0
-        ? Math.sin(t * a.df + a.frac * 1.5 + DRIFT_PHASE_B) * a.da
-        : 0;
+    // Wind gust lateral push — scales with height (base stays planted, top drifts most)
+    const gust = gustOffset * a.frac;
 
-    pointsA.push([wickX + snake + driftA - a.spread, y]);
-    pointsB.push([wickX + snake + driftB + a.spread, y]);
+    // Per-strand independent drift — creates crossovers
+    const driftA = a.da > 0 ? Math.sin(t * a.df + a.frac * 1.5) * a.da : 0;
+    const driftB =
+      a.da > 0 ? Math.sin(t * a.df + a.frac * 1.5 + DRIFT_PHASE_B) * a.da : 0;
+
+    pointsA.push([wickX + snake + gust + driftA - a.spread, y]);
+    pointsB.push([wickX + snake + gust + driftB + a.spread, y]);
   }
 
   // Build strand paths via Catmull-Rom interpolation
@@ -166,12 +242,13 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
   const strandBRef = useRef<SVGPathElement>(null);
   const fillRef = useRef<SVGPathElement>(null);
 
-  // Wind gust state — accumulated phase + gust multiplier
+  // Wind gust state — damped spring (position + velocity)
   const phaseRef = useRef(0);
-  const gustRef = useRef(0);
+  const gustPosRef = useRef(0);
+  const gustVelRef = useRef(0);
   const lastTimeRef = useRef(0);
 
-  const initial = useMemo(() => buildPaths(wickX, wickY, 0), [wickX, wickY]);
+  const initial = useMemo(() => buildPaths(wickX, wickY, 0, 0), [wickX, wickY]);
   const endY = wickY - RISE_HEIGHT;
 
   const gradientId = `smoke-grad-${id}`;
@@ -184,26 +261,33 @@ export function SealedSmokeWisps({ wickY, wickX = 50 }: SealedSmokeWispsProps) {
     let rafId: number;
     lastTimeRef.current = performance.now();
     phaseRef.current = 0;
-    gustRef.current = 0;
+    gustPosRef.current = 0;
+    gustVelRef.current = 0;
 
     const tick = () => {
       const now = performance.now();
       const dt = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
 
-      // Decay gust strength exponentially
-      gustRef.current *= GUST_DECAY;
-
-      // Random gust trigger
+      // Random gust trigger — apply impulse (always rightward)
       if (Math.random() < GUST_CHANCE_PER_FRAME) {
-        gustRef.current = GUST_STRENGTH;
+        gustVelRef.current += GUST_IMPULSE;
       }
 
-      // Accumulate phase at variable speed (higher during gusts)
-      const speed = BASE_STRAND_SPEED + gustRef.current;
-      phaseRef.current += dt * speed;
+      // Damped spring: acceleration = -spring * pos - damping * vel
+      const acc =
+        -GUST_SPRING * gustPosRef.current - GUST_DAMPING * gustVelRef.current;
+      gustVelRef.current += acc * dt;
+      gustPosRef.current += gustVelRef.current * dt;
 
-      const paths = buildPaths(wickX, wickY, phaseRef.current);
+      phaseRef.current += dt * PHASE_SPEED;
+
+      const paths = buildPaths(
+        wickX,
+        wickY,
+        phaseRef.current,
+        gustPosRef.current,
+      );
 
       strandARef.current?.setAttribute('d', paths.strandA);
       strandBRef.current?.setAttribute('d', paths.strandB);
