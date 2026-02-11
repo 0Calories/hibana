@@ -117,15 +117,54 @@ export async function setFlameSchedule(
 }
 
 /**
- * Returns the Flames that must be tended to for a specific date
+ * Returns the Flames that must be tended to for a specific date.
+ * Checks for a weekly schedule override first — if one exists for this
+ * week + day, uses the override's flame_ids. Otherwise falls back to
+ * the default schedule (daily flames + flame_schedules).
+ *
  * @param date  Must be provided in the 'YYYY-MM-DD' format
  */
 export async function getFlamesForDay(date: string) {
   const { supabase, user } = await createClientWithAuth();
 
-  // Must ensure we use UTC day to avoid timezone fuckery
-  const day = new Date(date).getUTCDay();
+  const d = new Date(`${date}T00:00:00`);
+  const day = d.getDay();
 
+  // Compute week start (Sunday) for override lookup
+  const weekStartDate = new Date(d);
+  weekStartDate.setDate(weekStartDate.getDate() - weekStartDate.getDay());
+  const weekStart = `${weekStartDate.getFullYear()}-${String(weekStartDate.getMonth() + 1).padStart(2, '0')}-${String(weekStartDate.getDate()).padStart(2, '0')}`;
+
+  // Check for a weekly override
+  const { data: override, error: overrideError } = await supabase
+    .from('weekly_schedule_overrides')
+    .select('flame_ids')
+    .eq('user_id', user.id)
+    .eq('week_start', weekStart)
+    .eq('day_of_week', day)
+    .maybeSingle();
+
+  if (overrideError) {
+    return { success: false, error: overrideError };
+  }
+
+  // If override exists, fetch those specific flames by ID
+  if (override?.flame_ids && override.flame_ids.length > 0) {
+    const { data: flames, error } = await supabase
+      .from('flames')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_archived', false)
+      .in('id', override.flame_ids);
+
+    if (error) {
+      return { success: false, error };
+    }
+
+    return { success: true, data: flames ?? [] };
+  }
+
+  // No override — fall back to default schedule
   // Daily flames are not included in the schedule so we must retrieve them separately first
   const { data: dailyFlames, error: dailyError } = await supabase
     .from('flames')
