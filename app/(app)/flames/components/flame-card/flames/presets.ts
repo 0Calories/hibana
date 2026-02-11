@@ -93,7 +93,7 @@ const STANDARD_EMBER_STATES: ParticleStateConfig = {
   paused: { count: 3, sizeMultiplier: 1 },
   untended: { count: 1, sizeMultiplier: 1 },
   sealing: { count: 12, sizeMultiplier: 1.6 },
-  sealed: { count: 1, sizeMultiplier: 1 },
+  sealed: { count: 0, sizeMultiplier: 0 },
 };
 
 export const STANDARD_EMBERS: EmberEffectConfig = {
