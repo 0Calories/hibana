@@ -142,7 +142,8 @@
     "resetToDefault": "Reset to default",
     "hours": "hr",
     "minutes": "min",
-    "dragHere": "Drag flames here"
+    "dragHere": "Drag flames here",
+    "noBudgetSet": "No budget set"
   },
   "pages": {
     "tasks": "Tasks",

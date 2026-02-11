@@ -142,7 +142,8 @@
     "resetToDefault": "デフォルトに戻す",
     "hours": "時間",
     "minutes": "分",
-    "dragHere": "ここにフレイムをドラッグ"
+    "dragHere": "ここにフレイムをドラッグ",
+    "noBudgetSet": "未設定"
   },
   "pages": {
     "tasks": "Tasks",
