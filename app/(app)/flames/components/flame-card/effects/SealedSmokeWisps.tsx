@@ -35,8 +35,8 @@ const TAPER_UPPER_OPACITY = 0.15;
 const TAPER_END_OPACITY = 0;
 
 // Wind gust — damped spring: impulse pushes smoke sideways, spring pulls it back
-const PHASE_SPEED = 2;
-const GUST_CHANCE_PER_FRAME = 0.003; // probability per frame (~every 5.5s at 60fps)
+const PHASE_SPEED = 0; // 2;
+const GUST_CHANCE_PER_FRAME = 0; // probability per frame: set to 0 for now because I'm not really liking how the wind gusts look
 const GUST_IMPULSE = 30;
 const GUST_SPRING = 8;
 const GUST_DAMPING = 4;
