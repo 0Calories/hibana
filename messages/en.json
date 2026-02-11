@@ -129,6 +129,7 @@
     "noFuel": "No budget",
     "flames": "Flames",
     "assigned": "Assigned",
+    "assignedHint": "Drag Flames here",
     "capacity": "Capacity",
     "full": "Full",
     "exceeds": "Exceeds budget",

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/lib/types';
-import { isValidDateString } from '@/lib/utils';
+import { isValidDateString, parseLocalDate } from '@/lib/utils';
 import type { FuelBudget } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
@@ -70,7 +70,7 @@ export async function getRemainingFuelBudget(
     };
   }
 
-  const d = new Date(`${date}T00:00:00`);
+  const d = parseLocalDate(date);
   const dayOfWeek = d.getDay();
 
   // Compute week start (Sunday) for override lookup

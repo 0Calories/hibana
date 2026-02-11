@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { parseLocalDate } from '@/lib/utils';
 import type { DayPlan, FlameWithSchedule } from '../actions';
 import { MiniFlame } from './MiniFlame';
 
@@ -23,20 +24,17 @@ export function DayCell({
   onSelect,
 }: DayCellProps) {
   const t = useTranslations('schedule');
-  const dateNum = new Date(`${day.date}T00:00:00`).getDate();
+  const dateNum = parseLocalDate(day.date).getDate();
   const assignedFlames = flames.filter((f) =>
     day.assignedFlameIds.includes(f.id),
   );
 
-  // Capacity calculation
-  const totalAllocated = assignedFlames.reduce(
+  const fuelNeeded = assignedFlames.reduce(
     (sum, f) => sum + (f.time_budget_minutes ?? 0),
     0,
   );
   const capacityRatio =
-    day.fuelMinutes && day.fuelMinutes > 0
-      ? totalAllocated / day.fuelMinutes
-      : 0;
+    day.fuelMinutes && day.fuelMinutes > 0 ? fuelNeeded / day.fuelMinutes : 0;
   const isOverAllocated = capacityRatio > 1;
 
   const formatMinutes = (mins: number) => {
@@ -62,7 +60,7 @@ export function DayCell({
           : 'border-border'
       } ${day.isOverride ? 'border-dashed' : ''}`}
     >
-      {/* Day abbreviation */}
+      {/* Day of week text */}
       <span className="text-[10px] font-medium text-muted-foreground">
         {DAY_ABBREVS[day.dayOfWeek]}
       </span>

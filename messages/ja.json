@@ -129,6 +129,7 @@
     "noFuel": "未設定",
     "flames": "フレイム",
     "assigned": "割り当て済み",
+    "assignedHint": "フレームをここへドラッグ",
     "capacity": "容量",
     "full": "満杯",
     "exceeds": "予算超過",

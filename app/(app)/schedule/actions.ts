@@ -25,8 +25,6 @@ export type WeeklySchedule = {
   flames: FlameWithSchedule[];
 };
 
-// --- Main fetch ---
-
 export async function getWeeklySchedule(
   weekStart: string,
 ): ActionResult<WeeklySchedule> {

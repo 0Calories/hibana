@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/lib/types';
-import { isValidDateString } from '@/lib/utils';
+import { isValidDateString, parseLocalDate } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 import type { TablesInsert } from '@/utils/supabase/types';
@@ -127,7 +127,7 @@ export async function setFlameSchedule(
 export async function getFlamesForDay(date: string) {
   const { supabase, user } = await createClientWithAuth();
 
-  const d = new Date(`${date}T00:00:00`);
+  const d = parseLocalDate(date);
   const day = d.getDay();
 
   // Compute week start (Sunday) for override lookup

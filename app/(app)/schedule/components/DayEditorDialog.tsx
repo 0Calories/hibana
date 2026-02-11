@@ -2,12 +2,12 @@
 
 import {
   DndContext,
+  type DragEndEvent,
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from '@dnd-kit/core';
-import { Flame, Lock } from 'lucide-react';
+import { FlameIcon, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -26,6 +26,7 @@ import {
   setWeeklyOverride,
 } from '../actions';
 import { AssignedFlamesZone } from './AssignedFlamesZone';
+import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './constants';
 import { DraggableFlame } from './DraggableFlame';
 import { FlamesDropZone } from './FlamesDropZone';
 import { FuelSlider } from './FuelSlider';
@@ -60,17 +61,20 @@ export function DayEditorDialog({
   const t = useTranslations('schedule');
   const today = getLocalDateString();
   const isToday = day.date === today;
-
-  // Fuel budget state (in minutes)
   const [fuelMinutes, setFuelMinutes] = useState(() => day.fuelMinutes ?? 0);
-
-  // Flame assignments state
-  const [assignedIds, setAssignedIds] = useState<string[]>(
+  const [assignedFlameIds, setAssignedFlameIds] = useState<string[]>(
     () => day.assignedFlameIds,
   );
 
   // Track whether a drag is active to lock scroll
   const [isDragging, setIsDragging] = useState(false);
+
+  // Map flame id → level based on index in the full flames array
+  // This is only for testing purposes and must be replaced by actual levels once the data model for flames is updated
+  const flameLevels = useMemo(
+    () => new Map(flames.map((f, i) => [f.id, (i % 8) + 1])),
+    [flames],
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -79,7 +83,7 @@ export function DayEditorDialog({
   // Reset state when day changes
   const resetState = useCallback(() => {
     setFuelMinutes(day.fuelMinutes ?? 0);
-    setAssignedIds(day.assignedFlameIds);
+    setAssignedFlameIds(day.assignedFlameIds);
   }, [day]);
 
   // Track whether fuel is "locked" for today
@@ -88,22 +92,19 @@ export function DayEditorDialog({
   // Capacity calculations — preserve assignment order
   const assignedFlames = useMemo(
     () =>
-      assignedIds
+      assignedFlameIds
         .map((id) => flames.find((f) => f.id === id))
         .filter(Boolean) as FlameWithSchedule[],
-    [flames, assignedIds],
+    [flames, assignedFlameIds],
   );
 
-  const totalAllocated = useMemo(
+  const totalAllocatedFuel = useMemo(
     () =>
-      assignedFlames.reduce(
-        (sum, f) => sum + (f.time_budget_minutes ?? 0),
-        0,
-      ),
+      assignedFlames.reduce((sum, f) => sum + (f.time_budget_minutes ?? 0), 0),
     [assignedFlames],
   );
 
-  const remainingCapacity = fuelMinutes - totalAllocated;
+  const remainingCapacity = fuelMinutes - totalAllocatedFuel;
 
   const canAddFlame = useCallback(
     (flame: FlameWithSchedule) => {
@@ -113,16 +114,9 @@ export function DayEditorDialog({
     [fuelMinutes, remainingCapacity],
   );
 
-  // Map flame id → level based on index in the full flames array
-  const flameLevels = useMemo(
-    () => new Map(flames.map((f, i) => [f.id, (i % 8) + 1])),
-    [flames],
-  );
-
-  // Flames available to drag (not assigned, not daily)
   const availableFlames = useMemo(
-    () => flames.filter((f) => !f.is_daily && !assignedIds.includes(f.id)),
-    [flames, assignedIds],
+    () => flames.filter((f) => !f.is_daily && !assignedFlameIds.includes(f.id)),
+    [flames, assignedFlameIds],
   );
 
   const formatMinutes = (total: number) => {
@@ -140,23 +134,23 @@ export function DayEditorDialog({
 
     const flameId = active.id as string;
 
-    if (over.id === 'assigned-zone') {
-      if (assignedIds.includes(flameId)) return;
+    if (over.id === ASSIGNED_FLAME_ZONE_ID) {
+      if (assignedFlameIds.includes(flameId)) return;
       const flame = flames.find((f) => f.id === flameId);
       if (!flame || !canAddFlame(flame)) return;
-      setAssignedIds((prev) => [...prev, flameId]);
-    } else if (over.id === 'flames-zone') {
+      setAssignedFlameIds((prev) => [...prev, flameId]);
+    } else if (over.id === MY_FLAMES_ZONE_ID) {
       const flame = flames.find((f) => f.id === flameId);
       if (!flame || flame.is_daily) return;
-      setAssignedIds((prev) => prev.filter((id) => id !== flameId));
+      setAssignedFlameIds((prev) => prev.filter((id) => id !== flameId));
     }
   };
 
   const handleRemoveFlame = useCallback((flameId: string) => {
-    setAssignedIds((prev) => prev.filter((id) => id !== flameId));
+    setAssignedFlameIds((prev) => prev.filter((id) => id !== flameId));
   }, []);
 
-  const isOverCapacity = fuelMinutes > 0 && totalAllocated > fuelMinutes;
+  const isOverCapacity = fuelMinutes > 0 && totalAllocatedFuel > fuelMinutes;
 
   const handleSave = async () => {
     const toastId = toast.loading(t('saving'), {
@@ -171,8 +165,9 @@ export function DayEditorDialog({
       weekStart,
       day.dayOfWeek,
       effectiveMinutes,
-      assignedIds,
+      assignedFlameIds,
     );
+
     if (!result.success) {
       toast.error(result.error.message, {
         id: toastId,
@@ -185,7 +180,7 @@ export function DayEditorDialog({
       ...day,
       fuelMinutes: effectiveMinutes,
       isOverride: true,
-      assignedFlameIds: assignedIds,
+      assignedFlameIds: assignedFlameIds,
     });
 
     toast.success(t('saved', { day: DAY_NAMES[day.dayOfWeek] }), {
@@ -203,7 +198,7 @@ export function DayEditorDialog({
       })
       .map((f) => f.id);
 
-    setAssignedIds(defaultFlameIds);
+    setAssignedFlameIds(defaultFlameIds);
   };
 
   return (
@@ -272,7 +267,9 @@ export function DayEditorDialog({
                   )}
                 </>
               )}
-              <p className={`text-xs font-medium text-destructive ${isOverCapacity ? 'visible' : 'invisible'}`}>
+              <p
+                className={`text-xs font-medium text-destructive ${isOverCapacity ? 'visible' : 'invisible'}`}
+              >
                 {t('overCapacity')}
               </p>
             </div>
@@ -280,14 +277,16 @@ export function DayEditorDialog({
             {/* Assigned Flames */}
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <Flame className="size-3.5 text-muted-foreground" />
+                <FlameIcon className="size-3.5 text-muted-foreground" />
                 <h3 className="text-sm font-medium text-muted-foreground">
                   {t('assigned')}
                 </h3>
+                <span className="text-xs text-muted-foreground/60">
+                  {t('assignedHint')}
+                </span>
               </div>
               <AssignedFlamesZone
                 flames={assignedFlames}
-                flameLevels={flameLevels}
                 onRemove={handleRemoveFlame}
               />
             </div>

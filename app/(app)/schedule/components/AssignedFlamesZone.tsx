@@ -2,23 +2,30 @@
 
 import { useDroppable } from '@dnd-kit/core';
 import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { FlameWithSchedule } from '../actions';
+import { ASSIGNED_FLAME_ZONE_ID } from './constants';
 import { DraggableFlame } from './DraggableFlame';
 
 interface AssignedFlamesZoneProps {
   flames: FlameWithSchedule[];
-  flameLevels: Map<string, number>;
   onRemove: (flameId: string) => void;
 }
 
 export function AssignedFlamesZone({
   flames,
-  flameLevels,
   onRemove,
 }: AssignedFlamesZoneProps) {
+  // Map flame id → level based on index in the full flames array
+  // This is only for testing purposes and must be replaced by actual levels once the data model for flames is updated
+  const flameLevels = useMemo(
+    () => new Map(flames.map((f, i) => [f.id, (i % 8) + 1])),
+    [flames],
+  );
+
   const t = useTranslations('schedule');
-  const { isOver, setNodeRef } = useDroppable({ id: 'assigned-zone' });
+  const { isOver, setNodeRef } = useDroppable({ id: ASSIGNED_FLAME_ZONE_ID });
 
   return (
     <div

@@ -2,19 +2,20 @@
 
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
+import { MY_FLAMES_ZONE_ID } from './constants';
 
 interface FlamesDropZoneProps {
   children: React.ReactNode;
 }
 
 export function FlamesDropZone({ children }: FlamesDropZoneProps) {
-  const { isOver, setNodeRef } = useDroppable({ id: 'flames-zone' });
+  const { isOver, setNodeRef } = useDroppable({ id: MY_FLAMES_ZONE_ID });
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        'min-h-[6.5rem] rounded-lg p-1 transition-colors',
+        'min-h-26 rounded-lg p-1 transition-colors',
         isOver && 'bg-muted/40',
       )}
     >
