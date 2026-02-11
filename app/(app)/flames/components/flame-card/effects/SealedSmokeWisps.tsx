@@ -22,7 +22,6 @@ interface SealedSmokeWispsProps {
 
 // General
 const SMOKE_COLOR_COOL = '#94a3b8'; // cool grey for upper smoke
-const SMOKE_COLOR_WARM = '#b8a494'; // warm brownish tint near wick (wax vapor)
 const RISE_HEIGHT = 70; // total height of smoke column in SVG units
 const REVEAL_DURATION = 3; // seconds for initial bottom-to-top reveal
 const PHASE_SPEED = 2;
