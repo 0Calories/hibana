@@ -194,7 +194,12 @@ export function FlameCard({
       <div className="pointer-events-none absolute inset-0 z-10">
         <div className="relative h-full w-full">
           <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
-            <EffectsRenderer effects={effects} state={state} colors={colors} isOverburning={isOverburning} />
+            <EffectsRenderer
+              effects={effects}
+              state={state}
+              colors={colors}
+              isOverburning={isOverburning}
+            />
           </div>
         </div>
       </div>
@@ -273,7 +278,12 @@ export function FlameCard({
             </div>
           )}
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
-            <ProgressBar progress={progress} state={state} colors={colors} isOverburning={isOverburning} />
+            <ProgressBar
+              progress={progress}
+              state={state}
+              colors={colors}
+              isOverburning={isOverburning}
+            />
           )}
           <div
             className={cn(

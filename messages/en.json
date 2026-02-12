@@ -1,5 +1,6 @@
 {
   "common": {
+    "cancel": "Cancel",
     "save": "Save",
     "email": "Email",
     "password": "Password",
