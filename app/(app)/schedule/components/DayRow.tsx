@@ -9,14 +9,10 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FlameIcon, Lock } from 'lucide-react';
+import { ChevronDown, FlameIcon, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
-import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
-import { getFlameColors } from '@/app/(app)/flames/utils/colors';
-import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
 import { Button } from '@/components/ui/button';
 import { cn, parseLocalDate } from '@/lib/utils';
 import {
@@ -26,6 +22,7 @@ import {
 } from '../actions';
 import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './constants';
 import { DayRowFuelBar } from './DayRowFuelBar';
+import { MiniFlameCard } from './MiniFlameCard';
 import { AssignedFlamesZone } from './dialog/AssignedFlamesZone';
 import { DraggableFlame } from './dialog/DraggableFlame';
 import { FuelSlider } from './dialog/FuelSlider';
@@ -268,7 +265,7 @@ export function DayRow({
             {dateShort}
           </span>
           {isToday && (
-            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-500">
+            <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-bold tracking-wide text-amber-500">
               {t('today')}
             </span>
           )}
@@ -290,11 +287,21 @@ export function DayRow({
             ? formatFuelBrief(day.fuelMinutes)
             : t('noBudgetSet')}
         </span>
+
+        {/* Expand chevron */}
+        {!isPast && (
+          <ChevronDown
+            className={cn(
+              'size-4 shrink-0 text-muted-foreground/50 transition-transform duration-200',
+              isExpanded && 'rotate-180',
+            )}
+          />
+        )}
       </button>
 
-      {/* Fuel bar + flame chips — collapsed view */}
-      {!isExpanded && (
-        <div className="px-3 pb-3 sm:px-4 sm:pb-4 space-y-2">
+      {/* Fuel bar + flame cards — collapsed view (skip for past days) */}
+      {!isExpanded && !isPast && (
+        <div className="px-3 pb-4 sm:px-4 sm:pb-5 space-y-3">
           {day.fuelMinutes != null && day.fuelMinutes > 0 && (
             <DayRowFuelBar
               fuelMinutes={day.fuelMinutes}
@@ -305,32 +312,18 @@ export function DayRow({
           {assignedFlames.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {assignedFlames.map((flame) => {
-                const colors = getFlameColors(flame.color as FlameColorName);
                 const level = flameLevels.get(flame.id) ?? 1;
-                const levelInfo = getFlameLevel(level);
                 return (
-                  <div
+                  <MiniFlameCard
                     key={flame.id}
-                    className="flex items-center gap-1.5 rounded-lg bg-muted/40 px-2 py-1"
-                  >
-                    <FlameRenderer
-                      state="untended"
-                      level={level}
-                      colors={colors}
-                      className="h-12 w-10 sm:h-16 sm:w-14 md:h-24 md:w-20"
-                    />
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-medium truncate max-w-[8rem]">
-                        {flame.name}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground">
-                        Lv. {level} · {levelInfo.name}
-                        {flame.time_budget_minutes != null && (
-                          <> · {formatMinutes(flame.time_budget_minutes)}</>
-                        )}
-                      </span>
-                    </div>
-                  </div>
+                    flame={flame}
+                    level={level}
+                    budgetLabel={
+                      flame.time_budget_minutes != null
+                        ? formatMinutes(flame.time_budget_minutes)
+                        : undefined
+                    }
+                  />
                 );
               })}
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getLocalDateString } from '@/lib/utils';
 import type { DayPlan, WeeklySchedule } from '../actions';
 import { DayRow } from './DayRow';
@@ -16,8 +16,14 @@ export function WeeklyPlanner({
 }: WeeklyPlannerProps) {
   const [schedule, setSchedule] = useState<WeeklySchedule>(initialSchedule);
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
+  const todayRef = useRef<HTMLDivElement>(null);
 
   const today = getLocalDateString();
+
+  // Auto-scroll to today on mount
+  useEffect(() => {
+    todayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const handleToggleExpand = useCallback((dayOfWeek: number) => {
     setExpandedDay((prev) => (prev === dayOfWeek ? null : dayOfWeek));
@@ -33,20 +39,24 @@ export function WeeklyPlanner({
   }, []);
 
   return (
-    <div className="flex flex-col gap-2">
-      {schedule.days.map((day) => (
-        <DayRow
-          key={day.dayOfWeek}
-          day={day}
-          flames={schedule.flames}
-          isToday={day.date === today}
-          isPast={day.date < today}
-          isExpanded={expandedDay === day.dayOfWeek}
-          onToggleExpand={() => handleToggleExpand(day.dayOfWeek)}
-          weekStart={weekStart}
-          onUpdate={handleDayUpdate}
-        />
-      ))}
+    <div className="flex flex-col gap-3">
+      {schedule.days.map((day) => {
+        const isToday = day.date === today;
+        return (
+          <div key={day.dayOfWeek} ref={isToday ? todayRef : undefined}>
+            <DayRow
+              day={day}
+              flames={schedule.flames}
+              isToday={isToday}
+              isPast={day.date < today}
+              isExpanded={expandedDay === day.dayOfWeek}
+              onToggleExpand={() => handleToggleExpand(day.dayOfWeek)}
+              weekStart={weekStart}
+              onUpdate={handleDayUpdate}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
