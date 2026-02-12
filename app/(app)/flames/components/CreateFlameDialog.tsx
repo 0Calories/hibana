@@ -142,7 +142,12 @@ export function CreateFlameDialog({
 
           {/* Live flame preview */}
           <div className="relative flex items-center justify-center h-40 rounded-xl bg-linear-to-b from-black/40 to-black/20 border border-white/5">
-            <FlameRenderer state="paused" level={1} colors={flameColors} />
+            <FlameRenderer
+              state="paused"
+              level={1}
+              colors={flameColors}
+              className="h-36 w-28 sm:h-36 sm:w-28 md:h-44 md:w-36"
+            />
             <div className="pointer-events-none absolute inset-0">
               <EffectsRenderer
                 effects={FLAME_REGISTRY[1].effects}
