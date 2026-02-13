@@ -25,7 +25,7 @@ export function HeroSection() {
           initial={shouldReduceMotion ? {} : { opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1.5 text-xs font-medium text-orange-300"
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-pink-500/20 bg-pink-500/10 px-4 py-1.5 text-xs font-medium text-pink-300"
         >
           <Flame className="h-3.5 w-3.5" />
           {t('hero.badge')}
@@ -41,7 +41,7 @@ export function HeroSection() {
         >
           {t('hero.headlineLine1')}
           <br />
-          <span className="bg-linear-to-r from-amber-300 via-orange-400 to-rose-500 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-rose-400 via-pink-500 to-rose-600 bg-clip-text text-transparent">
             {t('hero.headlineAccent')}
           </span>
         </motion.h1>

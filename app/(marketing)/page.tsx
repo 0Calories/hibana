@@ -26,7 +26,7 @@ const ECOSYSTEM_FEATURES = [
     icon: Sparkles,
     titleKey: 'ecosystem.sparksTitle' as const,
     bodyKey: 'ecosystem.sparksBody' as const,
-    color: '#f97316',
+    color: '#E60076',
   },
   {
     icon: StickyNote,
@@ -87,7 +87,7 @@ export default async function MarketingPage() {
               className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl"
             >
               {t('progression.headlinePrefix')}{' '}
-              <span className="bg-linear-to-r from-orange-400 to-rose-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-pink-400 to-rose-500 bg-clip-text text-transparent">
                 {t('progression.headlineAccent')}
               </span>
             </h2>
@@ -120,7 +120,7 @@ export default async function MarketingPage() {
               >
                 {t('ember.headlinePrefix')}{' '}
                 <SparkleEffect>
-                  <span className="bg-linear-to-r from-amber-300 via-orange-400 to-violet-400 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-r from-pink-300 via-pink-500 to-violet-400 bg-clip-text text-transparent">
                     {t('ember.headlineAccent')}
                   </span>
                 </SparkleEffect>
@@ -223,7 +223,7 @@ export default async function MarketingPage() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse at 50% 50%, rgba(249,115,22,0.06) 0%, transparent 60%)',
+              'radial-gradient(ellipse at 50% 50%, rgba(230,0,118,0.06) 0%, transparent 60%)',
           }}
         />
 

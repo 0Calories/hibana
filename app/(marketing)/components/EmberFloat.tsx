@@ -12,7 +12,7 @@ export function EmberFloat() {
         className="pointer-events-none absolute inset-0 -m-12 rounded-full blur-3xl"
         style={{
           background:
-            'radial-gradient(circle, rgba(251,146,60,0.2) 0%, rgba(167,139,250,0.08) 50%, transparent 70%)',
+            'radial-gradient(circle, rgba(230,0,118,0.2) 0%, rgba(167,139,250,0.08) 50%, transparent 70%)',
         }}
       />
 
@@ -29,7 +29,7 @@ export function EmberFloat() {
           alt="Ember — Hibana's AI flame-sprite companion"
           width={180}
           height={270}
-          className="relative select-none drop-shadow-[0_0_60px_rgba(251,146,60,0.35)]"
+          className="relative select-none drop-shadow-[0_0_60px_rgba(230,0,118,0.35)]"
           draggable={false}
           priority={false}
         />
