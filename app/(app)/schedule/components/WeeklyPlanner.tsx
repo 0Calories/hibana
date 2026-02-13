@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getLocalDateString } from '@/lib/utils';
 import type { DayPlan, WeeklySchedule } from '../actions';
-import { DayEditorDialog } from './dialog/DayEditorDialog';
-import { WeekStrip } from './WeekStrip';
+import { DayRow } from './DayRow';
 
 interface WeeklyPlannerProps {
   initialSchedule: WeeklySchedule;
@@ -15,10 +15,18 @@ export function WeeklyPlanner({
   weekStart,
 }: WeeklyPlannerProps) {
   const [schedule, setSchedule] = useState<WeeklySchedule>(initialSchedule);
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [expandedDay, setExpandedDay] = useState<number | null>(null);
+  const todayRef = useRef<HTMLDivElement>(null);
 
-  const handleSelectDay = useCallback((dayOfWeek: number) => {
-    setSelectedDay(dayOfWeek);
+  const today = getLocalDateString();
+
+  // Auto-scroll to today on mount
+  useEffect(() => {
+    todayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  const handleToggleExpand = useCallback((dayOfWeek: number) => {
+    setExpandedDay((prev) => (prev === dayOfWeek ? null : dayOfWeek));
   }, []);
 
   const handleDayUpdate = useCallback((updatedDay: DayPlan) => {
@@ -30,29 +38,25 @@ export function WeeklyPlanner({
     }));
   }, []);
 
-  const selectedDayData =
-    selectedDay !== null ? schedule.days[selectedDay] : null;
-
   return (
-    <>
-      <WeekStrip
-        days={schedule.days}
-        flames={schedule.flames}
-        onSelectDay={handleSelectDay}
-      />
-
-      {selectedDayData && (
-        <DayEditorDialog
-          open={selectedDay !== null}
-          onOpenChange={(open) => {
-            if (!open) setSelectedDay(null);
-          }}
-          day={selectedDayData}
-          flames={schedule.flames}
-          weekStart={weekStart}
-          onUpdate={handleDayUpdate}
-        />
-      )}
-    </>
+    <div className="flex flex-col gap-3">
+      {schedule.days.map((day) => {
+        const isToday = day.date === today;
+        return (
+          <div key={day.dayOfWeek} ref={isToday ? todayRef : undefined}>
+            <DayRow
+              day={day}
+              flames={schedule.flames}
+              isToday={isToday}
+              isPast={day.date < today}
+              isExpanded={expandedDay === day.dayOfWeek}
+              onToggleExpand={() => handleToggleExpand(day.dayOfWeek)}
+              weekStart={weekStart}
+              onUpdate={handleDayUpdate}
+            />
+          </div>
+        );
+      })}
+    </div>
   );
 }

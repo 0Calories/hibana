@@ -41,12 +41,15 @@ export function DraggableFlame({
     return `${m}${t('minutes')}`;
   };
 
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        zIndex: 50,
-      }
-    : undefined;
+  const style: React.CSSProperties = {
+    touchAction: disabled ? undefined : 'none',
+    ...(transform
+      ? {
+          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+          zIndex: 50,
+        }
+      : {}),
+  };
 
   return (
     <button
@@ -72,7 +75,7 @@ export function DraggableFlame({
         state="untended"
         level={level}
         colors={colors}
-        className="h-12 w-10"
+        className="h-12 w-10 sm:h-16 sm:w-14 md:h-24 md:w-20"
       />
       <span className="max-w-24 truncate text-center text-sm leading-tight">
         {flame.name}
