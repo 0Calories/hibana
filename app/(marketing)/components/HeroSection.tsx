@@ -41,7 +41,7 @@ export function HeroSection() {
         >
           {t('hero.headlineLine1')}
           <br />
-          <span className="bg-linear-to-r from-pink-300 via-pink-500 to-rose-600 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-rose-400 via-pink-500 to-rose-600 bg-clip-text text-transparent">
             {t('hero.headlineAccent')}
           </span>
         </motion.h1>
