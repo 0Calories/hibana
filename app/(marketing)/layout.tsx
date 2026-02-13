@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
@@ -48,10 +49,14 @@ export default async function MarketingLayout({
 
       {/* ── Fixed nav ── */}
       <nav className="fixed top-0 z-50 flex w-full items-center justify-between bg-[#090b14]/80 px-6 py-4 backdrop-blur-md">
-        <Link href="/" className="group text-lg font-bold tracking-tight">
-          <span className="bg-linear-to-r from-amber-300 via-orange-400 to-rose-500 bg-clip-text text-transparent transition-opacity group-hover:opacity-80">
-            火花
-          </span>{' '}
+        <Link href="/" className="group flex items-center gap-2 text-lg font-bold tracking-tight">
+          <Image
+            src="/logo.svg"
+            alt=""
+            width={28}
+            height={28}
+            className="transition-opacity group-hover:opacity-80"
+          />
           <span className="font-extrabold text-white">Hibana</span>
         </Link>
         <div className="flex items-center gap-2">
@@ -72,6 +77,13 @@ export default async function MarketingLayout({
       <footer className="border-t border-white/4 px-6 py-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-sm text-white/30">
+            <Image
+              src="/logo.svg"
+              alt=""
+              width={18}
+              height={18}
+              className="mr-1.5 inline-block align-text-bottom"
+            />
             <span className="font-medium text-white/50">火花 Hibana</span>
             {' · '}
             {m('footer.tagline')}

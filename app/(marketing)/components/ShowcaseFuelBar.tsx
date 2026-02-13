@@ -41,8 +41,8 @@ export function ShowcaseFuelBar() {
   const shouldReduceMotion = useReducedMotion();
   const t = useTranslations('marketing.fuel');
 
-  const glowColor = 'rgba(245, 158, 11, 0.12)';
-  const glowColorStrong = 'rgba(245, 158, 11, 0.25)';
+  const glowColor = 'rgba(230, 0, 118, 0.12)';
+  const glowColorStrong = 'rgba(230, 0, 118, 0.25)';
 
   return (
     <div ref={ref}>
@@ -67,7 +67,7 @@ export function ShowcaseFuelBar() {
       >
         <div className="flex items-center gap-2.5">
           {/* Icon + label */}
-          <div className="flex shrink-0 items-center gap-1 text-amber-400">
+          <div className="flex shrink-0 items-center gap-1 text-pink-400">
             <Fuel className="h-3.5 w-3.5" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               {t('label')}
@@ -89,7 +89,7 @@ export function ShowcaseFuelBar() {
 
               {/* Fill bar */}
               <motion.div
-                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-amber-500 to-amber-400"
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-pink-600 to-pink-400"
                 initial={{ width: '0%' }}
                 animate={inView ? { width: `${FILL_FRACTION * 100}%` } : {}}
                 transition={
@@ -104,9 +104,9 @@ export function ShowcaseFuelBar() {
                     className="absolute top-0 right-0 bottom-0 w-3 rounded-full"
                     style={{
                       background:
-                        'linear-gradient(to left, rgba(255,240,200,0.9), transparent)',
+                        'linear-gradient(to left, rgba(255,200,230,0.9), transparent)',
                       boxShadow:
-                        '0 0 6px rgba(251,191,36,0.6), 0 0 12px rgba(251,191,36,0.3)',
+                        '0 0 6px rgba(230,0,118,0.6), 0 0 12px rgba(230,0,118,0.3)',
                     }}
                     animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{
@@ -147,7 +147,7 @@ export function ShowcaseFuelBar() {
                 {DROPLETS.map((d) => (
                   <motion.div
                     key={d.id}
-                    className="absolute bg-amber-300/70"
+                    className="absolute bg-pink-300/70"
                     style={{
                       width: d.width,
                       height: d.height,
@@ -182,7 +182,7 @@ export function ShowcaseFuelBar() {
                       left: -p.size / 2,
                       top: '50%',
                       filter: `blur(${p.blur}px)`,
-                      background: 'rgba(220, 180, 100, 0.7)',
+                      background: 'rgba(230, 100, 170, 0.7)',
                     }}
                     initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
                     animate={{

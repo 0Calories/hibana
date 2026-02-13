@@ -61,12 +61,12 @@ export function NewsletterForm() {
             required
             placeholder={t('placeholder')}
             aria-label={t('ariaLabel')}
-            className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none backdrop-blur-sm transition-colors focus:border-orange-500/50 focus:bg-white/8"
+            className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none backdrop-blur-sm transition-colors focus:border-pink-500/50 focus:bg-white/8"
           />
           <button
             type="submit"
             disabled={isPending}
-            className="group relative cursor-pointer overflow-hidden rounded-xl bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-400 hover:shadow-[0_0_30px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="group relative cursor-pointer overflow-hidden rounded-xl bg-[#E60076] px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-[#ff1a8e] hover:shadow-[0_0_30px_rgba(230,0,118,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span className="relative z-10">
               {isPending ? 'Joining...' : t('submit')}

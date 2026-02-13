@@ -11,7 +11,7 @@ const SPARKLES = Array.from({ length: 5 }, (_, i) => ({
   delay: ((i * 571) % 3000) / 1000,
   duration: 5 + ((i * 1291) % 5000) / 1000,
   rotation: (i * 433) % 30,
-  color: i % 3 === 0 ? '#fde68a' : i % 2 === 0 ? '#fbbf24' : '#ffffff',
+  color: i % 3 === 0 ? '#ffb3d9' : i % 2 === 0 ? '#E60076' : '#ffffff',
 }));
 
 /**

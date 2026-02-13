@@ -11,12 +11,12 @@ const EMBER_DATA = Array.from({ length: 40 }, (_, i) => ({
   drift: -30 + ((i * 571) % 60),
   color:
     i % 5 === 0
-      ? '#f97316'
+      ? '#E60076'
       : i % 3 === 0
-        ? '#f59e0b'
+        ? '#ff69b4'
         : i % 2 === 0
-          ? '#fbbf24'
-          : '#fb923c',
+          ? '#ff91ce'
+          : '#d4006a',
   opacity: 0.15 + ((i * 317) % 45) / 100,
 }));
 
