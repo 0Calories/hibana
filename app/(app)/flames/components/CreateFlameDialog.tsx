@@ -133,6 +133,7 @@ export function CreateFlameDialog({
                       aria-invalid={fieldState.invalid}
                       placeholder={t('namePlaceholder')}
                       className="text-lg"
+                      autoComplete="off"
                     />
                   </Field>
                 )}
