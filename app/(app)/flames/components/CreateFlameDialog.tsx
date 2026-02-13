@@ -6,15 +6,17 @@ import { useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ColorPickerGrid } from '@/app/(app)/flames/components/ColorPickerGrid';
+import { EffectsRenderer } from '@/app/(app)/flames/components/flame-card/effects/EffectsRenderer';
+import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
+import { FLAME_REGISTRY } from '@/app/(app)/flames/components/flame-card/flames';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   InputGroup,
@@ -22,12 +24,6 @@ import {
   InputGroupInput,
   InputGroupText,
 } from '@/components/ui/input-group';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import {
   type CreateFlameFormData,
@@ -35,7 +31,11 @@ import {
 } from '@/lib/schemas/flame';
 import { cn } from '@/lib/utils';
 import { createFlame } from '../actions/flame-actions';
-import { FLAME_GRADIENT_CLASSES, type FlameColorName } from '../utils/colors';
+import {
+  FLAME_GRADIENT_CLASSES,
+  type FlameColorName,
+  getFlameColors,
+} from '../utils/colors';
 
 interface CreateFlameDialogProps {
   open: boolean;
@@ -62,12 +62,14 @@ export function CreateFlameDialog({
       color: 'rose',
       tracking_type: 'time',
       time_budget_minutes: 60,
-      count_target: 10,
+      count_target: undefined,
       is_daily: true,
     },
   });
 
   const trackingType = watch('tracking_type');
+  const selectedColor = watch('color') as FlameColorName;
+  const flameColors = getFlameColors(selectedColor);
 
   const onSubmit = async (data: CreateFlameFormData) => {
     const toastId = toast.loading(t('loading'), {
@@ -97,117 +99,117 @@ export function CreateFlameDialog({
     }
   };
 
-  const renderFlameStyleButton = () => (
-    <Controller
-      name="color"
-      control={control}
-      render={({ field }) => {
-        const color = field.value as FlameColorName;
-        const gradientClass = FLAME_GRADIENT_CLASSES[color];
-
-        return (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                className={cn(
-                  'size-9 rounded-lg flex items-center justify-center shrink-0 transition-transform cursor-pointer',
-                  gradientClass,
-                )}
-              >
-                <FlameIcon className="size-5" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-auto">
-              <ColorPickerGrid
-                value={color as FlameColorName}
-                onChange={field.onChange}
-              />
-            </PopoverContent>
-          </Popover>
-        );
-      }}
-    />
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col w-4/5 h-4/6 p-6">
+      <DialogContent className="sm:max-w-md p-6" showCloseButton={false}>
         <form
           id="create-flame"
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col flex-1 min-h-0 gap-4"
+          className="flex flex-col gap-5"
         >
-          <DialogHeader className="pt-4">
-            <DialogTitle>
-              <div className="flex items-center gap-2">
-                {renderFlameStyleButton()}
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid} className="flex-1">
-                      <Input
-                        {...field}
-                        id={field.name}
-                        aria-invalid={fieldState.invalid}
-                        placeholder={t('namePlaceholder')}
-                      />
-                    </Field>
-                  )}
-                />
-              </div>
+          {/* Name row with icon placeholder */}
+          <DialogHeader>
+            <DialogTitle className="sr-only">
+              {t('namePlaceholder')}
             </DialogTitle>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className={cn(
+                  'flex shrink-0 items-center justify-center size-8 rounded-lg text-white',
+                  FLAME_GRADIENT_CLASSES[selectedColor],
+                )}
+              >
+                <FlameIcon className="size-4" />
+              </button>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="flex-1">
+                    <Input
+                      {...field}
+                      id={field.name}
+                      aria-invalid={fieldState.invalid}
+                      placeholder={t('namePlaceholder')}
+                      className="text-lg"
+                      autoComplete="off"
+                    />
+                  </Field>
+                )}
+              />
+            </div>
           </DialogHeader>
 
-          <Separator />
+          {/* Live flame preview */}
+          <div className="relative flex items-center justify-center h-40 rounded-xl bg-linear-to-b from-black/40 to-black/20 border border-white/5">
+            <FlameRenderer
+              state="paused"
+              level={1}
+              colors={flameColors}
+              className="h-36 w-28 sm:h-36 sm:w-28 md:h-44 md:w-36"
+            />
+            <div className="pointer-events-none absolute inset-0">
+              <EffectsRenderer
+                effects={FLAME_REGISTRY[1].effects}
+                state="burning"
+                colors={flameColors}
+              />
+            </div>
+          </div>
 
-          <div className="flex-1 flex flex-col gap-8 min-h-0">
-            {/* Tracking Type Toggle */}
+          {/* Color picker strip */}
+          <Controller
+            name="color"
+            control={control}
+            render={({ field }) => (
+              <ColorPickerGrid
+                variant="strip"
+                value={field.value as FlameColorName}
+                onChange={field.onChange}
+              />
+            )}
+          />
+
+          {/* Settings section */}
+          <div className="flex flex-col gap-4 rounded-xl bg-muted/50 p-4">
+            {/* Segmented control for tracking type */}
             <Controller
               name="tracking_type"
               control={control}
               render={({ field }) => (
-                <Field orientation="horizontal" className="justify-between">
-                  <div className="flex flex-col gap-1">
-                    <FieldLabel htmlFor="tracking_type">
-                      {t('trackingType')}
-                    </FieldLabel>
-                    <FieldDescription>
-                      {field.value === 'time'
-                        ? t('trackingTime')
-                        : t('trackingRepetitions')}
-                    </FieldDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FlameKindlingIcon
-                      className={cn(
-                        'size-4',
-                        field.value === 'count'
-                          ? 'text-foreground'
-                          : 'text-muted-foreground',
-                      )}
-                    />
-                    <Switch
-                      id="tracking_type"
-                      checked={field.value === 'time'}
-                      onCheckedChange={(checked) =>
-                        field.onChange(checked ? 'time' : 'count')
-                      }
-                    />
-                    <HourglassIcon
-                      className={cn(
-                        'size-4',
-                        field.value === 'time'
-                          ? 'text-foreground'
-                          : 'text-muted-foreground',
-                      )}
-                    />
-                  </div>
-                </Field>
+                <div className="flex rounded-lg bg-muted p-1">
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex-1 inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                      field.value === 'time'
+                        ? 'bg-background shadow-sm'
+                        : 'text-muted-foreground',
+                    )}
+                    onClick={() => field.onChange('time')}
+                  >
+                    <HourglassIcon className="size-3.5" />
+                    {t('trackingTime')}
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      'flex-1 inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                      field.value === 'count'
+                        ? 'bg-background shadow-sm'
+                        : 'text-muted-foreground',
+                    )}
+                    onClick={() => field.onChange('count')}
+                  >
+                    <FlameKindlingIcon className="size-3.5" />
+                    {t('trackingRepetitions')}
+                  </button>
+                </div>
               )}
             />
 
-            {/* Fuel Budget Field */}
+            {/* Fuel Budget / Target Count */}
             {trackingType === 'time' ? (
               <Controller
                 name="time_budget_minutes"
@@ -253,7 +255,7 @@ export function CreateFlameDialog({
                         id={field.name}
                         type="number"
                         min={1}
-                        placeholder="10"
+                        placeholder="8"
                         aria-invalid={fieldState.invalid}
                         value={field.value ?? ''}
                         onChange={(e) =>
@@ -271,16 +273,14 @@ export function CreateFlameDialog({
               />
             )}
 
-            {/* Daily Checkbox */}
+            {/* Daily Switch */}
             <Controller
               name="is_daily"
               control={control}
               render={({ field }) => (
                 <Field orientation="horizontal" className="justify-self-end">
-                  <div className="flex flex-col gap-1">
-                    <FieldLabel htmlFor="is_daily">{t('daily')}</FieldLabel>
-                  </div>
-                  <Checkbox
+                  <FieldLabel htmlFor="is_daily">{t('daily')}</FieldLabel>
+                  <Switch
                     id="is_daily"
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -290,9 +290,15 @@ export function CreateFlameDialog({
             />
           </div>
 
-          <Separator />
-
-          <div className="flex gap-2 justify-end pt-2">
+          {/* Footer */}
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+            >
+              {tCommon('cancel')}
+            </Button>
             <Button type="submit" disabled={isSubmitting}>
               {tCommon('save')}
             </Button>

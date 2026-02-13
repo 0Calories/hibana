@@ -16,15 +16,39 @@ const FLAME_COLOR_GRID = [
   [CHEMICAL_FLAMES[0], CHEMICAL_FLAMES[1], CHEMICAL_FLAMES[2]],
 ];
 
+const ALL_COLORS = [...EARTHLY_FLAMES, ...COSMIC_FLAMES, ...CHEMICAL_FLAMES];
+
 interface ColorPickerGridProps {
   value: FlameColorName;
   onChange: (color: FlameColorName) => void;
+  variant?: 'grid' | 'strip';
 }
 
 export function ColorPickerGrid({
   value = 'rose',
   onChange,
+  variant = 'grid',
 }: ColorPickerGridProps) {
+  if (variant === 'strip') {
+    return (
+      <div className="flex gap-2 justify-center">
+        {ALL_COLORS.map((color) => (
+          <Button
+            key={color}
+            type="button"
+            className={cn(
+              'size-7 rounded-full transition-transform hover:scale-110 cursor-pointer',
+              FLAME_BG_CLASSES[color],
+              value === color && 'ring-1 ring-foreground',
+            )}
+            onClick={() => onChange(color)}
+            aria-label={`Select ${color}`}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-3 gap-1.5">

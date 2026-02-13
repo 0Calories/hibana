@@ -8,9 +8,9 @@ import { ShakeWrapper } from './ShakeWrapper';
 import type { ShapeColors } from './types';
 
 const stateVariants: Record<FlameState, TargetAndTransition> = {
-  untended: { scale: 0.9, opacity: 0.88, y: 0 },
+  untended: { scale: 0.8, opacity: 0.88, y: 0 },
   burning: { scale: 1.1, opacity: 1, y: -4 },
-  paused: { scale: 0.8, opacity: 0.95, y: 0 },
+  paused: { scale: 1, opacity: 0.95, y: 0 },
   sealing: { scale: 1.15, opacity: 1, y: -6 },
   sealed: { scale: 0, opacity: 1, y: 0.9 },
 };
@@ -110,8 +110,7 @@ export function FlameRenderer({
     ? { type: 'tween' as const, duration: 0.1, ease: 'linear' as const }
     : springTransition;
 
-  const animDuration =
-    animation.durations[state] * (isOverburning ? 0.55 : 1);
+  const animDuration = animation.durations[state] * (isOverburning ? 0.55 : 1);
   const animTransition = {
     duration: animDuration,
     repeat: Infinity,
