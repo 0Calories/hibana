@@ -11,8 +11,13 @@ import { cn } from '@/lib/utils';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : 'http://localhost:3000',
+  ),
   title: 'Hibana',
-  description: 'Ignite your good habits and extinguish the bad',
+  description: 'Set your motivation ablaze',
 };
 
 export default function RootLayout({
