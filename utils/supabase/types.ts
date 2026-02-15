@@ -332,6 +332,7 @@ export type Database = {
         Row: {
           day_of_week: number
           flame_ids: string[]
+          flame_minutes: number[]
           minutes: number
           user_id: string
           week_start: string
@@ -339,6 +340,7 @@ export type Database = {
         Insert: {
           day_of_week: number
           flame_ids?: string[]
+          flame_minutes?: number[]
           minutes: number
           user_id: string
           week_start: string
@@ -346,6 +348,7 @@ export type Database = {
         Update: {
           day_of_week?: number
           flame_ids?: string[]
+          flame_minutes?: number[]
           minutes?: number
           user_id?: string
           week_start?: string

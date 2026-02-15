@@ -83,13 +83,24 @@ export function DayRow({
   const [assignedFlameIds, setAssignedFlameIds] = useState<string[]>(
     () => day.assignedFlameIds,
   );
+  const [flameAllocations, setFlameAllocations] = useState<Record<string, number>>(
+    () => day.flameAllocations,
+  );
   const [isDragging, setIsDragging] = useState(false);
 
   // Reset edit state when expansion changes or day data changes
   const resetState = useCallback(() => {
     setFuelMinutes(day.fuelMinutes ?? 0);
     setAssignedFlameIds(day.assignedFlameIds);
+    setFlameAllocations(day.flameAllocations);
   }, [day]);
+
+  const handleAllocationChange = useCallback(
+    (flameId: string, minutes: number) => {
+      setFlameAllocations((prev) => ({ ...prev, [flameId]: minutes }));
+    },
+    [],
+  );
 
   // Sync edit state when day prop changes (e.g. after save)
   const editAssignedFlames = useMemo(
@@ -103,10 +114,10 @@ export function DayRow({
   const totalAllocatedFuel = useMemo(
     () =>
       editAssignedFlames.reduce(
-        (sum, f) => sum + (f.time_budget_minutes ?? 0),
+        (sum, f) => sum + (flameAllocations[f.id] ?? f.time_budget_minutes ?? 0),
         0,
       ),
-    [editAssignedFlames],
+    [editAssignedFlames, flameAllocations],
   );
 
   const remainingCapacity = fuelMinutes - totalAllocatedFuel;
@@ -159,15 +170,29 @@ export function DayRow({
       const flame = flames.find((f) => f.id === flameId);
       if (!flame || !canAddFlame(flame)) return;
       setAssignedFlameIds((prev) => [...prev, flameId]);
+      setFlameAllocations((prev) => ({
+        ...prev,
+        [flameId]: flame.time_budget_minutes ?? 0,
+      }));
     } else if (over.id === MY_FLAMES_ZONE_ID) {
       const flame = flames.find((f) => f.id === flameId);
       if (!flame || flame.is_daily) return;
       setAssignedFlameIds((prev) => prev.filter((id) => id !== flameId));
+      setFlameAllocations((prev) => {
+        const next = { ...prev };
+        delete next[flameId];
+        return next;
+      });
     }
   };
 
   const handleRemoveFlame = useCallback((flameId: string) => {
     setAssignedFlameIds((prev) => prev.filter((id) => id !== flameId));
+    setFlameAllocations((prev) => {
+      const next = { ...prev };
+      delete next[flameId];
+      return next;
+    });
   }, []);
 
   const handleSave = async () => {
@@ -177,11 +202,16 @@ export function DayRow({
       ? (day.fuelMinutes ?? 0)
       : fuelMinutes;
 
+    const flameMinutes = assignedFlameIds.map(
+      (id) => flameAllocations[id] ?? 0,
+    );
+
     const result = await setWeeklyOverride(
       weekStart,
       day.dayOfWeek,
       effectiveMinutes,
       assignedFlameIds,
+      flameMinutes,
     );
 
     if (!result.success) {
@@ -197,6 +227,7 @@ export function DayRow({
       fuelMinutes: effectiveMinutes,
       isOverride: true,
       assignedFlameIds: assignedFlameIds,
+      flameAllocations: { ...flameAllocations },
     });
 
     toast.success(t('saved', { day: dateLong }), {
@@ -207,14 +238,20 @@ export function DayRow({
   };
 
   const handleResetToDefault = () => {
-    const defaultFlameIds = flames
-      .filter((f) => {
-        if (f.is_daily) return true;
-        return f.defaultSchedule.includes(day.dayOfWeek);
-      })
-      .map((f) => f.id);
+    const defaultFlames = flames.filter((f) => {
+      if (f.is_daily) return true;
+      return f.defaultSchedule.includes(day.dayOfWeek);
+    });
 
-    setAssignedFlameIds(defaultFlameIds);
+    setAssignedFlameIds(defaultFlames.map((f) => f.id));
+
+    const defaultAllocations: Record<string, number> = {};
+    for (const f of defaultFlames) {
+      if (f.time_budget_minutes != null) {
+        defaultAllocations[f.id] = f.time_budget_minutes;
+      }
+    }
+    setFlameAllocations(defaultAllocations);
   };
 
   const handleToggle = () => {
@@ -306,6 +343,7 @@ export function DayRow({
             <DayRowFuelBar
               fuelMinutes={day.fuelMinutes}
               assignedFlames={assignedFlames}
+              allocations={day.flameAllocations}
             />
           )}
 
@@ -319,8 +357,8 @@ export function DayRow({
                     flame={flame}
                     level={level}
                     budgetLabel={
-                      flame.time_budget_minutes != null
-                        ? formatMinutes(flame.time_budget_minutes)
+                      (day.flameAllocations[flame.id] ?? flame.time_budget_minutes) != null
+                        ? formatMinutes(day.flameAllocations[flame.id] ?? flame.time_budget_minutes ?? 0)
                         : undefined
                     }
                   />
@@ -374,6 +412,8 @@ export function DayRow({
                         value={fuelMinutes}
                         onChange={setFuelMinutes}
                         assignedFlames={editAssignedFlames}
+                        allocations={flameAllocations}
+                        onAllocationChange={handleAllocationChange}
                         disabled={isFuelLocked}
                       />
                       {isToday && (
@@ -407,6 +447,8 @@ export function DayRow({
                   <AssignedFlamesZone
                     flames={editAssignedFlames}
                     onRemove={handleRemoveFlame}
+                    allocations={flameAllocations}
+                    onAllocationChange={handleAllocationChange}
                   />
                 </div>
 

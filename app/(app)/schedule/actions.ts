@@ -14,6 +14,7 @@ export type DayPlan = {
   fuelMinutes: number | null;
   isOverride: boolean;
   assignedFlameIds: string[];
+  flameAllocations: Record<string, number>;
 };
 
 export type FlameWithSchedule = Flame & {
@@ -86,24 +87,48 @@ export async function getWeeklySchedule(
     const override = overrideByDay.get(dayOfWeek);
 
     if (override) {
+      // Zip flame_ids and flame_minutes into allocations map
+      const flameAllocations: Record<string, number> = {};
+      for (let j = 0; j < override.flame_ids.length; j++) {
+        const flameId = override.flame_ids[j];
+        const mins = override.flame_minutes?.[j];
+        if (mins != null && mins > 0) {
+          flameAllocations[flameId] = mins;
+        } else {
+          // Fall back to the flame's default time_budget_minutes
+          const flame = flames.find((f) => f.id === flameId);
+          if (flame?.time_budget_minutes != null) {
+            flameAllocations[flameId] = flame.time_budget_minutes;
+          }
+        }
+      }
+
       return {
         dayOfWeek,
         date,
         fuelMinutes: override.minutes,
         isOverride: true,
         assignedFlameIds: override.flame_ids,
+        flameAllocations,
       };
     }
 
     // Default: fuel from fuel_budgets, flames from daily + schedules
     const fuelMinutes = defaultFuelByDay.get(dayOfWeek) ?? null;
-    const assignedFlameIds = flames
-      .filter((f) => {
-        if (f.is_daily) return true;
-        const schedule = flameScheduleMap.get(f.id) ?? [];
-        return schedule.includes(dayOfWeek);
-      })
-      .map((f) => f.id);
+    const defaultFlames = flames.filter((f) => {
+      if (f.is_daily) return true;
+      const schedule = flameScheduleMap.get(f.id) ?? [];
+      return schedule.includes(dayOfWeek);
+    });
+    const assignedFlameIds = defaultFlames.map((f) => f.id);
+
+    // Build default allocations from flame time_budget_minutes
+    const flameAllocations: Record<string, number> = {};
+    for (const f of defaultFlames) {
+      if (f.time_budget_minutes != null) {
+        flameAllocations[f.id] = f.time_budget_minutes;
+      }
+    }
 
     return {
       dayOfWeek,
@@ -111,6 +136,7 @@ export async function getWeeklySchedule(
       fuelMinutes,
       isOverride: false,
       assignedFlameIds,
+      flameAllocations,
     };
   });
 
@@ -132,6 +158,7 @@ export async function setWeeklyOverride(
   dayOfWeek: number,
   minutes: number,
   flameIds: string[],
+  flameMinutes: number[],
 ): ActionResult {
   const { supabase, user } = await createClientWithAuth();
 
@@ -149,6 +176,7 @@ export async function setWeeklyOverride(
       day_of_week: dayOfWeek,
       minutes,
       flame_ids: flameIds,
+      flame_minutes: flameMinutes,
     },
     { onConflict: 'user_id,week_start,day_of_week' },
   );
