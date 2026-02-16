@@ -153,7 +153,7 @@ function SealFuelMeter({
     <div className="w-full">
       <div className="flex items-center gap-2.5">
         {/* Fuel icon + label */}
-        <div className="flex shrink-0 items-center gap-1 text-amber-400">
+        <div className={`flex shrink-0 items-center gap-1 ${isOverburn ? 'text-red-500' : 'text-amber-400'}`}>
           <Fuel className="h-3.5 w-3.5" />
           <span className="text-xs font-semibold uppercase tracking-wide">
             Fuel
