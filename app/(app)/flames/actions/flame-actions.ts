@@ -59,7 +59,31 @@ export async function createFlame(
   }
 
   revalidatePath('/flames');
+  revalidatePath('/flames/manage');
   return { success: true, data };
+}
+
+export async function getAllFlamesForManagement(): ActionResult<Flame[]> {
+  const { supabase, user } = await createClientWithAuth();
+
+  const { data, error } = await supabase
+    .from('flames')
+    .select()
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  return { success: true, data };
+}
+
+export async function archiveFlame(
+  flameId: string,
+  archive: boolean,
+): ActionResult {
+  return updateFlame(flameId, { is_archived: archive });
 }
 
 export async function updateFlame(
@@ -79,6 +103,7 @@ export async function updateFlame(
   }
 
   revalidatePath('/flames');
+  revalidatePath('/flames/manage');
   return {
     success: true,
     data: `Successfully updated flame with id ${flameId}`,
@@ -113,6 +138,7 @@ export async function setFlameSchedule(
   }
 
   revalidatePath('/flames');
+  revalidatePath('/flames/manage');
   return { success: true, data: 'Flame schedule successfully updated!' };
 }
 
@@ -226,6 +252,7 @@ export async function deleteFlame(flameId: string) {
   }
 
   revalidatePath('/flames');
+  revalidatePath('/flames/manage');
   return { success: true, data };
 }
 

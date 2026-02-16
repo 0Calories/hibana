@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FlameIcon, FlameKindlingIcon, HourglassIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ColorPickerGrid } from '@/app/(app)/flames/components/ColorPickerGrid';
@@ -30,7 +31,8 @@ import {
   createFlameSchema,
 } from '@/lib/schemas/flame';
 import { cn } from '@/lib/utils';
-import { createFlame } from '../actions/flame-actions';
+import type { Flame } from '@/utils/supabase/rows';
+import { createFlame, updateFlame } from '../actions/flame-actions';
 import {
   FLAME_GRADIENT_CLASSES,
   type FlameColorName,
@@ -40,14 +42,26 @@ import {
 interface CreateFlameDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  flame?: Flame;
 }
+
+const defaultCreateValues: CreateFlameFormData = {
+  name: '',
+  color: 'rose',
+  tracking_type: 'time',
+  time_budget_minutes: 60,
+  count_target: undefined,
+  is_daily: true,
+};
 
 export function CreateFlameDialog({
   open,
   onOpenChange,
+  flame,
 }: CreateFlameDialogProps) {
   const t = useTranslations('flames.create');
   const tCommon = useTranslations('common');
+  const isEditMode = !!flame;
 
   const {
     control,
@@ -57,26 +71,44 @@ export function CreateFlameDialog({
     formState: { isSubmitting },
   } = useForm<CreateFlameFormData>({
     resolver: zodResolver(createFlameSchema),
-    defaultValues: {
-      name: '',
-      color: 'rose',
-      tracking_type: 'time',
-      time_budget_minutes: 60,
-      count_target: undefined,
-      is_daily: true,
-    },
+    defaultValues: flame
+      ? {
+          name: flame.name,
+          color: flame.color ?? 'rose',
+          tracking_type: flame.tracking_type as 'time' | 'count',
+          time_budget_minutes: flame.time_budget_minutes ?? 60,
+          count_target: flame.count_target ?? undefined,
+          is_daily: flame.is_daily,
+        }
+      : defaultCreateValues,
   });
+
+  useEffect(() => {
+    if (flame) {
+      reset({
+        name: flame.name,
+        color: flame.color ?? 'rose',
+        tracking_type: flame.tracking_type as 'time' | 'count',
+        time_budget_minutes: flame.time_budget_minutes ?? 60,
+        count_target: flame.count_target ?? undefined,
+        is_daily: flame.is_daily,
+      });
+    } else {
+      reset(defaultCreateValues);
+    }
+  }, [flame, reset]);
 
   const trackingType = watch('tracking_type');
   const selectedColor = watch('color') as FlameColorName;
   const flameColors = getFlameColors(selectedColor);
 
   const onSubmit = async (data: CreateFlameFormData) => {
-    const toastId = toast.loading(t('loading'), {
-      position: 'top-center',
-    });
+    const toastId = toast.loading(
+      isEditMode ? t('updateLoading') : t('loading'),
+      { position: 'top-center' },
+    );
 
-    const result = await createFlame({
+    const flameData = {
       name: data.name,
       icon: null,
       color: data.color,
@@ -85,11 +117,18 @@ export function CreateFlameDialog({
       count_target: data.count_target ?? null,
       count_unit: data.count_unit ?? 'number',
       is_daily: data.is_daily,
-    });
+    };
+
+    const result = isEditMode
+      ? await updateFlame(flame.id, flameData)
+      : await createFlame(flameData);
 
     if (result.success) {
-      toast.success(t('success'), { id: toastId, position: 'top-center' });
-      reset();
+      toast.success(isEditMode ? t('updateSuccess') : t('success'), {
+        id: toastId,
+        position: 'top-center',
+      });
+      if (!isEditMode) reset();
       onOpenChange(false);
     } else {
       toast.error(result.error.message, {
@@ -110,7 +149,7 @@ export function CreateFlameDialog({
           {/* Name row with icon placeholder */}
           <DialogHeader>
             <DialogTitle className="sr-only">
-              {t('namePlaceholder')}
+              {isEditMode ? t('editTitle') : t('namePlaceholder')}
             </DialogTitle>
             <div className="flex items-center gap-2">
               <button
