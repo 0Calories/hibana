@@ -43,7 +43,8 @@ export function TopBar() {
                 pathname === item.href ||
                 ('matchPrefix' in item &&
                   item.matchPrefix &&
-                  pathname === '/schedule');
+                  (pathname.startsWith(item.href) ||
+                    pathname.startsWith('/schedule')));
               return (
                 <Link
                   key={item.href}

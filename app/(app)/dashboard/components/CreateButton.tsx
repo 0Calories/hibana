@@ -35,8 +35,8 @@ export function CreateButton() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm">
-            <PlusIcon className="size-5" />
+          <Button variant="ghost" size="icon-sm" aria-label={t('createNew')}>
+            <PlusIcon className="size-5" aria-hidden="true" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="m-4 md:m-0 md:mb-2">

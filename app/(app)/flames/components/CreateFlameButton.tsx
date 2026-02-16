@@ -12,9 +12,10 @@ export function CreateFlameButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
+        aria-label="Create flame"
         className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/40 transition-transform duration-150 active:scale-90"
       >
-        <PlusIcon className="size-5 stroke-[2.5]" />
+        <PlusIcon className="size-5 stroke-[2.5]" aria-hidden="true" />
       </button>
       <CreateFlameDialog open={open} onOpenChange={setOpen} />
     </>

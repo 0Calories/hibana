@@ -35,7 +35,7 @@ export function ProfileBadge({
   xp = MOCK_DATA.xp,
   xpToNext = MOCK_DATA.xpToNext,
 }: ProfileBadgeProps) {
-  const xpProgress = xpToNext > 0 ? xp / xpToNext : 0;
+  const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
 
   return (
     <>
@@ -94,6 +94,9 @@ function MobileProfileBadge({
       <button
         type="button"
         onClick={() => setOpen(true)}
+        aria-label={t('title')}
+        aria-expanded={open}
+        aria-haspopup="dialog"
         className="flex items-center gap-2"
       >
         <div className="flex items-center gap-1 text-xs text-primary">

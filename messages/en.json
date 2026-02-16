@@ -95,7 +95,8 @@
       "label": "Fuel",
       "remaining": "{time} remaining",
       "depleted": "No fuel remaining",
-      "noBudget": "No fuel budget set"
+      "noBudget": "No fuel budget set",
+      "scheduleLink": "View schedule"
     },
     "card": {
       "ready": "Ready",

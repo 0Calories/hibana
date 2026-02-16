@@ -12,6 +12,7 @@ export function AddFlameCard() {
       <button
         type="button"
         onClick={() => setOpen(true)}
+        aria-label="Add flame"
         className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary active:scale-[0.98]"
       >
         <PlusIcon className="size-6" />

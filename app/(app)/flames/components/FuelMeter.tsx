@@ -328,6 +328,7 @@ export function FuelMeter({
           {/* Schedule link */}
           <Link
             href="/schedule"
+            aria-label={t('scheduleLink')}
             className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <CalendarRangeIcon className="size-3.5" />
