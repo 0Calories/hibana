@@ -143,6 +143,7 @@
       "error": "封印に失敗しました。もう一度お試しください。"
     },
     "todayTitle": "今日のフレイム",
+    "scheduleLink": "週間スケジュール",
     "manageLink": "フレイムを管理",
     "empty": "No flames yet. Create one to get started!",
     "emptyToday": "今日のフレイムはありません",

@@ -1,8 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { CalendarRangeIcon, Fuel } from 'lucide-react';
-import Link from 'next/link';
+import { Fuel } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -324,15 +323,6 @@ export function FuelMeter({
               ? t('depleted')
               : t('remaining', { time: formatTime(remainingSeconds) })}
           </span>
-
-          {/* Schedule link */}
-          <Link
-            href="/schedule"
-            aria-label={t('scheduleLink')}
-            className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <CalendarRangeIcon className="size-3.5" />
-          </Link>
         </div>
       </motion.div>
     </div>

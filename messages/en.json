@@ -143,6 +143,7 @@
       "error": "Failed to seal flame. Please try again."
     },
     "todayTitle": "Today's Flames",
+    "scheduleLink": "Weekly schedule",
     "manageLink": "Manage flames",
     "empty": "No flames yet. Create one to get started!",
     "emptyToday": "No flames scheduled for today",
