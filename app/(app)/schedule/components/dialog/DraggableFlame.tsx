@@ -70,7 +70,11 @@ export function DraggableFlame({
 
   const commitTimeEdit = () => {
     const parsed = Number.parseInt(editValue, 10);
-    if (!Number.isNaN(parsed) && parsed >= MIN_ALLOCATION && onAllocationChange) {
+    if (
+      !Number.isNaN(parsed) &&
+      parsed >= MIN_ALLOCATION &&
+      onAllocationChange
+    ) {
       // Snap to 15-min increments
       const snapped = Math.round(parsed / 15) * 15;
       onAllocationChange(Math.max(snapped, MIN_ALLOCATION));
@@ -118,8 +122,8 @@ export function DraggableFlame({
         {flame.name}
       </span>
       <div className="flex items-center gap-1">
-        {displayMinutes != null && (
-          isEditingTime ? (
+        {displayMinutes != null &&
+          (isEditingTime ? (
             <input
               ref={inputRef}
               type="number"
@@ -148,15 +152,16 @@ export function DraggableFlame({
                 onAllocationChange && 'cursor-pointer hover:underline',
               )}
               onClick={handleTimeClick}
-              onPointerDown={onAllocationChange ? (e) => e.stopPropagation() : undefined}
+              onPointerDown={
+                onAllocationChange ? (e) => e.stopPropagation() : undefined
+              }
             >
               {formatMinutes(displayMinutes)}
               {isCustomAllocation && (
                 <Pencil className="ml-0.5 inline size-2.5" />
               )}
             </span>
-          )
-        )}
+          ))}
         {showDaily && (
           <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] font-medium text-amber-600">
             {t('daily')}

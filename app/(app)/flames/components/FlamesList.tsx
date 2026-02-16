@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import type { FuelBudgetStatus } from '../actions/fuel-actions';
 import { endSession, getAllSessionsForDate } from '../session-actions';
+import { AddFlameCard } from './AddFlameCard';
 import { FlameCard } from './FlameCard';
 import { FuelMeter } from './FuelMeter';
 import { useFuel } from './hooks/useFuel';
@@ -84,6 +85,7 @@ export function FlamesList({
             level={(index % 8) + 1} // Demo: cycle through levels 1-8
           />
         ))}
+        <AddFlameCard />
       </div>
     </div>
   );

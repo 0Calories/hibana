@@ -4,7 +4,7 @@ import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { CreateFlameDialog } from './CreateFlameDialog';
 
-export function CreateFlameButton() {
+export function AddFlameCard() {
   const [open, setOpen] = useState(false);
 
   return (
@@ -12,10 +12,10 @@ export function CreateFlameButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Create flame"
-        className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/40 transition-transform duration-150 active:scale-90"
+        aria-label="Add flame"
+        className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary active:scale-[0.98]"
       >
-        <PlusIcon className="size-5 stroke-[2.5]" aria-hidden="true" />
+        <PlusIcon className="size-6" />
       </button>
       <CreateFlameDialog open={open} onOpenChange={setOpen} />
     </>

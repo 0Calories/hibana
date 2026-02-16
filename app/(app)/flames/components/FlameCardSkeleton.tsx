@@ -58,7 +58,9 @@ export function FuelMeterSkeleton({ label }: { label: string }) {
           {/* Icon + label — static, no skeleton needed */}
           <div className="flex shrink-0 items-center gap-1 text-amber-600 dark:text-amber-400">
             <Fuel className="h-3.5 w-3.5" />
-            <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
+            <span className="text-xs font-semibold uppercase tracking-wide">
+              {label}
+            </span>
           </div>
           {/* Bar placeholder */}
           <div className="h-3 flex-1 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />

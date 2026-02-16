@@ -27,12 +27,8 @@ const SMOKE_PARTICLE_CONFIG = {
 } as const;
 
 /** Mix of flame color shades and grey shades for natural-looking smoke */
-const SMOKE_PALETTE = (colors: ShapeColors) => [
-  colors.medium,
-  colors.dark,
-  colors.medium,
-  ...GREY_SHADES,
-] as const;
+const SMOKE_PALETTE = (colors: ShapeColors) =>
+  [colors.medium, colors.dark, colors.medium, ...GREY_SHADES] as const;
 
 function createSmokeParticle(
   index: number,

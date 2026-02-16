@@ -22,11 +22,11 @@ import {
 } from '../actions';
 import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './constants';
 import { DayRowFuelBar } from './DayRowFuelBar';
-import { MiniFlameCard } from './MiniFlameCard';
 import { AssignedFlamesZone } from './dialog/AssignedFlamesZone';
 import { DraggableFlame } from './dialog/DraggableFlame';
 import { FuelSlider } from './dialog/FuelSlider';
 import { MyFlamesZone } from './dialog/MyFlamesZone';
+import { MiniFlameCard } from './MiniFlameCard';
 
 interface DayRowProps {
   day: DayPlan;
@@ -83,9 +83,9 @@ export function DayRow({
   const [assignedFlameIds, setAssignedFlameIds] = useState<string[]>(
     () => day.assignedFlameIds,
   );
-  const [flameAllocations, setFlameAllocations] = useState<Record<string, number>>(
-    () => day.flameAllocations,
-  );
+  const [flameAllocations, setFlameAllocations] = useState<
+    Record<string, number>
+  >(() => day.flameAllocations);
   const [isDragging, setIsDragging] = useState(false);
 
   // Reset edit state when expansion changes or day data changes
@@ -114,7 +114,8 @@ export function DayRow({
   const totalAllocatedFuel = useMemo(
     () =>
       editAssignedFlames.reduce(
-        (sum, f) => sum + (flameAllocations[f.id] ?? f.time_budget_minutes ?? 0),
+        (sum, f) =>
+          sum + (flameAllocations[f.id] ?? f.time_budget_minutes ?? 0),
         0,
       ),
     [editAssignedFlames, flameAllocations],
@@ -123,7 +124,6 @@ export function DayRow({
   const isFuelLocked = isToday && day.fuelMinutes != null;
   const isOverCapacity = fuelMinutes > 0 && totalAllocatedFuel > fuelMinutes;
 
-
   const availableFlames = useMemo(
     () => flames.filter((f) => !f.is_daily && !assignedFlameIds.includes(f.id)),
     [flames, assignedFlameIds],
@@ -131,7 +131,9 @@ export function DayRow({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    }),
   );
 
   const formatMinutes = (mins: number) => {
@@ -273,24 +275,26 @@ export function DayRow({
         disabled={isPast}
         className={cn(
           'flex w-full min-h-[44px] items-center gap-3 p-3 sm:p-4 text-left transition-colors',
-          isPast
-            ? 'cursor-default'
-            : 'cursor-pointer',
+          isPast ? 'cursor-default' : 'cursor-pointer',
           !isPast && !isExpanded && 'hover:bg-muted/30 active:bg-muted/50',
         )}
       >
         {/* Day name + date */}
         <div className="flex items-baseline gap-2 shrink-0">
-          <span className={cn(
-            'hidden sm:inline text-base font-semibold',
-            isToday && 'text-amber-500',
-          )}>
+          <span
+            className={cn(
+              'hidden sm:inline text-base font-semibold',
+              isToday && 'text-amber-500',
+            )}
+          >
             {dateLong}
           </span>
-          <span className={cn(
-            'sm:hidden text-base font-semibold',
-            isToday && 'text-amber-500',
-          )}>
+          <span
+            className={cn(
+              'sm:hidden text-base font-semibold',
+              isToday && 'text-amber-500',
+            )}
+          >
             {dateShort}
           </span>
           {isToday && (
@@ -349,8 +353,13 @@ export function DayRow({
                     flame={flame}
                     level={level}
                     budgetLabel={
-                      (day.flameAllocations[flame.id] ?? flame.time_budget_minutes) != null
-                        ? formatMinutes(day.flameAllocations[flame.id] ?? flame.time_budget_minutes ?? 0)
+                      (day.flameAllocations[flame.id] ??
+                        flame.time_budget_minutes) != null
+                        ? formatMinutes(
+                            day.flameAllocations[flame.id] ??
+                              flame.time_budget_minutes ??
+                              0,
+                          )
                         : undefined
                     }
                   />

@@ -234,9 +234,7 @@ export default async function MarketingPage() {
           >
             {t('cta.headline')}
           </h2>
-          <p className="mb-6 max-w-md text-white/35">
-            {t('cta.body')}
-          </p>
+          <p className="mb-6 max-w-md text-white/35">{t('cta.body')}</p>
           <div className="w-full max-w-md">
             <NewsletterForm />
           </div>

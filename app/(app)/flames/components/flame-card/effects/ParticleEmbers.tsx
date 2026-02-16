@@ -15,16 +15,14 @@ interface ParticleEmbersProps extends BaseParticleProps {
   config: EmberEffectConfig;
 }
 
-const EMBER_PALETTE = (colors: ShapeColors) => [
-  colors.light,
-  colors.light,
-  colors.medium,
-] as const;
+const EMBER_PALETTE = (colors: ShapeColors) =>
+  [colors.light, colors.light, colors.medium] as const;
 
 export function ParticleEmbers({ state, colors, config }: ParticleEmbersProps) {
   const shouldReduceMotion = useReducedMotion();
   const sealedCount = config.states.sealed?.count ?? 0;
-  const showEmbers = shouldShowParticles(state) || (state === 'sealed' && sealedCount > 0);
+  const showEmbers =
+    shouldShowParticles(state) || (state === 'sealed' && sealedCount > 0);
   const { states } = config;
 
   const particles = useMemo(
