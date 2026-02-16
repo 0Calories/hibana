@@ -40,11 +40,7 @@ export function ProfileBadge({
   return (
     <>
       {/* Desktop: Compact pill */}
-      <DesktopProfilePill
-        username={username}
-        sparks={sparks}
-        level={level}
-      />
+      <DesktopProfilePill username={username} sparks={sparks} level={level} />
 
       {/* Mobile: Compact badge */}
       <MobileProfileBadge
@@ -98,14 +94,19 @@ function MobileProfileBadge({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 py-1 pl-1 pr-2.5"
+        className="flex items-center gap-2"
       >
         <div className="flex items-center gap-1 text-xs text-primary">
-          <SparklesIcon className="size-3" />
-          <span className="font-medium">{sparks}</span>
+          <SparklesIcon className="size-3.5" />
+          <span className="font-semibold tabular-nums">{sparks}</span>
         </div>
-        <div className="flex size-6 items-center justify-center rounded-full bg-background">
-          <UserIcon className="size-3 text-muted-foreground" />
+        <div className="relative">
+          <div className="flex size-7 items-center justify-center rounded-full bg-muted">
+            <UserIcon className="size-3.5 text-muted-foreground" />
+          </div>
+          <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-muted text-[8px] font-bold leading-none ring-1 ring-background">
+            {level}
+          </span>
         </div>
       </button>
 
