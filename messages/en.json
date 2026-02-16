@@ -111,10 +111,10 @@
     },
     "seal": {
       "title": "Flame Sealed!",
-      "subtitle": "Another step forward. Keep the momentum going.",
+      "subtitle": "Your fire grows stronger with every seal.",
       "fuelSpent": "Fuel Spent",
       "sparksEarned": "Sparks Earned",
-      "xpEarned": "XP Earned",
+      "xpEarned": "Heat Earned",
       "minutes": "{count} min",
       "dismiss": "Keep it up!",
       "error": "Failed to seal flame. Please try again."

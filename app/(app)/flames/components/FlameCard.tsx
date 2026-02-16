@@ -327,8 +327,12 @@ export function FlameCard({
       <SealSummaryModal
         open={showSummary}
         onOpenChange={setShowSummary}
-        minutes={fuelMinutes}
+        flameName={flame.name}
+        colors={colors}
         level={level}
+        effects={effects}
+        elapsedSeconds={elapsedSeconds}
+        targetSeconds={targetSeconds}
       />
     </div>
   );

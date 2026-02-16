@@ -1,23 +1,30 @@
 'use client';
 
-import { useReducedMotion } from 'framer-motion';
-import { FlameIcon, SparklesIcon, StarIcon } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { FlameIcon, Fuel, SparklesIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
+import { FlameRenderer } from './flame-card/effects/FlameRenderer';
+import { SealCelebration } from './flame-card/effects/SealCelebration';
+import type { EffectConfig, ShapeColors } from './flame-card/effects/types';
 
 interface SealSummaryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  minutes: number;
+  flameName: string;
+  colors: ShapeColors;
   level: number;
+  effects: EffectConfig[];
+  elapsedSeconds: number;
+  targetSeconds: number;
 }
 
 function calculateRewards(minutes: number, level: number) {
@@ -26,6 +33,18 @@ function calculateRewards(minutes: number, level: number) {
     sparks: Math.floor(minutes * 2 * levelMultiplier),
     xp: Math.floor(minutes * 1.5 * levelMultiplier),
   };
+}
+
+function formatTime(totalSeconds: number): string {
+  const s = Math.max(0, Math.round(totalSeconds));
+  const hours = Math.floor(s / 3600);
+  const minutes = Math.floor((s % 3600) / 60);
+  const seconds = s % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 function useCountUp(target: number, active: boolean) {
@@ -50,7 +69,6 @@ function useCountUp(target: number, active: boolean) {
     const tick = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setValue(Math.floor(eased * target));
 
@@ -71,28 +89,117 @@ function useCountUp(target: number, active: boolean) {
   return value;
 }
 
-function StatRow({
-  icon,
-  label,
-  value,
-  suffix,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-  suffix: string;
-  color: string;
-}) {
+function ShimmerParticles({ color }: { color: string }) {
+  const particles = useMemo(() => {
+    return Array.from({ length: 16 }, (_, i) => ({
+      id: i,
+      left: `${8 + Math.random() * 84}%`,
+      size: 2 + Math.random() * 3,
+      delay: Math.random() * 5,
+      duration: 2.5 + Math.random() * 2,
+    }));
+  }, []);
+
   return (
-    <div className="flex items-center justify-between py-2">
-      <div className="flex items-center gap-2 text-sm text-white/70">
-        <span style={{ color }}>{icon}</span>
-        {label}
-      </div>
-      <div className="text-sm font-semibold" style={{ color }}>
-        {suffix}
-        {value}
+    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+      {particles.map((p) => (
+        <span
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: p.left,
+            bottom: '-4px',
+            width: p.size,
+            height: p.size,
+            backgroundColor: color,
+            boxShadow: `0 0 ${p.size + 2}px ${color}, 0 0 ${p.size * 2 + 4}px ${color}`,
+            opacity: 0,
+            animation: `seal-shimmer ${p.duration}s ${p.delay}s ease-in-out infinite`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes seal-shimmer {
+          0% { opacity: 0; transform: translateY(0); }
+          8% { opacity: 0.45; }
+          50% { opacity: 0.3; }
+          100% { opacity: 0; transform: translateY(-420px); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function SealFuelMeter({
+  elapsedSeconds,
+  targetSeconds,
+  animate,
+}: {
+  elapsedSeconds: number;
+  targetSeconds: number;
+  animate: boolean;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+  const fraction = Math.min(elapsedSeconds / targetSeconds, 1);
+  const isOverburn = elapsedSeconds > targetSeconds;
+
+  const barGradient = isOverburn
+    ? 'linear-gradient(to right, #dc2626, #ef4444, #f87171)'
+    : 'linear-gradient(to right, #f59e0b, #fbbf24)';
+
+  const glowColor = isOverburn ? '#ef4444' : '#f59e0b';
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center gap-2.5">
+        {/* Fuel icon + label */}
+        <div className="flex shrink-0 items-center gap-1 text-amber-400">
+          <Fuel className="h-3.5 w-3.5" />
+          <span className="text-xs font-semibold uppercase tracking-wide">
+            Fuel
+          </span>
+        </div>
+
+        {/* Bar */}
+        <div className="relative h-3 flex-1 overflow-hidden rounded-full bg-white/10">
+          {/* Segment ticks — matching real FuelMeter */}
+          <div
+            className="pointer-events-none absolute inset-0 z-10 rounded-full"
+            aria-hidden
+            style={{
+              backgroundImage: `
+                repeating-linear-gradient(
+                  to right,
+                  transparent 0px,
+                  transparent 30px,
+                  rgba(0, 0, 0, 0.5) 30px,
+                  rgba(0, 0, 0, 0.5) 32px
+                )
+              `,
+              opacity: 0.2,
+            }}
+          />
+          {/* Fill */}
+          <motion.div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{
+              background: barGradient,
+              boxShadow: `0 0 8px ${glowColor}60, 0 0 16px ${glowColor}30`,
+            }}
+            initial={{ width: '0%' }}
+            animate={animate ? { width: `${fraction * 100}%` } : { width: '0%' }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0.1 }
+                : { type: 'spring', stiffness: 60, damping: 20 }
+            }
+          />
+        </div>
+
+        {/* Time label */}
+        <span className="shrink-0 text-xs font-medium tabular-nums text-white/50">
+          {formatTime(elapsedSeconds)} / {formatTime(targetSeconds)}
+        </span>
       </div>
     </div>
   );
@@ -101,61 +208,208 @@ function StatRow({
 export function SealSummaryModal({
   open,
   onOpenChange,
-  minutes,
+  flameName,
+  colors,
   level,
+  effects,
+  elapsedSeconds,
+  targetSeconds,
 }: SealSummaryModalProps) {
   const t = useTranslations('flames.seal');
+  const shouldReduceMotion = useReducedMotion();
+  const minutes = Math.floor(elapsedSeconds / 60);
   const rewards = calculateRewards(minutes, level);
 
-  const fuelCount = useCountUp(minutes, open);
-  const sparksCount = useCountUp(rewards.sparks, open);
-  const xpCount = useCountUp(rewards.xp, open);
+  // Animation sequence state
+  const [burstActive, setBurstActive] = useState(false);
+  const [showFlame, setShowFlame] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+  const [showGauge, setShowGauge] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setBurstActive(false);
+      setShowFlame(false);
+      setShowContent(false);
+      setShowGauge(false);
+      setShowStats(false);
+      return;
+    }
+
+    if (shouldReduceMotion) {
+      setShowFlame(true);
+      setShowContent(true);
+      setShowGauge(true);
+      setShowStats(true);
+      return;
+    }
+
+    // Staggered animation sequence:
+    // 200ms: Dialog open animation settles, fire celebration burst
+    // 500ms: Burst nearing end, reveal sealed flame (it has its own bounce-in)
+    // 700ms: Title + subtitle fade in
+    // 1000ms: Fuel gauge animates
+    // 1200ms: Stats slide up
+    const timers = [
+      setTimeout(() => setBurstActive(true), 200),
+      setTimeout(() => setShowFlame(true), 500),
+      setTimeout(() => setShowContent(true), 700),
+      setTimeout(() => setShowGauge(true), 1000),
+      setTimeout(() => setShowStats(true), 1200),
+    ];
+
+    return () => timers.forEach(clearTimeout);
+  }, [open, shouldReduceMotion]);
+
+  const handleBurstComplete = useCallback(() => {
+    setBurstActive(false);
+  }, []);
+
+  const sparksCount = useCountUp(rewards.sparks, showStats);
+  const xpCount = useCountUp(rewards.xp, showStats);
 
   const handleDismiss = useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);
 
+  const titleGradient = `linear-gradient(to right, ${colors.dark}, ${colors.medium}, ${colors.light})`;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="border-amber-900/30 bg-slate-950 text-white"
+        className="overflow-visible border bg-slate-950 text-white"
+        style={{
+          borderColor: `${colors.medium}40`,
+          boxShadow: `0 0 30px ${colors.medium}20, 0 0 60px ${colors.medium}10`,
+        }}
       >
-        <DialogHeader className="items-center text-center">
-          <DialogTitle className="text-lg font-bold text-amber-400">
-            {t('title')}
-          </DialogTitle>
-          <p className="text-sm text-white/50">{t('subtitle')}</p>
-        </DialogHeader>
+        {/* Accessible title (sr-only) */}
+        <DialogTitle className="sr-only">
+          {flameName} {t('title')}
+        </DialogTitle>
 
-        <div className="divide-y divide-white/10 px-2">
-          <StatRow
-            icon={<FlameIcon className="size-4" />}
-            label={t('fuelSpent')}
-            value={fuelCount}
-            suffix=""
-            color="#fb923c"
-          />
-          <StatRow
-            icon={<SparklesIcon className="size-4" />}
-            label={t('sparksEarned')}
-            value={sparksCount}
-            suffix="+"
-            color="#fbbf24"
-          />
-          <StatRow
-            icon={<StarIcon className="size-4" />}
-            label={t('xpEarned')}
-            value={xpCount}
-            suffix="+"
-            color="#a78bfa"
-          />
+        {/* Shimmer particles */}
+        {open && !shouldReduceMotion && (
+          <ShimmerParticles color={colors.light} />
+        )}
+
+        <div className="relative flex flex-col items-center gap-3 py-2">
+          {/* Header text — at top */}
+          <motion.div
+            className="text-center"
+            initial={shouldReduceMotion ? {} : { opacity: 0, y: 8 }}
+            animate={showContent ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          >
+            <h2
+              className="bg-clip-text text-xl font-bold text-transparent"
+              style={{ backgroundImage: titleGradient }}
+            >
+              {flameName} {t('title')}
+            </h2>
+            <p className="mt-1 text-sm text-white/50">{t('subtitle')}</p>
+          </motion.div>
+
+          {/* Hero flame visual — center of dialog */}
+          <div className="relative flex h-36 w-36 items-center justify-center overflow-visible">
+            {/* Celebration burst — plays on open */}
+            <SealCelebration
+              active={burstActive}
+              color={colors.medium}
+              onComplete={handleBurstComplete}
+            />
+
+            {/* Sealed flame — revealed after burst */}
+            {showFlame && (
+              <FlameRenderer
+                state="sealed"
+                level={level}
+                colors={colors}
+                className="h-28 w-24"
+              />
+            )}
+
+            {/* Effects container — aligned with flame, overflow visible for embers */}
+            {showFlame && (
+              <div className="pointer-events-none absolute inset-0 overflow-visible">
+                <div className="relative h-full w-full">
+                  <EffectsRenderer
+                    effects={effects}
+                    state="sealed"
+                    colors={colors}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Fuel meter */}
+          {targetSeconds > 0 && (
+            <motion.div
+              className="w-full px-2"
+              initial={shouldReduceMotion ? {} : { opacity: 0 }}
+              animate={showGauge ? { opacity: 1 } : {}}
+              transition={{ duration: 0.3 }}
+            >
+              <SealFuelMeter
+                elapsedSeconds={elapsedSeconds}
+                targetSeconds={targetSeconds}
+                animate={showGauge}
+              />
+            </motion.div>
+          )}
+
+          {/* Stat rows */}
+          <div className="flex w-full justify-center gap-8 px-4">
+            <motion.div
+              className="flex flex-col items-center"
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
+              animate={showStats ? { opacity: 1, y: 0 } : {}}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { duration: 0.4, ease: 'easeOut' }
+              }
+            >
+              <div className="flex items-center gap-1.5">
+                <SparklesIcon className="size-4" style={{ color: '#E60076' }} />
+                <span className="text-2xl font-bold tabular-nums">
+                  +{sparksCount}
+                </span>
+              </div>
+              <span className="text-xs text-white/50">
+                {t('sparksEarned')}
+              </span>
+            </motion.div>
+
+            <motion.div
+              className="flex flex-col items-center"
+              initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
+              animate={showStats ? { opacity: 1, y: 0 } : {}}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { duration: 0.4, ease: 'easeOut', delay: 0.2 }
+              }
+            >
+              <div className="flex items-center gap-1.5">
+                <FlameIcon className="size-4" style={{ color: '#f59e0b' }} />
+                <span className="text-2xl font-bold tabular-nums">
+                  +{xpCount}
+                </span>
+              </div>
+              <span className="text-xs text-white/50">{t('xpEarned')}</span>
+            </motion.div>
+          </div>
         </div>
 
         <DialogFooter>
           <Button
             onClick={handleDismiss}
-            className="w-full bg-amber-500 text-slate-950 hover:bg-amber-400"
+            className="w-full text-white hover:brightness-110"
+            style={{ backgroundColor: colors.medium }}
           >
             {t('dismiss')}
           </Button>

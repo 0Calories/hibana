@@ -111,10 +111,10 @@
     },
     "seal": {
       "title": "炎を封印しました！",
-      "subtitle": "また一歩前進。この勢いを続けよう。",
+      "subtitle": "封印するたびに、炎はより強く燃える。",
       "fuelSpent": "消費した燃料",
       "sparksEarned": "獲得スパーク",
-      "xpEarned": "獲得XP",
+      "xpEarned": "獲得ヒート",
       "minutes": "{count}分",
       "dismiss": "この調子で！",
       "error": "封印に失敗しました。もう一度お試しください。"
