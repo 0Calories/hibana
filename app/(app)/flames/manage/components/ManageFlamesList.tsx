@@ -3,11 +3,13 @@
 import {
   ArchiveIcon,
   ArchiveRestoreIcon,
+  ChevronLeftIcon,
   EllipsisVerticalIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -99,40 +101,61 @@ export function ManageFlamesList({ flames }: ManageFlamesListProps) {
 
   return (
     <>
-      {/* Filter / Sort controls */}
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div className="flex rounded-lg bg-muted p-0.5">
-          {filters.map((f) => (
-            <button
-              key={f.value}
-              type="button"
-              onClick={() => setFilter(f.value)}
-              className={cn(
-                'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                filter === f.value
-                  ? 'bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+      {/* Page header */}
+      <div className="flex items-center gap-2 mb-4">
+        <Link
+          href="/flames"
+          className="text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+        >
+          <ChevronLeftIcon className="size-5" />
+        </Link>
+        <h1 className="flex-1 text-lg font-semibold">{t('pageTitle')}</h1>
+      </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="text-xs">
-              {sorts.find((s) => s.value === sort)?.label}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {sorts.map((s) => (
-              <DropdownMenuItem key={s.value} onClick={() => setSort(s.value)}>
-                {s.label}
-              </DropdownMenuItem>
+      {/* Controls row */}
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <Button size="sm" onClick={() => setCreateOpen(true)}>
+          <PlusIcon className="size-4" />
+          {t('create')}
+        </Button>
+
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-lg bg-muted p-0.5">
+            {filters.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => setFilter(f.value)}
+                className={cn(
+                  'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                  filter === f.value
+                    ? 'bg-background shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {f.label}
+              </button>
             ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="text-xs">
+                {sorts.find((s) => s.value === sort)?.label}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {sorts.map((s) => (
+                <DropdownMenuItem
+                  key={s.value}
+                  onClick={() => setSort(s.value)}
+                >
+                  {s.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* List */}
@@ -216,16 +239,6 @@ export function ManageFlamesList({ flames }: ManageFlamesListProps) {
           })}
         </div>
       )}
-
-      {/* FAB — Create Flame */}
-      <Button
-        size="icon"
-        className="fixed bottom-20 right-4 z-30 size-12 rounded-full shadow-lg"
-        onClick={() => setCreateOpen(true)}
-        aria-label={t('create')}
-      >
-        <PlusIcon className="size-5" />
-      </Button>
 
       {/* Create/Edit dialog */}
       <CreateFlameDialog
