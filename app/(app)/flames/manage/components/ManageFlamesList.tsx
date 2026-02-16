@@ -26,7 +26,7 @@ import type { Flame } from '@/utils/supabase/rows';
 import { archiveFlame } from '../../actions/flame-actions';
 import { CreateFlameDialog } from '../../components/CreateFlameDialog';
 import { StaticFlameIcon } from '../../components/StaticFlameIcon';
-import { type FlameColorName, getFlameColors } from '../../utils/colors';
+import { getFlameColors } from '../../utils/colors';
 import { DeleteFlameDialog } from './DeleteFlameDialog';
 
 type FilterValue = 'all' | 'active' | 'archived';
