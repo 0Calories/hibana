@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  CalendarRangeIcon,
-  Flame,
-  LayoutList,
-  LucideHome,
-  Sparkles,
-} from 'lucide-react';
+import { Flame, LayoutList, LucideHome, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -17,17 +11,21 @@ export function BottomNav() {
 
   const navItems = [
     { icon: <LucideHome />, label: t('home'), href: '/dashboard' },
-    { icon: <Flame />, label: t('flames'), href: '/flames' },
-    { icon: <CalendarRangeIcon />, label: t('schedule'), href: '/schedule' },
+    {
+      icon: <Flame />,
+      label: t('flames'),
+      href: '/flames',
+      isActive: pathname === '/flames' || pathname === '/schedule',
+    },
     { icon: <Sparkles />, label: t('habits'), href: '/habits' },
     { icon: <LayoutList />, label: t('tasks'), href: '/tasks' },
   ];
 
   return (
     <nav className="md:hidden w-full fixed bottom-0 left-0 border-t backdrop-blur-lg dark:backdrop-blur-lg z-40">
-      <div className="grid h-16 grid-cols-5">
+      <div className="grid h-16 grid-cols-4">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = item.isActive ?? pathname === item.href;
 
           return (
             <Link

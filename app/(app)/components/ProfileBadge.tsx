@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { SparklesIcon, UserIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
 import { Badge } from '@/components/ui/badge';
 import {
   Sheet,
@@ -36,66 +35,59 @@ export function ProfileBadge({
   xp = MOCK_DATA.xp,
   xpToNext = MOCK_DATA.xpToNext,
 }: ProfileBadgeProps) {
-  const flameLevel = getFlameLevel(level);
   const xpProgress = xpToNext > 0 ? xp / xpToNext : 0;
 
   return (
     <>
-      {/* Desktop: Full variant */}
-      <div className="hidden md:flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-sm text-amber-400">
-            <SparklesIcon className="size-4" />
-            <span className="font-medium">{sparks}</span>
-          </div>
-          <Badge
-            variant="outline"
-            className="text-xs"
-            style={{ borderColor: flameLevel.color, color: flameLevel.color }}
-          >
-            Lv.{level} {flameLevel.name}
-          </Badge>
-        </div>
-        <div className="relative flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-full bg-muted">
-            <UserIcon className="size-4 text-muted-foreground" />
-          </div>
-          <span className="text-sm font-medium">{username}</span>
-          {/* XP progress bar beneath */}
-          <motion.div
-            className="absolute -bottom-1.5 left-0 h-0.5 rounded-full"
-            style={{ backgroundColor: flameLevel.color }}
-            initial={{ width: 0 }}
-            animate={{ width: `${xpProgress * 100}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-          />
-        </div>
-      </div>
+      {/* Desktop: Compact pill */}
+      <DesktopProfilePill
+        username={username}
+        sparks={sparks}
+        level={level}
+      />
 
-      {/* Mobile: Compact variant */}
-      <CompactProfileBadge
+      {/* Mobile: Compact badge */}
+      <MobileProfileBadge
         username={username}
         sparks={sparks}
         level={level}
         xp={xp}
         xpToNext={xpToNext}
-        flameLevel={flameLevel}
         xpProgress={xpProgress}
       />
     </>
   );
 }
 
-function CompactProfileBadge({
+function DesktopProfilePill({ username, sparks, level }: ProfileBadgeProps) {
+  return (
+    <div className="hidden md:flex items-center gap-0 rounded-full border border-border bg-muted/50 py-1 pl-1 pr-3">
+      <div className="relative mr-2">
+        <div className="flex size-7 items-center justify-center rounded-full bg-background">
+          <UserIcon className="size-3.5 text-muted-foreground" />
+        </div>
+        <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-muted text-[8px] font-bold leading-none ring-1 ring-border">
+          {level}
+        </span>
+      </div>
+      <span className="text-sm font-medium">{username}</span>
+      <span className="mx-1.5 text-border">·</span>
+      <div className="flex items-center gap-1 text-sm text-primary">
+        <SparklesIcon className="size-3.5" />
+        <span className="font-medium">{sparks}</span>
+      </div>
+    </div>
+  );
+}
+
+function MobileProfileBadge({
   username,
   sparks,
   level,
   xp,
   xpToNext,
-  flameLevel,
   xpProgress,
 }: ProfileBadgeProps & {
-  flameLevel: ReturnType<typeof getFlameLevel>;
   xpProgress: number;
 }) {
   const [open, setOpen] = useState(false);
@@ -106,14 +98,14 @@ function CompactProfileBadge({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2"
+        className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 py-1 pl-1 pr-2.5"
       >
-        <div className="flex items-center gap-1 text-xs text-amber-400">
-          <SparklesIcon className="size-3.5" />
+        <div className="flex items-center gap-1 text-xs text-primary">
+          <SparklesIcon className="size-3" />
           <span className="font-medium">{sparks}</span>
         </div>
-        <div className="flex size-7 items-center justify-center rounded-full bg-muted">
-          <UserIcon className="size-3.5 text-muted-foreground" />
+        <div className="flex size-6 items-center justify-center rounded-full bg-background">
+          <UserIcon className="size-3 text-muted-foreground" />
         </div>
       </button>
 
@@ -132,15 +124,8 @@ function CompactProfileBadge({
               </div>
               <div>
                 <p className="font-semibold">{username}</p>
-                <Badge
-                  variant="outline"
-                  className="mt-1 text-xs"
-                  style={{
-                    borderColor: flameLevel.color,
-                    color: flameLevel.color,
-                  }}
-                >
-                  Lv.{level} {flameLevel.name}
+                <Badge variant="secondary" className="mt-1 text-xs">
+                  Lv.{level}
                 </Badge>
               </div>
             </div>
@@ -148,7 +133,7 @@ function CompactProfileBadge({
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg bg-muted/50 p-3">
-                <div className="flex items-center gap-1.5 text-amber-400">
+                <div className="flex items-center gap-1.5 text-primary">
                   <SparklesIcon className="size-4" />
                   <span className="text-lg font-bold">{sparks}</span>
                 </div>
@@ -174,8 +159,7 @@ function CompactProfileBadge({
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <motion.div
-                  className="h-full rounded-full"
-                  style={{ backgroundColor: flameLevel.color }}
+                  className="h-full rounded-full bg-primary"
                   initial={{ width: 0 }}
                   animate={{ width: `${xpProgress * 100}%` }}
                   transition={{ duration: 0.8, ease: 'easeOut' }}

@@ -1,9 +1,6 @@
-import { CalendarRangeIcon } from 'lucide-react';
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getFlamesForDay } from './actions/flame-actions';
 import { getRemainingFuelBudget } from './actions/fuel-actions';
-import { CreateFlameButton } from './components/CreateFlameButton';
 import { FlamesList } from './components/FlamesList';
 import { getAllSessionsForDate } from './session-actions';
 import { getTodayDateString } from './utils/utils';
@@ -21,7 +18,6 @@ export default async function FlamesPage() {
   if (!flamesResult.data) {
     return (
       <div className="size-full p-4 pb-24">
-        <h1 className="mb-6 text-2xl font-bold">{t('pageTitle')}</h1>
         <p>{t('loading')}</p>
       </div>
     );
@@ -33,20 +29,6 @@ export default async function FlamesPage() {
 
   return (
     <div className="size-full p-4 pb-24">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('pageTitle')}</h1>
-        <div className="flex items-center gap-2">
-          <div className="hidden md:block">
-            <CreateFlameButton />
-          </div>
-          <Link
-            href="/schedule"
-            className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-muted hover:text-slate-700"
-          >
-            <CalendarRangeIcon className="size-5" />
-          </Link>
-        </div>
-      </div>
       {flames.length === 0 ? (
         <p className="text-muted-foreground">{t('empty')}</p>
       ) : (

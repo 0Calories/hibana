@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  CalendarRangeIcon,
   FlameIcon,
   LayoutDashboardIcon,
   LayoutListIcon,
@@ -16,8 +15,7 @@ import { ProfileBadge } from './ProfileBadge';
 
 const NAV_ITEMS = [
   { key: 'home', href: '/dashboard', icon: LayoutDashboardIcon },
-  { key: 'flames', href: '/flames', icon: FlameIcon },
-  { key: 'schedule', href: '/schedule', icon: CalendarRangeIcon },
+  { key: 'flames', href: '/flames', icon: FlameIcon, matchPrefix: true },
   { key: 'habits', href: '/habits', icon: SparklesIcon },
   { key: 'tasks', href: '/tasks', icon: LayoutListIcon },
 ] as const;
@@ -25,15 +23,6 @@ const NAV_ITEMS = [
 export function TopBar() {
   const pathname = usePathname();
   const t = useTranslations('navigation');
-
-  const pageTitles: Record<string, string> = {
-    '/dashboard': t('home'),
-    '/flames': t('flames'),
-    '/schedule': t('schedule'),
-    '/habits': t('habits'),
-    '/tasks': t('tasks'),
-  };
-  const currentPageTitle = pageTitles[pathname] ?? t('home');
 
   return (
     <header className="fixed top-0 left-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md">
@@ -50,7 +39,11 @@ export function TopBar() {
 
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive =
+                pathname === item.href ||
+                ('matchPrefix' in item &&
+                  item.matchPrefix &&
+                  pathname === '/schedule');
               return (
                 <Link
                   key={item.href}
@@ -69,15 +62,22 @@ export function TopBar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <CreateButton />
+          <div className="mx-1 h-5 w-px bg-border" />
           <ProfileBadge />
         </div>
       </div>
 
       {/* Mobile */}
       <div className="flex md:hidden h-12 items-center justify-between px-4">
-        <h1 className="text-base font-semibold">{currentPageTitle}</h1>
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 font-extrabold tracking-tight"
+        >
+          <Image src="/logo.svg" alt="" width={20} height={20} />
+          <span className="text-sm">Hibana</span>
+        </Link>
         <ProfileBadge />
       </div>
     </header>

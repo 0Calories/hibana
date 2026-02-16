@@ -35,8 +35,8 @@ export function CreateButton() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="rounded-lg size-10">
-            <PlusIcon />
+          <Button variant="ghost" size="icon-sm">
+            <PlusIcon className="size-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="m-4 md:m-0 md:mb-2">
