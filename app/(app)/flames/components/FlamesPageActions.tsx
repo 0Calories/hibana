@@ -19,7 +19,7 @@ export function FlamesPageActions() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
-              href="/schedule"
+              href="/flames/schedule"
               className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted"
               aria-label={t('scheduleLink')}
             >
