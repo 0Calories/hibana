@@ -111,7 +111,26 @@
     },
     "seal": {
       "title": "Flame Sealed!",
-      "subtitle": "Your fire grows stronger with every seal.",
+      "subtitlesOverburn": [
+        "Your passion burns hot, but be careful not to burn out.",
+        "Impressive heat — just remember to save fuel for tomorrow.",
+        "A roaring blaze, but even fires need to breathe."
+      ],
+      "subtitlesFull": [
+        "A perfect burn. Nothing wasted.",
+        "You're really turning up the heat!",
+        "Every drop of fuel, well spent."
+      ],
+      "subtitlesPartial": [
+        "Every spark counts. The fire remembers.",
+        "The flame of your passion burns brighter.",
+        "Another ember added to the forge."
+      ],
+      "subtitlesMinimal": [
+        "Even a small flame lights the dark.",
+        "A spark today, a blaze tomorrow.",
+        "The heat of discipline never fades."
+      ],
       "fuelSpent": "Fuel Spent",
       "sparksEarned": "Sparks Earned",
       "xpEarned": "Heat Earned",

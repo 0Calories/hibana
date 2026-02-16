@@ -220,6 +220,21 @@ export function SealSummaryModal({
   const minutes = Math.floor(elapsedSeconds / 60);
   const rewards = calculateRewards(minutes, level);
 
+  // Pick a contextual subtitle based on fuel percentage
+  const subtitle = useMemo(() => {
+    const pick = (key: string) => {
+      const list = t.raw(key) as string[];
+      return list[Math.floor(Math.random() * list.length)];
+    };
+    if (targetSeconds <= 0) return pick('subtitlesPartial');
+    const fuelPercent = elapsedSeconds / targetSeconds;
+    if (fuelPercent > 1) return pick('subtitlesOverburn');
+    if (fuelPercent >= 0.9) return pick('subtitlesFull');
+    if (fuelPercent >= 0.5) return pick('subtitlesPartial');
+    return pick('subtitlesMinimal');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   // Animation sequence state
   const [burstActive, setBurstActive] = useState(false);
   const [showFlame, setShowFlame] = useState(false);
@@ -309,7 +324,7 @@ export function SealSummaryModal({
             >
               {flameName} {t('title')}
             </h2>
-            <p className="mt-1 text-sm text-white/50">{t('subtitle')}</p>
+            <p className="mt-1 text-sm text-white/50">{subtitle}</p>
           </motion.div>
 
           {/* Hero flame visual — center of dialog */}
