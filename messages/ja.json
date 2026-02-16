@@ -145,7 +145,7 @@
     "todayTitle": "今日のフレイム",
     "scheduleLink": "週間スケジュール",
     "manageLink": "フレイムを管理",
-    "empty": "No flames yet. Create one to get started!",
+    "empty": "フレイムがまだありません。最初のフレイムを作成しましょう！",
     "emptyToday": "今日のフレイムはありません",
     "emptyTodayAction": "フレイムを管理",
     "manage": {
@@ -173,11 +173,14 @@
       "archiveSuccess": "フレイムをアーカイブしました",
       "unarchiveSuccess": "フレイムのアーカイブを解除しました",
       "archiveError": "フレイムの更新に失敗しました",
-      "budgetMinutes": "{count}分"
+      "budgetMinutes": "{count}分",
+      "backToFlames": "フレイムに戻る",
+      "actionsMenu": "操作"
     }
   },
   "schedule": {
     "pageTitle": "週間プラン",
+    "backToFlames": "フレイムに戻る",
     "today": "今日",
     "fuelBudget": "燃料予算",
     "fuelLocked": "今日の予算はロック済み",

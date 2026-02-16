@@ -173,11 +173,14 @@
       "archiveSuccess": "Flame archived",
       "unarchiveSuccess": "Flame unarchived",
       "archiveError": "Failed to update flame",
-      "budgetMinutes": "{count} min"
+      "budgetMinutes": "{count} min",
+      "backToFlames": "Back to flames",
+      "actionsMenu": "Actions"
     }
   },
   "schedule": {
     "pageTitle": "Weekly Plan",
+    "backToFlames": "Back to flames",
     "today": "Today",
     "fuelBudget": "Fuel Budget",
     "fuelLocked": "Budget locked for today",

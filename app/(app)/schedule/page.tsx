@@ -38,6 +38,7 @@ export default async function SchedulePage() {
           <Link
             href="/flames"
             className="text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+            aria-label={t('backToFlames')}
           >
             <ChevronLeftIcon className="size-5" />
           </Link>

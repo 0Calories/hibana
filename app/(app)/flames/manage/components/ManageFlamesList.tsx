@@ -106,6 +106,7 @@ export function ManageFlamesList({ flames }: ManageFlamesListProps) {
         <Link
           href="/flames"
           className="text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1"
+          aria-label={t('backToFlames')}
         >
           <ChevronLeftIcon className="size-5" />
         </Link>
@@ -208,6 +209,7 @@ export function ManageFlamesList({ flames }: ManageFlamesListProps) {
                       variant="ghost"
                       size="icon"
                       className="size-8 shrink-0"
+                      aria-label={t('actionsMenu')}
                     >
                       <EllipsisVerticalIcon className="size-4" />
                     </Button>
