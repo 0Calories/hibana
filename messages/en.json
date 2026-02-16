@@ -89,7 +89,10 @@
       "unitTimes": "times",
       "daily": "Daily",
       "loading": "Creating flame...",
-      "success": "Flame created!"
+      "success": "Flame created!",
+      "editTitle": "Edit Flame",
+      "updateLoading": "Updating flame...",
+      "updateSuccess": "Flame updated!"
     },
     "fuel": {
       "label": "Fuel",
@@ -139,7 +142,38 @@
       "dismiss": "Keep it up!",
       "error": "Failed to seal flame. Please try again."
     },
-    "empty": "No flames yet. Create one to get started!"
+    "todayTitle": "Today's Flames",
+    "manageLink": "Manage flames",
+    "empty": "No flames yet. Create one to get started!",
+    "emptyToday": "No flames scheduled for today",
+    "emptyTodayAction": "Manage Flames",
+    "manage": {
+      "pageTitle": "Manage Flames",
+      "create": "Create Flame",
+      "empty": "No flames yet. Create your first one!",
+      "filterAll": "All",
+      "filterActive": "Active",
+      "filterArchived": "Archived",
+      "sortName": "Name A-Z",
+      "sortNewest": "Newest",
+      "sortOldest": "Oldest",
+      "edit": "Edit",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "delete": "Delete",
+      "archived": "Archived",
+      "time": "Time",
+      "count": "Count",
+      "deleteTitle": "Delete Flame",
+      "deleteDescription": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+      "deleteConfirm": "Delete",
+      "deleteSuccess": "Flame deleted",
+      "deleteError": "Failed to delete flame",
+      "archiveSuccess": "Flame archived",
+      "unarchiveSuccess": "Flame unarchived",
+      "archiveError": "Failed to update flame",
+      "budgetMinutes": "{count} min"
+    }
   },
   "schedule": {
     "pageTitle": "Weekly Plan",

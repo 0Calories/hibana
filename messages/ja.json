@@ -88,8 +88,11 @@
       "unitMinutes": "min",
       "unitTimes": "times",
       "daily": "Daily",
-      "loading": "Creating flame...",
-      "success": "Flame created!"
+      "loading": "フレイムを作成中...",
+      "success": "フレイムを作成しました！",
+      "editTitle": "フレイムを編集",
+      "updateLoading": "フレイムを更新中...",
+      "updateSuccess": "フレイムを更新しました！"
     },
     "fuel": {
       "label": "Fuel",
@@ -139,7 +142,38 @@
       "dismiss": "この調子で！",
       "error": "封印に失敗しました。もう一度お試しください。"
     },
-    "empty": "No flames yet. Create one to get started!"
+    "todayTitle": "今日のフレイム",
+    "manageLink": "フレイムを管理",
+    "empty": "No flames yet. Create one to get started!",
+    "emptyToday": "今日のフレイムはありません",
+    "emptyTodayAction": "フレイムを管理",
+    "manage": {
+      "pageTitle": "フレイム管理",
+      "create": "フレイムを作成",
+      "empty": "フレイムがありません。最初のフレイムを作成しましょう！",
+      "filterAll": "すべて",
+      "filterActive": "アクティブ",
+      "filterArchived": "アーカイブ済み",
+      "sortName": "名前順",
+      "sortNewest": "新しい順",
+      "sortOldest": "古い順",
+      "edit": "編集",
+      "archive": "アーカイブ",
+      "unarchive": "アーカイブ解除",
+      "delete": "削除",
+      "archived": "アーカイブ済み",
+      "time": "時間",
+      "count": "カウント",
+      "deleteTitle": "フレイムを削除",
+      "deleteDescription": "「{name}」を削除しますか？この操作は取り消せません。",
+      "deleteConfirm": "削除",
+      "deleteSuccess": "フレイムを削除しました",
+      "deleteError": "フレイムの削除に失敗しました",
+      "archiveSuccess": "フレイムをアーカイブしました",
+      "unarchiveSuccess": "フレイムのアーカイブを解除しました",
+      "archiveError": "フレイムの更新に失敗しました",
+      "budgetMinutes": "{count}分"
+    }
   },
   "schedule": {
     "pageTitle": "週間プラン",
