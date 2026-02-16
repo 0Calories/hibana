@@ -199,7 +199,8 @@
     "hours": "hr",
     "minutes": "min",
     "dragHere": "Drag flames here",
-    "noBudgetSet": "No budget set"
+    "noBudgetSet": "No budget set",
+    "loadError": "Failed to load schedule."
   },
   "profile": {
     "title": "Profile",

@@ -43,7 +43,7 @@ export default async function SchedulePage() {
           </Link>
           <h1 className="text-lg font-semibold">{t('pageTitle')}</h1>
         </div>
-        <p className="text-muted-foreground">Failed to load schedule.</p>
+        <p className="text-muted-foreground">{t('loadError')}</p>
       </div>
     );
   }

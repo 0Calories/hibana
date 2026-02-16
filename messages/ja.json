@@ -199,7 +199,8 @@
     "hours": "時間",
     "minutes": "分",
     "dragHere": "ここにフレイムをドラッグ",
-    "noBudgetSet": "未設定"
+    "noBudgetSet": "未設定",
+    "loadError": "スケジュールの読み込みに失敗しました。"
   },
   "profile": {
     "title": "プロフィール",

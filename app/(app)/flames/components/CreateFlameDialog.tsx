@@ -45,6 +45,15 @@ interface CreateFlameDialogProps {
   flame?: Flame;
 }
 
+const defaultCreateValues: CreateFlameFormData = {
+  name: '',
+  color: 'rose',
+  tracking_type: 'time',
+  time_budget_minutes: 60,
+  count_target: undefined,
+  is_daily: true,
+};
+
 export function CreateFlameDialog({
   open,
   onOpenChange,
@@ -53,15 +62,6 @@ export function CreateFlameDialog({
   const t = useTranslations('flames.create');
   const tCommon = useTranslations('common');
   const isEditMode = !!flame;
-
-  const defaultCreateValues: CreateFlameFormData = {
-    name: '',
-    color: 'rose',
-    tracking_type: 'time',
-    time_budget_minutes: 60,
-    count_target: undefined,
-    is_daily: true,
-  };
 
   const {
     control,
