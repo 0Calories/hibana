@@ -23,6 +23,8 @@ interface FuelSliderProps {
   value: number;
   onChange: (minutes: number) => void;
   assignedFlames: FlameWithSchedule[];
+  allocations?: Record<string, number>;
+  onAllocationChange?: (flameId: string, minutes: number) => void;
   disabled?: boolean;
 }
 
@@ -54,20 +56,28 @@ function parseTime(input: string): number | null {
   return null;
 }
 
+const MIN_ALLOCATION = 15;
+
 export function FuelSlider({
   value,
   onChange,
   assignedFlames,
+  allocations,
+  onAllocationChange,
   disabled = false,
 }: FuelSliderProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
+  const resizingRef = useRef<{ flameId: string; startX: number; startMinutes: number } | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState('');
 
+  const getAllocation = (flame: FlameWithSchedule) =>
+    allocations?.[flame.id] ?? flame.time_budget_minutes ?? 0;
+
   const fraction = MAX_MINUTES > 0 ? Math.min(value / MAX_MINUTES, 1) : 0;
   const allocatedMinutes = assignedFlames.reduce(
-    (sum, f) => sum + (f.time_budget_minutes ?? 0),
+    (sum, f) => sum + getAllocation(f),
     0,
   );
   const isOverCapacity = allocatedMinutes > value;
@@ -76,6 +86,7 @@ export function FuelSlider({
 
   const segments = useMemo(() => {
     type FuelSegment = {
+      flameId: string;
       startFrac: number;
       endFrac: number;
       colors: {
@@ -88,7 +99,7 @@ export function FuelSlider({
 
     const result = assignedFlames.reduce(
       (acc: { segments: FuelSegment[]; cursor: number }, flame) => {
-        const budget = flame.time_budget_minutes ?? 0;
+        const budget = getAllocation(flame);
         if (budget <= 0) {
           return acc;
         }
@@ -98,6 +109,7 @@ export function FuelSlider({
         const endFrac = Math.min(acc.cursor / MAX_MINUTES, 1);
         const colors = getFlameColors(flame.color as FlameColorName);
         acc.segments.push({
+          flameId: flame.id,
           startFrac,
           endFrac,
           colors,
@@ -110,7 +122,8 @@ export function FuelSlider({
     );
 
     return result.segments;
-  }, [assignedFlames]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignedFlames, allocations]);
 
   const renderRemainderSegment = () => {
     const allocFrac = Math.min(allocatedMinutes / MAX_MINUTES, 1);
@@ -148,6 +161,8 @@ export function FuelSlider({
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (disabled) return;
+      // Don't start slider drag if we're on a resize handle
+      if (resizingRef.current) return;
       e.preventDefault();
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
       draggingRef.current = true;
@@ -158,15 +173,42 @@ export function FuelSlider({
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
+      if (resizingRef.current && barRef.current && onAllocationChange) {
+        const rect = barRef.current.getBoundingClientRect();
+        const deltaX = e.clientX - resizingRef.current.startX;
+        const deltaMinutes = (deltaX / rect.width) * MAX_MINUTES;
+        const newMinutes = snapTo(resizingRef.current.startMinutes + deltaMinutes);
+        onAllocationChange(
+          resizingRef.current.flameId,
+          Math.max(newMinutes, MIN_ALLOCATION),
+        );
+        return;
+      }
       if (!draggingRef.current) return;
       updateFromPointer(e.clientX);
     },
-    [updateFromPointer],
+    [updateFromPointer, onAllocationChange],
   );
 
   const handlePointerUp = useCallback(() => {
     draggingRef.current = false;
+    resizingRef.current = null;
   }, []);
+
+  const handleResizePointerDown = useCallback(
+    (e: React.PointerEvent, flameId: string, currentMinutes: number) => {
+      if (disabled || !onAllocationChange) return;
+      e.preventDefault();
+      e.stopPropagation();
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      resizingRef.current = {
+        flameId,
+        startX: e.clientX,
+        startMinutes: currentMinutes,
+      };
+    },
+    [disabled, onAllocationChange],
+  );
 
   const handleLabelClick = () => {
     if (disabled) return;
@@ -229,7 +271,7 @@ export function FuelSlider({
           {/* Colored flame segments */}
           {segments.map((seg) => (
             <div
-              key={`segment-${seg.colors.light}`}
+              key={`segment-${seg.flameId}`}
               className={cn(
                 'absolute inset-y-0',
                 seg.needsOutline &&
@@ -243,6 +285,31 @@ export function FuelSlider({
               }}
             />
           ))}
+
+          {/* Drag handles between segments */}
+          {onAllocationChange &&
+            segments.map((seg) => {
+              // Only show handle if segment end is within the fuel budget
+              if (seg.endFrac > fraction) return null;
+              return (
+                <div
+                  key={`handle-${seg.flameId}`}
+                  className="absolute inset-y-0 z-10 w-3 -translate-x-1/2 cursor-col-resize touch-none"
+                  style={{ left: `${seg.endFrac * 100}%` }}
+                  onPointerDown={(e) =>
+                    handleResizePointerDown(
+                      e,
+                      seg.flameId,
+                      getAllocation(
+                        assignedFlames.find((f) => f.id === seg.flameId)!,
+                      ),
+                    )
+                  }
+                >
+                  <div className="mx-auto h-full w-0.5 bg-white/60 dark:bg-white/40 opacity-0 hover:opacity-100 transition-opacity" />
+                </div>
+              );
+            })}
 
           {/* Amber fill for unallocated portion up to the slider position */}
           {renderRemainderSegment()}

@@ -17,14 +17,19 @@ const WARM_COLORS = new Set<string>([
 interface DayRowFuelBarProps {
   fuelMinutes: number;
   assignedFlames: FlameWithSchedule[];
+  allocations?: Record<string, number>;
 }
 
 export function DayRowFuelBar({
   fuelMinutes,
   assignedFlames,
+  allocations,
 }: DayRowFuelBarProps) {
+  const getAllocation = (flame: FlameWithSchedule) =>
+    allocations?.[flame.id] ?? flame.time_budget_minutes ?? 0;
+
   const allocatedMinutes = assignedFlames.reduce(
-    (sum, f) => sum + (f.time_budget_minutes ?? 0),
+    (sum, f) => sum + getAllocation(f),
     0,
   );
   const isOverCapacity = fuelMinutes > 0 && allocatedMinutes > fuelMinutes;
@@ -43,7 +48,7 @@ export function DayRowFuelBar({
     const result: Segment[] = [];
 
     for (const flame of assignedFlames) {
-      const budget = flame.time_budget_minutes ?? 0;
+      const budget = getAllocation(flame);
       if (budget <= 0) continue;
 
       const startPct = (cursor / fuelMinutes) * 100;
@@ -60,7 +65,8 @@ export function DayRowFuelBar({
     }
 
     return result;
-  }, [fuelMinutes, assignedFlames]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fuelMinutes, assignedFlames, allocations]);
 
   // Overflow segment for over-capacity
   const overflowPct =

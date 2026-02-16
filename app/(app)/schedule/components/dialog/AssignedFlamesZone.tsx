@@ -11,11 +11,15 @@ import { DraggableFlame } from './DraggableFlame';
 interface AssignedFlamesZoneProps {
   flames: FlameWithSchedule[];
   onRemove: (flameId: string) => void;
+  allocations: Record<string, number>;
+  onAllocationChange: (flameId: string, minutes: number) => void;
 }
 
 export function AssignedFlamesZone({
   flames,
   onRemove,
+  allocations,
+  onAllocationChange,
 }: AssignedFlamesZoneProps) {
   // Map flame id → level based on index in the full flames array
   // This is only for testing purposes and must be replaced by actual levels once the data model for flames is updated
@@ -51,6 +55,8 @@ export function AssignedFlamesZone({
               disabled={flame.is_daily}
               showDaily={flame.is_daily}
               onClick={flame.is_daily ? undefined : () => onRemove(flame.id)}
+              allocatedMinutes={allocations[flame.id]}
+              onAllocationChange={(mins) => onAllocationChange(flame.id, mins)}
             />
           ))}
         </div>
