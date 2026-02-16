@@ -146,6 +146,13 @@
     "dragHere": "ここにフレイムをドラッグ",
     "noBudgetSet": "未設定"
   },
+  "profile": {
+    "title": "プロフィール",
+    "description": "ゲーミフィケーションのステータスとプロフィール",
+    "sparks": "スパーク",
+    "level": "レベル",
+    "xpProgress": "XP進捗"
+  },
   "pages": {
     "tasks": "Tasks",
     "habits": "Habits",

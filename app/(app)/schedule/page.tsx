@@ -1,6 +1,6 @@
 import { ChevronLeft } from 'lucide-react';
-import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { parseLocalDate } from '@/lib/utils';
 import { getWeeklySchedule } from './actions';
 import { WeeklyPlanner } from './components/WeeklyPlanner';
@@ -52,7 +52,9 @@ export default async function SchedulePage() {
           <ChevronLeft className="size-5" />
         </Link>
         <h1 className="text-2xl font-bold">{t('pageTitle')}</h1>
-        <span className="text-sm text-muted-foreground self-end mb-0.5">{weekRange}</span>
+        <span className="text-sm text-muted-foreground self-end mb-0.5">
+          {weekRange}
+        </span>
       </div>
       <WeeklyPlanner
         initialSchedule={scheduleResult.data}

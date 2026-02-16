@@ -9,7 +9,11 @@ interface ShakeWrapperProps {
   children: React.ReactNode;
 }
 
-export function ShakeWrapper({ active, progress, children }: ShakeWrapperProps) {
+export function ShakeWrapper({
+  active,
+  progress,
+  children,
+}: ShakeWrapperProps) {
   const shakeX = useMotionValue(0);
   const shakeY = useMotionValue(0);
   const progressRef = useRef(progress);

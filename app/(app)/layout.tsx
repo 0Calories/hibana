@@ -1,4 +1,5 @@
 import { BottomNav } from '@/app/(app)/components/BottomNav';
+import { TopBar } from '@/app/(app)/components/TopBar';
 
 export default function AppLayout({
   children,
@@ -7,8 +8,8 @@ export default function AppLayout({
 }>) {
   return (
     <main className="h-screen w-full">
-      {/* <TopNav /> */}
-      <section className="h-full w-full">{children}</section>
+      <TopBar />
+      <section className="h-full w-full pt-12 md:pt-14">{children}</section>
 
       <BottomNav />
     </main>

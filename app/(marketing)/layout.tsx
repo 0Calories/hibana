@@ -49,7 +49,10 @@ export default async function MarketingLayout({
 
       {/* ── Fixed nav ── */}
       <nav className="fixed top-0 z-50 flex w-full items-center justify-between bg-[#090b14]/80 px-6 py-4 backdrop-blur-md">
-        <Link href="/" className="group flex items-center gap-2 text-lg font-bold tracking-tight">
+        <Link
+          href="/"
+          className="group flex items-center gap-2 text-lg font-bold tracking-tight"
+        >
           <Image
             src="/logo.svg"
             alt=""

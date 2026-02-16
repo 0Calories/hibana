@@ -68,7 +68,11 @@ export function FuelSlider({
 }: FuelSliderProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
-  const resizingRef = useRef<{ flameId: string; startX: number; startMinutes: number } | null>(null);
+  const resizingRef = useRef<{
+    flameId: string;
+    startX: number;
+    startMinutes: number;
+  } | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState('');
 
@@ -177,7 +181,9 @@ export function FuelSlider({
         const rect = barRef.current.getBoundingClientRect();
         const deltaX = e.clientX - resizingRef.current.startX;
         const deltaMinutes = (deltaX / rect.width) * MAX_MINUTES;
-        const newMinutes = snapTo(resizingRef.current.startMinutes + deltaMinutes);
+        const newMinutes = snapTo(
+          resizingRef.current.startMinutes + deltaMinutes,
+        );
         onAllocationChange(
           resizingRef.current.flameId,
           Math.max(newMinutes, MIN_ALLOCATION),
@@ -289,22 +295,22 @@ export function FuelSlider({
           {/* Drag handles at segment boundaries */}
           {onAllocationChange &&
             segments.map((seg) => (
-                <div
-                  key={`handle-${seg.flameId}`}
-                  className="absolute inset-y-0 z-10 w-3 -translate-x-1/2 cursor-col-resize touch-none"
-                  style={{ left: `${seg.endFrac * 100}%` }}
-                  onPointerDown={(e) =>
-                    handleResizePointerDown(
-                      e,
-                      seg.flameId,
-                      getAllocation(
-                        assignedFlames.find((f) => f.id === seg.flameId)!,
-                      ),
-                    )
-                  }
-                >
-                  <div className="mx-auto h-full w-0.5 bg-white/60 dark:bg-white/40 opacity-0 hover:opacity-100 transition-opacity" />
-                </div>
+              <div
+                key={`handle-${seg.flameId}`}
+                className="absolute inset-y-0 z-10 w-3 -translate-x-1/2 cursor-col-resize touch-none"
+                style={{ left: `${seg.endFrac * 100}%` }}
+                onPointerDown={(e) =>
+                  handleResizePointerDown(
+                    e,
+                    seg.flameId,
+                    getAllocation(
+                      assignedFlames.find((f) => f.id === seg.flameId)!,
+                    ),
+                  )
+                }
+              >
+                <div className="mx-auto h-full w-0.5 bg-white/60 dark:bg-white/40 opacity-0 hover:opacity-100 transition-opacity" />
+              </div>
             ))}
 
           {/* Amber fill for unallocated portion up to the slider position */}
