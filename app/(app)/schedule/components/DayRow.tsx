@@ -120,17 +120,9 @@ export function DayRow({
     [editAssignedFlames, flameAllocations],
   );
 
-  const remainingCapacity = fuelMinutes - totalAllocatedFuel;
   const isFuelLocked = isToday && day.fuelMinutes != null;
   const isOverCapacity = fuelMinutes > 0 && totalAllocatedFuel > fuelMinutes;
 
-  const canAddFlame = useCallback(
-    (flame: FlameWithSchedule) => {
-      if (fuelMinutes === 0) return true;
-      return remainingCapacity >= (flame.time_budget_minutes ?? 0);
-    },
-    [fuelMinutes, remainingCapacity],
-  );
 
   const availableFlames = useMemo(
     () => flames.filter((f) => !f.is_daily && !assignedFlameIds.includes(f.id)),
@@ -168,7 +160,7 @@ export function DayRow({
     if (over.id === ASSIGNED_FLAME_ZONE_ID) {
       if (assignedFlameIds.includes(flameId)) return;
       const flame = flames.find((f) => f.id === flameId);
-      if (!flame || !canAddFlame(flame)) return;
+      if (!flame) return;
       setAssignedFlameIds((prev) => [...prev, flameId]);
       setFlameAllocations((prev) => ({
         ...prev,
@@ -463,7 +455,7 @@ export function DayRow({
                         key={flame.id}
                         flame={flame}
                         level={flameLevels.get(flame.id) ?? 1}
-                        disabled={!canAddFlame(flame)}
+                        disabled={false}
                       />
                     ))}
                   </MyFlamesZone>

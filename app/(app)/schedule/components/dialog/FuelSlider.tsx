@@ -286,12 +286,9 @@ export function FuelSlider({
             />
           ))}
 
-          {/* Drag handles between segments */}
+          {/* Drag handles at segment boundaries */}
           {onAllocationChange &&
-            segments.map((seg) => {
-              // Only show handle if segment end is within the fuel budget
-              if (seg.endFrac > fraction) return null;
-              return (
+            segments.map((seg) => (
                 <div
                   key={`handle-${seg.flameId}`}
                   className="absolute inset-y-0 z-10 w-3 -translate-x-1/2 cursor-col-resize touch-none"
@@ -308,8 +305,7 @@ export function FuelSlider({
                 >
                   <div className="mx-auto h-full w-0.5 bg-white/60 dark:bg-white/40 opacity-0 hover:opacity-100 transition-opacity" />
                 </div>
-              );
-            })}
+            ))}
 
           {/* Amber fill for unallocated portion up to the slider position */}
           {renderRemainderSegment()}
