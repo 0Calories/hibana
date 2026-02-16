@@ -74,6 +74,6 @@ Key tables: `flames`, `flame_schedules`, `flame_sessions`, `fuel_budgets`, `week
 pnpm dev              # Start dev server
 pnpm build            # Production build
 pnpm biome check --write  # Lint + format
-supabase db push      # Push migrations
-supabase gen types typescript --local > utils/supabase/types.ts  # Regenerate types
+pnpx supabase db push      # Push migrations
+pnpx supabase gen types typescript --local > utils/supabase/types.ts  # Regenerate types
 ```
