@@ -74,7 +74,7 @@ export function DayRowFuelBar({
     : 0;
 
   return (
-    <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+    <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted">
       {segments.map((seg) => (
         <div
           key={`seg-${seg.startPct}`}

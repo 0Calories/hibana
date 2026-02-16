@@ -256,7 +256,7 @@ export function FuelSlider({
         onPointerUp={handlePointerUp}
       >
         {/* Track */}
-        <div className="relative h-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+        <div className="relative h-full overflow-hidden rounded-full bg-muted">
           {/* Segment ticks */}
           <div
             className="pointer-events-none absolute inset-0 z-10 rounded-full opacity-20 dark:opacity-15"
@@ -339,9 +339,7 @@ export function FuelSlider({
           type="text"
           className={cn(
             'w-14 shrink-0 border-b border-amber-400 bg-transparent text-center text-sm font-medium tabular-nums outline-none',
-            isOverCapacity
-              ? 'text-destructive'
-              : 'text-slate-600 dark:text-white/70',
+            isOverCapacity ? 'text-destructive' : 'text-muted-foreground',
           )}
           value={editText}
           onChange={(e) => setEditText(e.target.value)}
@@ -360,9 +358,7 @@ export function FuelSlider({
           disabled={disabled}
           className={cn(
             'w-14 shrink-0 cursor-text border-b border-transparent text-center text-sm font-medium tabular-nums hover:border-amber-400/50',
-            isOverCapacity
-              ? 'text-destructive'
-              : 'text-slate-600 dark:text-white/70',
+            isOverCapacity ? 'text-destructive' : 'text-muted-foreground',
           )}
         >
           {formatTime(value)}

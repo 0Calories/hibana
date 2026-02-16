@@ -25,8 +25,7 @@ export function MiniFlameCard({
     <div
       className={cn(
         'flex w-28 shrink-0 flex-col overflow-hidden rounded-xl border sm:w-36',
-        'border-slate-200 bg-linear-to-b from-white to-slate-50',
-        'dark:border-white/10 dark:from-slate-900 dark:to-slate-950',
+        'border-border bg-card',
       )}
     >
       {/* Header */}
@@ -54,8 +53,8 @@ export function MiniFlameCard({
 
       {/* Footer — time budget */}
       {budgetLabel && (
-        <div className="bg-slate-200/70 px-1.5 py-1.5 dark:bg-black/30 sm:px-2">
-          <p className="text-center text-[10px] text-slate-500 dark:text-white/50 sm:text-xs">
+        <div className="bg-muted px-1.5 py-1.5 sm:px-2">
+          <p className="text-center text-[10px] text-muted-foreground sm:text-xs">
             {budgetLabel}
           </p>
         </div>

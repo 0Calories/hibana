@@ -165,7 +165,7 @@ function SealFuelMeter({
         </div>
 
         {/* Bar */}
-        <div className="relative h-3 flex-1 overflow-hidden rounded-full bg-white/10">
+        <div className="relative h-3 flex-1 overflow-hidden rounded-full bg-muted">
           {/* Segment ticks — matching real FuelMeter */}
           <div
             className="pointer-events-none absolute inset-0 z-10 rounded-full"
@@ -203,7 +203,7 @@ function SealFuelMeter({
         </div>
 
         {/* Time label */}
-        <span className="shrink-0 text-xs font-medium tabular-nums text-white/50">
+        <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
           {formatTime(elapsedSeconds)} / {formatTime(targetSeconds)}
         </span>
       </div>
@@ -300,7 +300,7 @@ export function SealSummaryModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="overflow-visible border bg-slate-950 text-white"
+        className="overflow-visible border bg-card text-card-foreground"
         style={{
           borderColor: `${colors.medium}40`,
           boxShadow: `0 0 30px ${colors.medium}20, 0 0 60px ${colors.medium}10`,
@@ -330,7 +330,7 @@ export function SealSummaryModal({
             >
               {flameName} {t('title')}
             </h2>
-            <p className="mt-1 text-sm text-white/50">{subtitle}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           </motion.div>
 
           {/* Hero flame visual — center of dialog */}
@@ -400,7 +400,9 @@ export function SealSummaryModal({
                   +{sparksCount}
                 </span>
               </div>
-              <span className="text-xs text-white/50">{t('sparksEarned')}</span>
+              <span className="text-xs text-muted-foreground">
+                {t('sparksEarned')}
+              </span>
             </motion.div>
 
             <motion.div
@@ -419,7 +421,9 @@ export function SealSummaryModal({
                   +{xpCount}
                 </span>
               </div>
-              <span className="text-xs text-white/50">{t('xpEarned')}</span>
+              <span className="text-xs text-muted-foreground">
+                {t('xpEarned')}
+              </span>
             </motion.div>
           </div>
         </div>

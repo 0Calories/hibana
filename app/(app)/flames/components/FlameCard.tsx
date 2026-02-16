@@ -217,8 +217,7 @@ export function FlameCard({
         aria-label={getAriaLabel()}
         className={cn(
           'relative flex w-full flex-col overflow-hidden rounded-xl border transition-colors',
-          'border-slate-200 bg-linear-to-b from-white to-slate-50 text-slate-900',
-          'dark:border-white/10 dark:from-slate-900 dark:to-slate-950 dark:text-white',
+          'border-border bg-card text-foreground',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
           isSealed && 'cursor-default',
           isFuelBlocked && 'cursor-default opacity-40',
@@ -265,7 +264,7 @@ export function FlameCard({
         </div>
 
         {/* Footer - Timer, Progress, State */}
-        <div className="flex flex-col gap-1 bg-slate-200/70 px-2 py-2 dark:bg-black/30 sm:gap-1.5 sm:px-3 sm:py-3">
+        <div className="flex flex-col gap-1 bg-muted px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
           {flame.tracking_type === 'time' && targetSeconds > 0 && (
             <div className={cn(isSealed && 'opacity-40')}>
               <TimerDisplay
@@ -294,7 +293,7 @@ export function FlameCard({
                   ? 'font-medium text-red-500'
                   : isSealed
                     ? 'font-medium'
-                    : 'text-slate-500 dark:text-white/50',
+                    : 'text-muted-foreground',
             )}
           >
             {isSealed ? (

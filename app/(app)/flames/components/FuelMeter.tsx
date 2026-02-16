@@ -73,9 +73,9 @@ export function FuelMeter({
 
   if (!hasBudget) {
     return (
-      <div className="sticky top-0 z-20 -mx-4 mb-4 bg-white/80 px-4 pt-4 pb-0 backdrop-blur-sm dark:bg-slate-950/80">
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
-          <p className="text-center text-xs text-slate-500 dark:text-white/50">
+      <div className="sticky top-0 z-20 -mx-4 mb-4 bg-background/80 px-4 pt-4 pb-0 backdrop-blur-sm">
+        <div className="rounded-lg border border-border bg-card px-3 py-2">
+          <p className="text-center text-xs text-muted-foreground">
             {t('noBudget')}
           </p>
         </div>
@@ -90,19 +90,19 @@ export function FuelMeter({
 
   // Bar color logic: normal → amber, low → shifts to orange/red, depleted → grey
   const barColor = isDepleted
-    ? 'bg-slate-400 dark:bg-white/20'
+    ? 'bg-muted-foreground/40'
     : isLow
       ? 'bg-gradient-to-r from-red-500 to-orange-400 dark:from-red-500 dark:to-orange-400'
       : 'bg-gradient-to-r from-amber-500 to-amber-400 dark:from-amber-500 dark:to-amber-400';
 
   const textColor = isDepleted
-    ? 'text-slate-400 dark:text-white/30'
+    ? 'text-muted-foreground/60'
     : isLow
       ? 'text-red-600 dark:text-red-400'
-      : 'text-slate-600 dark:text-white/70';
+      : 'text-muted-foreground';
 
   const iconColor = isDepleted
-    ? 'text-slate-400 dark:text-white/30'
+    ? 'text-muted-foreground/60'
     : isLow
       ? 'text-red-500 dark:text-red-400'
       : 'text-amber-600 dark:text-amber-400';
@@ -116,9 +116,9 @@ export function FuelMeter({
     : 'rgba(245, 158, 11, 0.25)';
 
   return (
-    <div className="sticky top-0 z-20 -mx-4 mb-4 bg-white/80 px-4 pt-4 pb-0 backdrop-blur-sm dark:bg-slate-950/80">
+    <div className="sticky top-0 z-20 -mx-4 mb-4 bg-background/80 px-4 pt-4 pb-0 backdrop-blur-sm">
       <motion.div
-        className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/5"
+        className="rounded-lg border border-border bg-card px-3 py-2.5"
         initial={false}
         animate={
           isBurning && !isDepleted && !shouldReduceMotion
@@ -152,7 +152,7 @@ export function FuelMeter({
 
           {/* Bar container */}
           <div className="relative h-3 flex-1 overflow-visible">
-            <div className="relative h-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+            <div className="relative h-full overflow-hidden rounded-full bg-muted">
               {/* Segment ticks — repeating gradient overlay, auto-adapts to width */}
               <div
                 className="pointer-events-none absolute inset-0 z-10 rounded-full opacity-20 dark:opacity-15"

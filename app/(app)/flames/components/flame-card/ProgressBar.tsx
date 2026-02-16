@@ -49,7 +49,7 @@ export function ProgressBar({
 
   return (
     <div
-      className={`relative h-1.5 w-full rounded-full bg-slate-200 dark:bg-white/10 sm:h-2 ${isOverburning ? 'overflow-visible' : 'overflow-hidden'}`}
+      className={`relative h-1.5 w-full rounded-full bg-muted sm:h-2 ${isOverburning ? 'overflow-visible' : 'overflow-hidden'}`}
     >
       <motion.div
         className="absolute inset-y-0 left-0 rounded-full"
