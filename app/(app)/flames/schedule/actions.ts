@@ -185,7 +185,7 @@ export async function setWeeklyOverride(
     return { success: false, error };
   }
 
-  revalidatePath('/schedule');
+  revalidatePath('/flames/schedule');
   return { success: true, data: 'Override saved' };
 }
 
@@ -202,6 +202,6 @@ export async function clearWeeklyOverrides(weekStart: string): ActionResult {
     return { success: false, error };
   }
 
-  revalidatePath('/schedule');
+  revalidatePath('/flames/schedule');
   return { success: true, data: 'Weekly overrides cleared' };
 }

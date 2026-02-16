@@ -15,7 +15,7 @@ export function BottomNav() {
       icon: <Flame />,
       label: t('flames'),
       href: '/flames',
-      isActive: pathname.startsWith('/flames') || pathname === '/schedule',
+      isActive: pathname.startsWith('/flames'),
     },
     { icon: <Sparkles />, label: t('habits'), href: '/habits' },
     { icon: <LayoutList />, label: t('tasks'), href: '/tasks' },
