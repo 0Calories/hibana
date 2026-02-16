@@ -69,7 +69,6 @@ function useCountUp(target: number, active: boolean) {
     const tick = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
       const eased = 1 - (1 - progress) ** 3;
       setValue(Math.floor(eased * target));
 
@@ -141,6 +140,8 @@ function SealFuelMeter({
   animate: boolean;
 }) {
   const shouldReduceMotion = useReducedMotion();
+  const tFuel = useTranslations('flames.fuel');
+
   const fraction = Math.min(elapsedSeconds / targetSeconds, 1);
   const isOverburn = elapsedSeconds > targetSeconds;
 
@@ -154,10 +155,12 @@ function SealFuelMeter({
     <div className="w-full">
       <div className="flex items-center gap-2.5">
         {/* Fuel icon + label */}
-        <div className={`flex shrink-0 items-center gap-1 ${isOverburn ? 'text-red-500' : 'text-amber-400'}`}>
+        <div
+          className={`flex shrink-0 items-center gap-1 ${isOverburn ? 'text-red-500' : 'text-amber-400'}`}
+        >
           <Fuel className="h-3.5 w-3.5" />
           <span className="text-xs font-semibold uppercase tracking-wide">
-            Fuel
+            {tFuel('label')}
           </span>
         </div>
 
@@ -188,7 +191,9 @@ function SealFuelMeter({
               boxShadow: `0 0 8px ${glowColor}60, 0 0 16px ${glowColor}30`,
             }}
             initial={{ width: '0%' }}
-            animate={animate ? { width: `${fraction * 100}%` } : { width: '0%' }}
+            animate={
+              animate ? { width: `${fraction * 100}%` } : { width: '0%' }
+            }
             transition={
               shouldReduceMotion
                 ? { duration: 0.1 }
@@ -233,8 +238,8 @@ export function SealSummaryModal({
     if (fuelPercent >= 0.9) return pick('subtitlesFull');
     if (fuelPercent >= 0.5) return pick('subtitlesPartial');
     return pick('subtitlesMinimal');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetSeconds, elapsedSeconds, t]);
 
   // Animation sequence state
   const [burstActive, setBurstActive] = useState(false);
@@ -395,9 +400,7 @@ export function SealSummaryModal({
                   +{sparksCount}
                 </span>
               </div>
-              <span className="text-xs text-white/50">
-                {t('sparksEarned')}
-              </span>
+              <span className="text-xs text-white/50">{t('sparksEarned')}</span>
             </motion.div>
 
             <motion.div
