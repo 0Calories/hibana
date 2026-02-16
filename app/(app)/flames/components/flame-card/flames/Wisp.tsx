@@ -8,8 +8,8 @@ import {
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
-  WISP_EMBERS,
   simpleSealedSmokeEffect,
+  WISP_EMBERS,
 } from './presets';
 
 function WispFlame({ colors }: FlameComponentProps) {

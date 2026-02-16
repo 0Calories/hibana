@@ -69,10 +69,9 @@ export function DayRowFuelBar({
   }, [fuelMinutes, assignedFlames, allocations]);
 
   // Overflow segment for over-capacity
-  const overflowPct =
-    isOverCapacity
-      ? Math.min(((allocatedMinutes - fuelMinutes) / fuelMinutes) * 100, 20)
-      : 0;
+  const overflowPct = isOverCapacity
+    ? Math.min(((allocatedMinutes - fuelMinutes) / fuelMinutes) * 100, 20)
+    : 0;
 
   return (
     <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">

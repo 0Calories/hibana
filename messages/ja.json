@@ -95,7 +95,8 @@
       "label": "Fuel",
       "remaining": "{time} remaining",
       "depleted": "No fuel remaining",
-      "noBudget": "No fuel budget set"
+      "noBudget": "No fuel budget set",
+      "scheduleLink": "スケジュールを表示"
     },
     "card": {
       "ready": "Ready",
@@ -164,6 +165,13 @@
     "minutes": "分",
     "dragHere": "ここにフレイムをドラッグ",
     "noBudgetSet": "未設定"
+  },
+  "profile": {
+    "title": "プロフィール",
+    "description": "ゲーミフィケーションのステータスとプロフィール",
+    "sparks": "スパーク",
+    "level": "レベル",
+    "xpProgress": "XP進捗"
   },
   "pages": {
     "tasks": "Tasks",

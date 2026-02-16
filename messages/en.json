@@ -95,7 +95,8 @@
       "label": "Fuel",
       "remaining": "{time} remaining",
       "depleted": "No fuel remaining",
-      "noBudget": "No fuel budget set"
+      "noBudget": "No fuel budget set",
+      "scheduleLink": "View schedule"
     },
     "card": {
       "ready": "Ready",
@@ -164,6 +165,13 @@
     "minutes": "min",
     "dragHere": "Drag flames here",
     "noBudgetSet": "No budget set"
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Your gamification stats and profile",
+    "sparks": "Sparks",
+    "level": "Level",
+    "xpProgress": "XP Progress"
   },
   "pages": {
     "tasks": "Tasks",

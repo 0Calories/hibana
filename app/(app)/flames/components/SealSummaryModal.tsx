@@ -69,7 +69,8 @@ function useCountUp(target: number, active: boolean) {
     const tick = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      // Ease out cubic
+      const eased = 1 - (1 - progress) ** 3;
       setValue(Math.floor(eased * target));
 
       if (progress < 1) {

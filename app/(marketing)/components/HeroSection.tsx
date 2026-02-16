@@ -65,9 +65,7 @@ export function HeroSection() {
           className="w-full max-w-md"
         >
           <NewsletterForm />
-          <p className="mt-3 text-xs text-white/20">
-            {t('hero.waitlistHint')}
-          </p>
+          <p className="mt-3 text-xs text-white/20">{t('hero.waitlistHint')}</p>
         </motion.div>
       </motion.div>
 
