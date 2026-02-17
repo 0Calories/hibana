@@ -4,6 +4,8 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { Fuel } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
+import { FuelDroplets } from '@/app/(app)/flames/components/FuelDroplets';
+import { SmokePuffs } from '@/app/(app)/flames/components/SmokePuffs';
 
 /**
  * Visual-only fuel bar for the marketing page.
@@ -12,116 +14,6 @@ import { useRef } from 'react';
  */
 
 const FILL_FRACTION = 0.68;
-
-/** Fuel droplet particles — same as FuelMeter */
-const DROPLETS = [
-  { id: 'drop-0', duration: 1.4, delay: 0, xDrift: -2, width: 2.5, height: 4 },
-  { id: 'drop-1', duration: 1.6, delay: 0.3, xDrift: 1, width: 2, height: 3.5 },
-  { id: 'drop-2', duration: 1.2, delay: 0.6, xDrift: -1, width: 3, height: 5 },
-  { id: 'drop-3', duration: 1.5, delay: 0.9, xDrift: 2, width: 2, height: 3 },
-  {
-    id: 'drop-4',
-    duration: 1.3,
-    delay: 1.2,
-    xDrift: -3,
-    width: 2.5,
-    height: 4.5,
-  },
-] as const;
-
-/** Smoke puffs — same as FuelMeter */
-const SMOKE_PUFFS = [
-  {
-    id: 'pf-0',
-    size: 5,
-    blur: 2,
-    duration: 2.0,
-    delay: 0,
-    xPath: [0, -2, -4, -6] as const,
-    yEnd: -28,
-    peakOpacity: 0.4,
-  },
-  {
-    id: 'pf-1',
-    size: 3,
-    blur: 1.5,
-    duration: 1.8,
-    delay: 0.1,
-    xPath: [1, -1, -3, -4] as const,
-    yEnd: -22,
-    peakOpacity: 0.3,
-  },
-  {
-    id: 'pf-2',
-    size: 4,
-    blur: 2.5,
-    duration: 2.2,
-    delay: 0.2,
-    xPath: [-1, -3, -2, -5] as const,
-    yEnd: -32,
-    peakOpacity: 0.25,
-  },
-  {
-    id: 'pf-3',
-    size: 4,
-    blur: 2,
-    duration: 2.2,
-    delay: 0.8,
-    xPath: [0, 3, 5, 4] as const,
-    yEnd: -26,
-    peakOpacity: 0.35,
-  },
-  {
-    id: 'pf-4',
-    size: 6,
-    blur: 3,
-    duration: 2.4,
-    delay: 0.9,
-    xPath: [-1, 2, 4, 7] as const,
-    yEnd: -30,
-    peakOpacity: 0.25,
-  },
-  {
-    id: 'pf-5',
-    size: 3,
-    blur: 1.5,
-    duration: 2.0,
-    delay: 1.0,
-    xPath: [1, 4, 3, 5] as const,
-    yEnd: -20,
-    peakOpacity: 0.3,
-  },
-  {
-    id: 'pf-6',
-    size: 5,
-    blur: 2.5,
-    duration: 2.6,
-    delay: 1.6,
-    xPath: [0, 1, -2, 0] as const,
-    yEnd: -34,
-    peakOpacity: 0.3,
-  },
-  {
-    id: 'pf-7',
-    size: 3,
-    blur: 2,
-    duration: 2.0,
-    delay: 1.7,
-    xPath: [0, -2, 1, -1] as const,
-    yEnd: -24,
-    peakOpacity: 0.35,
-  },
-  {
-    id: 'pf-8',
-    size: 4,
-    blur: 3,
-    duration: 2.4,
-    delay: 1.9,
-    xPath: [1, 0, -1, 2] as const,
-    yEnd: -30,
-    peakOpacity: 0.2,
-  },
-] as const;
 
 export function ShowcaseFuelBar() {
   const ref = useRef<HTMLDivElement>(null);
@@ -240,62 +132,8 @@ export function ShowcaseFuelBar() {
                 className="pointer-events-none absolute top-0 h-full"
                 style={{ left: `${FILL_FRACTION * 100}%` }}
               >
-                {/* Fuel droplets */}
-                {DROPLETS.map((d) => (
-                  <motion.div
-                    key={d.id}
-                    className="absolute bg-amber-300/70"
-                    style={{
-                      width: d.width,
-                      height: d.height,
-                      left: -d.width / 2,
-                      top: '50%',
-                      borderRadius: '40% 40% 50% 50%',
-                    }}
-                    initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
-                    animate={{
-                      opacity: [0, 0.7, 0.5, 0],
-                      y: [0, 6, 16, 24],
-                      x: [0, d.xDrift * 0.5, d.xDrift],
-                      scale: [1, 1, 0.8, 0.4],
-                    }}
-                    transition={{
-                      duration: d.duration,
-                      delay: d.delay,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: 'easeIn',
-                    }}
-                  />
-                ))}
-
-                {/* Smoke puffs */}
-                {SMOKE_PUFFS.map((p) => (
-                  <motion.div
-                    key={p.id}
-                    className="absolute rounded-full"
-                    style={{
-                      width: p.size,
-                      height: p.size,
-                      left: -p.size / 2,
-                      top: '50%',
-                      filter: `blur(${p.blur}px)`,
-                      background: 'rgba(220, 180, 100, 0.7)',
-                    }}
-                    initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
-                    animate={{
-                      opacity: [0, p.peakOpacity, p.peakOpacity * 0.5, 0],
-                      y: [0, p.yEnd * 0.3, p.yEnd * 0.7, p.yEnd],
-                      x: [...p.xPath],
-                      scale: [0.6, 1, 1.4, 1.8],
-                    }}
-                    transition={{
-                      duration: p.duration,
-                      delay: p.delay,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: 'easeOut',
-                    }}
-                  />
-                ))}
+                <FuelDroplets className="bg-amber-300/70" />
+                <SmokePuffs color="rgba(220, 180, 100, 0.7)" />
               </div>
             )}
           </div>

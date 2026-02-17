@@ -1,5 +1,5 @@
 import type { FlameState } from '@/app/(app)/flames/utils/types';
-import type { ShapeColors } from '../types';
+import type { ShapeColors } from '../flame-card/effects/types';
 
 /** Base particle properties shared by all particle types */
 export interface Particle {

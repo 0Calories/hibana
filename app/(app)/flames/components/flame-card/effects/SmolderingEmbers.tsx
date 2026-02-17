@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useMemo } from 'react';
-import { generateHash } from './particles';
+import { generateHash } from '../../particles';
 
 interface SmolderingEmbersProps {
   color: string;

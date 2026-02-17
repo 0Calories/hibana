@@ -5,6 +5,7 @@ import { Fuel } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { FuelDroplets } from './FuelDroplets';
 import { SmokePuffs } from './SmokePuffs';
 
 interface FuelMeterProps {
@@ -25,29 +26,6 @@ function formatTime(totalSeconds: number): string {
   }
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
-
-/** Fuel droplet particles — deterministic to avoid hydration mismatch */
-const DROPLETS: {
-  id: string;
-  duration: number;
-  delay: number;
-  xDrift: number;
-  width: number;
-  height: number;
-}[] = [
-  { id: 'drop-0', duration: 1.4, delay: 0, xDrift: -2, width: 2.5, height: 4 },
-  { id: 'drop-1', duration: 1.6, delay: 0.3, xDrift: 1, width: 2, height: 3.5 },
-  { id: 'drop-2', duration: 1.2, delay: 0.6, xDrift: -1, width: 3, height: 5 },
-  { id: 'drop-3', duration: 1.5, delay: 0.9, xDrift: 2, width: 2, height: 3 },
-  {
-    id: 'drop-4',
-    duration: 1.3,
-    delay: 1.2,
-    xDrift: -3,
-    width: 2.5,
-    height: 4.5,
-  },
-];
 
 export function FuelMeter({
   budgetSeconds,
@@ -268,37 +246,13 @@ export function FuelMeter({
                 style={{ left: `${fraction * 100}%` }}
               >
                 {/* Fuel droplets — drip downward */}
-                {DROPLETS.map((d) => (
-                  <motion.div
-                    key={d.id}
-                    className={cn(
-                      'absolute',
-                      isLow
-                        ? 'bg-red-400/80 dark:bg-red-300/80'
-                        : 'bg-amber-500/70 dark:bg-amber-300/70',
-                    )}
-                    style={{
-                      width: d.width,
-                      height: d.height,
-                      left: -d.width / 2,
-                      top: '50%',
-                      borderRadius: '40% 40% 50% 50%',
-                    }}
-                    initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
-                    animate={{
-                      opacity: [0, 0.7, 0.5, 0],
-                      y: [0, 6, 16, 24],
-                      x: [0, d.xDrift * 0.5, d.xDrift],
-                      scale: [1, 1, 0.8, 0.4],
-                    }}
-                    transition={{
-                      duration: d.duration,
-                      delay: d.delay,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: 'easeIn',
-                    }}
-                  />
-                ))}
+                <FuelDroplets
+                  className={
+                    isLow
+                      ? 'bg-red-400/80 dark:bg-red-300/80'
+                      : 'bg-amber-500/70 dark:bg-amber-300/70'
+                  }
+                />
 
                 {/* Smoke puffs — soft blurred circles that accumulate into smoke */}
                 <SmokePuffs
