@@ -271,10 +271,8 @@ export function SealSummaryModal({
           {flameName} {t('title')}
         </DialogTitle>
 
-        {/* Shimmer particles */}
-        {open && !shouldReduceMotion && (
-          <SealEmbers color={colors.light} />
-        )}
+        {/* Floating ember particles */}
+        {open && !shouldReduceMotion && <SealEmbers color={colors.light} />}
 
         <div className="relative flex flex-col items-center gap-3 py-2">
           {/* Header text — at top */}
