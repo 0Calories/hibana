@@ -103,7 +103,7 @@ export function FlameParticles({
     ): ExtendedParticle => {
       const id = particleSeed ?? idCounter.current++;
       const base = generateFloatingParticle(index, id, rangeConfig);
-      const extra = extras ? extras(index, seed) : {};
+      const extra = extras ? extras(id, seed) : {};
       return {
         ...base,
         ...extra,
@@ -142,7 +142,7 @@ export function FlameParticles({
             effectiveStateConfig[state as keyof ParticleStateConfig];
           if (!stateConf) return p;
           const base = generateFloatingParticle(index, id, rangeConfig);
-          const extra = extras ? extras(index, seed) : {};
+          const extra = extras ? extras(id, seed) : {};
           return {
             ...base,
             ...extra,
@@ -173,7 +173,7 @@ export function FlameParticles({
             const index = prev.length + i;
             const id = idCounter.current++;
             const base = generateFloatingParticle(index, id, rangeConfig);
-            const extra = extras ? extras(index, seed) : {};
+            const extra = extras ? extras(id, seed) : {};
             return {
               ...base,
               ...extra,

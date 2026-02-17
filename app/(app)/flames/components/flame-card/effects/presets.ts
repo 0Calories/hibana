@@ -104,8 +104,10 @@ export const EMBER_EFFECT: FlameParticleEffect = {
     const isSPath = sPathHash % 20 < 1; // ~5%
     if (!isSPath) return {} as Record<string, number>;
     const ampHash = generateHash(index, seed + 555);
+    const posHash = generateHash(index, seed + 666);
     return {
       sPath: 1,
+      x: 20 + (posHash % 60), // 20–80%, wider spread than normal embers
       sSize: 2 + (ampHash % 2), // 2–3px, always small
       sAmplitude: 4 + (ampHash % 6), // 4–9px
       sinePeriod: 0.3 + ((ampHash % 100) / 100) * 0.2, // 0.3–0.5s per oscillation
