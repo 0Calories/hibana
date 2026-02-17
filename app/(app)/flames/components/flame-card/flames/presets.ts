@@ -1,6 +1,6 @@
 import type { TargetAndTransition } from 'framer-motion';
+import type { ParticleStateConfig } from '../../particles';
 import type { FlameState } from '../../../utils/types';
-import type { ParticleStateConfig } from '../effects/particles';
 import type {
   EmberEffectConfig,
   SealedSmokeEffectConfig,

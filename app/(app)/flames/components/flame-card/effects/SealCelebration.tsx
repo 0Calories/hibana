@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
-import { generateHash } from './particles';
+import { generateHash } from '../../particles';
 
 interface SealCelebrationProps {
   active: boolean;

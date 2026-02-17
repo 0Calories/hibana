@@ -15,6 +15,7 @@ import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
 import { FlameRenderer } from './flame-card/effects/FlameRenderer';
 import { SealCelebration } from './flame-card/effects/SealCelebration';
 import type { EffectConfig, ShapeColors } from './flame-card/effects/types';
+import { SealEmbers } from './SealEmbers';
 
 interface SealSummaryModalProps {
   open: boolean;
@@ -87,47 +88,6 @@ function useCountUp(target: number, active: boolean) {
   }, [target, active, shouldReduceMotion]);
 
   return value;
-}
-
-function ShimmerParticles({ color }: { color: string }) {
-  const particles = useMemo(() => {
-    return Array.from({ length: 16 }, (_, i) => ({
-      id: i,
-      left: `${8 + Math.random() * 84}%`,
-      size: 2 + Math.random() * 3,
-      delay: Math.random() * 5,
-      duration: 2.5 + Math.random() * 2,
-    }));
-  }, []);
-
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
-      {particles.map((p) => (
-        <span
-          key={p.id}
-          className="absolute rounded-full"
-          style={{
-            left: p.left,
-            bottom: '-4px',
-            width: p.size,
-            height: p.size,
-            backgroundColor: color,
-            boxShadow: `0 0 ${p.size + 2}px ${color}, 0 0 ${p.size * 2 + 4}px ${color}`,
-            opacity: 0,
-            animation: `seal-shimmer ${p.duration}s ${p.delay}s ease-in-out infinite`,
-          }}
-        />
-      ))}
-      <style>{`
-        @keyframes seal-shimmer {
-          0% { opacity: 0; transform: translateY(0); }
-          8% { opacity: 0.45; }
-          50% { opacity: 0.3; }
-          100% { opacity: 0; transform: translateY(-420px); }
-        }
-      `}</style>
-    </div>
-  );
 }
 
 function SealFuelMeter({
@@ -313,7 +273,7 @@ export function SealSummaryModal({
 
         {/* Shimmer particles */}
         {open && !shouldReduceMotion && (
-          <ShimmerParticles color={colors.light} />
+          <SealEmbers color={colors.light} />
         )}
 
         <div className="relative flex flex-col items-center gap-3 py-2">

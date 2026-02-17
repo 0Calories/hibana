@@ -1,15 +1,17 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useMemo } from 'react';
-import type { BaseParticleProps, Particle } from './particles';
 import {
+  type BaseParticleProps,
   generateBaseParticle,
   generateHash,
   generateParticles,
   getParticleIntensity,
+  type Particle,
+  ParticleField,
   shouldShowParticles,
-} from './particles';
+} from '../../particles';
 import type { ShapeColors, SmokeEffectConfig } from './types';
 
 interface SmokeParticle extends Particle {
@@ -65,7 +67,6 @@ export function GeometricSmoke({
   config,
   isOverburning = false,
 }: GeometricSmokeProps) {
-  const shouldReduceMotion = useReducedMotion();
   const showSmoke = shouldShowParticles(state) || state === 'sealed';
   const { baseSize, states } = config;
 
@@ -86,55 +87,51 @@ export function GeometricSmoke({
     [state, effectiveStates, baseSize],
   );
 
-  if (shouldReduceMotion || !showSmoke) {
-    return null;
-  }
-
   const { opacity, speed } = getParticleIntensity(state);
   const palette = isOverburning ? OVERBURN_GREY_PALETTE : SMOKE_PALETTE(colors);
   const effectiveSpeed = isOverburning ? speed * 0.65 : speed;
 
   return (
-    <div
+    <ParticleField
       key={`smoke-${state}`}
+      particles={particles}
+      active={showSmoke}
       className="pointer-events-none absolute inset-0 scale-75 md:scale-100"
     >
-      <AnimatePresence>
-        {particles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            className="absolute"
-            style={{
-              left: `${particle.x}%`,
-              bottom: '35%',
-              width: particle.size,
-              height: particle.size,
-              backgroundColor: palette[particle.colorIndex % palette.length],
-              opacity,
-            }}
-            initial={{
-              y: 0,
-              x: 0,
-              opacity: 0,
-              rotate: 0,
-              scale: 0.5,
-            }}
-            animate={{
-              y: [-10, -80, -140],
-              x: [0, particle.drift * 0.5, particle.drift],
-              opacity: [0, opacity, opacity * 0.6, 0],
-              rotate: [0, particle.rotation * 0.5, particle.rotation],
-              scale: [0.5, 1, 1.3, 0.8],
-            }}
-            transition={{
-              duration: particle.duration * effectiveSpeed,
-              delay: particle.delay,
-              repeat: Infinity,
-              ease: 'easeOut',
-            }}
-          />
-        ))}
-      </AnimatePresence>
-    </div>
+      {(particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute"
+          style={{
+            left: `${particle.x}%`,
+            bottom: '35%',
+            width: particle.size,
+            height: particle.size,
+            backgroundColor: palette[particle.colorIndex % palette.length],
+            opacity,
+          }}
+          initial={{
+            y: 0,
+            x: 0,
+            opacity: 0,
+            rotate: 0,
+            scale: 0.5,
+          }}
+          animate={{
+            y: [-10, -80, -140],
+            x: [0, particle.drift * 0.5, particle.drift],
+            opacity: [0, opacity, opacity * 0.6, 0],
+            rotate: [0, particle.rotation * 0.5, particle.rotation],
+            scale: [0.5, 1, 1.3, 0.8],
+          }}
+          transition={{
+            duration: particle.duration * effectiveSpeed,
+            delay: particle.delay,
+            repeat: Infinity,
+            ease: 'easeOut',
+          }}
+        />
+      )}
+    </ParticleField>
   );
 }

@@ -1,116 +1,55 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
+import {
+  generateBaseParticle,
+  generateHash,
+  type Particle,
+  ParticleField,
+} from './particles';
 
-/**
- * Smoke puffs — each is a soft blurred circle that drifts upward.
- * Multiple overlapping puffs at staggered timings create a smoky effect
- * through accumulation rather than any single shape looking like smoke.
- */
-const SMOKE_PUFFS: {
-  id: string;
-  size: number;
+const PUFF_COUNT = 9;
+const PUFF_SEED = 63;
+
+const PUFF_CONFIG = {
+  xRange: { min: 0, max: 1 }, // not used for positioning (puffs are relative to parent)
+  sizeRange: { min: 3, max: 6 },
+  delayRange: { min: 0, max: 2 },
+  durationRange: { min: 1.8, max: 2.6 },
+  driftRange: { min: -6, max: 7 },
+} as const;
+
+interface SmokePuff extends Particle {
   blur: number;
-  duration: number;
-  delay: number;
-  xPath: [number, number, number, number];
-  yEnd: number;
   peakOpacity: number;
-}[] = [
-  // cluster 1 — drifts left
-  {
-    id: 'pf-0',
-    size: 5,
-    blur: 2,
-    duration: 2.0,
-    delay: 0,
-    xPath: [0, -2, -4, -6],
-    yEnd: -28,
-    peakOpacity: 0.4,
-  },
-  {
-    id: 'pf-1',
-    size: 3,
-    blur: 1.5,
-    duration: 1.8,
-    delay: 0.1,
-    xPath: [1, -1, -3, -4],
-    yEnd: -22,
-    peakOpacity: 0.3,
-  },
-  {
-    id: 'pf-2',
-    size: 4,
-    blur: 2.5,
-    duration: 2.2,
-    delay: 0.2,
-    xPath: [-1, -3, -2, -5],
-    yEnd: -32,
-    peakOpacity: 0.25,
-  },
-  // cluster 2 — drifts right
-  {
-    id: 'pf-3',
-    size: 4,
-    blur: 2,
-    duration: 2.2,
-    delay: 0.8,
-    xPath: [0, 3, 5, 4],
-    yEnd: -26,
-    peakOpacity: 0.35,
-  },
-  {
-    id: 'pf-4',
-    size: 6,
-    blur: 3,
-    duration: 2.4,
-    delay: 0.9,
-    xPath: [-1, 2, 4, 7],
-    yEnd: -30,
-    peakOpacity: 0.25,
-  },
-  {
-    id: 'pf-5',
-    size: 3,
-    blur: 1.5,
-    duration: 2.0,
-    delay: 1.0,
-    xPath: [1, 4, 3, 5],
-    yEnd: -20,
-    peakOpacity: 0.3,
-  },
-  // cluster 3 — center-ish
-  {
-    id: 'pf-6',
-    size: 5,
-    blur: 2.5,
-    duration: 2.6,
-    delay: 1.6,
-    xPath: [0, 1, -2, 0],
-    yEnd: -34,
-    peakOpacity: 0.3,
-  },
-  {
-    id: 'pf-7',
-    size: 3,
-    blur: 2,
-    duration: 2.0,
-    delay: 1.7,
-    xPath: [0, -2, 1, -1],
-    yEnd: -24,
-    peakOpacity: 0.35,
-  },
-  {
-    id: 'pf-8',
-    size: 4,
-    blur: 3,
-    duration: 2.4,
-    delay: 1.9,
-    xPath: [1, 0, -1, 2],
-    yEnd: -30,
-    peakOpacity: 0.2,
-  },
-];
+  yEnd: number;
+  /** 4-point horizontal drift path */
+  xPath: [number, number, number, number];
+}
+
+function createSmokePuff(index: number): SmokePuff {
+  const base = generateBaseParticle(index, PUFF_SEED, PUFF_CONFIG);
+  const h1 = generateHash(index, 101);
+  const h2 = generateHash(index, 203);
+  const h3 = generateHash(index, 307);
+
+  const blur = 1.5 + ((h1 % 100) / 100) * 1.5;
+  const peakOpacity = 0.2 + ((h2 % 100) / 100) * 0.2;
+  const yEnd = -(20 + (h3 % 15));
+
+  // Build a 4-point drift path from the base drift
+  const driftDir = base.drift > 0 ? 1 : -1;
+  const mag = Math.abs(base.drift);
+  const xPath: [number, number, number, number] = [
+    0,
+    driftDir * mag * 0.3,
+    driftDir * mag * 0.7,
+    base.drift,
+  ];
+
+  return { ...base, blur, peakOpacity, yEnd, xPath };
+}
 
 interface SmokePuffsProps {
   color: string;
@@ -119,9 +58,14 @@ interface SmokePuffsProps {
 }
 
 export function SmokePuffs({ color, intensity = 1 }: SmokePuffsProps) {
+  const puffs = useMemo(
+    () => Array.from({ length: PUFF_COUNT }, (_, i) => createSmokePuff(i)),
+    [],
+  );
+
   return (
-    <>
-      {SMOKE_PUFFS.map((p) => {
+    <ParticleField particles={puffs} active>
+      {(p) => {
         const size = p.size * intensity;
         const peakOpacity = Math.min(p.peakOpacity * intensity, 1);
         return (
@@ -151,7 +95,7 @@ export function SmokePuffs({ color, intensity = 1 }: SmokePuffsProps) {
             }}
           />
         );
-      })}
-    </>
+      }}
+    </ParticleField>
   );
 }

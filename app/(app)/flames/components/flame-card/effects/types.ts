@@ -1,6 +1,6 @@
 import type { TargetAndTransition } from 'framer-motion';
 import type { FlameState } from '../../../utils/types';
-import type { ParticleStateConfig } from './particles';
+import type { ParticleStateConfig } from '../../particles';
 
 export interface ShapeColors {
   light: string;
