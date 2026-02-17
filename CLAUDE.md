@@ -56,6 +56,13 @@ messages/         # i18n translation files (en.json, ja.json)
 - **Types**: colocated or in `types.ts`. Suffix `Props` for component props, `Schema` for Zod, `Result` for action returns
 - **Translations**: Always use `useTranslations()` from next-intl. All user-facing strings go in `messages/en.json` and `messages/ja.json`.
 - **Formatting**: Run `pnpm biome check --write` before committing. Single quotes, 2-space indent.
+- **Theme Colors**: Use CSS theme tokens from `globals.css` instead of hard-coded Tailwind color classes. The theme system handles light/dark mode automatically.
+  - Backgrounds: `bg-background`, `bg-card`, `bg-muted` — NOT `bg-white`, `bg-slate-50`, `bg-slate-200`
+  - Text: `text-foreground`, `text-muted-foreground`, `text-card-foreground` — NOT `text-slate-900`, `text-slate-500`, `text-gray-400`
+  - Borders: `border-border` — NOT `border-slate-200`
+  - SVG fills: `fill-muted` — NOT `fill-slate-200`
+  - Do NOT add `dark:` overrides for colors that the theme already handles (e.g. `dark:text-white` alongside `text-foreground` is redundant)
+  - Flame-specific status colors (`text-amber-500`, `text-red-500`, gradient hex values) are intentionally NOT theme tokens — keep those as-is
 
 ## Git Conventions
 

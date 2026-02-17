@@ -58,7 +58,7 @@ export function TimerDisplay({
       ? '' // Use inline color prop for completed state
       : isOverburning
         ? 'text-red-500 dark:text-red-400'
-        : 'text-slate-700 dark:text-white/80';
+        : 'text-foreground';
 
   return (
     <motion.div

@@ -10,7 +10,7 @@ export default async function FlamesLoading() {
   return (
     <div className="size-full p-4 pb-24">
       {/* Page title skeleton */}
-      <div className="mb-6 h-8 w-32 animate-pulse rounded-lg bg-slate-200 dark:bg-white/10" />
+      <div className="mb-6 h-8 w-32 animate-pulse rounded-lg bg-muted" />
 
       <FuelMeterSkeleton label={t('fuel.label')} />
 

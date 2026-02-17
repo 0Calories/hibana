@@ -32,7 +32,9 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
-                isActive ? 'text-primary' : 'text-gray-400 active:scale-95'
+                isActive
+                  ? 'text-primary'
+                  : 'text-muted-foreground active:scale-95'
               }`}
             >
               <span className="text-xl leading-none">{item.icon}</span>
