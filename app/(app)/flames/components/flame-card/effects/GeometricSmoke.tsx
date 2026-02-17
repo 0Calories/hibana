@@ -1,11 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type BaseParticleProps,
-  generateBaseParticle,
-  generateHash,
+  generateFloatingParticle,
   generateParticles,
   getParticleIntensity,
   type Particle,
@@ -20,31 +19,9 @@ interface SmokeParticle extends Particle {
 
 const GREY_SHADES = ['#6b7280', '#9ca3af', '#4b5563', '#d1d5db'];
 
-const SMOKE_PARTICLE_CONFIG = {
-  xRange: { min: 30, max: 70 },
-  sizeRange: { min: 0.7, max: 1.3 },
-  delayRange: { min: 0, max: 3 },
-  durationRange: { min: 2.5, max: 4.5 },
-  driftRange: { min: -15, max: 15 },
-} as const;
-
 /** Mix of flame color shades and grey shades for natural-looking smoke */
 const SMOKE_PALETTE = (colors: ShapeColors) =>
   [colors.medium, colors.dark, colors.medium, ...GREY_SHADES] as const;
-
-function createSmokeParticle(
-  index: number,
-  sizeMultiplier: number,
-  baseSize: number,
-): SmokeParticle {
-  const base = generateBaseParticle(index, 42, SMOKE_PARTICLE_CONFIG);
-  const hash = generateHash(index);
-  return {
-    ...base,
-    size: baseSize * base.size * sizeMultiplier,
-    rotation: (hash % 90) - 45,
-  };
-}
 
 const OVERBURN_GREY_PALETTE = [
   '#6b7280',
@@ -68,23 +45,59 @@ export function GeometricSmoke({
   isOverburning = false,
 }: GeometricSmokeProps) {
   const showSmoke = shouldShowParticles(state) || state === 'sealed';
-  const { baseSize, states } = config;
+  const { stateConfig } = config;
 
   // When overburning, boost smoke particle count and size
   const effectiveStates = useMemo(() => {
-    if (!isOverburning) return states;
+    if (!isOverburning) {
+      return stateConfig;
+    }
+
     return {
-      ...states,
+      ...stateConfig,
       burning: { count: 25, sizeMultiplier: 1.8 },
     };
-  }, [states, isOverburning]);
+  }, [stateConfig, isOverburning]);
 
-  const particles = useMemo(
-    () =>
-      generateParticles(state, effectiveStates, (index, sizeMultiplier) =>
-        createSmokeParticle(index, sizeMultiplier, baseSize),
-      ),
-    [state, effectiveStates, baseSize],
+  const idCounter = useRef(0);
+  const [particles, setParticles] = useState<SmokeParticle[]>([]);
+
+  useEffect(() => {
+    setParticles(
+      generateParticles(state, effectiveStates, (index, sizeMultiplier) => {
+        const id = idCounter.current++;
+        const particle = generateFloatingParticle(index, id);
+        return {
+          ...particle,
+          id,
+          size: particle.size * sizeMultiplier,
+          rotation: -45 + Math.random() * 90,
+        };
+      }),
+    );
+  }, [state, effectiveStates]);
+
+  const replaceParticle = useCallback(
+    (completedId: number) => {
+      setParticles((prev) =>
+        prev.map((p) => {
+          if (p.id !== completedId) return p;
+          const id = idCounter.current++;
+          const stateConf =
+            effectiveStates[state as keyof typeof effectiveStates];
+          if (!stateConf) return p;
+          const particle = generateFloatingParticle(id, id);
+          return {
+            ...particle,
+            id,
+            size: particle.size * stateConf.sizeMultiplier,
+            rotation: -45 + Math.random() * 90,
+            delay: 0,
+          };
+        }),
+      );
+    },
+    [state, effectiveStates],
   );
 
   const { opacity, speed } = getParticleIntensity(state);
@@ -127,9 +140,9 @@ export function GeometricSmoke({
           transition={{
             duration: particle.duration * effectiveSpeed,
             delay: particle.delay,
-            repeat: Infinity,
-            ease: 'easeOut',
+            ease: 'linear',
           }}
+          onAnimationComplete={() => replaceParticle(particle.id)}
         />
       )}
     </ParticleField>

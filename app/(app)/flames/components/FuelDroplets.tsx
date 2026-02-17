@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import {
-  generateBaseParticle,
+  generateFloatingParticle,
   generateHash,
   type Particle,
   ParticleField,
@@ -26,7 +26,7 @@ interface Droplet extends Particle {
 }
 
 function createDroplet(index: number): Droplet {
-  const base = generateBaseParticle(index, DROPLET_SEED, DROPLET_CONFIG);
+  const base = generateFloatingParticle(index, DROPLET_SEED, DROPLET_CONFIG);
   const h = generateHash(index, 171);
   const width = 2 + ((h % 100) / 100) * 1;
   const height = 3 + ((h % 100) / 100) * 2;

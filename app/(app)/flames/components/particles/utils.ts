@@ -5,8 +5,16 @@ import type {
   ParticleStateConfig,
 } from './types';
 
+export interface ParticleRangeConfig {
+  xRange?: { min: number; max: number };
+  sizeRange?: { min: number; max: number };
+  delayRange?: { min: number; max: number };
+  durationRange?: { min: number; max: number };
+  driftRange?: { min: number; max: number };
+}
+
 /** Seed for deterministic random generation (avoids hydration mismatch) */
-const DEFAULT_SEED = 42;
+const DEFAULT_SEED = 420;
 const HASH_PRIME = 9973;
 const HASH_MOD = 10000;
 
@@ -22,28 +30,20 @@ export function generateHash(
 }
 
 /**
- * Generate base particle properties using deterministic randomization.
+ * Generates a base upward floating particle using deterministic randomization.
  */
-export function generateBaseParticle(
+export function generateFloatingParticle(
   index: number,
   seed: number = DEFAULT_SEED,
-  config?: {
-    xRange?: { min: number; max: number };
-    sizeRange?: { min: number; max: number };
-    delayRange?: { min: number; max: number };
-    durationRange?: { min: number; max: number };
-    driftRange?: { min: number; max: number };
-  },
+  config?: ParticleRangeConfig,
 ): Particle {
-  const hash = generateHash(index, seed);
-
   const xRange = config?.xRange ?? { min: 35, max: 65 };
   const sizeRange = config?.sizeRange ?? { min: 3, max: 6 };
   const delayRange = config?.delayRange ?? { min: 0, max: 1.5 };
   const durationRange = config?.durationRange ?? { min: 1.5, max: 2.5 };
   const driftRange = config?.driftRange ?? { min: -10, max: 10 };
 
-  // Use a different seed for color so it doesn't correlate with position/size
+  const hash = generateHash(index, seed);
   const colorHash = generateHash(index, seed + 77);
 
   return {

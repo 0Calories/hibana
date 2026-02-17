@@ -18,12 +18,12 @@ export interface SealedFlameProps {
 
 export interface EmberEffectConfig {
   type: 'embers';
-  states: ParticleStateConfig;
+  stateConfig: ParticleStateConfig;
 }
 
 export interface SmokeEffectConfig {
   type: 'smoke';
-  states: ParticleStateConfig;
+  stateConfig: ParticleStateConfig;
   baseSize: number;
 }
 

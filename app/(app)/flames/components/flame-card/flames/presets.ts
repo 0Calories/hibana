@@ -1,6 +1,6 @@
 import type { TargetAndTransition } from 'framer-motion';
-import type { ParticleStateConfig } from '../../particles';
 import type { FlameState } from '../../../utils/types';
+import type { ParticleStateConfig } from '../../particles';
 import type {
   EmberEffectConfig,
   SealedSmokeEffectConfig,
@@ -90,7 +90,7 @@ export const RADIATE_ORIGIN = { x: '50%', y: '50%' } as const;
 
 const STANDARD_EMBER_STATES: ParticleStateConfig = {
   burning: { count: 8, sizeMultiplier: 1.4 },
-  paused: { count: 3, sizeMultiplier: 1 },
+  paused: { count: 5, sizeMultiplier: 1 },
   untended: { count: 1, sizeMultiplier: 1 },
   sealing: { count: 12, sizeMultiplier: 1.6 },
   sealed: { count: 0, sizeMultiplier: 0 },
@@ -98,20 +98,20 @@ const STANDARD_EMBER_STATES: ParticleStateConfig = {
 
 export const STANDARD_EMBERS: EmberEffectConfig = {
   type: 'embers',
-  states: STANDARD_EMBER_STATES,
+  stateConfig: STANDARD_EMBER_STATES,
 };
 
 const WISP_EMBER_STATES: ParticleStateConfig = {
   burning: { count: 8, sizeMultiplier: 1.4 },
-  paused: { count: 3, sizeMultiplier: 1 },
-  untended: { count: 1, sizeMultiplier: 1 },
+  paused: { count: 5, sizeMultiplier: 1 },
+  untended: { count: 3, sizeMultiplier: 1 },
   sealing: { count: 12, sizeMultiplier: 1.6 },
   sealed: { count: 3, sizeMultiplier: 0.6 },
 };
 
 export const WISP_EMBERS: EmberEffectConfig = {
   type: 'embers',
-  states: WISP_EMBER_STATES,
+  stateConfig: WISP_EMBER_STATES,
 };
 
 export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
@@ -123,7 +123,7 @@ export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
 };
 
 export function smokeEffect(baseSize: number): SmokeEffectConfig {
-  return { type: 'smoke', states: STANDARD_SMOKE_STATES, baseSize };
+  return { type: 'smoke', stateConfig: STANDARD_SMOKE_STATES, baseSize };
 }
 
 export function sealedSmokeEffect(
