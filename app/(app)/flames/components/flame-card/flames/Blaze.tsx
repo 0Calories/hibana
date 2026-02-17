@@ -1,11 +1,11 @@
-import type { FlameComponentProps, FlameDefinition } from '../effects/types';
 import {
+  EMBER_EFFECT,
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
-  STANDARD_EMBERS,
   smokeEffect,
-} from './presets';
+} from '../effects/presets';
+import type { FlameComponentProps, FlameDefinition } from '../effects/types';
 
 function BlazeFlame({ colors }: FlameComponentProps) {
   return (
@@ -56,5 +56,5 @@ export const Blaze: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [STANDARD_EMBERS, smokeEffect(7)],
+  effects: [EMBER_EFFECT, smokeEffect()],
 };

@@ -183,8 +183,6 @@ export function FlameCard({
         ? { borderColor: '#64748b50' }
         : {};
 
-  const fuelMinutes = Math.floor(elapsedSeconds / 60);
-
   const { effects } = FLAME_REGISTRY[level];
 
   return (

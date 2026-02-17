@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import {
-  generateBaseParticle,
+  generateFloatingParticle,
   generateHash,
   type Particle,
   ParticleField,
@@ -26,12 +26,12 @@ interface SealEmber extends Particle {
 }
 
 function createSealEmber(index: number): SealEmber {
-  const base = generateBaseParticle(index, EMBER_SEED, EMBER_CONFIG);
+  const base = generateFloatingParticle(index, EMBER_SEED, EMBER_CONFIG);
   const h = generateHash(index, 149);
   return {
     ...base,
     glowSize: base.size + 2 + ((h % 100) / 100) * 2,
-    peakOpacity: 0.15 + ((h % 45) / 100),
+    peakOpacity: 0.15 + (h % 45) / 100,
   };
 }
 

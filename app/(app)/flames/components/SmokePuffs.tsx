@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import {
-  generateBaseParticle,
+  generateFloatingParticle,
   generateHash,
   type Particle,
   ParticleField,
@@ -29,7 +29,7 @@ interface SmokePuff extends Particle {
 }
 
 function createSmokePuff(index: number): SmokePuff {
-  const base = generateBaseParticle(index, PUFF_SEED, PUFF_CONFIG);
+  const base = generateFloatingParticle(index, PUFF_SEED, PUFF_CONFIG);
   const h1 = generateHash(index, 101);
   const h2 = generateHash(index, 203);
   const h3 = generateHash(index, 307);

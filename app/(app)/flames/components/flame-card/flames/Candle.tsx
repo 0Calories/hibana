@@ -1,17 +1,17 @@
 import { motion, useReducedMotion } from 'framer-motion';
+import {
+  EMBER_EFFECT,
+  FLICKER_DURATIONS,
+  FLICKER_ORIGIN,
+  FLICKER_VARIANTS,
+  sealedSmokeEffect,
+  smokeEffect,
+} from '../effects/presets';
 import type {
   FlameComponentProps,
   FlameDefinition,
   SealedFlameProps,
 } from '../effects/types';
-import {
-  FLICKER_DURATIONS,
-  FLICKER_ORIGIN,
-  FLICKER_VARIANTS,
-  STANDARD_EMBERS,
-  sealedSmokeEffect,
-  smokeEffect,
-} from './presets';
 
 function CandleBase() {
   return (
@@ -90,6 +90,21 @@ function CandleSealed({ colors }: SealedFlameProps) {
   );
 }
 
+const smokeEffectStateConfig = {
+  burning: {
+    count: 1,
+    sizeMultiplier: 1,
+  },
+  paused: {
+    count: 0,
+    sizeMultiplier: 0,
+  },
+  untended: {
+    count: 0,
+    sizeMultiplier: 0,
+  },
+};
+
 export const Candle: FlameDefinition = {
   Base: CandleBase,
   Flame: CandleFlame,
@@ -99,5 +114,9 @@ export const Candle: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [STANDARD_EMBERS, smokeEffect(4), sealedSmokeEffect(65)],
+  effects: [
+    EMBER_EFFECT,
+    smokeEffect(smokeEffectStateConfig),
+    sealedSmokeEffect(65),
+  ],
 };

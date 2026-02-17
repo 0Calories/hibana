@@ -1,15 +1,15 @@
 import { motion, useReducedMotion } from 'framer-motion';
+import {
+  EMBER_EFFECT,
+  RADIATE_DURATIONS,
+  RADIATE_ORIGIN,
+  RADIATE_VARIANTS,
+} from '../effects/presets';
 import type {
   FlameComponentProps,
   FlameDefinition,
   SealedFlameProps,
 } from '../effects/types';
-import {
-  RADIATE_DURATIONS,
-  RADIATE_ORIGIN,
-  RADIATE_VARIANTS,
-  STANDARD_EMBERS,
-} from './presets';
 
 function StarFlame({ colors }: FlameComponentProps) {
   return (
@@ -66,5 +66,5 @@ export const Star: FlameDefinition = {
     variants: RADIATE_VARIANTS,
     durations: RADIATE_DURATIONS,
   },
-  effects: [STANDARD_EMBERS],
+  effects: [EMBER_EFFECT],
 };
