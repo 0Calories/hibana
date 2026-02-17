@@ -177,7 +177,6 @@ export function FlameCard({
         }
     : canSeal || isSealing
       ? {
-          boxShadow: '0 0 15px #fbbf2450, 0 0 30px #fbbf2425',
           borderColor: '#fbbf24',
         }
       : isSealed
@@ -199,6 +198,7 @@ export function FlameCard({
               state={state}
               colors={colors}
               isOverburning={isOverburning}
+              isSealReady={canSeal}
             />
           </div>
         </div>
@@ -219,6 +219,7 @@ export function FlameCard({
           'relative flex w-full flex-col overflow-hidden rounded-xl border transition-colors',
           'border-border bg-card text-foreground',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
+          (canSeal || isSealing) && 'animate-seal-ready-glow',
           isSealed && 'cursor-default',
           isFuelBlocked && 'cursor-default opacity-40',
           isBlocked && 'cursor-default opacity-40',

@@ -14,12 +14,21 @@ import type { EmberEffectConfig, ShapeColors } from './types';
 
 interface ParticleEmbersProps extends BaseParticleProps {
   config: EmberEffectConfig;
+  isSealReady?: boolean;
 }
 
 const EMBER_PALETTE = (colors: ShapeColors) =>
   [colors.light, colors.light, colors.medium] as const;
 
-export function ParticleEmbers({ state, colors, config }: ParticleEmbersProps) {
+const SEAL_READY_PALETTE = (colors: ShapeColors) =>
+  [colors.light, '#fbbf24', colors.medium, '#f59e0b', '#fde68a'] as const;
+
+export function ParticleEmbers({
+  state,
+  colors,
+  config,
+  isSealReady = false,
+}: ParticleEmbersProps) {
   const sealedCount = config.states.sealed?.count ?? 0;
   const showEmbers =
     shouldShowParticles(state) || (state === 'sealed' && sealedCount > 0);
@@ -35,7 +44,9 @@ export function ParticleEmbers({ state, colors, config }: ParticleEmbersProps) {
   );
 
   const { opacity, speed } = getParticleIntensity(state, {});
-  const palette = EMBER_PALETTE(colors);
+  const palette = isSealReady
+    ? SEAL_READY_PALETTE(colors)
+    : EMBER_PALETTE(colors);
 
   return (
     <ParticleField
