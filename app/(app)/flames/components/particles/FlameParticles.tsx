@@ -163,9 +163,13 @@ export function FlameParticles({
     const target = stateConf.count;
 
     setParticles((prev) => {
-      if (prev.length === target) return prev;
+      if (prev.length === target) {
+        removingIds.current.clear();
+        return prev;
+      }
 
       if (prev.length < target) {
+        removingIds.current.clear();
         // Append new particles
         const newParticles = Array.from(
           { length: target - prev.length },
@@ -185,11 +189,8 @@ export function FlameParticles({
         return [...prev, ...newParticles];
       }
 
-      // Mark excess for removal (they'll fade out organically)
-      const excess = prev.slice(target);
-      for (const p of excess) {
-        removingIds.current.add(p.id);
-      }
+      // Replace stale set — only current excess should be marked
+      removingIds.current = new Set(prev.slice(target).map((p) => p.id));
       return prev;
     });
   }, [state, effectiveStateConfig, rangeConfig, extras, seed]);

@@ -134,13 +134,14 @@ export const EMBER_EFFECT: FlameParticleEffect = {
         x: [0, particle.drift],
       };
     },
-    transition: (particle, _duration) => {
+    transition: (particle, duration) => {
       if (!particle.sPath) return {};
+      const sinePeriod = particle.sinePeriod ?? 0.4;
       return {
         x: {
-          duration: particle.sinePeriod ?? 0.4,
+          duration: sinePeriod,
           ease: 'easeInOut',
-          repeat: Number.POSITIVE_INFINITY,
+          repeat: Math.ceil(duration / sinePeriod),
           repeatType: 'loop' as const,
         },
       };
