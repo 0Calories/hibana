@@ -126,12 +126,6 @@
   }
 }
 
-@keyframes ember-sine {
-  0%, 100% { translate: 0; }
-  25% { translate: var(--sine-amp, 12px); }
-  75% { translate: calc(-1 * var(--sine-amp, 12px)); }
-}
-
 @keyframes seal-ready-glow {
   0%,
   100% {

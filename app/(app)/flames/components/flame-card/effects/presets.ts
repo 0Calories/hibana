@@ -121,17 +121,28 @@ export const EMBER_EFFECT: FlameParticleEffect = {
     initial: { opacity: 0, y: 0, x: 0 },
     animate: (particle, opacity) => {
       if (particle.sPath) {
-        // Only y + opacity — x wobble is handled by CSS sine on inner div
+        const amp = particle.sAmplitude ?? 8;
         return {
           opacity: [0, opacity, opacity, opacity * 0.6, 0],
           y: -RISE_HEIGHT * 1.4,
-          x: 0,
+          x: [0, amp, 0, -amp, 0],
         };
       }
       return {
         opacity: [0, opacity, opacity * 0.6, 0],
         y: -RISE_HEIGHT,
         x: [0, particle.drift],
+      };
+    },
+    transition: (particle, _duration) => {
+      if (!particle.sPath) return {};
+      return {
+        x: {
+          duration: particle.sinePeriod ?? 0.4,
+          ease: 'easeInOut',
+          repeat: Number.POSITIVE_INFINITY,
+          repeatType: 'loop' as const,
+        },
       };
     },
   },

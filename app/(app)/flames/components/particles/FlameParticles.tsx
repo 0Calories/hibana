@@ -208,41 +208,7 @@ export function FlameParticles({
         const particleOpacity = opacity * particle.opacityJitter;
         const duration =
           particle.duration * effectiveSpeed * particle.speedJitter;
-        const color = palette[particle.colorIndex % palette.length];
-
-        if (particle.sPath) {
-          return (
-            <motion.div
-              key={particle.id}
-              className="absolute"
-              style={{
-                left: `${particle.x}%`,
-                bottom: animation.bottom,
-              }}
-              initial={animation.initial}
-              animate={animation.animate(particle, particleOpacity)}
-              transition={{
-                duration,
-                delay: particle.delay,
-                ...(animation.ease ? { ease: animation.ease } : {}),
-              }}
-              onAnimationComplete={() => replaceParticle(particle.id)}
-            >
-              <div
-                className={animation.className}
-                style={
-                  {
-                    width: particle.sSize ?? particle.size,
-                    height: particle.sSize ?? particle.size,
-                    backgroundColor: color,
-                    animation: `ember-sine ${particle.sinePeriod ?? 0.8}s ease-in-out infinite`,
-                    '--sine-amp': `${particle.sAmplitude ?? 12}px`,
-                  } as React.CSSProperties
-                }
-              />
-            </motion.div>
-          );
-        }
+        const size = particle.sSize ?? particle.size;
 
         return (
           <motion.div
@@ -251,9 +217,9 @@ export function FlameParticles({
             style={{
               left: `${particle.x}%`,
               bottom: animation.bottom,
-              width: particle.size,
-              height: particle.size,
-              backgroundColor: color,
+              width: size,
+              height: size,
+              backgroundColor: palette[particle.colorIndex % palette.length],
             }}
             initial={animation.initial}
             animate={animation.animate(particle, particleOpacity)}
@@ -261,6 +227,9 @@ export function FlameParticles({
               duration,
               delay: particle.delay,
               ...(animation.ease ? { ease: animation.ease } : {}),
+              ...(animation.transition
+                ? animation.transition(particle, duration)
+                : {}),
             }}
             onAnimationComplete={() => replaceParticle(particle.id)}
           />

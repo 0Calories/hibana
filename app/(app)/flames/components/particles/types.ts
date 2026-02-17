@@ -68,6 +68,11 @@ export interface FlameParticleEffect {
       opacity: number,
     ) => Record<string, number | number[]>;
     ease?: Easing;
+    /** Per-property transition overrides, merged on top of the base transition */
+    transition?: (
+      particle: ExtendedParticle,
+      duration: number,
+    ) => Record<string, unknown>;
   };
   extras?: (index: number, seed: number) => Record<string, number>;
   showWhen?: (state: FlameState) => boolean;
