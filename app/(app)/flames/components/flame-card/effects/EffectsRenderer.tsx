@@ -11,6 +11,7 @@ interface EffectsRendererProps {
   state: FlameState;
   colors: ShapeColors;
   isOverburning?: boolean;
+  isSealReady?: boolean;
 }
 
 export function EffectsRenderer({
@@ -18,6 +19,7 @@ export function EffectsRenderer({
   state,
   colors,
   isOverburning = false,
+  isSealReady = false,
 }: EffectsRendererProps) {
   return (
     <>
@@ -30,6 +32,7 @@ export function EffectsRenderer({
                 state={state}
                 colors={colors}
                 config={effect}
+                isSealReady={isSealReady}
               />
             );
           case 'smoke':
