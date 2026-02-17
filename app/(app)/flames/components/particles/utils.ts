@@ -45,6 +45,8 @@ export function generateFloatingParticle(
 
   const hash = generateHash(index, seed);
   const colorHash = generateHash(index, seed + 77);
+  const opacityHash = generateHash(index, seed + 111);
+  const speedHash = generateHash(index, seed + 222);
 
   return {
     id: index,
@@ -59,6 +61,8 @@ export function generateFloatingParticle(
       ((hash % 1000) / 1000) * (durationRange.max - durationRange.min),
     drift: driftRange.min + (hash % (driftRange.max - driftRange.min + 1)),
     colorIndex: colorHash,
+    opacityJitter: 0.7 + ((opacityHash % 100) / 100) * 0.29,
+    speedJitter: 0.8 + ((speedHash % 100) / 100) * 0.39,
   };
 }
 

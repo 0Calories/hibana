@@ -1,16 +1,16 @@
+import {
+  FLICKER_DURATIONS,
+  FLICKER_ORIGIN,
+  FLICKER_VARIANTS,
+  simpleSealedSmokeEffect,
+  WISP_EMBER_EFFECT,
+} from '../effects/presets';
 import { SmolderingEmbers } from '../effects/SmolderingEmbers';
 import type {
   FlameComponentProps,
   FlameDefinition,
   SealedFlameProps,
 } from '../effects/types';
-import {
-  FLICKER_DURATIONS,
-  FLICKER_ORIGIN,
-  FLICKER_VARIANTS,
-  simpleSealedSmokeEffect,
-  WISP_EMBERS,
-} from './presets';
 
 function WispFlame({ colors }: FlameComponentProps) {
   return (
@@ -35,5 +35,5 @@ export const Wisp: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [WISP_EMBERS, simpleSealedSmokeEffect(62)],
+  effects: [WISP_EMBER_EFFECT, simpleSealedSmokeEffect(62)],
 };

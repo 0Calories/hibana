@@ -1,0 +1,271 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FlameState } from '../../utils/types';
+import type { ShapeColors } from '../flame-card/effects/types';
+import { ParticleField } from './ParticleField';
+import type {
+  ExtendedParticle,
+  FlameParticleEffect,
+  ParticleConditions,
+  ParticleStateConfig,
+} from './types';
+import {
+  generateFloatingParticle,
+  generateParticles,
+  getParticleIntensity,
+  shouldShowParticles,
+} from './utils';
+
+interface FlameParticlesProps {
+  effect: FlameParticleEffect;
+  state: FlameState;
+  colors: ShapeColors;
+  conditions: ParticleConditions;
+}
+
+export function FlameParticles({
+  effect,
+  state,
+  colors,
+  conditions,
+}: FlameParticlesProps) {
+  const {
+    key,
+    stateConfig,
+    rangeConfig,
+    seed = 420,
+    palette: basePalette,
+    animation,
+    extras,
+    showWhen,
+    modifiers,
+  } = effect;
+
+  // Resolve active modifiers
+  const activeModifiers = useMemo(
+    () =>
+      modifiers?.filter((m) => {
+        if (m.condition === 'sealReady') return conditions.sealReady;
+        if (m.condition === 'overburning') return conditions.overburning;
+        return false;
+      }) ?? [],
+    [modifiers, conditions.sealReady, conditions.overburning],
+  );
+
+  // Merge state config with modifier overrides
+  const effectiveStateConfig = useMemo(() => {
+    let config = stateConfig;
+    for (const mod of activeModifiers) {
+      if (mod.stateOverrides) {
+        config = { ...config, ...mod.stateOverrides };
+      }
+    }
+    return config;
+  }, [stateConfig, activeModifiers]);
+
+  // Resolve palette
+  const palette = useMemo(() => {
+    for (const mod of activeModifiers) {
+      if (mod.palette) {
+        return typeof mod.palette === 'function'
+          ? mod.palette(colors)
+          : mod.palette;
+      }
+    }
+    return basePalette(colors);
+  }, [activeModifiers, basePalette, colors]);
+
+  // Resolve speed multiplier
+  const speedMultiplier = useMemo(() => {
+    for (const mod of activeModifiers) {
+      if (mod.speedMultiplier != null) return mod.speedMultiplier;
+    }
+    return 1;
+  }, [activeModifiers]);
+
+  // Visibility
+  const sealedCount = effectiveStateConfig.sealed?.count ?? 0;
+  const customVisible = showWhen ? showWhen(state) : false;
+  const active =
+    shouldShowParticles(state) ||
+    (state === 'sealed' && sealedCount > 0) ||
+    customVisible;
+
+  const idCounter = useRef(0);
+
+  const createParticle = useCallback(
+    (
+      index: number,
+      sizeMultiplier: number,
+      particleSeed?: number,
+    ): ExtendedParticle => {
+      const id = particleSeed ?? idCounter.current++;
+      const base = generateFloatingParticle(index, id, rangeConfig);
+      const extra = extras ? extras(index, seed) : {};
+      return {
+        ...base,
+        ...extra,
+        id,
+        size: base.size * sizeMultiplier,
+      };
+    },
+    [rangeConfig, extras, seed],
+  );
+
+  // Deterministic initial generation
+  const [particles, setParticles] = useState<ExtendedParticle[]>(() =>
+    generateParticles(state, effectiveStateConfig, (index, sizeMultiplier) => {
+      const id = idCounter.current++;
+      return createParticle(index, sizeMultiplier, id);
+    }),
+  );
+
+  // Recycle individual particles on animation complete
+  const removingIds = useRef(new Set<number>());
+
+  const replaceParticle = useCallback(
+    (completedId: number) => {
+      // If marked for removal, drop instead of recycling
+      if (removingIds.current.has(completedId)) {
+        removingIds.current.delete(completedId);
+        setParticles((prev) => prev.filter((p) => p.id !== completedId));
+        return;
+      }
+
+      setParticles((prev) =>
+        prev.map((p, index) => {
+          if (p.id !== completedId) return p;
+          const id = idCounter.current++;
+          const stateConf =
+            effectiveStateConfig[state as keyof ParticleStateConfig];
+          if (!stateConf) return p;
+          const base = generateFloatingParticle(index, id, rangeConfig);
+          const extra = extras ? extras(index, seed) : {};
+          return {
+            ...base,
+            ...extra,
+            id,
+            size: base.size * stateConf.sizeMultiplier,
+            delay: 0,
+          };
+        }),
+      );
+    },
+    [state, effectiveStateConfig, rangeConfig, extras, seed],
+  );
+
+  // Sync particle count when state changes
+  useEffect(() => {
+    const stateConf = effectiveStateConfig[state as keyof ParticleStateConfig];
+    if (!stateConf) return;
+    const target = stateConf.count;
+
+    setParticles((prev) => {
+      if (prev.length === target) return prev;
+
+      if (prev.length < target) {
+        // Append new particles
+        const newParticles = Array.from(
+          { length: target - prev.length },
+          (_, i) => {
+            const index = prev.length + i;
+            const id = idCounter.current++;
+            const base = generateFloatingParticle(index, id, rangeConfig);
+            const extra = extras ? extras(index, seed) : {};
+            return {
+              ...base,
+              ...extra,
+              id,
+              size: base.size * stateConf.sizeMultiplier,
+            } as ExtendedParticle;
+          },
+        );
+        return [...prev, ...newParticles];
+      }
+
+      // Mark excess for removal (they'll fade out organically)
+      const excess = prev.slice(target);
+      for (const p of excess) {
+        removingIds.current.add(p.id);
+      }
+      return prev;
+    });
+  }, [state, effectiveStateConfig, rangeConfig, extras, seed]);
+
+  const { opacity, speed } = getParticleIntensity(state);
+  const effectiveSpeed = speed * speedMultiplier;
+
+  return (
+    <ParticleField
+      key={`${key}-${state}`}
+      particles={particles}
+      active={active}
+      className="pointer-events-none absolute inset-0 scale-75 md:scale-100"
+    >
+      {(particle) => {
+        const particleOpacity = opacity * particle.opacityJitter;
+        const duration =
+          particle.duration * effectiveSpeed * particle.speedJitter;
+        const color = palette[particle.colorIndex % palette.length];
+
+        if (particle.sPath) {
+          return (
+            <motion.div
+              key={particle.id}
+              className="absolute"
+              style={{
+                left: `${particle.x}%`,
+                bottom: animation.bottom,
+              }}
+              initial={animation.initial}
+              animate={animation.animate(particle, particleOpacity)}
+              transition={{
+                duration,
+                delay: particle.delay,
+                ...(animation.ease ? { ease: animation.ease } : {}),
+              }}
+              onAnimationComplete={() => replaceParticle(particle.id)}
+            >
+              <div
+                className={animation.className}
+                style={
+                  {
+                    width: particle.sSize ?? particle.size,
+                    height: particle.sSize ?? particle.size,
+                    backgroundColor: color,
+                    animation: `ember-sine ${particle.sinePeriod ?? 0.8}s ease-in-out infinite`,
+                    '--sine-amp': `${particle.sAmplitude ?? 12}px`,
+                  } as React.CSSProperties
+                }
+              />
+            </motion.div>
+          );
+        }
+
+        return (
+          <motion.div
+            key={particle.id}
+            className={`absolute ${animation.className}`}
+            style={{
+              left: `${particle.x}%`,
+              bottom: animation.bottom,
+              width: particle.size,
+              height: particle.size,
+              backgroundColor: color,
+            }}
+            initial={animation.initial}
+            animate={animation.animate(particle, particleOpacity)}
+            transition={{
+              duration,
+              delay: particle.delay,
+              ...(animation.ease ? { ease: animation.ease } : {}),
+            }}
+            onAnimationComplete={() => replaceParticle(particle.id)}
+          />
+        );
+      }}
+    </ParticleField>
+  );
+}

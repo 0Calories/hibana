@@ -1,6 +1,6 @@
 import type { TargetAndTransition } from 'framer-motion';
 import type { FlameState } from '../../../utils/types';
-import type { ParticleStateConfig } from '../../particles';
+import type { FlameParticleEffect } from '../../particles';
 
 export interface ShapeColors {
   light: string;
@@ -16,17 +16,6 @@ export interface SealedFlameProps {
   colors: ShapeColors;
 }
 
-export interface EmberEffectConfig {
-  type: 'embers';
-  stateConfig: ParticleStateConfig;
-}
-
-export interface SmokeEffectConfig {
-  type: 'smoke';
-  stateConfig: ParticleStateConfig;
-  baseSize: number;
-}
-
 export interface SealedSmokeEffectConfig {
   type: 'sealedSmoke';
   wickY: number;
@@ -39,10 +28,7 @@ export interface SealedSmokeEffectConfig {
   simple?: boolean;
 }
 
-export type EffectConfig =
-  | EmberEffectConfig
-  | SmokeEffectConfig
-  | SealedSmokeEffectConfig;
+export type EffectConfig = FlameParticleEffect | SealedSmokeEffectConfig;
 
 export interface FlameDefinition {
   Flame: React.FC<FlameComponentProps>;

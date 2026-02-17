@@ -1,17 +1,17 @@
 import { motion } from 'framer-motion';
+import {
+  EMBER_EFFECT,
+  FLICKER_DURATIONS,
+  FLICKER_ORIGIN,
+  FLICKER_VARIANTS,
+  sealedSmokeEffect,
+  smokeEffect,
+} from '../effects/presets';
 import type {
   FlameComponentProps,
   FlameDefinition,
   SealedFlameProps,
 } from '../effects/types';
-import {
-  FLICKER_DURATIONS,
-  FLICKER_ORIGIN,
-  FLICKER_VARIANTS,
-  STANDARD_EMBERS,
-  sealedSmokeEffect,
-  smokeEffect,
-} from './presets';
 
 function TorchBase() {
   return (
@@ -71,5 +71,5 @@ export const Torch: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [STANDARD_EMBERS, smokeEffect(5), sealedSmokeEffect(65)],
+  effects: [EMBER_EFFECT, smokeEffect(), sealedSmokeEffect(65)],
 };

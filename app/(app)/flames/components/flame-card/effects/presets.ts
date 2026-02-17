@@ -1,11 +1,8 @@
 import type { TargetAndTransition } from 'framer-motion';
 import type { FlameState } from '../../../utils/types';
-import type { ParticleStateConfig } from '../../particles';
-import type {
-  EmberEffectConfig,
-  SealedSmokeEffectConfig,
-  SmokeEffectConfig,
-} from '../effects/types';
+import type { FlameParticleEffect, ParticleStateConfig } from '../../particles';
+import { generateHash } from '../../particles';
+import type { SealedSmokeEffectConfig } from './types';
 
 // ---------------------------------------------------------------------------
 // Animation variant maps
@@ -88,6 +85,8 @@ export const RADIATE_ORIGIN = { x: '50%', y: '50%' } as const;
 // Effect presets
 // ---------------------------------------------------------------------------
 
+const RISE_HEIGHT = 140;
+
 const STANDARD_EMBER_STATES: ParticleStateConfig = {
   burning: { count: 8, sizeMultiplier: 1.4 },
   paused: { count: 5, sizeMultiplier: 1 },
@@ -96,9 +95,56 @@ const STANDARD_EMBER_STATES: ParticleStateConfig = {
   sealed: { count: 0, sizeMultiplier: 0 },
 };
 
-export const STANDARD_EMBERS: EmberEffectConfig = {
-  type: 'embers',
+export const EMBER_EFFECT: FlameParticleEffect = {
+  key: 'embers',
   stateConfig: STANDARD_EMBER_STATES,
+  palette: (colors) => [colors.light, colors.light, colors.medium],
+  extras: (index, seed) => {
+    const sPathHash = generateHash(index, seed + 444);
+    const isSPath = sPathHash % 20 < 1; // ~5%
+    if (!isSPath) return {} as Record<string, number>;
+    const ampHash = generateHash(index, seed + 555);
+    return {
+      sPath: 1,
+      sSize: 2 + (ampHash % 2), // 2–3px, always small
+      sAmplitude: 4 + (ampHash % 6), // 4–9px
+      sinePeriod: 0.3 + ((ampHash % 100) / 100) * 0.2, // 0.3–0.5s per oscillation
+      speedJitter: 0.8 + ((ampHash % 100) / 100) * 0.1, // 0.80–0.90, slightly faster
+      opacityJitter: 1, // override — stay fully opaque
+    };
+  },
+  animation: {
+    bottom: '40%',
+    className: 'rounded-full',
+    initial: { opacity: 0, y: 0, x: 0 },
+    animate: (particle, opacity) => {
+      if (particle.sPath) {
+        // Only y + opacity — x wobble is handled by CSS sine on inner div
+        return {
+          opacity: [0, opacity, opacity, opacity * 0.6, 0],
+          y: -RISE_HEIGHT * 1.4,
+          x: 0,
+        };
+      }
+      return {
+        opacity: [0, opacity, opacity * 0.6, 0],
+        y: -RISE_HEIGHT,
+        x: [0, particle.drift],
+      };
+    },
+  },
+  modifiers: [
+    {
+      condition: 'sealReady',
+      palette: (colors) => [
+        colors.light,
+        '#fbbf24',
+        colors.medium,
+        '#f59e0b',
+        '#fde68a',
+      ],
+    },
+  ],
 };
 
 const WISP_EMBER_STATES: ParticleStateConfig = {
@@ -109,12 +155,12 @@ const WISP_EMBER_STATES: ParticleStateConfig = {
   sealed: { count: 3, sizeMultiplier: 0.6 },
 };
 
-export const WISP_EMBERS: EmberEffectConfig = {
-  type: 'embers',
+export const WISP_EMBER_EFFECT: FlameParticleEffect = {
+  ...EMBER_EFFECT,
   stateConfig: WISP_EMBER_STATES,
 };
 
-export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
+const STANDARD_SMOKE_STATES: ParticleStateConfig = {
   burning: { count: 15, sizeMultiplier: 1.5 },
   paused: { count: 4, sizeMultiplier: 1 },
   untended: { count: 2, sizeMultiplier: 1 },
@@ -122,8 +168,59 @@ export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
   sealed: { count: 0, sizeMultiplier: 0 },
 };
 
-export function smokeEffect(baseSize: number): SmokeEffectConfig {
-  return { type: 'smoke', stateConfig: STANDARD_SMOKE_STATES, baseSize };
+const OVERBURN_GREY_PALETTE = [
+  '#6b7280',
+  '#9ca3af',
+  '#4b5563',
+  '#78716c',
+  '#a8a29e',
+  '#57534e',
+  '#d1d5db',
+] as const;
+
+export function smokeEffect(
+  stateConfig?: ParticleStateConfig,
+): FlameParticleEffect {
+  return {
+    key: 'smoke',
+    stateConfig: stateConfig ?? STANDARD_SMOKE_STATES,
+    seed: 777,
+    palette: (colors) => [
+      colors.medium,
+      colors.dark,
+      colors.medium,
+      '#6b7280',
+      '#9ca3af',
+      '#4b5563',
+      '#d1d5db',
+    ],
+    extras: (index, seed) => ({
+      rotation: (generateHash(index, seed + 333) % 90) - 45,
+    }),
+    animation: {
+      bottom: '35%',
+      className: '',
+      initial: { y: 0, x: 0, opacity: 0, rotate: 0, scale: 0.5 },
+      animate: (particle, opacity) => ({
+        y: [-10, -80, -140],
+        x: [0, particle.drift * 0.5, particle.drift],
+        opacity: [0, opacity, opacity * 0.6, 0],
+        rotate: [0, (particle.rotation ?? 0) * 0.5, particle.rotation ?? 0],
+        scale: [0.5, 1, 1.3, 0.8],
+      }),
+      ease: 'linear' as const,
+    },
+    modifiers: [
+      {
+        condition: 'overburning',
+        palette: OVERBURN_GREY_PALETTE,
+        stateOverrides: {
+          burning: { count: 25, sizeMultiplier: 1.8 },
+        },
+        speedMultiplier: 0.65,
+      },
+    ],
+  };
 }
 
 export function sealedSmokeEffect(
