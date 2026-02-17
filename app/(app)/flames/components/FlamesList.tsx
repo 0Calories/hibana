@@ -4,8 +4,8 @@ import { useCallback, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import type { FuelBudgetStatus } from '../actions/fuel-actions';
 import { endSession, getAllSessionsForDate } from '../session-actions';
-import { FlameCard } from './FlameCard';
 import { FuelMeter } from './FuelMeter';
+import { FlameCard } from './flame-card/FlameCard';
 import { useFuel } from './hooks/useFuel';
 
 interface FlamesListProps {

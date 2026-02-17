@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import {
   FlameCardSkeleton,
   FuelMeterSkeleton,
-} from './components/FlameCardSkeleton';
+} from './components/flame-card/FlameCardSkeleton';
 
 export default async function FlamesLoading() {
   const t = await getTranslations('flames');
