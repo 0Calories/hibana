@@ -59,7 +59,6 @@ export function SealEmbers({ color }: SealEmbersProps) {
             width: p.size,
             height: p.size,
             backgroundColor: color,
-            //boxShadow: `0 0 ${p.glowSize}px ${color}, 0 0 ${p.glowSize * 2}px ${color}`,
           }}
           animate={{
             y: -420,
