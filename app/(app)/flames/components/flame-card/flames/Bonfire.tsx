@@ -4,6 +4,7 @@ import {
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
+  DANCING_EMBER_EFFECT,
   sealedSmokeEffect,
   smokeEffect,
 } from '../effects/presets';
@@ -115,5 +116,10 @@ export const Bonfire: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [EMBER_EFFECT, smokeEffect(), sealedSmokeEffect(72)],
+  effects: [
+    EMBER_EFFECT,
+    DANCING_EMBER_EFFECT,
+    smokeEffect(),
+    sealedSmokeEffect(72),
+  ],
 };

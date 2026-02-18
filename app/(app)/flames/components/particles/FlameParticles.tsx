@@ -105,16 +105,6 @@ export function FlameParticles({
 
   const idCounter = useRef(0);
 
-  // Clamp x to effective bounds when extras override x
-  const effectiveXRange = effectiveRangeConfig?.xRange;
-  const clampX = useCallback(
-    (x: number) => {
-      if (!constrainToFlame || !effectiveXRange) return x;
-      return Math.max(effectiveXRange.min, Math.min(effectiveXRange.max, x));
-    },
-    [constrainToFlame, effectiveXRange],
-  );
-
   const createParticle = useCallback(
     (
       index: number,
@@ -128,11 +118,10 @@ export function FlameParticles({
         ...base,
         ...extra,
         id,
-        x: clampX(extra.x ?? base.x),
         size: base.size * sizeMultiplier,
       };
     },
-    [effectiveRangeConfig, extras, seed, clampX],
+    [effectiveRangeConfig, extras, seed],
   );
 
   // Deterministic initial generation
@@ -172,14 +161,13 @@ export function FlameParticles({
             ...base,
             ...extra,
             id,
-            x: clampX(extra.x ?? base.x),
             size: base.size * stateConf.sizeMultiplier,
             delay: 0,
           };
         }),
       );
     },
-    [state, effectiveStateConfig, effectiveRangeConfig, extras, seed, clampX],
+    [state, effectiveStateConfig, effectiveRangeConfig, extras, seed],
   );
 
   // Sync particle count when state changes
@@ -212,7 +200,6 @@ export function FlameParticles({
               ...base,
               ...extra,
               id,
-              x: clampX(extra.x ?? base.x),
               size: base.size * stateConf.sizeMultiplier,
             } as ExtendedParticle;
           },
@@ -224,7 +211,7 @@ export function FlameParticles({
       removingIds.current = new Set(prev.slice(target).map((p) => p.id));
       return prev;
     });
-  }, [state, effectiveStateConfig, effectiveRangeConfig, extras, seed, clampX]);
+  }, [state, effectiveStateConfig, effectiveRangeConfig, extras, seed]);
 
   const { opacity, speed } = getParticleIntensity(state);
   const effectiveSpeed = speed * speedMultiplier;
