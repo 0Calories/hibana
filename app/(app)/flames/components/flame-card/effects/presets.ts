@@ -134,8 +134,8 @@ export const EMBER_EFFECT: FlameParticleEffect = {
   modifiers: SEAL_READY_PALETTE,
 };
 
-const S_PATH_EMBER_STATES: ParticleStateConfig = {
-  burning: { count: 2, sizeMultiplier: 1 },
+const DANCING_EMBER_STATES: ParticleStateConfig = {
+  burning: { count: 3, sizeMultiplier: 1 },
   paused: { count: 1, sizeMultiplier: 1 },
   untended: { count: 0, sizeMultiplier: 1 },
   sealing: { count: 3, sizeMultiplier: 1 },
@@ -146,7 +146,7 @@ const S_PATH_EMBER_STATES: ParticleStateConfig = {
 export const DANCING_EMBER_EFFECT: FlameParticleEffect = {
   key: 'dancingEmbers',
   constrainToFlame: true,
-  stateConfig: S_PATH_EMBER_STATES,
+  stateConfig: DANCING_EMBER_STATES,
   seed: 888,
   rangeConfig: { sizeRange: { min: 2, max: 3 } },
   palette: (colors) => [colors.light, colors.light, colors.medium],
@@ -191,7 +191,7 @@ export const WISP_EMBER_EFFECT: FlameParticleEffect = {
   stateConfig: WISP_EMBER_STATES,
 };
 
-const STANDARD_SMOKE_STATES: ParticleStateConfig = {
+export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
   burning: { count: 15, sizeMultiplier: 1.5 },
   paused: { count: 4, sizeMultiplier: 1 },
   untended: { count: 2, sizeMultiplier: 1 },
@@ -221,9 +221,7 @@ export function smokeEffect(
       colors.medium,
       colors.dark,
       colors.medium,
-      '#6b7280',
       '#9ca3af',
-      '#4b5563',
       '#d1d5db',
     ],
     extras: (index, seed) => ({

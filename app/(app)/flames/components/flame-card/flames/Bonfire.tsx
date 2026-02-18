@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
 import {
+  DANCING_EMBER_EFFECT,
   EMBER_EFFECT,
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
-  DANCING_EMBER_EFFECT,
+  STANDARD_SMOKE_STATES,
   sealedSmokeEffect,
   smokeEffect,
 } from '../effects/presets';
@@ -107,6 +108,15 @@ function BonfireSealed({ colors }: SealedFlameProps) {
   );
 }
 
+const smokeEffectStateConfig = {
+  ...STANDARD_SMOKE_STATES,
+  burning: { count: 15, sizeMultiplier: 2.5 },
+  paused: { count: 8, sizeMultiplier: 1 },
+  untended: { count: 2, sizeMultiplier: 1 },
+  sealing: { count: 15, sizeMultiplier: 2 },
+  sealed: { count: 0, sizeMultiplier: 0 },
+};
+
 export const Bonfire: FlameDefinition = {
   Base: BonfireBase,
   Flame: BonfireFlame,
@@ -119,7 +129,7 @@ export const Bonfire: FlameDefinition = {
   effects: [
     EMBER_EFFECT,
     DANCING_EMBER_EFFECT,
-    smokeEffect(),
+    smokeEffect(smokeEffectStateConfig),
     sealedSmokeEffect(72),
   ],
 };
