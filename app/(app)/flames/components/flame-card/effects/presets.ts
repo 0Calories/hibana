@@ -88,15 +88,24 @@ export const RADIATE_ORIGIN = { x: '50%', y: '50%' } as const;
 const RISE_HEIGHT = 140;
 
 const STANDARD_EMBER_STATES: ParticleStateConfig = {
-  burning: { count: 8, sizeMultiplier: 1.4 },
+  burning: { count: 16, sizeMultiplier: 1.4 },
   paused: { count: 5, sizeMultiplier: 1 },
   untended: { count: 1, sizeMultiplier: 1 },
   sealing: { count: 12, sizeMultiplier: 1.6 },
   sealed: { count: 0, sizeMultiplier: 0 },
 };
 
+const WISP_EMBER_STATES: ParticleStateConfig = {
+  burning: { count: 12, sizeMultiplier: 2.4 },
+  paused: { count: 5, sizeMultiplier: 1 },
+  untended: { count: 3, sizeMultiplier: 1 },
+  sealing: { count: 24, sizeMultiplier: 1.6 },
+  sealed: { count: 3, sizeMultiplier: 0.6 },
+};
+
 export const EMBER_EFFECT: FlameParticleEffect = {
   key: 'embers',
+  constrainToFlame: true,
   stateConfig: STANDARD_EMBER_STATES,
   palette: (colors) => [colors.light, colors.light, colors.medium],
   extras: (index, seed) => {
@@ -161,14 +170,6 @@ export const EMBER_EFFECT: FlameParticleEffect = {
   ],
 };
 
-const WISP_EMBER_STATES: ParticleStateConfig = {
-  burning: { count: 12, sizeMultiplier: 2.4 },
-  paused: { count: 5, sizeMultiplier: 1 },
-  untended: { count: 3, sizeMultiplier: 1 },
-  sealing: { count: 24, sizeMultiplier: 1.6 },
-  sealed: { count: 3, sizeMultiplier: 0.6 },
-};
-
 export const WISP_EMBER_EFFECT: FlameParticleEffect = {
   ...EMBER_EFFECT,
   stateConfig: WISP_EMBER_STATES,
@@ -197,6 +198,7 @@ export function smokeEffect(
 ): FlameParticleEffect {
   return {
     key: 'smoke',
+    constrainToFlame: true,
     stateConfig: stateConfig ?? STANDARD_SMOKE_STATES,
     seed: 777,
     palette: (colors) => [

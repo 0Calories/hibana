@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FlameState } from '../../utils/types';
 import type { ShapeColors } from '../flame-card/effects/types';
+import { useFlameGeometry } from '../flame-card/FlameGeometryContext';
 import { ParticleField } from './ParticleField';
 import type {
   ExtendedParticle,
@@ -41,7 +42,16 @@ export function FlameParticles({
     extras,
     showWhen,
     modifiers,
+    constrainToFlame,
   } = effect;
+
+  // Merge flame geometry bounds when constrainToFlame is set and no explicit xRange
+  const { xBounds } = useFlameGeometry();
+  const effectiveRangeConfig = useMemo(() => {
+    if (!constrainToFlame || rangeConfig?.xRange || !xBounds)
+      return rangeConfig;
+    return { ...rangeConfig, xRange: xBounds };
+  }, [constrainToFlame, rangeConfig, xBounds]);
 
   // Resolve active modifiers
   const activeModifiers = useMemo(
@@ -95,6 +105,16 @@ export function FlameParticles({
 
   const idCounter = useRef(0);
 
+  // Clamp x to effective bounds when extras override x
+  const effectiveXRange = effectiveRangeConfig?.xRange;
+  const clampX = useCallback(
+    (x: number) => {
+      if (!constrainToFlame || !effectiveXRange) return x;
+      return Math.max(effectiveXRange.min, Math.min(effectiveXRange.max, x));
+    },
+    [constrainToFlame, effectiveXRange],
+  );
+
   const createParticle = useCallback(
     (
       index: number,
@@ -102,16 +122,17 @@ export function FlameParticles({
       particleSeed?: number,
     ): ExtendedParticle => {
       const id = particleSeed ?? idCounter.current++;
-      const base = generateFloatingParticle(index, id, rangeConfig);
+      const base = generateFloatingParticle(index, id, effectiveRangeConfig);
       const extra = extras ? extras(id, seed) : {};
       return {
         ...base,
         ...extra,
         id,
+        x: clampX(extra.x ?? base.x),
         size: base.size * sizeMultiplier,
       };
     },
-    [rangeConfig, extras, seed],
+    [effectiveRangeConfig, extras, seed, clampX],
   );
 
   // Deterministic initial generation
@@ -141,19 +162,24 @@ export function FlameParticles({
           const stateConf =
             effectiveStateConfig[state as keyof ParticleStateConfig];
           if (!stateConf) return p;
-          const base = generateFloatingParticle(index, id, rangeConfig);
+          const base = generateFloatingParticle(
+            index,
+            id,
+            effectiveRangeConfig,
+          );
           const extra = extras ? extras(id, seed) : {};
           return {
             ...base,
             ...extra,
             id,
+            x: clampX(extra.x ?? base.x),
             size: base.size * stateConf.sizeMultiplier,
             delay: 0,
           };
         }),
       );
     },
-    [state, effectiveStateConfig, rangeConfig, extras, seed],
+    [state, effectiveStateConfig, effectiveRangeConfig, extras, seed, clampX],
   );
 
   // Sync particle count when state changes
@@ -176,12 +202,17 @@ export function FlameParticles({
           (_, i) => {
             const index = prev.length + i;
             const id = idCounter.current++;
-            const base = generateFloatingParticle(index, id, rangeConfig);
+            const base = generateFloatingParticle(
+              index,
+              id,
+              effectiveRangeConfig,
+            );
             const extra = extras ? extras(id, seed) : {};
             return {
               ...base,
               ...extra,
               id,
+              x: clampX(extra.x ?? base.x),
               size: base.size * stateConf.sizeMultiplier,
             } as ExtendedParticle;
           },
@@ -193,7 +224,7 @@ export function FlameParticles({
       removingIds.current = new Set(prev.slice(target).map((p) => p.id));
       return prev;
     });
-  }, [state, effectiveStateConfig, rangeConfig, extras, seed]);
+  }, [state, effectiveStateConfig, effectiveRangeConfig, extras, seed, clampX]);
 
   const { opacity, speed } = getParticleIntensity(state);
   const effectiveSpeed = speed * speedMultiplier;
