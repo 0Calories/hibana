@@ -11,6 +11,7 @@ import {
   SheetDescription,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useUserState } from './UserStateProvider';
 
 interface ProfileBadgeProps {
   username?: string;
@@ -22,7 +23,6 @@ interface ProfileBadgeProps {
 
 const MOCK_DATA = {
   username: 'Explorer',
-  sparks: 128,
   level: 3,
   xp: 450,
   xpToNext: 1000,
@@ -30,11 +30,11 @@ const MOCK_DATA = {
 
 export function ProfileBadge({
   username = MOCK_DATA.username,
-  sparks = MOCK_DATA.sparks,
   level = MOCK_DATA.level,
   xp = MOCK_DATA.xp,
   xpToNext = MOCK_DATA.xpToNext,
 }: ProfileBadgeProps) {
+  const { sparks_balance: sparks } = useUserState();
   const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
 
   return (
