@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { creditSealReward } from '@/app/(app)/shop/actions';
 import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { getFlameColors } from '../../utils/colors';
@@ -75,11 +76,12 @@ export function FlameCard({
   const handleSealComplete = useCallback(async () => {
     const success = await completeSeal();
     if (success) {
+      creditSealReward(flame.id, date); // fire-and-forget
       setCelebrationActive(true);
     } else {
       toast.error(tSeal('error'), { position: 'top-center' });
     }
-  }, [completeSeal, tSeal]);
+  }, [completeSeal, tSeal, flame.id, date]);
 
   const handleCelebrationComplete = useCallback(() => {
     setCelebrationActive(false);

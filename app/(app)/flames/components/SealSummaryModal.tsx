@@ -28,10 +28,19 @@ interface SealSummaryModalProps {
   targetSeconds: number;
 }
 
-function calculateRewards(minutes: number, level: number) {
+function calculateRewards(
+  elapsedSeconds: number,
+  targetSeconds: number,
+  level: number,
+) {
   const levelMultiplier = 1 + (level - 1) * 0.1;
+  const minutes = Math.floor(elapsedSeconds / 60);
+  const completionBonus =
+    targetSeconds > 0 && elapsedSeconds >= targetSeconds
+      ? Math.floor((targetSeconds / 60) * 0.5)
+      : 0;
   return {
-    sparks: Math.floor(minutes * 2 * levelMultiplier),
+    sparks: Math.floor(minutes * 1 * levelMultiplier) + completionBonus,
     xp: Math.floor(minutes * 1.5 * levelMultiplier),
   };
 }
@@ -183,8 +192,7 @@ export function SealSummaryModal({
 }: SealSummaryModalProps) {
   const t = useTranslations('flames.seal');
   const shouldReduceMotion = useReducedMotion();
-  const minutes = Math.floor(elapsedSeconds / 60);
-  const rewards = calculateRewards(minutes, level);
+  const rewards = calculateRewards(elapsedSeconds, targetSeconds, level);
 
   // Pick a contextual subtitle based on fuel percentage
   const subtitle = useMemo(() => {
