@@ -19,11 +19,11 @@
 
   -- Sample items
   insert into items (id, name, description, type, cost_sparks) values
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Sticky Note Pack', 'Open to get sticky notes to post on your wall', 'item', 100),
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Sticky Note Pack', 'Open to get sticky notes to post on your wall', 'item', 100);
 
   -- Inventory entries for test user
   insert into user_inventory (user_id, item_id, quantity, is_equipped) values
-    ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1, false),
+    ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1, false);
 
   -- Sample spark transactions (earn, earn, spend)
   insert into spark_transactions (user_id, amount, reason) values
