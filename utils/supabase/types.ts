@@ -212,6 +212,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      items: {
+        Row: {
+          cost_sparks: number;
+          created_at: string;
+          description: string | null;
+          id: string;
+          is_active: boolean;
+          metadata: Json;
+          name: string;
+          type: string;
+        };
+        Insert: {
+          cost_sparks?: number;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean;
+          metadata?: Json;
+          name: string;
+          type: string;
+        };
+        Update: {
+          cost_sparks?: number;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean;
+          metadata?: Json;
+          name?: string;
+          type?: string;
+        };
+        Relationships: [];
+      };
       notes: {
         Row: {
           content: string | null;
@@ -263,6 +296,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      spark_transactions: {
+        Row: {
+          amount: number;
+          created_at: string;
+          id: string;
+          reason: string;
+          reference_id: string | null;
+          user_id: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          id?: string;
+          reason: string;
+          reference_id?: string | null;
+          user_id: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          reason?: string;
+          reference_id?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       tasks: {
         Row: {
           content: string | null;
@@ -309,6 +369,62 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      user_inventory: {
+        Row: {
+          acquired_at: string;
+          id: string;
+          is_equipped: boolean;
+          item_id: string;
+          quantity: number;
+          user_id: string;
+        };
+        Insert: {
+          acquired_at?: string;
+          id?: string;
+          is_equipped?: boolean;
+          item_id: string;
+          quantity?: number;
+          user_id: string;
+        };
+        Update: {
+          acquired_at?: string;
+          id?: string;
+          is_equipped?: boolean;
+          item_id?: string;
+          quantity?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_inventory_item_id_fkey';
+            columns: ['item_id'];
+            isOneToOne: false;
+            referencedRelation: 'items';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      user_state: {
+        Row: {
+          created_at: string;
+          sparks_balance: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          sparks_balance?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          sparks_balance?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
       };
       waitlist: {
         Row: {
