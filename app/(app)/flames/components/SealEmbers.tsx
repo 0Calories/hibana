@@ -9,8 +9,8 @@ import {
   ParticleField,
 } from './particles';
 
-const EMBER_COUNT = 16;
-const EMBER_SEED = 89;
+const EMBER_COUNT = 24;
+const EMBER_SEED = 69;
 
 const EMBER_CONFIG = {
   xRange: { min: 8, max: 92 },
@@ -21,7 +21,6 @@ const EMBER_CONFIG = {
 } as const;
 
 interface SealEmber extends Particle {
-  glowSize: number;
   peakOpacity: number;
 }
 
@@ -30,8 +29,7 @@ function createSealEmber(index: number): SealEmber {
   const h = generateHash(index, 149);
   return {
     ...base,
-    glowSize: base.size + 2 + ((h % 100) / 100) * 2,
-    peakOpacity: 0.15 + (h % 45) / 100,
+    peakOpacity: 0.1 + (h % 45) / 100,
   };
 }
 
@@ -61,7 +59,6 @@ export function SealEmbers({ color }: SealEmbersProps) {
             width: p.size,
             height: p.size,
             backgroundColor: color,
-            boxShadow: `0 0 ${p.glowSize}px ${color}, 0 0 ${p.glowSize * 2}px ${color}`,
           }}
           animate={{
             y: -420,

@@ -77,6 +77,8 @@ export interface FlameParticleEffect {
   extras?: (index: number, seed: number) => Record<string, number>;
   showWhen?: (state: FlameState) => boolean;
   modifiers?: StateModifier[];
+  /** When true, particle X range is constrained to the flame SVG bounds via FlameGeometryContext */
+  constrainToFlame?: boolean;
 }
 
 export interface ParticleConditions {

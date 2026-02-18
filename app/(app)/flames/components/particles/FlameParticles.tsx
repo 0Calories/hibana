@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FlameState } from '../../utils/types';
 import type { ShapeColors } from '../flame-card/effects/types';
+import { useFlameGeometry } from '../flame-card/FlameGeometryContext';
 import { ParticleField } from './ParticleField';
 import type {
   ExtendedParticle,
@@ -41,7 +42,16 @@ export function FlameParticles({
     extras,
     showWhen,
     modifiers,
+    constrainToFlame,
   } = effect;
+
+  // Merge flame geometry bounds when constrainToFlame is set and no explicit xRange
+  const { xBounds } = useFlameGeometry();
+  const effectiveRangeConfig = useMemo(() => {
+    if (!constrainToFlame || rangeConfig?.xRange || !xBounds)
+      return rangeConfig;
+    return { ...rangeConfig, xRange: xBounds };
+  }, [constrainToFlame, rangeConfig, xBounds]);
 
   // Resolve active modifiers
   const activeModifiers = useMemo(
@@ -102,7 +112,7 @@ export function FlameParticles({
       particleSeed?: number,
     ): ExtendedParticle => {
       const id = particleSeed ?? idCounter.current++;
-      const base = generateFloatingParticle(index, id, rangeConfig);
+      const base = generateFloatingParticle(index, id, effectiveRangeConfig);
       const extra = extras ? extras(id, seed) : {};
       return {
         ...base,
@@ -111,7 +121,7 @@ export function FlameParticles({
         size: base.size * sizeMultiplier,
       };
     },
-    [rangeConfig, extras, seed],
+    [effectiveRangeConfig, extras, seed],
   );
 
   // Deterministic initial generation
@@ -141,7 +151,11 @@ export function FlameParticles({
           const stateConf =
             effectiveStateConfig[state as keyof ParticleStateConfig];
           if (!stateConf) return p;
-          const base = generateFloatingParticle(index, id, rangeConfig);
+          const base = generateFloatingParticle(
+            index,
+            id,
+            effectiveRangeConfig,
+          );
           const extra = extras ? extras(id, seed) : {};
           return {
             ...base,
@@ -153,7 +167,7 @@ export function FlameParticles({
         }),
       );
     },
-    [state, effectiveStateConfig, rangeConfig, extras, seed],
+    [state, effectiveStateConfig, effectiveRangeConfig, extras, seed],
   );
 
   // Sync particle count when state changes
@@ -176,7 +190,11 @@ export function FlameParticles({
           (_, i) => {
             const index = prev.length + i;
             const id = idCounter.current++;
-            const base = generateFloatingParticle(index, id, rangeConfig);
+            const base = generateFloatingParticle(
+              index,
+              id,
+              effectiveRangeConfig,
+            );
             const extra = extras ? extras(id, seed) : {};
             return {
               ...base,
@@ -193,7 +211,7 @@ export function FlameParticles({
       removingIds.current = new Set(prev.slice(target).map((p) => p.id));
       return prev;
     });
-  }, [state, effectiveStateConfig, rangeConfig, extras, seed]);
+  }, [state, effectiveStateConfig, effectiveRangeConfig, extras, seed]);
 
   const { opacity, speed } = getParticleIntensity(state);
   const effectiveSpeed = speed * speedMultiplier;

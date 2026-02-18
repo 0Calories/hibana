@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
@@ -15,6 +15,7 @@ import { EffectsRenderer } from './effects/EffectsRenderer';
 import { FlameRenderer } from './effects/FlameRenderer';
 import { SealCelebration } from './effects/SealCelebration';
 import { SealRingProgress } from './effects/SealRingProgress';
+import { FlameGeometryProvider } from './FlameGeometryContext';
 import { FLAME_REGISTRY } from './flames';
 import { ProgressBar } from './ProgressBar';
 import { TimerDisplay } from './TimerDisplay';
@@ -183,24 +184,59 @@ export function FlameCard({
         ? { borderColor: '#64748b50' }
         : {};
 
-  const { effects } = FLAME_REGISTRY[level];
+  const flameDef = FLAME_REGISTRY[level];
+  const { effects } = flameDef;
+
+  // Measure flame SVG position for particle X-axis constraint
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [autoXBounds, setAutoXBounds] = useState<
+    { min: number; max: number } | undefined
+  >();
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+
+    const measure = () => {
+      const svg = card.querySelector('svg[role="img"]');
+      if (!svg || !card) return;
+      const cardRect = card.getBoundingClientRect();
+      const svgRect = svg.getBoundingClientRect();
+      if (cardRect.width === 0) return;
+      const min = ((svgRect.left - cardRect.left) / cardRect.width) * 100;
+      const max = ((svgRect.right - cardRect.left) / cardRect.width) * 100;
+      setAutoXBounds({ min: Math.max(0, min), max: Math.min(100, max) });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
+
+  const flameGeometry = useMemo(
+    () => ({ xBounds: flameDef.xBounds ?? autoXBounds }),
+    [flameDef.xBounds, autoXBounds],
+  );
 
   return (
-    <div className="relative w-full">
+    <div ref={cardRef} className="relative w-full">
       {/* Particle effects overlay - positioned outside button to avoid clipping */}
-      <div className="pointer-events-none absolute inset-0 z-10">
-        <div className="relative h-full w-full">
-          <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
-            <EffectsRenderer
-              effects={effects}
-              state={state}
-              colors={colors}
-              isOverburning={isOverburning}
-              isSealReady={canSeal}
-            />
+      <FlameGeometryProvider value={flameGeometry}>
+        <div className="pointer-events-none absolute inset-0 z-10">
+          <div className="relative h-full w-full">
+            <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
+              <EffectsRenderer
+                effects={effects}
+                state={state}
+                colors={colors}
+                isOverburning={isOverburning}
+                isSealReady={canSeal}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </FlameGeometryProvider>
 
       <SealCelebration
         active={celebrationActive}

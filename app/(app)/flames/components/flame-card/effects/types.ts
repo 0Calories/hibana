@@ -42,4 +42,6 @@ export interface FlameDefinition {
   };
 
   effects: EffectConfig[];
+  /** Manual override for particle X bounds (percentage of container width) */
+  xBounds?: { min: number; max: number };
 }

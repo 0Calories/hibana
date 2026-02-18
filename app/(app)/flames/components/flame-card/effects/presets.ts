@@ -88,31 +88,75 @@ export const RADIATE_ORIGIN = { x: '50%', y: '50%' } as const;
 const RISE_HEIGHT = 140;
 
 const STANDARD_EMBER_STATES: ParticleStateConfig = {
-  burning: { count: 8, sizeMultiplier: 1.4 },
+  burning: { count: 16, sizeMultiplier: 1.4 },
   paused: { count: 5, sizeMultiplier: 1 },
   untended: { count: 1, sizeMultiplier: 1 },
   sealing: { count: 12, sizeMultiplier: 1.6 },
   sealed: { count: 0, sizeMultiplier: 0 },
 };
 
+const WISP_EMBER_STATES: ParticleStateConfig = {
+  burning: { count: 12, sizeMultiplier: 2.4 },
+  paused: { count: 5, sizeMultiplier: 1 },
+  untended: { count: 3, sizeMultiplier: 1 },
+  sealing: { count: 24, sizeMultiplier: 1.6 },
+  sealed: { count: 3, sizeMultiplier: 0.6 },
+};
+
+const SEAL_READY_PALETTE: FlameParticleEffect['modifiers'] = [
+  {
+    condition: 'sealReady',
+    palette: (colors) => [
+      colors.light,
+      '#fbbf24',
+      colors.medium,
+      '#f59e0b',
+      '#fde68a',
+    ],
+  },
+];
+
 export const EMBER_EFFECT: FlameParticleEffect = {
   key: 'embers',
+  constrainToFlame: true,
   stateConfig: STANDARD_EMBER_STATES,
   palette: (colors) => [colors.light, colors.light, colors.medium],
+  animation: {
+    bottom: '40%',
+    className: 'rounded-full',
+    initial: { opacity: 0, y: 0, x: 0 },
+    animate: (particle, opacity) => ({
+      opacity: [0, opacity, opacity * 0.6, 0],
+      y: -RISE_HEIGHT,
+      x: [0, particle.drift],
+    }),
+  },
+  modifiers: SEAL_READY_PALETTE,
+};
+
+const DANCING_EMBER_STATES: ParticleStateConfig = {
+  burning: { count: 3, sizeMultiplier: 1 },
+  paused: { count: 1, sizeMultiplier: 1 },
+  untended: { count: 0, sizeMultiplier: 1 },
+  sealing: { count: 3, sizeMultiplier: 1 },
+  sealed: { count: 0, sizeMultiplier: 0 },
+};
+
+/** Fast wiggly embers that rise in an S-shaped sine path */
+export const DANCING_EMBER_EFFECT: FlameParticleEffect = {
+  key: 'dancingEmbers',
+  constrainToFlame: true,
+  stateConfig: DANCING_EMBER_STATES,
+  seed: 888,
+  rangeConfig: { sizeRange: { min: 2, max: 3 } },
+  palette: (colors) => [colors.light, colors.light, colors.medium],
   extras: (index, seed) => {
-    const sPathHash = generateHash(index, seed + 444);
-    const isSPath = sPathHash % 20 < 1; // ~5%
-    if (!isSPath) return {} as Record<string, number>;
-    const ampHash = generateHash(index, seed + 555);
-    const posHash = generateHash(index, seed + 666);
+    const h = generateHash(index, seed + 555);
     return {
-      sPath: 1,
-      x: 20 + (posHash % 60), // 20–80%, wider spread than normal embers
-      sSize: 2 + (ampHash % 2), // 2–3px, always small
-      sAmplitude: 4 + (ampHash % 6), // 4–9px
-      sinePeriod: 0.3 + ((ampHash % 100) / 100) * 0.2, // 0.3–0.5s per oscillation
-      speedJitter: 0.8 + ((ampHash % 100) / 100) * 0.1, // 0.80–0.90, slightly faster
-      opacityJitter: 1, // override — stay fully opaque
+      sAmplitude: 4 + (h % 6), // 4–9px
+      sinePeriod: 0.3 + ((h % 100) / 100) * 0.2, // 0.3–0.5s per oscillation
+      speedJitter: 0.8 + ((h % 100) / 100) * 0.1, // 0.80–0.90
+      opacityJitter: 1, // stay fully opaque
     };
   },
   animation: {
@@ -120,22 +164,14 @@ export const EMBER_EFFECT: FlameParticleEffect = {
     className: 'rounded-full',
     initial: { opacity: 0, y: 0, x: 0 },
     animate: (particle, opacity) => {
-      if (particle.sPath) {
-        const amp = particle.sAmplitude ?? 8;
-        return {
-          opacity: [0, opacity, opacity, opacity * 0.6, 0],
-          y: -RISE_HEIGHT * 1.4,
-          x: [0, amp, 0, -amp, 0],
-        };
-      }
+      const amp = particle.sAmplitude ?? 8;
       return {
-        opacity: [0, opacity, opacity * 0.6, 0],
-        y: -RISE_HEIGHT,
-        x: [0, particle.drift],
+        opacity: [0, opacity, opacity, opacity * 0.6, 0],
+        y: -RISE_HEIGHT * 1.4,
+        x: [0, amp, 0, -amp, 0],
       };
     },
     transition: (particle, duration) => {
-      if (!particle.sPath) return {};
       const sinePeriod = particle.sinePeriod ?? 0.4;
       return {
         x: {
@@ -147,26 +183,7 @@ export const EMBER_EFFECT: FlameParticleEffect = {
       };
     },
   },
-  modifiers: [
-    {
-      condition: 'sealReady',
-      palette: (colors) => [
-        colors.light,
-        '#fbbf24',
-        colors.medium,
-        '#f59e0b',
-        '#fde68a',
-      ],
-    },
-  ],
-};
-
-const WISP_EMBER_STATES: ParticleStateConfig = {
-  burning: { count: 8, sizeMultiplier: 1.4 },
-  paused: { count: 5, sizeMultiplier: 1 },
-  untended: { count: 3, sizeMultiplier: 1 },
-  sealing: { count: 12, sizeMultiplier: 1.6 },
-  sealed: { count: 3, sizeMultiplier: 0.6 },
+  modifiers: SEAL_READY_PALETTE,
 };
 
 export const WISP_EMBER_EFFECT: FlameParticleEffect = {
@@ -174,7 +191,7 @@ export const WISP_EMBER_EFFECT: FlameParticleEffect = {
   stateConfig: WISP_EMBER_STATES,
 };
 
-const STANDARD_SMOKE_STATES: ParticleStateConfig = {
+export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
   burning: { count: 15, sizeMultiplier: 1.5 },
   paused: { count: 4, sizeMultiplier: 1 },
   untended: { count: 2, sizeMultiplier: 1 },
@@ -197,15 +214,14 @@ export function smokeEffect(
 ): FlameParticleEffect {
   return {
     key: 'smoke',
+    constrainToFlame: true,
     stateConfig: stateConfig ?? STANDARD_SMOKE_STATES,
     seed: 777,
     palette: (colors) => [
       colors.medium,
       colors.dark,
       colors.medium,
-      '#6b7280',
       '#9ca3af',
-      '#4b5563',
       '#d1d5db',
     ],
     extras: (index, seed) => ({

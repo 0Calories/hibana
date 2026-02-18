@@ -3,6 +3,7 @@ import {
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
+  DANCING_EMBER_EFFECT,
   smokeEffect,
 } from '../effects/presets';
 import type { FlameComponentProps, FlameDefinition } from '../effects/types';
@@ -56,5 +57,5 @@ export const Blaze: FlameDefinition = {
     variants: FLICKER_VARIANTS,
     durations: FLICKER_DURATIONS,
   },
-  effects: [EMBER_EFFECT, smokeEffect()],
+  effects: [EMBER_EFFECT, DANCING_EMBER_EFFECT, smokeEffect()],
 };
