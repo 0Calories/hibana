@@ -162,10 +162,10 @@ export const EMBER_EFFECT: FlameParticleEffect = {
 };
 
 const WISP_EMBER_STATES: ParticleStateConfig = {
-  burning: { count: 8, sizeMultiplier: 1.4 },
+  burning: { count: 12, sizeMultiplier: 2.4 },
   paused: { count: 5, sizeMultiplier: 1 },
   untended: { count: 3, sizeMultiplier: 1 },
-  sealing: { count: 12, sizeMultiplier: 1.6 },
+  sealing: { count: 24, sizeMultiplier: 1.6 },
   sealed: { count: 3, sizeMultiplier: 0.6 },
 };
 
