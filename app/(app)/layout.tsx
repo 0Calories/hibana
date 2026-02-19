@@ -9,23 +9,17 @@ export default async function AppLayout({
   children: React.ReactNode;
 }>) {
   const result = await getOrCreateUserState();
-  const userState = result.success ? result.data : null;
+  const userState = result.success
+    ? result.data
+    : { user_id: '', sparks_balance: 0, created_at: '', updated_at: '' };
 
   return (
     <main className="h-screen w-full">
-      {userState ? (
-        <UserStateProvider userState={userState}>
-          <TopBar />
-          <section className="h-full w-full pt-12 md:pt-14">{children}</section>
-          <BottomNav />
-        </UserStateProvider>
-      ) : (
-        <>
-          <TopBar />
-          <section className="h-full w-full pt-12 md:pt-14">{children}</section>
-          <BottomNav />
-        </>
-      )}
+      <UserStateProvider userState={userState}>
+        <TopBar />
+        <section className="h-full w-full pt-12 md:pt-14">{children}</section>
+        <BottomNav />
+      </UserStateProvider>
     </main>
   );
 }
