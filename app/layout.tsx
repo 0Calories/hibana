@@ -1,14 +1,24 @@
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Geologica, M_PLUS_Rounded_1c } from 'next/font/google';
 import './globals.css';
 import { NextIntlClientProvider } from 'next-intl';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const font = Geologica({
+  subsets: ['latin'],
+  variable: '--font-latin',
+  axes: ['CRSV'],
+});
+
+const fontJa = M_PLUS_Rounded_1c({
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  variable: '--font-ja',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -29,7 +39,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn('h-full', inter.variable)}
+      className={cn('h-full', font.variable, fontJa.variable)}
     >
       <body className="h-full antialiased" suppressHydrationWarning>
         <ThemeProvider
