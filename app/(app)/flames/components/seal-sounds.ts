@@ -16,7 +16,9 @@ function getCtx(): AudioContext | null {
     ctx = new AudioContext();
   }
   if (ctx.state === 'suspended') {
-    ctx.resume();
+    void ctx.resume().catch(() => {
+      /* ignore rejection; will resume on next gesture */
+    });
   }
   return ctx;
 }
