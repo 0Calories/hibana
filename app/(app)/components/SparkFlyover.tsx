@@ -3,6 +3,8 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   createContext,
+  type ReactNode,
+  type RefObject,
   use,
   useCallback,
   useEffect,
@@ -125,18 +127,20 @@ function generateParticles(
   });
 }
 
+type FlyoverOverlayProps = {
+  request: FlyoverRequest;
+  targetRef: RefObject<HTMLElement | null>;
+  onParticleLand: () => void;
+  onComplete: (id: number) => void;
+};
+
 // ─── Overlay ─────────────────────────────────────────────────────────
 function FlyoverOverlay({
   request,
   targetRef,
   onParticleLand,
   onComplete,
-}: {
-  request: FlyoverRequest;
-  targetRef: React.RefObject<HTMLElement | null>;
-  onParticleLand: () => void;
-  onComplete: (id: number) => void;
-}) {
+}: FlyoverOverlayProps) {
   const shouldReduceMotion = useReducedMotion();
   const [particles, setParticles] = useState<FlyParticle[]>([]);
   const [landed, setLanded] = useState(false);
@@ -176,7 +180,7 @@ function FlyoverOverlay({
   }
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100]">
+    <div className="pointer-events-none fixed inset-0 z-100">
       {particles.map((p) => (
         <motion.div
           key={p.id}
@@ -219,11 +223,7 @@ function FlyoverOverlay({
 // ─── Provider ────────────────────────────────────────────────────────
 let flyoverId = 0;
 
-export function SparkFlyoverProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function SparkFlyoverProvider({ children }: { children: ReactNode }) {
   const shouldReduceMotion = useReducedMotion();
   const reducedMotionRef = useRef(shouldReduceMotion);
   reducedMotionRef.current = shouldReduceMotion;
