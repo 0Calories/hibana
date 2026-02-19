@@ -55,8 +55,8 @@ export function useSparkFlyover() {
 const MIN_PARTICLES = 5;
 const MAX_PARTICLES = 14;
 const FLIGHT_DURATION = 0.65;
-const SPARK_PINK = '#E60076';
-const SPARK_GOLD = '#fbbf24';
+export const SPARK_PINK = '#E60076';
+export const SPARK_GOLD = '#fbbf24';
 
 /** Scale particle count proportionally: 5 for small rewards, up to 14 for big */
 function getParticleCount(sparks: number): number {

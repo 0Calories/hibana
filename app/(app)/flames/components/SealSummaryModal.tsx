@@ -4,7 +4,11 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { FlameIcon, Fuel, SparklesIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSparkFlyover } from '@/app/(app)/components/SparkFlyover';
+import {
+  SPARK_GOLD,
+  SPARK_PINK,
+  useSparkFlyover,
+} from '@/app/(app)/components/SparkFlyover';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -184,7 +188,7 @@ function SealFuelMeter({
 // ─── Spark Shower ────────────────────────────────────────────────────
 // Burst of tiny particles behind the spark count on reveal
 const SHOWER_COUNT = 18;
-const SHOWER_COLORS = ['#E60076', '#ff3399', '#fbbf24', '#E60076', '#E60076'];
+const SHOWER_COLORS = [SPARK_PINK, '#ff3399', SPARK_GOLD, SPARK_PINK, SPARK_PINK];
 
 interface ShowerParticle {
   id: number;
@@ -449,7 +453,7 @@ export function SealSummaryModal({
                 >
                   <SparklesIcon
                     className="size-4"
-                    style={{ color: '#E60076' }}
+                    style={{ color: SPARK_PINK }}
                   />
                 </motion.div>
                 <span className="text-2xl font-bold tabular-nums">
