@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { FlameIcon, Fuel, SparklesIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSparkFlyover } from '@/app/(app)/components/SparkFlyover';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -180,6 +181,73 @@ function SealFuelMeter({
   );
 }
 
+// ─── Spark Shower ────────────────────────────────────────────────────
+// Burst of tiny particles behind the spark count on reveal
+const SHOWER_COUNT = 18;
+const SHOWER_COLORS = ['#E60076', '#ff3399', '#fbbf24', '#E60076', '#E60076'];
+
+interface ShowerParticle {
+  id: number;
+  angle: number;
+  distance: number;
+  size: number;
+  color: string;
+  delay: number;
+}
+
+function SparkShower({ active }: { active: boolean }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  const particles = useMemo(
+    (): ShowerParticle[] =>
+      Array.from({ length: SHOWER_COUNT }, (_, i) => {
+        const angle = (360 / SHOWER_COUNT) * i + (((i * 37) % 20) - 10);
+        const distance = 18 + ((i * 53) % 30);
+        const size = 2 + ((i * 17) % 3);
+        const color = SHOWER_COLORS[i % SHOWER_COLORS.length];
+        const delay = ((i * 29) % 80) / 1000;
+        return { id: i, angle, distance, size, color, delay };
+      }),
+    [],
+  );
+
+  if (!active || shouldReduceMotion) return null;
+
+  return (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-visible">
+      {particles.map((p) => {
+        const rad = (p.angle * Math.PI) / 180;
+        const x = Math.cos(rad) * p.distance;
+        const y = Math.sin(rad) * p.distance;
+        return (
+          <motion.div
+            key={p.id}
+            className="absolute rounded-full"
+            style={{
+              width: p.size,
+              height: p.size,
+              backgroundColor: p.color,
+              boxShadow: `0 0 4px ${p.color}`,
+            }}
+            initial={{ x: 0, y: 0, opacity: 1, scale: 0.3 }}
+            animate={{
+              x,
+              y,
+              opacity: [1, 0.9, 0],
+              scale: [0.3, 1.2, 0],
+            }}
+            transition={{
+              duration: 0.6,
+              delay: p.delay,
+              ease: 'easeOut',
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 export function SealSummaryModal({
   open,
   onOpenChange,
@@ -193,6 +261,8 @@ export function SealSummaryModal({
   const t = useTranslations('flames.seal');
   const shouldReduceMotion = useReducedMotion();
   const rewards = calculateRewards(elapsedSeconds, targetSeconds, level);
+  const sparksRef = useRef<HTMLDivElement>(null);
+  const { triggerFlyover } = useSparkFlyover();
 
   // Pick a contextual subtitle based on fuel percentage
   const subtitle = useMemo(() => {
@@ -259,8 +329,13 @@ export function SealSummaryModal({
   const xpCount = useCountUp(rewards.xp, showStats);
 
   const handleDismiss = useCallback(() => {
+    // Launch spark flyover from the spark count to the profile badge
+    if (sparksRef.current && rewards.sparks > 0) {
+      const rect = sparksRef.current.getBoundingClientRect();
+      triggerFlyover(rect, rewards.sparks);
+    }
     onOpenChange(false);
-  }, [onOpenChange]);
+  }, [onOpenChange, triggerFlyover, rewards.sparks]);
 
   const titleGradient = `linear-gradient(to right, ${colors.dark}, ${colors.medium}, ${colors.light})`;
 
@@ -351,7 +426,8 @@ export function SealSummaryModal({
           {/* Stat rows */}
           <div className="flex w-full justify-center gap-8 px-4">
             <motion.div
-              className="flex flex-col items-center"
+              ref={sparksRef}
+              className="relative flex flex-col items-center"
               initial={shouldReduceMotion ? {} : { opacity: 0, y: 12 }}
               animate={showStats ? { opacity: 1, y: 0 } : {}}
               transition={
@@ -360,8 +436,29 @@ export function SealSummaryModal({
                   : { duration: 0.4, ease: 'easeOut' }
               }
             >
+              {/* Spark shower burst on reveal */}
+              <SparkShower active={showStats} />
               <div className="flex items-center gap-1.5">
-                <SparklesIcon className="size-4" style={{ color: '#E60076' }} />
+                <motion.div
+                  animate={
+                    showStats && !shouldReduceMotion
+                      ? {
+                          scale: [1, 1.4, 1],
+                          filter: [
+                            'drop-shadow(0 0 0px #E60076)',
+                            'drop-shadow(0 0 8px #E60076)',
+                            'drop-shadow(0 0 2px #E60076)',
+                          ],
+                        }
+                      : {}
+                  }
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  <SparklesIcon
+                    className="size-4"
+                    style={{ color: '#E60076' }}
+                  />
+                </motion.div>
                 <span className="text-2xl font-bold tabular-nums">
                   +{sparksCount}
                 </span>

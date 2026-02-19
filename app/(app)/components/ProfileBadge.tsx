@@ -1,9 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { SparklesIcon, UserIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
   Sheet,
@@ -11,6 +11,7 @@ import {
   SheetDescription,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useSparkFlyover } from './SparkFlyover';
 import { useUserState } from './UserStateProvider';
 
 interface ProfileBadgeProps {
@@ -36,11 +37,17 @@ export function ProfileBadge({
 }: ProfileBadgeProps) {
   const { sparks_balance: sparks } = useUserState();
   const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
+  const { registerTarget } = useSparkFlyover();
 
   return (
     <>
       {/* Desktop: Compact pill */}
-      <DesktopProfilePill username={username} sparks={sparks} level={level} />
+      <DesktopProfilePill
+        username={username}
+        sparks={sparks}
+        level={level}
+        registerTarget={registerTarget}
+      />
 
       {/* Mobile: Compact badge */}
       <MobileProfileBadge
@@ -50,12 +57,41 @@ export function ProfileBadge({
         xp={xp}
         xpToNext={xpToNext}
         xpProgress={xpProgress}
+        registerTarget={registerTarget}
       />
     </>
   );
 }
 
-function DesktopProfilePill({ username, sparks, level }: ProfileBadgeProps) {
+function DesktopProfilePill({
+  username,
+  sparks,
+  level,
+  registerTarget,
+}: ProfileBadgeProps & {
+  registerTarget: (el: HTMLElement | null) => void;
+}) {
+  const sparkRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const [pulse, setPulse] = useState(false);
+  const prevSparks = useRef(sparks);
+
+  // Register as flyover target
+  useEffect(() => {
+    registerTarget(sparkRef.current);
+  }, [registerTarget]);
+
+  // Detect balance change → trigger pulse
+  useEffect(() => {
+    if (prevSparks.current !== sparks && prevSparks.current !== undefined) {
+      setPulse(true);
+      const timer = setTimeout(() => setPulse(false), 800);
+      prevSparks.current = sparks;
+      return () => clearTimeout(timer);
+    }
+    prevSparks.current = sparks;
+  }, [sparks]);
+
   return (
     <div className="hidden md:flex items-center gap-0 rounded-full border border-border bg-muted/50 py-1 pl-1 pr-3">
       <div className="relative mr-2">
@@ -68,10 +104,26 @@ function DesktopProfilePill({ username, sparks, level }: ProfileBadgeProps) {
       </div>
       <span className="text-sm font-medium">{username}</span>
       <span className="mx-1.5 text-border">·</span>
-      <div className="flex items-center gap-1 text-sm text-primary">
+      <motion.div
+        ref={sparkRef}
+        className="flex items-center gap-1 text-sm text-primary"
+        animate={
+          pulse && !shouldReduceMotion
+            ? {
+                scale: [1, 1.3, 1],
+                filter: [
+                  'drop-shadow(0 0 0px #E60076)',
+                  'drop-shadow(0 0 10px #E60076)',
+                  'drop-shadow(0 0 0px #E60076)',
+                ],
+              }
+            : {}
+        }
+        transition={{ duration: 0.6 }}
+      >
         <SparklesIcon className="size-3.5" />
         <span className="font-medium">{sparks}</span>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -83,11 +135,33 @@ function MobileProfileBadge({
   xp,
   xpToNext,
   xpProgress,
+  registerTarget,
 }: ProfileBadgeProps & {
   xpProgress: number;
+  registerTarget: (el: HTMLElement | null) => void;
 }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('profile');
+  const sparkRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const [pulse, setPulse] = useState(false);
+  const prevSparks = useRef(sparks);
+
+  // Register as flyover target (mobile takes priority when visible)
+  useEffect(() => {
+    registerTarget(sparkRef.current);
+  }, [registerTarget]);
+
+  // Detect balance change → trigger pulse
+  useEffect(() => {
+    if (prevSparks.current !== sparks && prevSparks.current !== undefined) {
+      setPulse(true);
+      const timer = setTimeout(() => setPulse(false), 800);
+      prevSparks.current = sparks;
+      return () => clearTimeout(timer);
+    }
+    prevSparks.current = sparks;
+  }, [sparks]);
 
   return (
     <div className="md:hidden">
@@ -99,10 +173,26 @@ function MobileProfileBadge({
         aria-haspopup="dialog"
         className="flex items-center gap-2"
       >
-        <div className="flex items-center gap-1 text-xs text-primary">
+        <motion.div
+          ref={sparkRef}
+          className="flex items-center gap-1 text-xs text-primary"
+          animate={
+            pulse && !shouldReduceMotion
+              ? {
+                  scale: [1, 1.3, 1],
+                  filter: [
+                    'drop-shadow(0 0 0px #E60076)',
+                    'drop-shadow(0 0 10px #E60076)',
+                    'drop-shadow(0 0 0px #E60076)',
+                  ],
+                }
+              : {}
+          }
+          transition={{ duration: 0.6 }}
+        >
           <SparklesIcon className="size-3.5" />
           <span className="font-semibold tabular-nums">{sparks}</span>
-        </div>
+        </motion.div>
         <div className="relative">
           <div className="flex size-7 items-center justify-center rounded-full bg-muted">
             <UserIcon className="size-3.5 text-muted-foreground" />
