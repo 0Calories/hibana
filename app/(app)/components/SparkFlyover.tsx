@@ -63,6 +63,12 @@ function getParticleCount(sparks: number): number {
   );
 }
 
+type ParticleShape = 'circle' | 'star';
+
+/** 4-point star clip-path */
+const STAR_CLIP =
+  'polygon(50% 0%, 62% 35%, 100% 50%, 62% 65%, 50% 100%, 38% 65%, 0% 50%, 38% 35%)';
+
 interface FlyParticle {
   id: number;
   startX: number;
@@ -74,6 +80,7 @@ interface FlyParticle {
   delay: number;
   arcX: number;
   arcY: number;
+  shape: ParticleShape;
 }
 
 function generateParticles(
@@ -100,17 +107,19 @@ function generateParticles(
     const arcOffset = -40 + Math.random() * -60;
     const sideOffset = (Math.random() - 0.5) * 80;
 
+    const isStar = Math.random() < 0.4;
     return {
       id: i,
       startX: sx,
       startY: sy,
       endX: endCX + jitterX,
       endY: endCY + jitterY,
-      size: 3 + Math.random() * 3,
+      size: isStar ? 8 + Math.random() * 4 : 4 + Math.random() * 4,
       color: i % 3 === 0 ? SPARK_GOLD : SPARK_PINK,
       delay: i * 0.07,
       arcX: midX + sideOffset,
       arcY: midY + arcOffset,
+      shape: isStar ? 'star' : 'circle',
     };
   });
 }
@@ -170,12 +179,13 @@ function FlyoverOverlay({
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          className="absolute rounded-full"
+          className={`absolute ${p.shape === 'circle' ? 'rounded-full' : ''}`}
           style={{
             width: p.size,
             height: p.size,
             backgroundColor: p.color,
-            boxShadow: `0 0 6px ${p.color}, 0 0 12px ${p.color}80`,
+            filter: `drop-shadow(0 0 4px ${p.color}) drop-shadow(0 0 8px ${p.color}80)`,
+            clipPath: p.shape === 'star' ? STAR_CLIP : undefined,
             left: 0,
             top: 0,
           }}
@@ -184,12 +194,14 @@ function FlyoverOverlay({
             y: p.startY,
             scale: 1.2,
             opacity: 1,
+            rotate: p.shape === 'star' ? Math.random() * 360 : 0,
           }}
           animate={{
             x: [p.startX, p.arcX, p.endX],
             y: [p.startY, p.arcY, p.endY],
             scale: [1.2, 0.9, 0.4],
             opacity: [1, 1, 0.8],
+            rotate: p.shape === 'star' ? Math.random() * 360 + 180 : 0,
           }}
           transition={{
             duration: FLIGHT_DURATION,
