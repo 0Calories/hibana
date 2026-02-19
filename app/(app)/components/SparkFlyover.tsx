@@ -57,7 +57,10 @@ const SPARK_GOLD = '#fbbf24';
 
 /** Scale particle count proportionally: 5 for small rewards, up to 14 for big */
 function getParticleCount(sparks: number): number {
-  return Math.min(MAX_PARTICLES, Math.max(MIN_PARTICLES, Math.floor(sparks / 8)));
+  return Math.min(
+    MAX_PARTICLES,
+    Math.max(MIN_PARTICLES, Math.floor(sparks / 8)),
+  );
 }
 
 interface FlyParticle {
@@ -105,7 +108,7 @@ function generateParticles(
       endY: endCY + jitterY,
       size: 3 + Math.random() * 3,
       color: i % 3 === 0 ? SPARK_GOLD : SPARK_PINK,
-      delay: i * 0.04,
+      delay: i * 0.07,
       arcX: midX + sideOffset,
       arcY: midY + arcOffset,
     };

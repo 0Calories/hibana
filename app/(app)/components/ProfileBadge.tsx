@@ -1,6 +1,12 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import {
+  type AnimationPlaybackControls,
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+} from 'framer-motion';
 import { SparklesIcon, UserIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
@@ -29,6 +35,44 @@ const MOCK_DATA = {
   xpToNext: 1000,
 };
 
+// ─── Inflation/deflation pulse hook ─────────────────────────────────
+const SCALE_BUMP = 0.08;
+const MAX_SCALE = 1.4;
+const DECAY_DURATION = 0.5;
+
+function useInflatingPulse(landingState: LandingState | null) {
+  const scale = useMotionValue(1);
+  const [flashActive, setFlashActive] = useState(false);
+  const decayRef = useRef<AnimationPlaybackControls | null>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const prevLanded = useRef(0);
+  const shouldReduceMotion = useReducedMotion();
+
+  const landedCount = landingState?.landedCount ?? 0;
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    if (landedCount > prevLanded.current) {
+      // Scale inflation
+      decayRef.current?.stop();
+      const bumped = Math.min(scale.get() + SCALE_BUMP, MAX_SCALE);
+      scale.set(bumped);
+      decayRef.current = animate(scale, 1, {
+        duration: DECAY_DURATION,
+        ease: 'easeOut',
+      });
+      // Color flash — snap to gold, CSS transition handles fade-out
+      setFlashActive(true);
+      clearTimeout(flashTimer.current);
+      flashTimer.current = setTimeout(() => setFlashActive(false), 400);
+      prevLanded.current = landedCount;
+    }
+    if (landedCount === 0) prevLanded.current = 0;
+  }, [landedCount, scale, shouldReduceMotion]);
+
+  return { scale, flashActive };
+}
+
 /** Compute displayed spark count during flyover: increments as particles land */
 function getDisplayedSparks(
   baseSparks: number,
@@ -39,6 +83,7 @@ function getDisplayedSparks(
   return baseSparks + Math.floor(landing.totalSparks * fraction);
 }
 
+// ─── Main component ─────────────────────────────────────────────────
 export function ProfileBadge({
   username = MOCK_DATA.username,
   level = MOCK_DATA.level,
@@ -75,6 +120,7 @@ export function ProfileBadge({
   );
 }
 
+// ─── Desktop ────────────────────────────────────────────────────────
 function DesktopProfilePill({
   username,
   sparks,
@@ -86,26 +132,11 @@ function DesktopProfilePill({
   landingState: LandingState | null;
 }) {
   const sparkRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = useReducedMotion();
-  const [landPulse, setLandPulse] = useState(false);
-  const prevLanded = useRef(0);
+  const { scale, flashActive } = useInflatingPulse(landingState);
 
-  // Register as flyover target
   useEffect(() => {
     registerTarget(sparkRef.current);
   }, [registerTarget]);
-
-  // Per-particle landing pulse
-  const landedCount = landingState?.landedCount ?? 0;
-  useEffect(() => {
-    if (landedCount > prevLanded.current) {
-      setLandPulse(true);
-      const timer = setTimeout(() => setLandPulse(false), 150);
-      prevLanded.current = landedCount;
-      return () => clearTimeout(timer);
-    }
-    if (landedCount === 0) prevLanded.current = 0;
-  }, [landedCount]);
 
   const displayedSparks = getDisplayedSparks(sparks ?? 0, landingState);
 
@@ -123,20 +154,8 @@ function DesktopProfilePill({
       <span className="mx-1.5 text-border">·</span>
       <motion.div
         ref={sparkRef}
-        className="flex items-center gap-1 text-sm text-primary"
-        animate={
-          landPulse && !shouldReduceMotion
-            ? {
-                scale: [1, 1.25, 1],
-                filter: [
-                  'drop-shadow(0 0 0px #E60076)',
-                  'drop-shadow(0 0 8px #E60076)',
-                  'drop-shadow(0 0 0px #E60076)',
-                ],
-              }
-            : {}
-        }
-        transition={{ duration: 0.25 }}
+        className={`flex items-center gap-1 text-sm transition-colors duration-300 ease-out ${flashActive ? 'text-amber-400' : 'text-primary'}`}
+        style={{ scale }}
       >
         <SparklesIcon className="size-3.5" />
         <span className="font-medium tabular-nums">{displayedSparks}</span>
@@ -145,6 +164,7 @@ function DesktopProfilePill({
   );
 }
 
+// ─── Mobile ─────────────────────────────────────────────────────────
 function MobileProfileBadge({
   username,
   sparks,
@@ -162,26 +182,11 @@ function MobileProfileBadge({
   const [open, setOpen] = useState(false);
   const t = useTranslations('profile');
   const sparkRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = useReducedMotion();
-  const [landPulse, setLandPulse] = useState(false);
-  const prevLanded = useRef(0);
+  const { scale, flashActive } = useInflatingPulse(landingState);
 
-  // Register as flyover target (mobile takes priority when visible)
   useEffect(() => {
     registerTarget(sparkRef.current);
   }, [registerTarget]);
-
-  // Per-particle landing pulse
-  const landedCount = landingState?.landedCount ?? 0;
-  useEffect(() => {
-    if (landedCount > prevLanded.current) {
-      setLandPulse(true);
-      const timer = setTimeout(() => setLandPulse(false), 150);
-      prevLanded.current = landedCount;
-      return () => clearTimeout(timer);
-    }
-    if (landedCount === 0) prevLanded.current = 0;
-  }, [landedCount]);
 
   const displayedSparks = getDisplayedSparks(sparks ?? 0, landingState);
 
@@ -197,20 +202,8 @@ function MobileProfileBadge({
       >
         <motion.div
           ref={sparkRef}
-          className="flex items-center gap-1 text-xs text-primary"
-          animate={
-            landPulse && !shouldReduceMotion
-              ? {
-                  scale: [1, 1.25, 1],
-                  filter: [
-                    'drop-shadow(0 0 0px #E60076)',
-                    'drop-shadow(0 0 8px #E60076)',
-                    'drop-shadow(0 0 0px #E60076)',
-                  ],
-                }
-              : {}
-          }
-          transition={{ duration: 0.25 }}
+          className={`flex items-center gap-1 text-xs transition-colors duration-300 ease-out ${flashActive ? 'text-amber-400' : 'text-primary'}`}
+          style={{ scale }}
         >
           <SparklesIcon className="size-3.5" />
           <span className="font-semibold tabular-nums">{displayedSparks}</span>

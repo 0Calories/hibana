@@ -442,14 +442,7 @@ export function SealSummaryModal({
                 <motion.div
                   animate={
                     showStats && !shouldReduceMotion
-                      ? {
-                          scale: [1, 1.4, 1],
-                          filter: [
-                            'drop-shadow(0 0 0px #E60076)',
-                            'drop-shadow(0 0 8px #E60076)',
-                            'drop-shadow(0 0 2px #E60076)',
-                          ],
-                        }
+                      ? { scale: [1, 1.4, 1] }
                       : {}
                   }
                   transition={{ duration: 0.6, delay: 0.3 }}
