@@ -187,8 +187,14 @@ function SealFuelMeter({
 
 // ─── Spark Shower ────────────────────────────────────────────────────
 // Burst of tiny particles behind the spark count on reveal
-const SHOWER_COUNT = 18;
-const SHOWER_COLORS = [SPARK_PINK, '#ff3399', SPARK_GOLD, SPARK_PINK, SPARK_PINK];
+const SHOWER_COUNT = 36;
+const SHOWER_COLORS = [
+  SPARK_PINK,
+  '#ff3399',
+  SPARK_GOLD,
+  SPARK_PINK,
+  SPARK_PINK,
+];
 
 interface ShowerParticle {
   id: number;

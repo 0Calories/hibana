@@ -29,7 +29,7 @@ interface ProfileBadgeProps {
 }
 
 const MOCK_DATA = {
-  username: 'Explorer',
+  username: 'Smokesniffer',
   level: 3,
   xp: 450,
   xpToNext: 1000,
@@ -37,7 +37,7 @@ const MOCK_DATA = {
 
 // ─── Inflation/deflation pulse hook ─────────────────────────────────
 const SCALE_BUMP = 0.08;
-const MAX_SCALE = 1.4;
+const MAX_SCALE = 1.2;
 const DECAY_DURATION = 0.5;
 
 function useInflatingPulse(landingState: LandingState | null) {
@@ -61,12 +61,14 @@ function useInflatingPulse(landingState: LandingState | null) {
         duration: DECAY_DURATION,
         ease: 'easeOut',
       });
+
       // Color flash — snap to gold, CSS transition handles fade-out
       setFlashActive(true);
       clearTimeout(flashTimer.current);
       flashTimer.current = setTimeout(() => setFlashActive(false), 400);
       prevLanded.current = landedCount;
     }
+
     if (landedCount === 0) prevLanded.current = 0;
 
     return () => {

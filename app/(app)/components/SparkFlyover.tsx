@@ -54,7 +54,11 @@ export function useSparkFlyover() {
 // ─── Particle config ─────────────────────────────────────────────────
 const MIN_PARTICLES = 5;
 const MAX_PARTICLES = 14;
-const FLIGHT_DURATION = 0.65;
+const FLIGHT_DURATION = 0.8;
+const SPREAD_RADIUS = 24; //12
+const STAR_BASE_SIZE = 8;
+const CIRCLE_BASE_SIZE = 4;
+
 export const SPARK_PINK = '#E60076';
 export const SPARK_GOLD = '#fbbf24';
 
@@ -62,7 +66,7 @@ export const SPARK_GOLD = '#fbbf24';
 function getParticleCount(sparks: number): number {
   return Math.min(
     MAX_PARTICLES,
-    Math.max(MIN_PARTICLES, Math.floor(sparks / 8)),
+    Math.max(MIN_PARTICLES, Math.floor(sparks / 4)),
   );
 }
 
@@ -72,7 +76,7 @@ type ParticleShape = 'circle' | 'star';
 const STAR_CLIP =
   'polygon(50% 0%, 62% 35%, 100% 50%, 62% 65%, 50% 100%, 38% 65%, 0% 50%, 38% 35%)';
 
-interface FlyParticle {
+interface FlyingSparkParticle {
   id: number;
   startX: number;
   startY: number;
@@ -86,11 +90,11 @@ interface FlyParticle {
   shape: ParticleShape;
 }
 
-function generateParticles(
+function generateSparkParticles(
   from: DOMRect,
   to: DOMRect,
   particleCount: number,
-): FlyParticle[] {
+): FlyingSparkParticle[] {
   const startCX = from.left + from.width / 2;
   const startCY = from.top + from.height / 2;
   const endCX = to.left + to.width / 2;
@@ -98,9 +102,9 @@ function generateParticles(
 
   return Array.from({ length: particleCount }, (_, i) => {
     const angle = ((Math.PI * 2) / particleCount) * i;
-    const spreadRadius = 12;
-    const sx = startCX + Math.cos(angle) * spreadRadius;
-    const sy = startCY + Math.sin(angle) * spreadRadius;
+
+    const sx = startCX + Math.cos(angle) * SPREAD_RADIUS;
+    const sy = startCY + Math.sin(angle) * SPREAD_RADIUS;
 
     const jitterX = (Math.random() - 0.5) * 8;
     const jitterY = (Math.random() - 0.5) * 4;
@@ -111,13 +115,17 @@ function generateParticles(
     const sideOffset = (Math.random() - 0.5) * 80;
 
     const isStar = Math.random() < 0.4;
+    const size = isStar
+      ? STAR_BASE_SIZE + Math.random() * 4
+      : CIRCLE_BASE_SIZE + Math.random() * 4;
+
     return {
       id: i,
       startX: sx,
       startY: sy,
       endX: endCX + jitterX,
       endY: endCY + jitterY,
-      size: isStar ? 8 + Math.random() * 4 : 4 + Math.random() * 4,
+      size,
       color: i % 3 === 0 ? SPARK_GOLD : SPARK_PINK,
       delay: i * 0.07,
       arcX: midX + sideOffset,
@@ -142,7 +150,7 @@ function FlyoverOverlay({
   onComplete,
 }: FlyoverOverlayProps) {
   const shouldReduceMotion = useReducedMotion();
-  const [particles, setParticles] = useState<FlyParticle[]>([]);
+  const [particles, setParticles] = useState<FlyingSparkParticle[]>([]);
   const [landed, setLanded] = useState(false);
   const completedRef = useRef(0);
 
@@ -155,7 +163,7 @@ function FlyoverOverlay({
 
     const targetRect = target.getBoundingClientRect();
     setParticles(
-      generateParticles(request.from, targetRect, request.particleCount),
+      generateSparkParticles(request.from, targetRect, request.particleCount),
     );
   }, [request, targetRef, onComplete]);
 
@@ -211,7 +219,7 @@ function FlyoverOverlay({
           transition={{
             duration: FLIGHT_DURATION,
             delay: p.delay,
-            ease: [0.32, 0, 0.24, 1],
+            ease: 'easeIn',
           }}
           onAnimationComplete={handleParticleLand}
         />
