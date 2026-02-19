@@ -76,7 +76,9 @@ export function FlameCard({
   const handleSealComplete = useCallback(async () => {
     const success = await completeSeal();
     if (success) {
-      creditSealReward(flame.id, date); // fire-and-forget
+      creditSealReward(flame.id, date).then((r) => {
+        if (!r.success) console.error('Failed to credit seal reward:', r.error);
+      });
       setCelebrationActive(true);
     } else {
       toast.error(tSeal('error'), { position: 'top-center' });
