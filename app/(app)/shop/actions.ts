@@ -69,6 +69,7 @@ export async function getUserInventory(): ActionResult<
 /**
  * Credits sparks to the user for sealing a flame session.
  * Idempotent: if the session was already credited, returns { sparks: 0 }.
+ * Uses an atomic RPC to prevent race conditions on double-credit and balance update.
  */
 export async function creditSealReward(
   flameId: string,
@@ -95,18 +96,6 @@ export async function creditSealReward(
     };
   }
 
-  // Double-credit check
-  const { data: existing } = await supabase
-    .from('spark_transactions')
-    .select('id')
-    .eq('reference_id', session.id)
-    .eq('reason', 'seal')
-    .maybeSingle();
-
-  if (existing) {
-    return { success: true, data: { sparks: 0 } };
-  }
-
   // Compute sparks (level hardcoded to 1 until flame leveling ships)
   const level = 1;
   const levelMultiplier = 1 + (level - 1) * 0.1;
@@ -126,43 +115,24 @@ export async function creditSealReward(
     return { success: true, data: { sparks: 0 } };
   }
 
-  // Insert transaction
-  const { error: txError } = await supabase.from('spark_transactions').insert({
-    user_id: user.id,
-    amount: sparks,
-    reason: 'seal',
-    reference_id: session.id,
-  });
-
-  if (txError) {
-    return { success: false, error: txError };
-  }
-
-  // Upsert user_state balance
-  const { data: state } = await supabase
-    .from('user_state')
-    .select('sparks_balance')
-    .eq('user_id', user.id)
-    .single();
-
-  const currentBalance = state?.sparks_balance ?? 0;
-
-  const { error: upsertError } = await supabase.from('user_state').upsert(
+  // Atomic: insert transaction (idempotent) + increment balance
+  const { data: credited, error: rpcError } = await supabase.rpc(
+    'credit_seal_sparks',
     {
-      user_id: user.id,
-      sparks_balance: currentBalance + sparks,
+      p_user_id: user.id,
+      p_session_id: session.id,
+      p_amount: sparks,
     },
-    { onConflict: 'user_id' },
   );
 
-  if (upsertError) {
-    return { success: false, error: upsertError };
+  if (rpcError) {
+    return { success: false, error: rpcError };
   }
 
   const { revalidatePath } = await import('next/cache');
   revalidatePath('/flames');
 
-  return { success: true, data: { sparks } };
+  return { success: true, data: { sparks: credited ?? 0 } };
 }
 
 /**

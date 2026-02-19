@@ -476,7 +476,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      credit_seal_sparks: {
+        Args: {
+          p_user_id: string;
+          p_session_id: string;
+          p_amount: number;
+        };
+        Returns: number;
+      };
     };
     Enums: {
       [_ in never]: never;
