@@ -11,7 +11,7 @@ import {
   SheetDescription,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useSparkFlyover } from './SparkFlyover';
+import { type LandingState, useSparkFlyover } from './SparkFlyover';
 import { useUserState } from './UserStateProvider';
 
 interface ProfileBadgeProps {
@@ -29,6 +29,16 @@ const MOCK_DATA = {
   xpToNext: 1000,
 };
 
+/** Compute displayed spark count during flyover: increments as particles land */
+function getDisplayedSparks(
+  baseSparks: number,
+  landing: LandingState | null,
+): number {
+  if (!landing || landing.totalParticles === 0) return baseSparks;
+  const fraction = landing.landedCount / landing.totalParticles;
+  return baseSparks + Math.floor(landing.totalSparks * fraction);
+}
+
 export function ProfileBadge({
   username = MOCK_DATA.username,
   level = MOCK_DATA.level,
@@ -37,7 +47,7 @@ export function ProfileBadge({
 }: ProfileBadgeProps) {
   const { sparks_balance: sparks } = useUserState();
   const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
-  const { registerTarget } = useSparkFlyover();
+  const { registerTarget, landingState } = useSparkFlyover();
 
   return (
     <>
@@ -47,6 +57,7 @@ export function ProfileBadge({
         sparks={sparks}
         level={level}
         registerTarget={registerTarget}
+        landingState={landingState}
       />
 
       {/* Mobile: Compact badge */}
@@ -58,6 +69,7 @@ export function ProfileBadge({
         xpToNext={xpToNext}
         xpProgress={xpProgress}
         registerTarget={registerTarget}
+        landingState={landingState}
       />
     </>
   );
@@ -68,29 +80,34 @@ function DesktopProfilePill({
   sparks,
   level,
   registerTarget,
+  landingState,
 }: ProfileBadgeProps & {
   registerTarget: (el: HTMLElement | null) => void;
+  landingState: LandingState | null;
 }) {
   const sparkRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
-  const [pulse, setPulse] = useState(false);
-  const prevSparks = useRef(sparks);
+  const [landPulse, setLandPulse] = useState(false);
+  const prevLanded = useRef(0);
 
   // Register as flyover target
   useEffect(() => {
     registerTarget(sparkRef.current);
   }, [registerTarget]);
 
-  // Detect balance change → trigger pulse
+  // Per-particle landing pulse
+  const landedCount = landingState?.landedCount ?? 0;
   useEffect(() => {
-    if (prevSparks.current !== sparks && prevSparks.current !== undefined) {
-      setPulse(true);
-      const timer = setTimeout(() => setPulse(false), 800);
-      prevSparks.current = sparks;
+    if (landedCount > prevLanded.current) {
+      setLandPulse(true);
+      const timer = setTimeout(() => setLandPulse(false), 150);
+      prevLanded.current = landedCount;
       return () => clearTimeout(timer);
     }
-    prevSparks.current = sparks;
-  }, [sparks]);
+    if (landedCount === 0) prevLanded.current = 0;
+  }, [landedCount]);
+
+  const displayedSparks = getDisplayedSparks(sparks ?? 0, landingState);
 
   return (
     <div className="hidden md:flex items-center gap-0 rounded-full border border-border bg-muted/50 py-1 pl-1 pr-3">
@@ -108,21 +125,21 @@ function DesktopProfilePill({
         ref={sparkRef}
         className="flex items-center gap-1 text-sm text-primary"
         animate={
-          pulse && !shouldReduceMotion
+          landPulse && !shouldReduceMotion
             ? {
-                scale: [1, 1.3, 1],
+                scale: [1, 1.25, 1],
                 filter: [
                   'drop-shadow(0 0 0px #E60076)',
-                  'drop-shadow(0 0 10px #E60076)',
+                  'drop-shadow(0 0 8px #E60076)',
                   'drop-shadow(0 0 0px #E60076)',
                 ],
               }
             : {}
         }
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.25 }}
       >
         <SparklesIcon className="size-3.5" />
-        <span className="font-medium">{sparks}</span>
+        <span className="font-medium tabular-nums">{displayedSparks}</span>
       </motion.div>
     </div>
   );
@@ -136,32 +153,37 @@ function MobileProfileBadge({
   xpToNext,
   xpProgress,
   registerTarget,
+  landingState,
 }: ProfileBadgeProps & {
   xpProgress: number;
   registerTarget: (el: HTMLElement | null) => void;
+  landingState: LandingState | null;
 }) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('profile');
   const sparkRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
-  const [pulse, setPulse] = useState(false);
-  const prevSparks = useRef(sparks);
+  const [landPulse, setLandPulse] = useState(false);
+  const prevLanded = useRef(0);
 
   // Register as flyover target (mobile takes priority when visible)
   useEffect(() => {
     registerTarget(sparkRef.current);
   }, [registerTarget]);
 
-  // Detect balance change → trigger pulse
+  // Per-particle landing pulse
+  const landedCount = landingState?.landedCount ?? 0;
   useEffect(() => {
-    if (prevSparks.current !== sparks && prevSparks.current !== undefined) {
-      setPulse(true);
-      const timer = setTimeout(() => setPulse(false), 800);
-      prevSparks.current = sparks;
+    if (landedCount > prevLanded.current) {
+      setLandPulse(true);
+      const timer = setTimeout(() => setLandPulse(false), 150);
+      prevLanded.current = landedCount;
       return () => clearTimeout(timer);
     }
-    prevSparks.current = sparks;
-  }, [sparks]);
+    if (landedCount === 0) prevLanded.current = 0;
+  }, [landedCount]);
+
+  const displayedSparks = getDisplayedSparks(sparks ?? 0, landingState);
 
   return (
     <div className="md:hidden">
@@ -177,21 +199,21 @@ function MobileProfileBadge({
           ref={sparkRef}
           className="flex items-center gap-1 text-xs text-primary"
           animate={
-            pulse && !shouldReduceMotion
+            landPulse && !shouldReduceMotion
               ? {
-                  scale: [1, 1.3, 1],
+                  scale: [1, 1.25, 1],
                   filter: [
                     'drop-shadow(0 0 0px #E60076)',
-                    'drop-shadow(0 0 10px #E60076)',
+                    'drop-shadow(0 0 8px #E60076)',
                     'drop-shadow(0 0 0px #E60076)',
                   ],
                 }
               : {}
           }
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.25 }}
         >
           <SparklesIcon className="size-3.5" />
-          <span className="font-semibold tabular-nums">{sparks}</span>
+          <span className="font-semibold tabular-nums">{displayedSparks}</span>
         </motion.div>
         <div className="relative">
           <div className="flex size-7 items-center justify-center rounded-full bg-muted">
@@ -229,7 +251,7 @@ function MobileProfileBadge({
               <div className="rounded-lg bg-muted/50 p-3">
                 <div className="flex items-center gap-1.5 text-primary">
                   <SparklesIcon className="size-4" />
-                  <span className="text-lg font-bold">{sparks}</span>
+                  <span className="text-lg font-bold">{displayedSparks}</span>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {t('sparks')}
