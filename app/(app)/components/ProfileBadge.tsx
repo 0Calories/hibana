@@ -68,6 +68,13 @@ function useInflatingPulse(landingState: LandingState | null) {
       prevLanded.current = landedCount;
     }
     if (landedCount === 0) prevLanded.current = 0;
+
+    return () => {
+      decayRef.current?.stop();
+      if (flashTimer.current) {
+        clearTimeout(flashTimer.current);
+      }
+    };
   }, [landedCount, scale, shouldReduceMotion]);
 
   return { scale, flashActive };
@@ -121,16 +128,18 @@ export function ProfileBadge({
 }
 
 // ─── Desktop ────────────────────────────────────────────────────────
+type DesktopProfilePillProps = ProfileBadgeProps & {
+  registerTarget: (el: HTMLElement | null) => void;
+  landingState: LandingState | null;
+};
+
 function DesktopProfilePill({
   username,
   sparks,
   level,
   registerTarget,
   landingState,
-}: ProfileBadgeProps & {
-  registerTarget: (el: HTMLElement | null) => void;
-  landingState: LandingState | null;
-}) {
+}: DesktopProfilePillProps) {
   const sparkRef = useRef<HTMLDivElement>(null);
   const { scale, flashActive } = useInflatingPulse(landingState);
 
@@ -165,6 +174,12 @@ function DesktopProfilePill({
 }
 
 // ─── Mobile ─────────────────────────────────────────────────────────
+type MobileProfileBadgeProps = ProfileBadgeProps & {
+  xpProgress: number;
+  registerTarget: (el: HTMLElement | null) => void;
+  landingState: LandingState | null;
+};
+
 function MobileProfileBadge({
   username,
   sparks,
@@ -174,11 +189,7 @@ function MobileProfileBadge({
   xpProgress,
   registerTarget,
   landingState,
-}: ProfileBadgeProps & {
-  xpProgress: number;
-  registerTarget: (el: HTMLElement | null) => void;
-  landingState: LandingState | null;
-}) {
+}: MobileProfileBadgeProps) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('profile');
   const sparkRef = useRef<HTMLDivElement>(null);
