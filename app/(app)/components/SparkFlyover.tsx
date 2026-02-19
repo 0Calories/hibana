@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { playCompletionChime, playSparkTick } from './spark-sounds';
 
 // ─── Types ───────────────────────────────────────────────────────────
 interface FlyoverRequest {
@@ -223,6 +224,9 @@ export function SparkFlyoverProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const shouldReduceMotion = useReducedMotion();
+  const reducedMotionRef = useRef(shouldReduceMotion);
+  reducedMotionRef.current = shouldReduceMotion;
   const targetsRef = useRef<Set<HTMLElement>>(new Set());
   const targetRef = useRef<HTMLElement | null>(null);
   const [requests, setRequests] = useState<FlyoverRequest[]>([]);
@@ -265,6 +269,7 @@ export function SparkFlyoverProvider({
   }, []);
 
   const handleParticleLand = useCallback(() => {
+    if (!reducedMotionRef.current) playSparkTick();
     setLandingState((prev) => {
       if (!prev) return prev;
       return { ...prev, landedCount: prev.landedCount + 1 };
@@ -272,6 +277,7 @@ export function SparkFlyoverProvider({
   }, []);
 
   const handleComplete = useCallback((id: number) => {
+    if (!reducedMotionRef.current) playCompletionChime();
     setRequests((prev) => prev.filter((r) => r.id !== id));
     // Clear landing state after a brief delay (let badge finish its pulse)
     setTimeout(() => setLandingState(null), 400);
