@@ -11,6 +11,12 @@ import { getFlameLevel } from '../../utils/levels';
 import { useFlameState } from '../hooks/useFlameState';
 import { useLongPress } from '../hooks/useLongPress';
 import { SealSummaryModal } from '../SealSummaryModal';
+import {
+  cancelSealSound,
+  completeSealSound,
+  startSealSound,
+  updateSealSound,
+} from '../seal-sounds';
 import { EffectsRenderer } from './effects/EffectsRenderer';
 import { FlameRenderer } from './effects/FlameRenderer';
 import { SealCelebration } from './effects/SealCelebration';
@@ -73,13 +79,14 @@ export function FlameCard({
   const SEAL_INTENT_THRESHOLD = 0.05;
 
   const handleSealComplete = useCallback(async () => {
+    if (!shouldReduceMotion) completeSealSound();
     const success = await completeSeal();
     if (success) {
       setCelebrationActive(true);
     } else {
       toast.error(tSeal('error'), { position: 'top-center' });
     }
-  }, [completeSeal, tSeal]);
+  }, [completeSeal, tSeal, shouldReduceMotion]);
 
   const handleCelebrationComplete = useCallback(() => {
     setCelebrationActive(false);
@@ -95,10 +102,16 @@ export function FlameCard({
       // Only enter sealing state after meaningful hold
       if (p > SEAL_INTENT_THRESHOLD && state !== 'sealing') {
         beginSealing();
+        if (!shouldReduceMotion) startSealSound();
+      }
+      // Update seal sound pitch/volume each frame
+      if (state === 'sealing' && !shouldReduceMotion) {
+        updateSealSound(p);
       }
     },
     onComplete: handleSealComplete,
     onCancel: () => {
+      if (!shouldReduceMotion) cancelSealSound();
       cancelSealing();
     },
   });
