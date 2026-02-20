@@ -1,9 +1,9 @@
 import {
+  DANCING_EMBER_EFFECT,
   EMBER_EFFECT,
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
-  DANCING_EMBER_EFFECT,
   smokeEffect,
 } from '../effects/presets';
 import type { FlameComponentProps, FlameDefinition } from '../effects/types';

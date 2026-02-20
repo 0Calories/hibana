@@ -10,8 +10,6 @@ export const createFlameSchema = z
     time_budget_minutes: z.number().min(1).optional(),
     count_target: z.number().min(1).optional(),
     count_unit: z.string().optional(),
-    is_daily: z.boolean(),
-    schedule: z.array(z.number().min(0).max(6)).optional(),
   })
   .refine(
     (data) => {
@@ -36,15 +34,6 @@ export const createFlameSchema = z
       message: 'Count target is required for count-based flames',
       path: ['count_target'],
     },
-  )
-  .refine(
-    (data) => {
-      if (!data.is_daily) {
-        return data.schedule && data.schedule.length > 0;
-      }
-      return true;
-    },
-    { message: 'Select at least one day', path: ['schedule'] },
   );
 
 export type CreateFlameFormData = z.infer<typeof createFlameSchema>;

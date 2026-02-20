@@ -8,7 +8,7 @@ import {
   getFlameColors,
 } from '@/app/(app)/flames/utils/colors';
 import { cn } from '@/lib/utils';
-import type { FlameWithSchedule } from '../../actions';
+import type { Flame } from '@/utils/supabase/rows';
 
 const MAX_MINUTES = 720; // 12 hours
 const SNAP_INCREMENT = 15;
@@ -22,7 +22,7 @@ const WARM_COLORS = new Set<string>([
 interface FuelSliderProps {
   value: number;
   onChange: (minutes: number) => void;
-  assignedFlames: FlameWithSchedule[];
+  assignedFlames: Flame[];
   allocations?: Record<string, number>;
   onAllocationChange?: (flameId: string, minutes: number) => void;
   disabled?: boolean;
@@ -76,7 +76,7 @@ export function FuelSlider({
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState('');
 
-  const getAllocation = (flame: FlameWithSchedule) =>
+  const getAllocation = (flame: Flame) =>
     allocations?.[flame.id] ?? flame.time_budget_minutes ?? 0;
 
   const fraction = MAX_MINUTES > 0 ? Math.min(value / MAX_MINUTES, 1) : 0;

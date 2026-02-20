@@ -7,9 +7,6 @@ export type FlameSchedule =
   Database['public']['Tables']['flame_schedules']['Row'];
 export type FlameSession =
   Database['public']['Tables']['flame_sessions']['Row'];
-export type FuelBudget = Database['public']['Tables']['fuel_budgets']['Row'];
-export type WeeklyScheduleOverride =
-  Database['public']['Tables']['weekly_schedule_overrides']['Row'];
 export type UserState = Database['public']['Tables']['user_state']['Row'];
 export type Item = Database['public']['Tables']['items']['Row'];
 export type UserInventory =

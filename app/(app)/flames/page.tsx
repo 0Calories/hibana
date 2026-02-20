@@ -1,23 +1,17 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { getFlamesForDay } from './actions/flame-actions';
-import { getRemainingFuelBudget } from './actions/fuel-actions';
+import { getFlamesPageData } from './actions';
 import { FlamesList } from './components/FlamesList';
 import { FlamesPageActions } from './components/FlamesPageActions';
-import { getAllSessionsForDate } from './session-actions';
 import { getTodayDateString } from './utils/utils';
 
 export default async function FlamesPage() {
   const t = await getTranslations('flames');
   const today = getTodayDateString();
 
-  const [flamesResult, sessionsResult, fuelResult] = await Promise.all([
-    getFlamesForDay(today),
-    getAllSessionsForDate(today),
-    getRemainingFuelBudget(today),
-  ]);
+  const result = await getFlamesPageData(today);
 
-  if (!flamesResult.data) {
+  if (!result.success) {
     return (
       <div className="size-full p-4 pb-24">
         <div className="flex items-center justify-between mb-4">
@@ -29,9 +23,7 @@ export default async function FlamesPage() {
     );
   }
 
-  const flames = flamesResult.data;
-  const sessions = sessionsResult.success ? (sessionsResult.data ?? []) : [];
-  const fuelBudget = fuelResult.success ? (fuelResult.data ?? null) : null;
+  const { flames, sessions, fuelBudget } = result.data;
 
   return (
     <div className="size-full p-4 pb-24">

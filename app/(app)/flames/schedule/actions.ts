@@ -4,94 +4,60 @@ import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/lib/types';
 import type { Flame } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
-import { getWeekDates } from './utils';
+import { getWeekDates, getWeekStartDate } from './utils';
 
 // --- Types ---
 
 export type DayPlan = {
   dayOfWeek: number;
   date: string;
-  fuelMinutes: number | null;
-  isOverride: boolean;
+  fuelBudget: number | null;
   assignedFlameIds: string[];
   flameAllocations: Record<string, number>;
 };
 
-export type FlameWithSchedule = Flame & {
-  defaultSchedule: number[];
-};
-
 export type WeeklySchedule = {
   days: DayPlan[];
-  flames: FlameWithSchedule[];
+  flames: Flame[];
 };
 
-export async function getWeeklySchedule(
-  weekStart: string,
-): ActionResult<WeeklySchedule> {
+export async function getWeeklySchedule(): ActionResult<WeeklySchedule> {
   const { supabase, user } = await createClientWithAuth();
+
+  // Compute current week dates for display
+  const weekStart = getWeekStartDate();
   const dates = getWeekDates(weekStart);
 
-  const [
-    defaultFuelResult,
-    overridesResult,
-    flamesResult,
-    flameSchedulesResult,
-  ] = await Promise.all([
-    supabase.from('fuel_budgets').select('*').eq('user_id', user.id),
-    supabase
-      .from('weekly_schedule_overrides')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('week_start', weekStart),
+  const [schedulesResult, flamesResult] = await Promise.all([
+    supabase.from('flame_schedules').select('*').eq('user_id', user.id),
     supabase
       .from('flames')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_archived', false),
-    supabase.from('flame_schedules').select('*'),
   ]);
 
-  if (defaultFuelResult.error)
-    return { success: false, error: defaultFuelResult.error };
-  if (overridesResult.error)
-    return { success: false, error: overridesResult.error };
+  if (schedulesResult.error)
+    return { success: false, error: schedulesResult.error };
   if (flamesResult.error) return { success: false, error: flamesResult.error };
-  if (flameSchedulesResult.error)
-    return { success: false, error: flameSchedulesResult.error };
 
-  const defaultFuels = defaultFuelResult.data;
-  const overrides = overridesResult.data;
+  const schedules = schedulesResult.data;
   const flames = flamesResult.data;
-  const flameSchedules = flameSchedulesResult.data;
 
-  // Build lookup: day_of_week -> default fuel minutes
-  const defaultFuelByDay = new Map(
-    defaultFuels.map((f) => [f.day_of_week, f.minutes]),
-  );
-
-  // Build lookup: day_of_week -> override row
-  const overrideByDay = new Map(overrides.map((o) => [o.day_of_week, o]));
-
-  // Build lookup: flame_id -> default schedule days
-  const flameScheduleMap = new Map<string, number[]>();
-  for (const fs of flameSchedules) {
-    const existing = flameScheduleMap.get(fs.flame_id) ?? [];
-    existing.push(fs.day_of_week);
-    flameScheduleMap.set(fs.flame_id, existing);
-  }
+  // Build lookup: day_of_week -> schedule row
+  const scheduleByDay = new Map(schedules.map((s) => [s.day_of_week, s]));
 
   // Build day plans
   const days: DayPlan[] = dates.map((date, i) => {
     const dayOfWeek = i; // 0=Sun through 6=Sat
-    const override = overrideByDay.get(dayOfWeek);
+    const schedule = scheduleByDay.get(dayOfWeek);
 
-    if (override) {
+    if (schedule) {
       // Zip flame_ids and flame_minutes into allocations map
       const flameAllocations: Record<string, number> = {};
-      for (let j = 0; j < override.flame_ids.length; j++) {
-        const flameId = override.flame_ids[j];
-        const mins = override.flame_minutes?.[j];
+      for (let j = 0; j < schedule.flame_ids.length; j++) {
+        const flameId = schedule.flame_ids[j];
+        const mins = schedule.flame_minutes?.[j];
         if (mins != null && mins > 0) {
           flameAllocations[flameId] = mins;
         } else {
@@ -106,57 +72,30 @@ export async function getWeeklySchedule(
       return {
         dayOfWeek,
         date,
-        fuelMinutes: override.minutes,
-        isOverride: true,
-        assignedFlameIds: override.flame_ids,
+        fuelBudget: schedule.fuel_budget,
+        assignedFlameIds: schedule.flame_ids,
         flameAllocations,
       };
     }
 
-    // Default: fuel from fuel_budgets, flames from daily + schedules
-    const fuelMinutes = defaultFuelByDay.get(dayOfWeek) ?? null;
-    const defaultFlames = flames.filter((f) => {
-      if (f.is_daily) return true;
-      const schedule = flameScheduleMap.get(f.id) ?? [];
-      return schedule.includes(dayOfWeek);
-    });
-    const assignedFlameIds = defaultFlames.map((f) => f.id);
-
-    // Build default allocations from flame time_budget_minutes
-    const flameAllocations: Record<string, number> = {};
-    for (const f of defaultFlames) {
-      if (f.time_budget_minutes != null) {
-        flameAllocations[f.id] = f.time_budget_minutes;
-      }
-    }
-
+    // No schedule configured for this day
     return {
       dayOfWeek,
       date,
-      fuelMinutes,
-      isOverride: false,
-      assignedFlameIds,
-      flameAllocations,
+      fuelBudget: null,
+      assignedFlameIds: [],
+      flameAllocations: {},
     };
   });
 
-  // Build flames with schedules
-  const flamesWithSchedule: FlameWithSchedule[] = flames.map((f) => ({
-    ...f,
-    defaultSchedule: f.is_daily
-      ? [0, 1, 2, 3, 4, 5, 6]
-      : (flameScheduleMap.get(f.id) ?? []),
-  }));
-
-  return { success: true, data: { days, flames: flamesWithSchedule } };
+  return { success: true, data: { days, flames } };
 }
 
 // --- Mutations ---
 
-export async function setWeeklyOverride(
-  weekStart: string,
+export async function setDaySchedule(
   dayOfWeek: number,
-  minutes: number,
+  fuelBudget: number,
   flameIds: string[],
   flameMinutes: number[],
 ): ActionResult {
@@ -169,16 +108,15 @@ export async function setWeeklyOverride(
     };
   }
 
-  const { error } = await supabase.from('weekly_schedule_overrides').upsert(
+  const { error } = await supabase.from('flame_schedules').upsert(
     {
       user_id: user.id,
-      week_start: weekStart,
       day_of_week: dayOfWeek,
-      minutes,
+      fuel_budget: fuelBudget,
       flame_ids: flameIds,
       flame_minutes: flameMinutes,
     },
-    { onConflict: 'user_id,week_start,day_of_week' },
+    { onConflict: 'user_id,day_of_week' },
   );
 
   if (error) {
@@ -186,22 +124,21 @@ export async function setWeeklyOverride(
   }
 
   revalidatePath('/flames/schedule');
-  return { success: true, data: 'Override saved' };
+  return { success: true, data: 'Schedule saved' };
 }
 
-export async function clearWeeklyOverrides(weekStart: string): ActionResult {
+export async function clearSchedule(): ActionResult {
   const { supabase, user } = await createClientWithAuth();
 
   const { error } = await supabase
-    .from('weekly_schedule_overrides')
+    .from('flame_schedules')
     .delete()
-    .eq('user_id', user.id)
-    .eq('week_start', weekStart);
+    .eq('user_id', user.id);
 
   if (error) {
     return { success: false, error };
   }
 
   revalidatePath('/flames/schedule');
-  return { success: true, data: 'Weekly overrides cleared' };
+  return { success: true, data: 'Schedule cleared' };
 }

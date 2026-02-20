@@ -5,10 +5,10 @@ import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
 import { getFlameColors } from '@/app/(app)/flames/utils/colors';
 import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
 import { cn } from '@/lib/utils';
-import type { FlameWithSchedule } from '../actions';
+import type { Flame } from '@/utils/supabase/rows';
 
 interface MiniFlameCardProps {
-  flame: FlameWithSchedule;
+  flame: Flame;
   level: number;
   budgetLabel?: string;
 }

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
-import { setFlameCompletion } from '../../actions/flame-actions';
+import { setFlameCompletion } from '../../actions';
 import { endSession, startSession } from '../../session-actions';
 import type { FlameState } from '../../utils/types';
 

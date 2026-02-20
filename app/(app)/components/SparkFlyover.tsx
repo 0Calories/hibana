@@ -55,7 +55,7 @@ export function useSparkFlyover() {
 const MIN_PARTICLES = 5;
 const MAX_PARTICLES = 14;
 const FLIGHT_DURATION = 0.8;
-const SPREAD_RADIUS = 24; //12
+const SPREAD_RADIUS = 24;
 const STAR_BASE_SIZE = 8;
 const CIRCLE_BASE_SIZE = 4;
 

@@ -4,12 +4,12 @@ import { useDroppable } from '@dnd-kit/core';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { FlameWithSchedule } from '../../actions';
+import type { Flame } from '@/utils/supabase/rows';
 import { ASSIGNED_FLAME_ZONE_ID } from '../constants';
 import { DraggableFlame } from './DraggableFlame';
 
 interface AssignedFlamesZoneProps {
-  flames: FlameWithSchedule[];
+  flames: Flame[];
   onRemove: (flameId: string) => void;
   allocations: Record<string, number>;
   onAllocationChange: (flameId: string, minutes: number) => void;
@@ -52,9 +52,7 @@ export function AssignedFlamesZone({
               key={flame.id}
               flame={flame}
               level={flameLevels.get(flame.id) ?? 1}
-              disabled={flame.is_daily}
-              showDaily={flame.is_daily}
-              onClick={flame.is_daily ? undefined : () => onRemove(flame.id)}
+              onClick={() => onRemove(flame.id)}
               allocatedMinutes={allocations[flame.id]}
               onAllocationChange={(mins) => onAllocationChange(flame.id, mins)}
             />

@@ -33,16 +33,18 @@ messages/         # i18n translation files (en.json, ja.json)
 
 - **Flame**: A habit/goal. Has name, color, icon, tracking_type (time|count), budget, schedule. Five visual levels: Candle, Torch, Blaze, Bonfire, Supernova.
 - **Flame State Machine**: untended → burning → paused → sealing → sealed
-- **Fuel Budget**: Daily minutes allocated across flames. Per-day-of-week configuration. Overburning is allowed but flagged.
 - **Flame Session**: A tracking instance (started_at, ended_at, duration_seconds, is_completed).
 - **Seal**: Completing a flame session. Triggers celebration animation.
-- **Schedule**: `flame_schedules` (default weekly), `weekly_schedule_overrides` (per-week customization).
+- **Schedule**: `flame_schedules` — rolling weekly template (max 7 rows per user). Each row stores `fuel_budget`, `flame_ids[]`, and `flame_minutes[]` for one day-of-week. Flames are assigned to days through the schedule, not through per-flame `is_daily` flags.
 - **Flame Colors**: rose, orange, amber, indigo, teal, green, blue, sky, fuchsia (grouped: Earthly, Chemical, Cosmic).
 
 ## Architecture Patterns
 
 - **Server Components by default**. Add `'use client'` only when interactivity is needed.
-- **Server Actions** (`'use server'`) for all mutations and data fetching. Wrap Supabase calls with error handling. Revalidate with `revalidatePath()`.
+- **Fetch where you render**: Read data directly in Server Components, not through Server Actions. Colocate data fetching with the route that needs it.
+- **Data Access Layer**: Consolidated fetch functions (e.g. `getFlamesPageData`) that verify auth once, run parallel queries, and return minimal consumer-shaped objects. One function per page/view, not per table.
+- **Server Actions for mutations only**: `'use server'` functions handle writes (create, update, delete). Never use Server Actions for reads. Call `revalidatePath()` after mutations. One action per user intent.
+- **Client-side reads via Server Actions**: Exception — client components that need to refetch data (e.g. `useFuel` polling remaining budget) can call Server Actions that perform reads, since they can't call server-only functions directly.
 - **Local state only** (useState). No global state library. Server is the source of truth.
 - **Custom hooks**: `useFlameState`, `useFuel`, `useLongPress` — colocated in `/hooks` folders.
 - **Supabase auth**: `createClientWithAuth()` for authenticated access, `createClient()` for public.
@@ -73,7 +75,7 @@ messages/         # i18n translation files (en.json, ja.json)
 
 ## Database
 
-Key tables: `flames`, `flame_schedules`, `flame_sessions`, `fuel_budgets`, `weekly_schedule_overrides`, `tasks`, `notes`, `waitlist`. Migrations in `supabase/migrations/`. Generated types in `utils/supabase/types.ts`, row helpers in `utils/supabase/rows.ts`.
+Key tables: `flames`, `flame_schedules` (consolidated weekly template with fuel budget + flame assignments), `flame_sessions`, `tasks`, `notes`, `waitlist`. Migrations in `supabase/migrations/`. Generated types in `utils/supabase/types.ts`, row helpers in `utils/supabase/rows.ts`.
 
 ## Common Commands
 

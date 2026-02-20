@@ -7,7 +7,7 @@ import {
   getFlameColors,
 } from '@/app/(app)/flames/utils/colors';
 import { cn } from '@/lib/utils';
-import type { FlameWithSchedule } from '../actions';
+import type { Flame } from '@/utils/supabase/rows';
 
 const WARM_COLORS = new Set<string>([
   FLAME_HEX_COLORS.amber.medium,
@@ -16,7 +16,7 @@ const WARM_COLORS = new Set<string>([
 
 interface DayRowFuelBarProps {
   fuelMinutes: number;
-  assignedFlames: FlameWithSchedule[];
+  assignedFlames: Flame[];
   allocations?: Record<string, number>;
 }
 
@@ -25,7 +25,7 @@ export function DayRowFuelBar({
   assignedFlames,
   allocations,
 }: DayRowFuelBarProps) {
-  const getAllocation = (flame: FlameWithSchedule) =>
+  const getAllocation = (flame: Flame) =>
     allocations?.[flame.id] ?? flame.time_budget_minutes ?? 0;
 
   const allocatedMinutes = assignedFlames.reduce(

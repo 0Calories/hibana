@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
-import { archiveFlame } from '../../actions/flame-actions';
+import { archiveFlame } from '../../actions';
 import { CreateFlameDialog } from '../../components/CreateFlameDialog';
 import { StaticFlameIcon } from '../../components/StaticFlameIcon';
 import { getFlameColors } from '../../utils/colors';

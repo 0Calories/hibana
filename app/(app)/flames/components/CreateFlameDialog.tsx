@@ -25,14 +25,13 @@ import {
   InputGroupInput,
   InputGroupText,
 } from '@/components/ui/input-group';
-import { Switch } from '@/components/ui/switch';
 import {
   type CreateFlameFormData,
   createFlameSchema,
 } from '@/lib/schemas/flame';
 import { cn } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
-import { createFlame, updateFlame } from '../actions/flame-actions';
+import { createFlame, updateFlame } from '../actions';
 import {
   FLAME_GRADIENT_CLASSES,
   type FlameColorName,
@@ -51,7 +50,6 @@ const defaultCreateValues: CreateFlameFormData = {
   tracking_type: 'time',
   time_budget_minutes: 60,
   count_target: undefined,
-  is_daily: true,
 };
 
 export function CreateFlameDialog({
@@ -78,7 +76,6 @@ export function CreateFlameDialog({
           tracking_type: flame.tracking_type as 'time' | 'count',
           time_budget_minutes: flame.time_budget_minutes ?? 60,
           count_target: flame.count_target ?? undefined,
-          is_daily: flame.is_daily,
         }
       : defaultCreateValues,
   });
@@ -91,7 +88,6 @@ export function CreateFlameDialog({
         tracking_type: flame.tracking_type as 'time' | 'count',
         time_budget_minutes: flame.time_budget_minutes ?? 60,
         count_target: flame.count_target ?? undefined,
-        is_daily: flame.is_daily,
       });
     } else {
       reset(defaultCreateValues);
@@ -116,7 +112,6 @@ export function CreateFlameDialog({
       time_budget_minutes: data.time_budget_minutes ?? null,
       count_target: data.count_target ?? null,
       count_unit: data.count_unit ?? 'number',
-      is_daily: data.is_daily,
     };
 
     const result = isEditMode
@@ -311,22 +306,6 @@ export function CreateFlameDialog({
                 )}
               />
             )}
-
-            {/* Daily Switch */}
-            <Controller
-              name="is_daily"
-              control={control}
-              render={({ field }) => (
-                <Field orientation="horizontal" className="justify-self-end">
-                  <FieldLabel htmlFor="is_daily">{t('daily')}</FieldLabel>
-                  <Switch
-                    id="is_daily"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </Field>
-              )}
-            />
           </div>
 
           {/* Footer */}

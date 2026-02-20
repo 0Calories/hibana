@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
-import type { FuelBudgetStatus } from '../actions/fuel-actions';
+import type { FuelBudgetStatus } from '../actions';
 import { endSession, getAllSessionsForDate } from '../session-actions';
 import { FuelMeter } from './FuelMeter';
 import { FlameCard } from './flame-card/FlameCard';

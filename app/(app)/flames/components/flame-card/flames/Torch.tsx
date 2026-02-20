@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import {
+  DANCING_EMBER_EFFECT,
   EMBER_EFFECT,
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
-  DANCING_EMBER_EFFECT,
   sealedSmokeEffect,
   smokeEffect,
 } from '../effects/presets';
