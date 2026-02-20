@@ -7,11 +7,11 @@
   );
 
   -- Test flames
-  insert into flames (user_id, name, tracking_type, is_daily)
+  insert into flames (user_id, name, tracking_type)
   values
-    ('11111111-1111-1111-1111-111111111111', 'Meditation', 'time', true),
-    ('11111111-1111-1111-1111-111111111111', 'Exercise', 'time', false),
-    ('11111111-1111-1111-1111-111111111111', 'Read', 'count', true);
+    ('11111111-1111-1111-1111-111111111111', 'Meditation', 'time'),
+    ('11111111-1111-1111-1111-111111111111', 'Exercise', 'time'),
+    ('11111111-1111-1111-1111-111111111111', 'Read', 'count');
 
   -- Test user state 
   insert into user_state (user_id, sparks_balance)

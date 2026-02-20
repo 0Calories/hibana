@@ -16,13 +16,9 @@ type FlameInput = Pick<
   | 'tracking_type'
   | 'count_target'
   | 'count_unit'
-  | 'is_daily'
 >;
 
-export async function createFlame(
-  flameInput: FlameInput,
-  schedule?: number[],
-): ActionResult<Flame> {
+export async function createFlame(flameInput: FlameInput): ActionResult<Flame> {
   const { supabase, user } = await createClientWithAuth();
 
   const flameInsertData: TablesInsert<'flames'> = {
@@ -37,25 +33,6 @@ export async function createFlame(
     .single();
   if (insertError) {
     return { success: false, error: insertError };
-  }
-
-  // If this flame was created alongside a schedule, we must also update the data accordingly
-  if (!flameInput.is_daily && schedule && schedule.length > 0) {
-    const flameId = data.id;
-    const { error: scheduleInsertError } = await supabase
-      .from('flame_schedules')
-      .insert(
-        schedule.map((day) => ({
-          day_of_week: day,
-          flame_id: flameId,
-        })),
-      );
-
-    // If there was a problem when attempting to update the schedule, clean up the orphaned flame
-    if (scheduleInsertError) {
-      await supabase.from('flames').delete().eq('id', data.id);
-      return { success: false, error: scheduleInsertError };
-    }
   }
 
   revalidatePath('/flames');
@@ -111,42 +88,8 @@ export async function updateFlame(
 }
 
 /**
- * Configure a schedule for a flame. If the flame already has an existing schedule it will be cleared and replaced
- * @param flameId
- * @param schedule A list of days of the week that the flame should be assigned to (e.g. 1 for Monday, 2 for Tuesday, etc.)
- */
-export async function setFlameSchedule(
-  flameId: string,
-  schedule: number[],
-): ActionResult {
-  const { supabase } = await createClientWithAuth();
-
-  // Clears schedule if empty array passed
-  if (schedule.length === 0) {
-    await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
-    return { success: true, data: 'Flame schedule cleared successfully' };
-  }
-
-  await supabase.from('flame_schedules').delete().eq('flame_id', flameId);
-
-  const { error } = await supabase
-    .from('flame_schedules')
-    .insert(schedule.map((day) => ({ day_of_week: day, flame_id: flameId })));
-
-  if (error) {
-    return { success: false, error };
-  }
-
-  revalidatePath('/flames');
-  revalidatePath('/flames/manage');
-  return { success: true, data: 'Flame schedule successfully updated!' };
-}
-
-/**
  * Returns the Flames that must be tended to for a specific date.
- * Checks for a weekly schedule override first — if one exists for this
- * week + day, uses the override's flame_ids. Otherwise falls back to
- * the default schedule (daily flames + flame_schedules).
+ * Queries the consolidated flame_schedules table for the day_of_week.
  *
  * @param date  Must be provided in the 'YYYY-MM-DD' format
  */
@@ -154,70 +97,51 @@ export async function getFlamesForDay(date: string) {
   const { supabase, user } = await createClientWithAuth();
 
   const d = parseLocalDate(date);
-  const day = d.getDay();
+  const dayOfWeek = d.getDay();
 
-  // Compute week start (Sunday) for override lookup
-  const weekStartDate = new Date(d);
-  weekStartDate.setDate(weekStartDate.getDate() - weekStartDate.getDay());
-  const weekStart = `${weekStartDate.getFullYear()}-${String(weekStartDate.getMonth() + 1).padStart(2, '0')}-${String(weekStartDate.getDate()).padStart(2, '0')}`;
-
-  // Check for a weekly override
-  const { data: override, error: overrideError } = await supabase
-    .from('weekly_schedule_overrides')
-    .select('flame_ids')
+  // Query the consolidated schedule for this day
+  const { data: schedule, error: scheduleError } = await supabase
+    .from('flame_schedules')
+    .select('flame_ids, flame_minutes')
     .eq('user_id', user.id)
-    .eq('week_start', weekStart)
-    .eq('day_of_week', day)
+    .eq('day_of_week', dayOfWeek)
     .maybeSingle();
 
-  if (overrideError) {
-    return { success: false, error: overrideError };
+  if (scheduleError) {
+    return { success: false, error: scheduleError };
   }
 
-  // If override exists, fetch those specific flames by ID
-  if (override?.flame_ids && override.flame_ids.length > 0) {
-    const { data: flames, error } = await supabase
-      .from('flames')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_archived', false)
-      .in('id', override.flame_ids);
-
-    if (error) {
-      return { success: false, error };
-    }
-
-    return { success: true, data: flames ?? [] };
+  if (!schedule?.flame_ids || schedule.flame_ids.length === 0) {
+    return { success: true, data: [] };
   }
 
-  // No override — fall back to default schedule
-  // Daily flames are not included in the schedule so we must retrieve them separately first
-  const { data: dailyFlames, error: dailyError } = await supabase
+  // Fetch the assigned flames by ID
+  const { data: flames, error } = await supabase
     .from('flames')
     .select('*')
     .eq('user_id', user.id)
-    .eq('is_daily', true)
-    .eq('is_archived', false);
-
-  if (dailyError) {
-    return { success: false, error: dailyError };
-  }
-
-  const { data: scheduledFlames, error: scheduledError } = await supabase
-    .from('flames')
-    .select('*, flame_schedules!inner()')
-    .eq('user_id', user.id)
-    .eq('is_daily', false)
     .eq('is_archived', false)
-    .eq('flame_schedules.day_of_week', day);
+    .in('id', schedule.flame_ids);
 
-  if (scheduledError) {
-    return { success: false, error: scheduledError };
+  if (error) {
+    return { success: false, error };
   }
 
-  const combinedResult = [...(dailyFlames ?? []), ...(scheduledFlames ?? [])];
+  // Apply per-flame time allocations and preserve the user's custom order
+  const flameMap = new Map((flames ?? []).map((f) => [f.id, f]));
+  const orderedFlames = schedule.flame_ids
+    .map((id, i) => {
+      const flame = flameMap.get(id);
+      if (!flame) return null;
+      const minutes = schedule.flame_minutes?.[i];
+      if (minutes != null && minutes > 0) {
+        return { ...flame, time_budget_minutes: minutes };
+      }
+      return flame;
+    })
+    .filter((f): f is NonNullable<typeof f> => f !== null);
 
-  return { success: true, data: combinedResult };
+  return { success: true, data: orderedFlames };
 }
 
 export async function getAllFlames(): ActionResult<Flame[]> {

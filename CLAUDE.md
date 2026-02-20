@@ -33,10 +33,9 @@ messages/         # i18n translation files (en.json, ja.json)
 
 - **Flame**: A habit/goal. Has name, color, icon, tracking_type (time|count), budget, schedule. Five visual levels: Candle, Torch, Blaze, Bonfire, Supernova.
 - **Flame State Machine**: untended → burning → paused → sealing → sealed
-- **Fuel Budget**: Daily minutes allocated across flames. Per-day-of-week configuration. Overburning is allowed but flagged.
 - **Flame Session**: A tracking instance (started_at, ended_at, duration_seconds, is_completed).
 - **Seal**: Completing a flame session. Triggers celebration animation.
-- **Schedule**: `flame_schedules` (default weekly), `weekly_schedule_overrides` (per-week customization).
+- **Schedule**: `flame_schedules` — rolling weekly template (max 7 rows per user). Each row stores `fuel_budget`, `flame_ids[]`, and `flame_minutes[]` for one day-of-week. Flames are assigned to days through the schedule, not through per-flame `is_daily` flags.
 - **Flame Colors**: rose, orange, amber, indigo, teal, green, blue, sky, fuchsia (grouped: Earthly, Chemical, Cosmic).
 
 ## Architecture Patterns
@@ -73,7 +72,7 @@ messages/         # i18n translation files (en.json, ja.json)
 
 ## Database
 
-Key tables: `flames`, `flame_schedules`, `flame_sessions`, `fuel_budgets`, `weekly_schedule_overrides`, `tasks`, `notes`, `waitlist`. Migrations in `supabase/migrations/`. Generated types in `utils/supabase/types.ts`, row helpers in `utils/supabase/rows.ts`.
+Key tables: `flames`, `flame_schedules` (consolidated weekly template with fuel budget + flame assignments), `flame_sessions`, `tasks`, `notes`, `waitlist`. Migrations in `supabase/migrations/`. Generated types in `utils/supabase/types.ts`, row helpers in `utils/supabase/rows.ts`.
 
 ## Common Commands
 

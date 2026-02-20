@@ -3,14 +3,14 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/lib/types';
 import { isValidDateString, parseLocalDate } from '@/lib/utils';
-import type { FuelBudget } from '@/utils/supabase/rows';
+import type { FlameSchedule } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 
-export async function getFuelBudget(): ActionResult<FuelBudget[]> {
+export async function getFuelBudget(): ActionResult<FlameSchedule[]> {
   const { supabase, user } = await createClientWithAuth();
 
   const { data, error } = await supabase
-    .from('fuel_budgets')
+    .from('flame_schedules')
     .select('*')
     .eq('user_id', user.id);
 
@@ -34,11 +34,11 @@ export async function setFuelBudget(
     };
   }
 
-  // Use upsert to replace existing budget for the day if already set
+  // Upsert into the consolidated flame_schedules table
   const { error } = await supabase
-    .from('fuel_budgets')
+    .from('flame_schedules')
     .upsert(
-      { user_id: user.id, day_of_week: dayOfWeek, minutes: fuelMinutes },
+      { user_id: user.id, day_of_week: dayOfWeek, fuel_budget: fuelMinutes },
       { onConflict: 'user_id,day_of_week' },
     );
 
@@ -73,43 +73,19 @@ export async function getRemainingFuelBudget(
   const d = parseLocalDate(date);
   const dayOfWeek = d.getDay();
 
-  // Compute week start (Sunday) for override lookup
-  const weekStartDate = new Date(d);
-  weekStartDate.setDate(weekStartDate.getDate() - weekStartDate.getDay());
-  const weekStart = `${weekStartDate.getFullYear()}-${String(weekStartDate.getMonth() + 1).padStart(2, '0')}-${String(weekStartDate.getDate()).padStart(2, '0')}`;
-
-  // Check for a weekly override first
-  const { data: override, error: overrideError } = await supabase
-    .from('weekly_schedule_overrides')
-    .select('minutes')
+  // Single query to the consolidated flame_schedules table
+  const { data: schedule, error: scheduleError } = await supabase
+    .from('flame_schedules')
+    .select('fuel_budget')
     .eq('user_id', user.id)
-    .eq('week_start', weekStart)
     .eq('day_of_week', dayOfWeek)
     .maybeSingle();
 
-  if (overrideError) {
-    return { success: false, error: overrideError };
+  if (scheduleError) {
+    return { success: false, error: scheduleError };
   }
 
-  // Determine budget minutes: override takes priority over default
-  let budgetMinutes: number | null = null;
-
-  if (override) {
-    budgetMinutes = override.minutes;
-  } else {
-    const { data: fuelBudgetData, error: fuelBudgetError } = await supabase
-      .from('fuel_budgets')
-      .select('minutes')
-      .eq('user_id', user.id)
-      .eq('day_of_week', dayOfWeek)
-      .maybeSingle();
-
-    if (fuelBudgetError) {
-      return { success: false, error: fuelBudgetError };
-    }
-
-    budgetMinutes = fuelBudgetData?.minutes ?? null;
-  }
+  const budgetMinutes = schedule?.fuel_budget ?? null;
 
   if (budgetMinutes === null) {
     return { success: true, data: null };

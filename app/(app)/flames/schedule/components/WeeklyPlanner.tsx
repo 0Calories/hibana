@@ -7,13 +7,9 @@ import { DayRow } from './DayRow';
 
 interface WeeklyPlannerProps {
   initialSchedule: WeeklySchedule;
-  weekStart: string;
 }
 
-export function WeeklyPlanner({
-  initialSchedule,
-  weekStart,
-}: WeeklyPlannerProps) {
+export function WeeklyPlanner({ initialSchedule }: WeeklyPlannerProps) {
   const [schedule, setSchedule] = useState<WeeklySchedule>(initialSchedule);
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const todayRef = useRef<HTMLDivElement>(null);
@@ -51,7 +47,6 @@ export function WeeklyPlanner({
               isPast={day.date < today}
               isExpanded={expandedDay === day.dayOfWeek}
               onToggleExpand={() => handleToggleExpand(day.dayOfWeek)}
-              weekStart={weekStart}
               onUpdate={handleDayUpdate}
             />
           </div>

@@ -8,13 +8,12 @@ import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/
 import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
 import { getFlameColors } from '@/app/(app)/flames/utils/colors';
 import { cn } from '@/lib/utils';
-import type { FlameWithSchedule } from '../../actions';
+import type { Flame } from '@/utils/supabase/rows';
 
 interface DraggableFlameProps {
-  flame: FlameWithSchedule;
+  flame: Flame;
   level: number;
   disabled?: boolean;
-  showDaily?: boolean;
   onClick?: () => void;
   allocatedMinutes?: number;
   onAllocationChange?: (minutes: number) => void;
@@ -26,7 +25,6 @@ export function DraggableFlame({
   flame,
   level,
   disabled = false,
-  showDaily = false,
   onClick,
   allocatedMinutes,
   onAllocationChange,
@@ -108,8 +106,6 @@ export function DraggableFlame({
           : onClick
             ? 'cursor-pointer hover:bg-muted/50'
             : 'cursor-grab active:cursor-grabbing',
-        showDaily &&
-          'border border-amber-400/30 bg-amber-50/30 dark:border-amber-500/20 dark:bg-amber-500/5',
       )}
     >
       <FlameRenderer
@@ -162,11 +158,6 @@ export function DraggableFlame({
               )}
             </span>
           ))}
-        {showDaily && (
-          <span className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] font-medium text-amber-600">
-            {t('daily')}
-          </span>
-        )}
       </div>
     </button>
   );
