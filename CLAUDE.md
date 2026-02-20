@@ -41,7 +41,10 @@ messages/         # i18n translation files (en.json, ja.json)
 ## Architecture Patterns
 
 - **Server Components by default**. Add `'use client'` only when interactivity is needed.
-- **Server Actions** (`'use server'`) for all mutations and data fetching. Wrap Supabase calls with error handling. Revalidate with `revalidatePath()`.
+- **Fetch where you render**: Read data directly in Server Components, not through Server Actions. Colocate data fetching with the route that needs it.
+- **Data Access Layer**: Consolidated fetch functions (e.g. `getFlamesPageData`) that verify auth once, run parallel queries, and return minimal consumer-shaped objects. One function per page/view, not per table.
+- **Server Actions for mutations only**: `'use server'` functions handle writes (create, update, delete). Never use Server Actions for reads. Call `revalidatePath()` after mutations. One action per user intent.
+- **Client-side reads via Server Actions**: Exception — client components that need to refetch data (e.g. `useFuel` polling remaining budget) can call Server Actions that perform reads, since they can't call server-only functions directly.
 - **Local state only** (useState). No global state library. Server is the source of truth.
 - **Custom hooks**: `useFlameState`, `useFuel`, `useLongPress` — colocated in `/hooks` folders.
 - **Supabase auth**: `createClientWithAuth()` for authenticated access, `createClient()` for public.
