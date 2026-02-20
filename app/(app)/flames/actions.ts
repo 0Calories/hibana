@@ -272,6 +272,7 @@ export async function getRemainingFuelBudget(
   const { data: sessions, error: fuelSpentError } = await supabase
     .from('flame_sessions')
     .select('duration_seconds')
+    .eq('user_id', user.id)
     .eq('date', date);
 
   if (fuelSpentError) {
@@ -322,7 +323,11 @@ export async function getFlamesPageData(
       .eq('user_id', user.id)
       .eq('day_of_week', dayOfWeek)
       .maybeSingle(),
-    supabase.from('flame_sessions').select('*').eq('date', date),
+    supabase
+      .from('flame_sessions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('date', date),
   ]);
 
   if (scheduleResult.error) {
