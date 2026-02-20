@@ -15,8 +15,7 @@ export default async function FlamesPage() {
   if (!result.success) {
     return (
       <div className="size-full p-4 pb-24">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold">{t('todayTitle')}</h1>
+        <div className="flex justify-end mb-4">
           <FlamesPageActions />
         </div>
         <p>{t('loading')}</p>
@@ -28,12 +27,9 @@ export default async function FlamesPage() {
 
   return (
     <div className="size-full p-4 pb-24">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold">{t('todayTitle')}</h1>
-        <FlamesPageActions />
-      </div>
       {flames.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+          <FlamesPageActions />
           <p className="text-muted-foreground text-sm">{t('emptyToday')}</p>
           <Link
             href="/flames/manage"

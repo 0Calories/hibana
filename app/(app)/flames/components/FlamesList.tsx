@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import type { FuelBudgetStatus } from '../actions';
 import { endSession, getAllSessionsForDate } from '../session-actions';
+import { FlamesPageActions } from './FlamesPageActions';
 import { FuelMeter } from './FuelMeter';
 import { FlameCard } from './flame-card/FlameCard';
 import { useFuel } from './hooks/useFuel';
@@ -65,12 +66,21 @@ export function FlamesList({
 
   return (
     <div>
-      <FuelMeter
-        budgetSeconds={budgetSeconds}
-        remainingSeconds={remainingSeconds}
-        hasBudget={hasBudget}
-        isBurning={activeFlameId !== null}
-      />
+      <div className="sticky top-12 z-20 -mx-4 mb-4 bg-background/80 px-4 pb-0 backdrop-blur-sm md:top-14">
+        <div className="flex items-stretch gap-2">
+          <div className="min-w-0 flex-1">
+            <FuelMeter
+              budgetSeconds={budgetSeconds}
+              remainingSeconds={remainingSeconds}
+              hasBudget={hasBudget}
+              isBurning={activeFlameId !== null}
+            />
+          </div>
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-card px-2">
+            <FlamesPageActions />
+          </div>
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {flames.map((flame, index) => (
           <FlameCard
