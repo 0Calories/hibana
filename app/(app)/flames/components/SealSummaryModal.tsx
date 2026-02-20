@@ -16,6 +16,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { calculateSparks } from '@/lib/sparks';
 import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
 import { FlameRenderer } from './flame-card/effects/FlameRenderer';
 import { SealCelebration } from './flame-card/effects/SealCelebration';
@@ -40,12 +41,9 @@ function calculateRewards(
 ) {
   const levelMultiplier = 1 + (level - 1) * 0.1;
   const minutes = Math.floor(elapsedSeconds / 60);
-  const completionBonus =
-    targetSeconds > 0 && elapsedSeconds >= targetSeconds
-      ? Math.floor((targetSeconds / 60) * 0.5)
-      : 0;
+  // Sparks use level hardcoded to 1 until flame leveling ships (must match backend)
   return {
-    sparks: Math.floor(minutes * 1 * levelMultiplier) + completionBonus,
+    sparks: calculateSparks(elapsedSeconds, targetSeconds, 1),
     xp: Math.floor(minutes * 1.5 * levelMultiplier),
   };
 }

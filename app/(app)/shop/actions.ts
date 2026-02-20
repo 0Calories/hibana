@@ -1,5 +1,6 @@
 'use server';
 
+import { calculateSparks } from '@/lib/sparks';
 import type { ActionResult } from '@/lib/types';
 import type {
   Item,
@@ -98,18 +99,12 @@ export async function creditSealReward(
 
   // Compute sparks (level hardcoded to 1 until flame leveling ships)
   const level = 1;
-  const levelMultiplier = 1 + (level - 1) * 0.1;
   const elapsedSeconds = session.duration_seconds;
-  const minutes = Math.floor(elapsedSeconds / 60);
   const flame = session.flames as unknown as {
     time_budget_minutes: number | null;
   };
   const targetSeconds = (flame?.time_budget_minutes ?? 0) * 60;
-  const completionBonus =
-    targetSeconds > 0 && elapsedSeconds >= targetSeconds
-      ? Math.floor((targetSeconds / 60) * 0.5)
-      : 0;
-  const sparks = Math.floor(minutes * 1 * levelMultiplier) + completionBonus;
+  const sparks = calculateSparks(elapsedSeconds, targetSeconds, level);
 
   if (sparks <= 0) {
     return { success: true, data: { sparks: 0 } };
@@ -129,8 +124,9 @@ export async function creditSealReward(
     return { success: false, error: rpcError };
   }
 
-  const { revalidatePath } = await import('next/cache');
-  revalidatePath('/flames');
+  // No revalidatePath here — the seal completion action already revalidates
+  // /flames, and premature revalidation would update the profile badge before
+  // the flyover animation finishes.
 
   return { success: true, data: { sparks: credited ?? 0 } };
 }

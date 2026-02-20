@@ -69,7 +69,10 @@ function useInflatingPulse(landingState: LandingState | null) {
       prevLanded.current = landedCount;
     }
 
-    if (landedCount === 0) prevLanded.current = 0;
+    if (landedCount === 0) {
+      prevLanded.current = 0;
+      setFlashActive(false);
+    }
 
     return () => {
       decayRef.current?.stop();
@@ -101,14 +104,28 @@ export function ProfileBadge({
 }: ProfileBadgeProps) {
   const { sparks_balance: sparks } = useUserState();
   const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
-  const { registerTarget, landingState } = useSparkFlyover();
+  const { registerTarget, landingState, sparksBoost, resetBoost } =
+    useSparkFlyover();
+
+  // When the server value updates (e.g. on next navigation), it already
+  // includes the credited sparks — clear the local boost to avoid double-counting.
+  const prevServerSparks = useRef(sparks);
+  useEffect(() => {
+    if (sparks !== prevServerSparks.current) {
+      prevServerSparks.current = sparks;
+      resetBoost();
+    }
+  }, [sparks, resetBoost]);
+
+  // Base = server balance + accumulated boost from completed flyovers
+  const effectiveSparks = sparks + sparksBoost;
 
   return (
     <>
       {/* Desktop: Compact pill */}
       <DesktopProfilePill
         username={username}
-        sparks={sparks}
+        sparks={effectiveSparks}
         level={level}
         registerTarget={registerTarget}
         landingState={landingState}
@@ -117,7 +134,7 @@ export function ProfileBadge({
       {/* Mobile: Compact badge */}
       <MobileProfileBadge
         username={username}
-        sparks={sparks}
+        sparks={effectiveSparks}
         level={level}
         xp={xp}
         xpToNext={xpToNext}
