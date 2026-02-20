@@ -9,7 +9,10 @@ export function calculateSparks(
   level: number,
 ): number {
   const levelMultiplier = 1 + (level - 1) * 0.1;
-  const minutes = Math.floor(elapsedSeconds / 60);
+  // Cap credited time at the target — overburn minutes earn no sparks
+  const creditedSeconds =
+    targetSeconds > 0 ? Math.min(elapsedSeconds, targetSeconds) : elapsedSeconds;
+  const minutes = Math.floor(creditedSeconds / 60);
   const completionBonus =
     targetSeconds > 0 && elapsedSeconds >= targetSeconds
       ? Math.floor((targetSeconds / 60) * 0.5)
