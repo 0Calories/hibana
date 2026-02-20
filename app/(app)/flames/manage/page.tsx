@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { getAllFlamesForManagement } from '../actions/flame-actions';
+import { getAllFlamesForManagement } from '../actions';
 import { ManageFlamesList } from './components/ManageFlamesList';
 
 export default async function ManageFlamesPage() {

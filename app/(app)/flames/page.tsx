@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { getFlamesPageData } from './actions/flame-actions';
+import { getFlamesPageData } from './actions';
 import { FlamesList } from './components/FlamesList';
 import { FlamesPageActions } from './components/FlamesPageActions';
 import { getTodayDateString } from './utils/utils';

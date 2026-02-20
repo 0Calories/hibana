@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FlameSession } from '@/utils/supabase/rows';
-import {
-  type FuelBudgetStatus,
-  getRemainingFuelBudget,
-} from '../../actions/flame-actions';
+import { type FuelBudgetStatus, getRemainingFuelBudget } from '../../actions';
 
 interface UseFuelOptions {
   initialFuelBudget: FuelBudgetStatus;

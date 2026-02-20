@@ -31,7 +31,7 @@ import {
 } from '@/lib/schemas/flame';
 import { cn } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
-import { createFlame, updateFlame } from '../actions/flame-actions';
+import { createFlame, updateFlame } from '../actions';
 import {
   FLAME_GRADIENT_CLASSES,
   type FlameColorName,
