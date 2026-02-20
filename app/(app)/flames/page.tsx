@@ -11,6 +11,7 @@ export default async function FlamesPage() {
 
   const result = await getFlamesPageData(today);
 
+  // TODO: Handle error display, this is incorrectly showing a loading state
   if (!result.success) {
     return (
       <div className="size-full p-4 pb-24">

@@ -116,6 +116,7 @@ export function DayRow({
     [editAssignedFlames, flameAllocations],
   );
 
+  // TODO: Smarter lock logic - lock only if isToday and user has not consumed any fuel yet.
   const isFuelLocked = isToday && day.fuelBudget != null;
   const isOverCapacity = fuelBudget > 0 && totalAllocatedFuel > fuelBudget;
 
