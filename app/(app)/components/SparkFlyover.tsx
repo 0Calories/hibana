@@ -36,6 +36,10 @@ interface SparkFlyoverContextValue {
   triggerFlyover: (from: DOMRect, sparkCount: number) => void;
   /** Live landing state — null when no flyover is active */
   landingState: LandingState | null;
+  /** Accumulated sparks from completed flyovers (not yet synced to server) */
+  sparksBoost: number;
+  /** Reset boost when server state catches up */
+  resetBoost: () => void;
 }
 
 // ─── Context ─────────────────────────────────────────────────────────
@@ -239,6 +243,9 @@ export function SparkFlyoverProvider({ children }: { children: ReactNode }) {
   const targetRef = useRef<HTMLElement | null>(null);
   const [requests, setRequests] = useState<FlyoverRequest[]>([]);
   const [landingState, setLandingState] = useState<LandingState | null>(null);
+  const [sparksBoost, setSparksBoost] = useState(0);
+  const landingStateRef = useRef(landingState);
+  landingStateRef.current = landingState;
 
   const registerTarget = useCallback((el: HTMLElement | null) => {
     if (el) {
@@ -261,6 +268,13 @@ export function SparkFlyoverProvider({ children }: { children: ReactNode }) {
       }
     }
     targetRef.current = visible;
+
+    // Absorb any in-progress flyover sparks into the boost before replacing
+    const prev = landingStateRef.current;
+    if (prev && prev.totalParticles > 0) {
+      const fraction = prev.landedCount / prev.totalParticles;
+      setSparksBoost((b) => b + Math.floor(prev.totalSparks * fraction));
+    }
 
     const particleCount = getParticleCount(sparkCount);
     setLandingState({
@@ -287,13 +301,28 @@ export function SparkFlyoverProvider({ children }: { children: ReactNode }) {
   const handleComplete = useCallback((id: number) => {
     if (!reducedMotionRef.current) playCompletionChime();
     setRequests((prev) => prev.filter((r) => r.id !== id));
-    // Clear landing state after a brief delay (let badge finish its pulse)
-    setTimeout(() => setLandingState(null), 400);
+    // After the pulse settles, move flyover sparks into the boost accumulator
+    // so the badge retains the correct total until the server catches up.
+    setTimeout(() => {
+      setSparksBoost((b) => {
+        const ls = landingStateRef.current;
+        return b + (ls?.totalSparks ?? 0);
+      });
+      setLandingState(null);
+    }, 400);
   }, []);
+
+  const resetBoost = useCallback(() => setSparksBoost(0), []);
 
   return (
     <SparkFlyoverContext
-      value={{ registerTarget, triggerFlyover, landingState }}
+      value={{
+        registerTarget,
+        triggerFlyover,
+        landingState,
+        sparksBoost,
+        resetBoost,
+      }}
     >
       {children}
       {requests.map((req) => (
