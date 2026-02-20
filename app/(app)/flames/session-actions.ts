@@ -9,7 +9,7 @@ export async function startSession(
   flameId: string,
   date: string,
 ): ActionResult {
-  const { supabase } = await createClientWithAuth();
+  const { supabase, user } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {
     return {
@@ -65,6 +65,7 @@ export async function startSession(
     date,
     started_at: new Date().toISOString(),
     ended_at: null,
+    user_id: user.id,
   });
 
   if (error) {
@@ -148,11 +149,12 @@ export async function endSession(flameId: string, date: string): ActionResult {
 export async function getAllSessionsForDate(
   date: string,
 ): ActionResult<FlameSession[]> {
-  const { supabase } = await createClientWithAuth();
+  const { supabase, user } = await createClientWithAuth();
 
   const { data, error } = await supabase
     .from('flame_sessions')
     .select('*')
+    .eq('user_id', user.id)
     .eq('date', date);
 
   if (error) {

@@ -69,6 +69,7 @@ export type Database = {
           is_completed: boolean;
           notes: string | null;
           started_at: string | null;
+          user_id: string;
         };
         Insert: {
           created_at?: string;
@@ -80,6 +81,7 @@ export type Database = {
           is_completed?: boolean;
           notes?: string | null;
           started_at?: string | null;
+          user_id: string;
         };
         Update: {
           created_at?: string;
@@ -91,6 +93,7 @@ export type Database = {
           is_completed?: boolean;
           notes?: string | null;
           started_at?: string | null;
+          user_id?: string;
         };
         Relationships: [
           {
