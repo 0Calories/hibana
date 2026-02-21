@@ -76,7 +76,7 @@ export function FlamesList({
               isBurning={activeFlameId !== null}
             />
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-border bg-background/80 px-2 backdrop-blur-sm">
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-card px-2 backdrop-blur-sm">
             <FlamesPageActions />
           </div>
         </div>
