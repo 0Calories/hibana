@@ -155,7 +155,7 @@ export function FlameCard({
 
   const getStateText = () => {
     if (isFuelBlocked && state !== 'sealed') return t('noFuel');
-    if (isBlocked) return null;
+    if (isBlocked && state !== 'sealed') return null;
     switch (state) {
       case 'untended':
         return t('ready');
