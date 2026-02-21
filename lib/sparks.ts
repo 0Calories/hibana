@@ -1,7 +1,7 @@
 /** Minimum fuel % to earn the completion bonus */
 export const COMPLETION_THRESHOLD = 0.9;
 /** Overburn % still treated as "full completion" for messaging */
-export const OVERBURN_GRACE = 1.1;
+export const OVERBURN_GRACE = 1.05;
 
 /**
  * Shared spark reward calculation — single source of truth for
@@ -16,7 +16,9 @@ export function calculateSparks(
   const levelMultiplier = 1 + (level - 1) * 0.1;
   // Cap credited time at the target — overburn minutes earn no sparks
   const creditedSeconds =
-    targetSeconds > 0 ? Math.min(elapsedSeconds, targetSeconds) : elapsedSeconds;
+    targetSeconds > 0
+      ? Math.min(elapsedSeconds, targetSeconds)
+      : elapsedSeconds;
   const minutes = Math.floor(creditedSeconds / 60);
   const completionBonus =
     targetSeconds > 0 && elapsedSeconds >= targetSeconds * COMPLETION_THRESHOLD
