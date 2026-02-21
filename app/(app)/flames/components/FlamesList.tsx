@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import type { FuelBudgetStatus } from '../actions';
 import { endSession, getAllSessionsForDate } from '../session-actions';
@@ -48,6 +49,23 @@ export function FlamesList({
     onFuelDepleted: handleFuelDepleted,
   });
 
+  // Detect when the fuel bar becomes sticky
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [isStuck, setIsStuck] = useState(false);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsStuck(!entry.isIntersecting),
+      { rootMargin: '-48px 0px 0px 0px' },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
   const refreshSessions = useCallback(async () => {
     const result = await getAllSessionsForDate(date);
     if (result.success && result.data) {
@@ -66,7 +84,8 @@ export function FlamesList({
 
   return (
     <div>
-      <div className="sticky top-12 z-20 -mx-4 mb-4 bg-background/80 px-4 pb-0 backdrop-blur-sm md:top-14">
+      <div ref={sentinelRef} className="h-0" />
+      <div className="sticky top-12 z-20 -mx-4 mb-4 px-4 pt-2 md:top-14">
         <div className="flex items-stretch gap-2">
           <div className="min-w-0 flex-1">
             <FuelMeter
@@ -74,9 +93,15 @@ export function FlamesList({
               remainingSeconds={remainingSeconds}
               hasBudget={hasBudget}
               isBurning={activeFlameId !== null}
+              isStuck={isStuck}
             />
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-border bg-card px-2">
+          <div
+            className={cn(
+              'flex items-center gap-1 rounded-lg border border-border px-2 backdrop-blur-sm transition-[colors,opacity] duration-1000',
+              isStuck ? 'bg-card/50 opacity-90' : 'bg-card',
+            )}
+          >
             <FlamesPageActions />
           </div>
         </div>
