@@ -16,7 +16,11 @@ import {
   DialogFooter,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { calculateSparks } from '@/lib/sparks';
+import {
+  COMPLETION_THRESHOLD,
+  OVERBURN_GRACE,
+  calculateSparks,
+} from '@/lib/sparks';
 import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
 import { FlameRenderer } from './flame-card/effects/FlameRenderer';
 import { SealCelebration } from './flame-card/effects/SealCelebration';
@@ -280,8 +284,8 @@ export function SealSummaryModal({
     };
     if (targetSeconds <= 0) return pick('subtitlesPartial');
     const fuelPercent = elapsedSeconds / targetSeconds;
-    if (fuelPercent > 1) return pick('subtitlesOverburn');
-    if (fuelPercent >= 0.9) return pick('subtitlesFull');
+    if (fuelPercent > OVERBURN_GRACE) return pick('subtitlesOverburn');
+    if (fuelPercent >= COMPLETION_THRESHOLD) return pick('subtitlesFull');
     if (fuelPercent >= 0.5) return pick('subtitlesPartial');
     return pick('subtitlesMinimal');
     // eslint-disable-next-line react-hooks/exhaustive-deps
