@@ -13,6 +13,7 @@ interface FuelMeterProps {
   remainingSeconds: number;
   hasBudget: boolean;
   isBurning: boolean;
+  isStuck?: boolean;
 }
 
 function formatTime(totalSeconds: number): string {
@@ -32,6 +33,7 @@ export function FuelMeter({
   remainingSeconds,
   hasBudget,
   isBurning,
+  isStuck = false,
 }: FuelMeterProps) {
   const t = useTranslations('flames.fuel');
   const shouldReduceMotion = useReducedMotion();
@@ -51,7 +53,12 @@ export function FuelMeter({
 
   if (!hasBudget) {
     return (
-      <div className="flex h-full items-center justify-center rounded-lg border border-border bg-card px-3 py-2 backdrop-blur-sm">
+      <div
+        className={cn(
+          'flex h-full items-center justify-center rounded-lg border border-border px-3 py-2 backdrop-blur-sm transition-[colors,opacity] duration-1000',
+          isStuck ? 'bg-card/50 opacity-90' : 'bg-card',
+        )}
+      >
         <p className="text-xs text-muted-foreground">{t('noBudget')}</p>
       </div>
     );
@@ -91,7 +98,10 @@ export function FuelMeter({
 
   return (
     <motion.div
-      className="h-full rounded-lg border border-border bg-card px-3 py-2.5 backdrop-blur-sm"
+      className={cn(
+        'h-full rounded-lg border border-border px-3 py-2.5 backdrop-blur-sm transition-[colors,opacity] duration-1000',
+        isStuck ? 'bg-card/50 opacity-90' : 'bg-card',
+      )}
       initial={false}
       animate={
         isBurning && !isDepleted && !shouldReduceMotion
