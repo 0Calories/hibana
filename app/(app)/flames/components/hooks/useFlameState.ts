@@ -159,14 +159,14 @@ export function useFlameState({
   };
 
   const completeSeal = async (): Promise<boolean> => {
+    // Optimistically transition to sealed state so visual effects fire immediately
+    setState('sealed');
     try {
       const result = await setFlameCompletion(flame.id, date, true);
       if (result.success) {
-        setState('sealed');
         onSessionUpdate?.();
         return true;
       }
-      // Fall back to paused on failure
       setState('paused');
       return false;
     } catch {

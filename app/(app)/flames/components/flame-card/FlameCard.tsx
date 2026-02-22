@@ -79,17 +79,22 @@ export function FlameCard({
   // Threshold: only treat as "long press" after 5% of duration (~100ms)
   const SEAL_INTENT_THRESHOLD = 0.05;
 
-  const handleSealComplete = useCallback(async () => {
+  const handleSealComplete = useCallback(() => {
     if (!shouldReduceMotion) completeSealSound();
-    const success = await completeSeal();
-    if (success) {
-      creditSealReward(flame.id, date).then((r) => {
-        if (!r.success) console.error('Failed to credit seal reward:', r.error);
-      });
-      setCelebrationActive(true);
-    } else {
-      toast.error(tSeal('error'), { position: 'top-center' });
-    }
+
+    // Fire celebration immediately — don't wait for server
+    setCelebrationActive(true);
+
+    // Server action + spark reward run in background
+    completeSeal().then((success) => {
+      if (success) {
+        creditSealReward(flame.id, date).then((r) => {
+          if (!r.success) console.error('Failed to credit seal reward:', r.error);
+        });
+      } else {
+        toast.error(tSeal('error'), { position: 'top-center' });
+      }
+    });
   }, [completeSeal, tSeal, flame.id, date, shouldReduceMotion]);
 
   const handleCelebrationComplete = useCallback(() => {
