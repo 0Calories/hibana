@@ -116,10 +116,20 @@ export function useFlameState({
           setState('burning');
           break;
 
-        case 'burning':
-          await endSession(flame.id, date);
+        case 'burning': {
+          // Capture the exact pause moment before any network latency
+          const pausedAt = new Date().toISOString();
+
+          // Freeze the timer immediately — stop the interval and lock elapsed
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
           setState('paused');
+
+          await endSession(flame.id, date, pausedAt);
           break;
+        }
 
         case 'paused':
           await startSession(flame.id, date);
