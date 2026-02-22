@@ -1,10 +1,15 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { setFlameCompletion } from '../../actions';
 import { endSession, startSession } from '../../session-actions';
 import type { FlameState } from '../../utils/types';
+
+const END_SESSION_RETRIES = 2;
+const RETRY_DELAY_MS = 1500;
 
 interface UseFlameTimerOptions {
   flame: Flame;
@@ -33,6 +38,7 @@ export function useFlameState({
   date,
   onSessionUpdate,
 }: UseFlameTimerOptions): UseFlameTimerReturn {
+  const t = useTranslations('flames.card');
   const [state, setState] = useState<FlameState>('untended');
   const [isLoading, setIsLoading] = useState(false);
   const [localElapsed, setLocalElapsed] = useState(0);
@@ -127,7 +133,22 @@ export function useFlameState({
           }
           setState('paused');
 
-          await endSession(flame.id, date, pausedAt);
+          // Retry in the background — the user already sees the pause,
+          // so we must persist it rather than silently reverting to burning.
+          let persisted = false;
+          for (let attempt = 0; attempt <= END_SESSION_RETRIES; attempt++) {
+            if (attempt > 0) {
+              await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+            }
+            const result = await endSession(flame.id, date, pausedAt);
+            if (result.success) {
+              persisted = true;
+              break;
+            }
+          }
+          if (!persisted) {
+            toast.error(t('pauseError'), { position: 'top-center' });
+          }
           break;
         }
 

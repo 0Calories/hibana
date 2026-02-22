@@ -110,7 +110,8 @@
       "sealing": "Sealing ...",
       "sealed": "Sealed",
       "readyToSeal": "Ready to Seal",
-      "overburning": "Overburn"
+      "overburning": "Overburn",
+      "pauseError": "Failed to pause Flame timer — please try again"
     },
     "seal": {
       "title": "Flame Sealed!",
