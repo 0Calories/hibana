@@ -2,7 +2,7 @@ import { ChevronLeftIcon } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getServerToday } from '@/lib/timezone';
-import { getWeeklySchedule } from './actions';
+import { getWeeklySchedule } from './queries';
 import { WeeklyPlanner } from './components/WeeklyPlanner';
 
 export default async function SchedulePage() {

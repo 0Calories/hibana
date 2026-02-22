@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { DayPlan, WeeklySchedule } from '../actions';
+import type { DayPlan, WeeklySchedule } from '../queries';
 import { DayRow } from './DayRow';
 
 interface WeeklyPlannerProps {
