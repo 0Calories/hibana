@@ -82,14 +82,14 @@ export function FlameCard({
   const handleSealComplete = useCallback(() => {
     if (!shouldReduceMotion) completeSealSound();
 
-    // Fire celebration immediately — don't wait for server
     setCelebrationActive(true);
 
     // Server action + spark reward run in background
     completeSeal().then((success) => {
       if (success) {
         creditSealReward(flame.id, date).then((r) => {
-          if (!r.success) console.error('Failed to credit seal reward:', r.error);
+          if (!r.success)
+            console.error('Failed to credit seal reward:', r.error);
         });
       } else {
         toast.error(tSeal('error'), { position: 'top-center' });
