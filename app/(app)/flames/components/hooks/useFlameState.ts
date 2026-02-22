@@ -78,15 +78,14 @@ export function useFlameState({
     setLocalElapsed(calculateElapsed());
   }, [deriveState, calculateElapsed]);
 
-  // Timer interval for active state
+  // Timer interval for active state — recalculate from timestamps each tick
+  // to avoid setInterval drift that desynchronises the client display from
+  // the server's exact duration_seconds (which matters for the completion
+  // bonus threshold in spark reward calculations).
   useEffect(() => {
     if (state === 'burning') {
       intervalRef.current = setInterval(() => {
-        setLocalElapsed((prev) => {
-          const newElapsed = prev + 1;
-          // Indicates overburn (going above budgeted time)
-          return newElapsed;
-        });
+        setLocalElapsed(calculateElapsed());
       }, 1000);
     } else {
       if (intervalRef.current) {
@@ -101,7 +100,7 @@ export function useFlameState({
         intervalRef.current = null;
       }
     };
-  }, [state]);
+  }, [state, calculateElapsed]);
 
   const toggle = async () => {
     if (isLoading) {
