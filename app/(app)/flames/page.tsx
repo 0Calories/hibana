@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { getServerToday } from '@/lib/timezone';
 import { getFlamesPageData } from './actions';
 import { FlamesList } from './components/FlamesList';
 import { FlamesPageActions } from './components/FlamesPageActions';
-import { getTodayDateString } from './utils/utils';
 
 export default async function FlamesPage() {
   const t = await getTranslations('flames');
-  const today = getTodayDateString();
+  const today = await getServerToday();
 
   const result = await getFlamesPageData(today);
 

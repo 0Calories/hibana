@@ -1,20 +1,18 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getLocalDateString } from '@/lib/utils';
-import type { DayPlan, WeeklySchedule } from '../actions';
+import type { DayPlan, WeeklySchedule } from '../queries';
 import { DayRow } from './DayRow';
 
 interface WeeklyPlannerProps {
   initialSchedule: WeeklySchedule;
+  today: string;
 }
 
-export function WeeklyPlanner({ initialSchedule }: WeeklyPlannerProps) {
+export function WeeklyPlanner({ initialSchedule, today }: WeeklyPlannerProps) {
   const [schedule, setSchedule] = useState<WeeklySchedule>(initialSchedule);
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const todayRef = useRef<HTMLDivElement>(null);
-
-  const today = getLocalDateString();
 
   // Auto-scroll to today on mount
   useEffect(() => {
