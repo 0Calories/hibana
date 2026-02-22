@@ -140,10 +140,14 @@ export function useFlameState({
             if (attempt > 0) {
               await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
             }
-            const result = await endSession(flame.id, date, pausedAt);
-            if (result.success) {
-              persisted = true;
-              break;
+            try {
+              const result = await endSession(flame.id, date, pausedAt);
+              if (result.success) {
+                persisted = true;
+                break;
+              }
+            } catch {
+              // Transient failure (network error, etc.) — continue to next retry
             }
           }
           if (!persisted) {

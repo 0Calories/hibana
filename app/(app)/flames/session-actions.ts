@@ -124,7 +124,12 @@ export async function endSession(
   const startTime = new Date(lastSessionData.started_at);
   // Use the client-provided pause timestamp so duration reflects the moment
   // the user clicked pause, not when the server processed the request.
-  const endTime = pausedAt ? new Date(pausedAt) : new Date();
+  // Falls back to server time if the timestamp is missing or malformed.
+  const parsedPausedAt = pausedAt ? new Date(pausedAt) : null;
+  const endTime =
+    parsedPausedAt && !Number.isNaN(parsedPausedAt.getTime())
+      ? parsedPausedAt
+      : new Date();
 
   const sessionDurationSeconds = Math.max(
     0,
