@@ -122,14 +122,12 @@ export async function endSession(
   // Math.max compensates for potential clock skew fuckery by avoiding negative values
   const currentDuration = Math.max(0, lastSessionData.duration_seconds);
   const startTime = new Date(lastSessionData.started_at);
-  // Use the client-provided pause timestamp so duration reflects the moment
-  // the user clicked pause, not when the server processed the request.
-  // Falls back to server time if the timestamp is missing or malformed.
   const parsedPausedAt = pausedAt ? new Date(pausedAt) : null;
+  const now = new Date();
   const endTime =
     parsedPausedAt && !Number.isNaN(parsedPausedAt.getTime())
-      ? parsedPausedAt
-      : new Date();
+      ? new Date(Math.min(parsedPausedAt.getTime(), now.getTime()))
+      : now;
 
   const sessionDurationSeconds = Math.max(
     0,
