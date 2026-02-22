@@ -110,7 +110,8 @@
       "sealing": "封印中 ...",
       "sealed": "封印済み",
       "readyToSeal": "封印可能",
-      "overburning": "超過燃焼"
+      "overburning": "超過燃焼",
+      "pauseError": "炎タイマーの一時停止に失敗しました。もう一度お試しください"
     },
     "seal": {
       "title": "炎を封印しました！",

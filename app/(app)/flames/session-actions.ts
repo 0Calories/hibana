@@ -78,7 +78,11 @@ export async function startSession(
   };
 }
 
-export async function endSession(flameId: string, date: string): ActionResult {
+export async function endSession(
+  flameId: string,
+  date: string,
+  pausedAt?: string,
+): ActionResult {
   const { supabase } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {
@@ -118,7 +122,12 @@ export async function endSession(flameId: string, date: string): ActionResult {
   // Math.max compensates for potential clock skew fuckery by avoiding negative values
   const currentDuration = Math.max(0, lastSessionData.duration_seconds);
   const startTime = new Date(lastSessionData.started_at);
-  const endTime = new Date();
+  const parsedPausedAt = pausedAt ? new Date(pausedAt) : null;
+  const now = new Date();
+  const endTime =
+    parsedPausedAt && !Number.isNaN(parsedPausedAt.getTime())
+      ? new Date(Math.min(parsedPausedAt.getTime(), now.getTime()))
+      : now;
 
   const sessionDurationSeconds = Math.max(
     0,

@@ -372,8 +372,8 @@ export function FlameCard({
           </div>
         </div>
 
-        {/* Loading overlay */}
-        {isLoading && (
+        {/* Loading overlay — hidden during optimistic pause so the freeze feels instant */}
+        {isLoading && state !== 'paused' && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-black/30">
             <div
               className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
