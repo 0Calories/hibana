@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionResult } from '@/lib/types';
+import { getServerToday } from '@/lib/timezone';
+import { parseLocalDate } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
 import { createClientWithAuth } from '@/utils/supabase/server';
 import { getWeekDates, getWeekStartDate } from './utils';
@@ -25,7 +27,8 @@ export async function getWeeklySchedule(): ActionResult<WeeklySchedule> {
   const { supabase, user } = await createClientWithAuth();
 
   // Compute current week dates for display
-  const weekStart = getWeekStartDate();
+  const today = await getServerToday();
+  const weekStart = getWeekStartDate(parseLocalDate(today));
   const dates = getWeekDates(weekStart);
 
   const [schedulesResult, flamesResult] = await Promise.all([

@@ -1,12 +1,14 @@
 import { ChevronLeftIcon } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { getServerToday } from '@/lib/timezone';
 import { getWeeklySchedule } from './actions';
 import { WeeklyPlanner } from './components/WeeklyPlanner';
 
 export default async function SchedulePage() {
   const t = await getTranslations('schedule');
 
+  const today = await getServerToday();
   const scheduleResult = await getWeeklySchedule();
 
   if (!scheduleResult.success) {
@@ -38,7 +40,7 @@ export default async function SchedulePage() {
         </Link>
         <h1 className="text-lg font-semibold">{t('pageTitle')}</h1>
       </div>
-      <WeeklyPlanner initialSchedule={scheduleResult.data} />
+      <WeeklyPlanner initialSchedule={scheduleResult.data} today={today} />
     </div>
   );
 }
