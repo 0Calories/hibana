@@ -81,13 +81,21 @@ export function FlameCard({
 
   const handleSealComplete = useCallback(async () => {
     if (!shouldReduceMotion) completeSealSound();
-    const success = await completeSeal();
-    if (success) {
-      creditSealReward(flame.id, date).then((r) => {
-        if (!r.success) console.error('Failed to credit seal reward:', r.error);
-      });
-      setCelebrationActive(true);
-    } else {
+
+    setCelebrationActive(true);
+
+    // Server action + spark reward run in background
+    try {
+      const success = await completeSeal();
+      if (success) {
+        creditSealReward(flame.id, date).then((r) => {
+          if (!r.success)
+            console.error('Failed to credit seal reward:', r.error);
+        });
+      } else {
+        toast.error(tSeal('error'), { position: 'top-center' });
+      }
+    } catch {
       toast.error(tSeal('error'), { position: 'top-center' });
     }
   }, [completeSeal, tSeal, flame.id, date, shouldReduceMotion]);
