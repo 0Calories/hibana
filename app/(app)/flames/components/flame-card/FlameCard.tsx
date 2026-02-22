@@ -82,7 +82,6 @@ export function FlameCard({
   const handleSealComplete = useCallback(async () => {
     if (!shouldReduceMotion) completeSealSound();
 
-    // Fire celebration immediately — don't wait for server
     setCelebrationActive(true);
 
     // Server action + spark reward run in background
