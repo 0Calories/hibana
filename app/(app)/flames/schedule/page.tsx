@@ -9,7 +9,7 @@ export default async function SchedulePage() {
   const t = await getTranslations('schedule');
 
   const today = await getServerToday();
-  const scheduleResult = await getWeeklySchedule();
+  const scheduleResult = await getWeeklySchedule(today);
 
   if (!scheduleResult.success) {
     return (
