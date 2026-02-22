@@ -101,7 +101,7 @@ export function useFlameState({
         intervalRef.current = null;
       }
     };
-  }, [state, targetSeconds]);
+  }, [state]);
 
   const toggle = async () => {
     if (isLoading) {
