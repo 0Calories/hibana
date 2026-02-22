@@ -111,7 +111,9 @@
       "sealed": "Sealed",
       "readyToSeal": "Ready to Seal",
       "overburning": "Overburn",
-      "pauseError": "Failed to pause Flame timer — please try again"
+      "pauseError": "Failed to pause Flame timer — please try again",
+      "startError": "Failed to start Flame timer — please try again",
+      "resumeError": "Failed to resume Flame timer — please try again"
     },
     "seal": {
       "title": "Flame Sealed!",

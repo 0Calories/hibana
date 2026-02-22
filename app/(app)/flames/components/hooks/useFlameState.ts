@@ -44,6 +44,14 @@ export function useFlameState({
   const [localElapsed, setLocalElapsed] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Tracks the client-side timestamp of an optimistic start/resume so the
+  // timer can tick before the server refetch updates the session prop.
+  // Cleared once fresh session data arrives via the sync useEffect.
+  const optimisticStartRef = useRef<{
+    startedAt: number;
+    baseElapsed: number;
+  } | null>(null);
+
   const targetSeconds = (flame.time_budget_minutes ?? 0) * 60;
 
   const sealThresholdSeconds =
@@ -60,6 +68,12 @@ export function useFlameState({
   }, [session]);
 
   const calculateElapsed = useCallback((): number => {
+    // Optimistic start/resume — session prop is stale, use client timestamp
+    const opt = optimisticStartRef.current;
+    if (opt) {
+      return opt.baseElapsed + Math.floor((Date.now() - opt.startedAt) / 1000);
+    }
+
     if (!session) return 0;
 
     let total = session.duration_seconds;
@@ -77,6 +91,10 @@ export function useFlameState({
 
   // Update state when session changes, but don't override transient 'sealing' state
   useEffect(() => {
+    // Fresh session data arrived — clear optimistic fallback so
+    // calculateElapsed uses the real server timestamps from now on.
+    optimisticStartRef.current = null;
+
     setState((prev) => {
       if (prev === 'sealing') return prev;
       return deriveState();
@@ -117,10 +135,35 @@ export function useFlameState({
 
     try {
       switch (state) {
-        case 'untended':
-          await startSession(flame.id, date);
+        case 'untended': {
+          optimisticStartRef.current = {
+            startedAt: Date.now(),
+            baseElapsed: 0,
+          };
           setState('burning');
+
+          let started = false;
+          for (let attempt = 0; attempt <= END_SESSION_RETRIES; attempt++) {
+            if (attempt > 0) {
+              await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+            }
+            try {
+              const result = await startSession(flame.id, date);
+              if (result.success) {
+                started = true;
+                break;
+              }
+            } catch {
+              // Transient failure — continue to next retry
+            }
+          }
+          if (!started) {
+            optimisticStartRef.current = null;
+            setState('untended');
+            toast.error(t('startError'), { position: 'top-center' });
+          }
           break;
+        }
 
         case 'burning': {
           // Capture the exact pause moment before any network latency
@@ -156,10 +199,35 @@ export function useFlameState({
           break;
         }
 
-        case 'paused':
-          await startSession(flame.id, date);
+        case 'paused': {
+          optimisticStartRef.current = {
+            startedAt: Date.now(),
+            baseElapsed: localElapsed,
+          };
           setState('burning');
+
+          let resumed = false;
+          for (let attempt = 0; attempt <= END_SESSION_RETRIES; attempt++) {
+            if (attempt > 0) {
+              await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+            }
+            try {
+              const result = await startSession(flame.id, date);
+              if (result.success) {
+                resumed = true;
+                break;
+              }
+            } catch {
+              // Transient failure — continue to next retry
+            }
+          }
+          if (!resumed) {
+            optimisticStartRef.current = null;
+            setState('paused');
+            toast.error(t('resumeError'), { position: 'top-center' });
+          }
           break;
+        }
 
         case 'sealed':
         case 'sealing':
