@@ -378,7 +378,7 @@ export function FlameCard({
           </div>
         </div>
 
-        {/* Loading overlay — hidden during optimistic transitions (pause/start/resume) */}
+        {/* Loading overlay — hidden during optimistic transitions */}
         {isLoading && state !== 'paused' && state !== 'burning' && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-black/30">
             <div

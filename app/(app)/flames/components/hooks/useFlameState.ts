@@ -1,14 +1,14 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import { setFlameCompletion } from '../../actions';
 import { endSession, startSession } from '../../session-actions';
 import type { FlameState } from '../../utils/types';
 
-const END_SESSION_RETRIES = 2;
+const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1500;
 
 interface UseFlameTimerOptions {
@@ -32,6 +32,29 @@ interface UseFlameTimerReturn {
   completeFlame: () => Promise<boolean>;
 }
 
+/**
+ * Retry an async action up to `retries` times with a delay between attempts.
+ * Returns true if any attempt succeeds.
+ */
+async function retryAction(
+  fn: () => Promise<{ success: boolean }>,
+  retries = MAX_RETRIES,
+  delayMs = RETRY_DELAY_MS,
+): Promise<boolean> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    if (attempt > 0) {
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+    try {
+      const result = await fn();
+      if (result.success) return true;
+    } catch {
+      // Transient failure — continue to next retry
+    }
+  }
+  return false;
+}
+
 export function useFlameState({
   flame,
   session,
@@ -39,18 +62,50 @@ export function useFlameState({
   onSessionUpdate,
 }: UseFlameTimerOptions): UseFlameTimerReturn {
   const t = useTranslations('flames.card');
-  const [state, setState] = useState<FlameState>('untended');
+
+  // --- Client-owned timer state ---
+  const [state, setState] = useState<FlameState>(() => {
+    if (!session) return 'untended';
+    if (session.is_completed) return 'sealed';
+    if (session.started_at && !session.ended_at) return 'burning';
+    if (session.ended_at) return 'paused';
+    return 'untended';
+  });
+
+  const [baseElapsed, setBaseElapsed] = useState(() => {
+    return session?.duration_seconds ?? 0;
+  });
+
+  const [startedAt, setStartedAt] = useState<number | null>(() => {
+    if (session?.started_at && !session.ended_at) {
+      // Hydrate: reconstruct client timestamp for an already-burning session
+      return Date.now() - (Date.now() - new Date(session.started_at).getTime());
+    }
+    return null;
+  });
+
+  const [elapsed, setElapsed] = useState(() => {
+    const base = session?.duration_seconds ?? 0;
+    if (session?.started_at && !session.ended_at) {
+      const running = Math.floor(
+        (Date.now() - new Date(session.started_at).getTime()) / 1000,
+      );
+      return base + running;
+    }
+    return base;
+  });
+
   const [isLoading, setIsLoading] = useState(false);
-  const [localElapsed, setLocalElapsed] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Tracks the client-side timestamp of an optimistic start/resume so the
-  // timer can tick before the server refetch updates the session prop.
-  // Cleared once fresh session data arrives via the sync useEffect.
-  const optimisticStartRef = useRef<{
-    startedAt: number;
-    baseElapsed: number;
-  } | null>(null);
+  // Track previous session identity for narrow sync effect
+  const prevSessionRef = useRef<{
+    endedAt: string | null;
+    isCompleted: boolean;
+  }>({
+    endedAt: session?.ended_at ?? null,
+    isCompleted: session?.is_completed ?? false,
+  });
 
   const targetSeconds = (flame.time_budget_minutes ?? 0) * 60;
 
@@ -60,63 +115,21 @@ export function useFlameState({
       ? (flame.completion_threshold_minutes as number) * 60
       : (flame.time_budget_minutes ?? 0) * 30; // 50% of budget as default
 
-  const deriveState = useCallback((): FlameState => {
-    if (!session) return 'untended';
-    if (session.is_completed) return 'completed';
-    if (session.started_at && !session.ended_at) return 'burning';
-    if (session.ended_at) return 'paused';
-    return 'untended';
-  }, [session]);
-
-  const calculateElapsed = useCallback((): number => {
-    // Optimistic start/resume — session prop is stale, use client timestamp
-    const opt = optimisticStartRef.current;
-    if (opt) {
-      return opt.baseElapsed + Math.floor((Date.now() - opt.startedAt) / 1000);
-    }
-
-    if (!session) return 0;
-
-    let total = session.duration_seconds;
-
-    // If session is active, add time since start
-    if (session.started_at && !session.ended_at) {
-      const startTime = new Date(session.started_at).getTime();
-      const now = Date.now();
-      const currentSessionSeconds = Math.floor((now - startTime) / 1000);
-      total += currentSessionSeconds;
-    }
-
-    return total;
-  }, [session]);
-
-  // Update state when session changes, but don't override transient 'completing' state
+  // --- Timer tick ---
   useEffect(() => {
-    // Fresh session data arrived — clear optimistic fallback so
-    // calculateElapsed uses the real server timestamps from now on.
-    optimisticStartRef.current = null;
-
-    setState((prev) => {
-      if (prev === 'completing') return prev;
-      return deriveState();
-    });
-    setLocalElapsed(calculateElapsed());
-  }, [deriveState, calculateElapsed]);
-
-  // Timer interval for active state — recalculate from timestamps each tick
-  // to avoid setInterval drift that desynchronises the client display from
-  // the server's exact duration_seconds (which matters for the completion
-  // bonus threshold in spark reward calculations).
-  useEffect(() => {
-    if (state === 'burning') {
-      intervalRef.current = setInterval(() => {
-        setLocalElapsed(calculateElapsed());
-      }, 1000);
+    if (state === 'burning' && startedAt !== null) {
+      const tick = () => {
+        setElapsed(baseElapsed + Math.floor((Date.now() - startedAt) / 1000));
+      };
+      tick(); // immediate first tick
+      intervalRef.current = setInterval(tick, 1000);
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      // When not burning, elapsed is just baseElapsed (frozen)
+      setElapsed(baseElapsed);
     }
 
     return () => {
@@ -125,41 +138,53 @@ export function useFlameState({
         intervalRef.current = null;
       }
     };
-  }, [state, calculateElapsed]);
+  }, [state, startedAt, baseElapsed]);
 
-  const toggle = async () => {
-    if (isLoading) {
-      return;
+  // --- Narrow sync effect for external changes ---
+  // Only handles: fuel auto-stop (session ended externally) and external seal
+  useEffect(() => {
+    const prev = prevSessionRef.current;
+    const wasActive = prev.endedAt === null;
+    const wasCompleted = prev.isCompleted;
+
+    // Update ref for next comparison
+    prevSessionRef.current = {
+      endedAt: session?.ended_at ?? null,
+      isCompleted: session?.is_completed ?? false,
+    };
+
+    // Fuel auto-stop: session was active, now has ended_at (ended externally)
+    if (wasActive && session?.ended_at && state === 'burning') {
+      setState('paused');
+      setStartedAt(null);
+      setBaseElapsed(session.duration_seconds);
     }
+
+    // External seal: session became completed (e.g. from another tab)
+    if (!wasCompleted && session?.is_completed && state !== 'completed') {
+      setState('completed');
+      setStartedAt(null);
+      setBaseElapsed(session.duration_seconds);
+    }
+  }, [session, state]);
+
+  // --- Transitions ---
+  const toggle = async () => {
+    if (isLoading) return;
 
     setIsLoading(true);
 
     try {
       switch (state) {
         case 'untended': {
-          optimisticStartRef.current = {
-            startedAt: Date.now(),
-            baseElapsed: 0,
-          };
+          const now = Date.now();
+          setStartedAt(now);
+          setBaseElapsed(0);
           setState('burning');
 
-          let started = false;
-          for (let attempt = 0; attempt <= END_SESSION_RETRIES; attempt++) {
-            if (attempt > 0) {
-              await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-            }
-            try {
-              const result = await startSession(flame.id, date);
-              if (result.success) {
-                started = true;
-                break;
-              }
-            } catch {
-              // Transient failure — continue to next retry
-            }
-          }
+          const started = await retryAction(() => startSession(flame.id, date));
           if (!started) {
-            optimisticStartRef.current = null;
+            setStartedAt(null);
             setState('untended');
             toast.error(t('startError'), { position: 'top-center' });
           }
@@ -167,33 +192,21 @@ export function useFlameState({
         }
 
         case 'burning': {
-          // Capture the exact pause moment before any network latency
-          const pausedAt = new Date().toISOString();
+          // Capture elapsed at pause moment
+          const now = Date.now();
+          const finalElapsed =
+            startedAt !== null
+              ? baseElapsed + Math.floor((now - startedAt) / 1000)
+              : baseElapsed;
 
-          // Freeze the timer immediately — stop the interval and lock elapsed
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
+          // Freeze immediately
+          setBaseElapsed(finalElapsed);
+          setStartedAt(null);
           setState('paused');
 
-          // Retry in the background — the user already sees the pause,
-          // so we must persist it rather than silently reverting to burning.
-          let persisted = false;
-          for (let attempt = 0; attempt <= END_SESSION_RETRIES; attempt++) {
-            if (attempt > 0) {
-              await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-            }
-            try {
-              const result = await endSession(flame.id, date, pausedAt);
-              if (result.success) {
-                persisted = true;
-                break;
-              }
-            } catch {
-              // Transient failure (network error, etc.) — continue to next retry
-            }
-          }
+          const persisted = await retryAction(() =>
+            endSession(flame.id, date, finalElapsed),
+          );
           if (!persisted) {
             toast.error(t('pauseError'), { position: 'top-center' });
           }
@@ -201,29 +214,13 @@ export function useFlameState({
         }
 
         case 'paused': {
-          optimisticStartRef.current = {
-            startedAt: Date.now(),
-            baseElapsed: localElapsed,
-          };
+          const now = Date.now();
+          setStartedAt(now);
           setState('burning');
 
-          let resumed = false;
-          for (let attempt = 0; attempt <= END_SESSION_RETRIES; attempt++) {
-            if (attempt > 0) {
-              await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-            }
-            try {
-              const result = await startSession(flame.id, date);
-              if (result.success) {
-                resumed = true;
-                break;
-              }
-            } catch {
-              // Transient failure — continue to next retry
-            }
-          }
+          const resumed = await retryAction(() => startSession(flame.id, date));
           if (!resumed) {
-            optimisticStartRef.current = null;
+            setStartedAt(null);
             setState('paused');
             toast.error(t('resumeError'), { position: 'top-center' });
           }
@@ -247,7 +244,7 @@ export function useFlameState({
   const isCompletionReady =
     state === 'paused' &&
     completionThresholdSeconds > 0 &&
-    localElapsed >= completionThresholdSeconds;
+    elapsed >= completionThresholdSeconds;
 
   const beginCompletion = () => {
     if (isCompletionReady) {
@@ -262,7 +259,6 @@ export function useFlameState({
   };
 
   const completeFlame = async (): Promise<boolean> => {
-    // Optimistically transition to completed state so visual effects fire immediately
     setState('completed');
     try {
       const result = await setFlameCompletion(flame.id, date, true);
@@ -278,15 +274,14 @@ export function useFlameState({
     }
   };
 
-  const progress =
-    targetSeconds > 0 ? Math.min(localElapsed / targetSeconds, 1) : 0;
+  const progress = targetSeconds > 0 ? Math.min(elapsed / targetSeconds, 1) : 0;
 
   const isOverburning =
-    state === 'burning' && targetSeconds > 0 && localElapsed > targetSeconds;
+    state === 'burning' && targetSeconds > 0 && elapsed > targetSeconds;
 
   return {
     state,
-    elapsedSeconds: localElapsed,
+    elapsedSeconds: elapsed,
     targetSeconds,
     progress,
     isOverburning,
