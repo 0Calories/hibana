@@ -32,6 +32,7 @@ interface FlameCardProps {
   session: FlameSession | null;
   date: string;
   onSessionUpdate?: () => void;
+  onBurnChange?: (isBurning: boolean) => void;
   isBlocked?: boolean;
   isFuelDepleted?: boolean;
   level?: number;
@@ -44,6 +45,7 @@ export function FlameCard({
   session,
   date,
   onSessionUpdate,
+  onBurnChange,
   isBlocked = false,
   isFuelDepleted = false,
   level = 1,
@@ -71,6 +73,7 @@ export function FlameCard({
     session,
     date,
     onSessionUpdate,
+    onBurnChange,
   });
 
   const [showSummary, setShowSummary] = useState(false);

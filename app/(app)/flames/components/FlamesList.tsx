@@ -66,10 +66,17 @@ export function FlamesList({
     return () => observer.disconnect();
   }, []);
 
+  // Optimistic active flame ID — updated immediately on burn transitions,
+  // before the server round-trip. `undefined` = use server-derived value.
+  const [optimisticActiveFlameId, setOptimisticActiveFlameId] = useState<
+    string | null | undefined
+  >(undefined);
+
   const refreshSessions = useCallback(async () => {
     const result = await getAllSessionsForDate(date);
     if (result.success && result.data) {
       setSessions(result.data);
+      setOptimisticActiveFlameId(undefined);
     }
     await refetchFuel();
   }, [date, refetchFuel]);
@@ -79,8 +86,13 @@ export function FlamesList({
   };
 
   // Find which flame is currently burning (has a session with started_at but no ended_at)
-  const activeFlameId =
+  const serverActiveFlameId =
     sessions.find((s) => s.started_at && !s.ended_at)?.flame_id ?? null;
+
+  const activeFlameId =
+    optimisticActiveFlameId !== undefined
+      ? optimisticActiveFlameId
+      : serverActiveFlameId;
 
   return (
     <div>
@@ -114,6 +126,9 @@ export function FlamesList({
             session={getSessionForFlame(flame.id)}
             date={date}
             onSessionUpdate={refreshSessions}
+            onBurnChange={(isBurning) =>
+              setOptimisticActiveFlameId(isBurning ? flame.id : null)
+            }
             isBlocked={activeFlameId !== null && activeFlameId !== flame.id}
             isFuelDepleted={isFuelDepleted || !hasBudget}
             level={(index % 8) + 1} // Demo: cycle through levels 1-8

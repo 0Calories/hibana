@@ -16,6 +16,7 @@ interface UseFlameTimerOptions {
   session: FlameSession | null;
   date: string;
   onSessionUpdate?: () => void;
+  onBurnChange?: (isBurning: boolean) => void;
 }
 
 interface UseFlameTimerReturn {
@@ -60,6 +61,7 @@ export function useFlameState({
   session,
   date,
   onSessionUpdate,
+  onBurnChange,
 }: UseFlameTimerOptions): UseFlameTimerReturn {
   const t = useTranslations('flames.card');
 
@@ -158,6 +160,7 @@ export function useFlameState({
       setState('paused');
       setStartedAt(null);
       setBaseElapsed(session.duration_seconds);
+      onBurnChange?.(false);
     }
 
     // External seal: session became completed (e.g. from another tab)
@@ -166,7 +169,7 @@ export function useFlameState({
       setStartedAt(null);
       setBaseElapsed(session.duration_seconds);
     }
-  }, [session, state]);
+  }, [session, state, onBurnChange]);
 
   // --- Transitions ---
   const toggle = async () => {
@@ -181,11 +184,13 @@ export function useFlameState({
           setStartedAt(now);
           setBaseElapsed(0);
           setState('burning');
+          onBurnChange?.(true);
 
           const started = await retryAction(() => startSession(flame.id, date));
           if (!started) {
             setStartedAt(null);
             setState('untended');
+            onBurnChange?.(false);
             toast.error(t('startError'), { position: 'top-center' });
           }
           break;
@@ -203,6 +208,7 @@ export function useFlameState({
           setBaseElapsed(finalElapsed);
           setStartedAt(null);
           setState('paused');
+          onBurnChange?.(false);
 
           const persisted = await retryAction(() =>
             endSession(flame.id, date, finalElapsed),
@@ -217,11 +223,13 @@ export function useFlameState({
           const now = Date.now();
           setStartedAt(now);
           setState('burning');
+          onBurnChange?.(true);
 
           const resumed = await retryAction(() => startSession(flame.id, date));
           if (!resumed) {
             setStartedAt(null);
             setState('paused');
+            onBurnChange?.(false);
             toast.error(t('resumeError'), { position: 'top-center' });
           }
           break;
