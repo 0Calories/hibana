@@ -77,12 +77,37 @@ messages/         # i18n translation files (en.json, ja.json)
 
 Key tables: `flames`, `flame_schedules` (consolidated weekly template with fuel budget + flame assignments), `flame_sessions`, `tasks`, `notes`, `waitlist`. Migrations in `supabase/migrations/`. Generated types in `utils/supabase/types.ts`, row helpers in `utils/supabase/rows.ts`.
 
+## Database Migrations
+
+### Workflow
+
+- Develop against local Supabase (`supabase start`). Create migrations with `supabase migration new <name>` and apply locally with `supabase migration up`.
+- Migrations are applied to prod via GitHub Actions on merge to master (`.github/workflows/supabase-migrations.yml`). Do not run `supabase db push` manually against prod.
+- Migrations belong in the same PR as the code that depends on them. They ship together — never separately.
+
+### Migration Safety: Expand-and-Contract
+
+**Additive changes are always safe** — new columns, tables, functions, or indexes can ship in any PR.
+
+**Destructive changes require two PRs** (renames, drops, column type changes):
+
+1. **Expand PR**: Add new names alongside old ones. Backfill data. Update code to use new names. Old names remain so rollback is safe.
+2. **Contract PR** (after Expand is deployed): Drop old columns/functions. Migration-only, no code changes.
+
+**Rule of thumb**: If a migration contains `DROP`, `RENAME`, or `ALTER COLUMN ... TYPE`, it needs expand-and-contract.
+
+### Scoping
+
+- Migrations that support a feature belong in the feature PR.
+- Pure schema maintenance (indexes, RLS policies) can be standalone PRs.
+- Contract (cleanup) migrations are always standalone PRs.
+
 ## Common Commands
 
 ```bash
 pnpm dev              # Start dev server
 pnpm build            # Production build
 pnpm biome check --write  # Lint + format
-pnpx supabase db push      # Push migrations
+pnpx supabase migration up  # Apply pending migrations to local DB
 pnpx supabase gen types typescript --local > utils/supabase/types.ts  # Regenerate types
 ```
