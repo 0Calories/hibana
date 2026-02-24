@@ -26,8 +26,8 @@ export interface ParticleStateConfig {
   burning: { count: number; sizeMultiplier: number };
   paused: { count: number; sizeMultiplier: number };
   untended: { count: number; sizeMultiplier: number };
-  sealing?: { count: number; sizeMultiplier: number };
-  sealed?: { count: number; sizeMultiplier: number };
+  completing?: { count: number; sizeMultiplier: number };
+  completed?: { count: number; sizeMultiplier: number };
 }
 
 export interface AnimationIntensity {
@@ -47,7 +47,7 @@ export interface BaseParticleProps {
 export type PaletteFn = (colors: ShapeColors) => readonly string[];
 
 export interface StateModifier {
-  condition: 'sealReady' | 'overburning';
+  condition: 'completionReady' | 'overburning';
   palette?: PaletteFn | readonly string[];
   stateOverrides?: Partial<ParticleStateConfig>;
   speedMultiplier?: number;
@@ -82,6 +82,6 @@ export interface FlameParticleEffect {
 }
 
 export interface ParticleConditions {
-  sealReady: boolean;
+  completionReady: boolean;
   overburning: boolean;
 }

@@ -11,8 +11,8 @@ const stateVariants: Record<FlameState, TargetAndTransition> = {
   untended: { scale: 0.8, opacity: 0.88, y: 0 },
   burning: { scale: 1.1, opacity: 1, y: -4 },
   paused: { scale: 1, opacity: 0.95, y: 0 },
-  sealing: { scale: 1.15, opacity: 1, y: -6 },
-  sealed: { scale: 0, opacity: 1, y: 0.9 },
+  completing: { scale: 1.15, opacity: 1, y: -6 },
+  completed: { scale: 0, opacity: 1, y: 0.9 },
 };
 
 const DEFAULT_SVG_CLASS = 'h-24 w-20 sm:h-36 sm:w-28 md:h-44 md:w-36';
@@ -23,7 +23,7 @@ const springTransition = {
   damping: 20,
 };
 const fadeInTransition = { duration: 0.4, ease: 'easeOut' as const };
-const sealBounceTransition = {
+const completionBounceTransition = {
   type: 'spring' as const,
   stiffness: 120,
   damping: 12,
@@ -33,7 +33,7 @@ interface FlameRendererProps {
   state: FlameState;
   level: number;
   colors: ShapeColors;
-  sealProgress?: number;
+  completionProgress?: number;
   className?: string;
   isOverburning?: boolean;
 }
@@ -42,20 +42,21 @@ export function FlameRenderer({
   state,
   level,
   colors,
-  sealProgress = 0,
+  completionProgress = 0,
   className,
   isOverburning = false,
 }: FlameRendererProps) {
   const shouldReduceMotion = useReducedMotion();
   const clampedLevel = Math.max(1, Math.min(8, level));
-  const { Base, Flame, SealedFlame, animation } = FLAME_REGISTRY[clampedLevel];
+  const { Base, Flame, CompletedFlame, animation } =
+    FLAME_REGISTRY[clampedLevel];
   const svgClass = className ?? DEFAULT_SVG_CLASS;
 
   const fadeInInitial = shouldReduceMotion ? {} : { opacity: 0 };
 
-  // Sealed state: bounce from sealing peak then settle into resting visual
-  if (state === 'sealed') {
-    const hasSealedFlame = !!SealedFlame;
+  // Completed state: bounce from completing peak then settle into resting visual
+  if (state === 'completed') {
+    const hasCompletedFlame = !!CompletedFlame;
     return (
       <motion.svg
         viewBox="0 0 100 100"
@@ -65,13 +66,16 @@ export function FlameRenderer({
         initial={{ scale: 1.2, y: -6, ...fadeInInitial }}
         animate={{
           scale: 0.85,
-          opacity: hasSealedFlame ? 1 : 0.7,
+          opacity: hasCompletedFlame ? 1 : 0.7,
           y: 0,
         }}
-        transition={{ ...sealBounceTransition, opacity: fadeInTransition }}
+        transition={{
+          ...completionBounceTransition,
+          opacity: fadeInTransition,
+        }}
       >
-        {SealedFlame ? (
-          <SealedFlame colors={colors} />
+        {CompletedFlame ? (
+          <CompletedFlame colors={colors} />
         ) : (
           <>
             {Base && <Base />}
@@ -99,14 +103,18 @@ export function FlameRenderer({
     );
   }
 
-  // Compute SVG animate values: dynamic for sealing, from stateVariants otherwise
-  const isSealing = state === 'sealing';
-  const svgAnimate = isSealing
-    ? { scale: 0.8 + sealProgress * 0.35, y: sealProgress * -6, opacity: 1 }
+  // Compute SVG animate values: dynamic for completing, from stateVariants otherwise
+  const isCompleting = state === 'completing';
+  const svgAnimate = isCompleting
+    ? {
+        scale: 0.8 + completionProgress * 0.35,
+        y: completionProgress * -6,
+        opacity: 1,
+      }
     : isOverburning
       ? { scale: 1.25, opacity: 1, y: -6 }
       : stateVariants[state];
-  const svgTransition = isSealing
+  const svgTransition = isCompleting
     ? { type: 'tween' as const, duration: 0.1, ease: 'linear' as const }
     : springTransition;
 
@@ -119,8 +127,8 @@ export function FlameRenderer({
 
   return (
     <ShakeWrapper
-      active={isSealing && !shouldReduceMotion}
-      progress={sealProgress}
+      active={isCompleting && !shouldReduceMotion}
+      progress={completionProgress}
     >
       <motion.svg
         viewBox="0 0 100 100"

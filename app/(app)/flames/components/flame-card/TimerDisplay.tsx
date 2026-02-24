@@ -54,7 +54,7 @@ export function TimerDisplay({
   };
 
   const textColorClass =
-    state === 'sealed'
+    state === 'completed'
       ? '' // Use inline color prop for completed state
       : isOverburning
         ? 'text-red-500 dark:text-red-400'
@@ -63,7 +63,7 @@ export function TimerDisplay({
   return (
     <motion.div
       className={`text-center font-mono text-[10px] tracking-tight sm:text-xs md:text-sm ${textColorClass}`}
-      style={state === 'sealed' ? { color } : undefined}
+      style={state === 'completed' ? { color } : undefined}
       animate={pulseAnimation}
       transition={pulseTransition}
     >

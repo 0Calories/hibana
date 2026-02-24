@@ -5,8 +5,8 @@ export const OVERBURN_GRACE = 1.05;
 
 /**
  * Shared spark reward calculation — single source of truth for
- * both the frontend preview (SealSummaryModal) and the backend ledger
- * (creditSealReward server action).
+ * both the frontend preview (CompletionSummaryModal) and the backend ledger
+ * (creditCompletionReward server action).
  */
 export function calculateSparks(
   elapsedSeconds: number,

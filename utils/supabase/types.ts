@@ -108,6 +108,7 @@ export type Database = {
       flames: {
         Row: {
           color: string | null;
+          completion_threshold_minutes: number | null;
           count_target: number | null;
           count_unit: string | null;
           created_at: string;
@@ -115,7 +116,6 @@ export type Database = {
           id: string;
           is_archived: boolean;
           name: string;
-          seal_threshold_minutes: number | null;
           time_budget_minutes: number | null;
           tracking_type: string;
           updated_at: string;
@@ -123,6 +123,7 @@ export type Database = {
         };
         Insert: {
           color?: string | null;
+          completion_threshold_minutes?: number | null;
           count_target?: number | null;
           count_unit?: string | null;
           created_at?: string;
@@ -130,7 +131,6 @@ export type Database = {
           id?: string;
           is_archived?: boolean;
           name: string;
-          seal_threshold_minutes?: number | null;
           time_budget_minutes?: number | null;
           tracking_type: string;
           updated_at?: string;
@@ -138,6 +138,7 @@ export type Database = {
         };
         Update: {
           color?: string | null;
+          completion_threshold_minutes?: number | null;
           count_target?: number | null;
           count_unit?: string | null;
           created_at?: string;
@@ -145,7 +146,6 @@ export type Database = {
           id?: string;
           is_archived?: boolean;
           name?: string;
-          seal_threshold_minutes?: number | null;
           time_budget_minutes?: number | null;
           tracking_type?: string;
           updated_at?: string;
@@ -432,7 +432,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      credit_seal_sparks: {
+      credit_completion_sparks: {
         Args: { p_amount: number; p_session_id: string; p_user_id: string };
         Returns: number;
       };

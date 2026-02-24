@@ -12,28 +12,28 @@ export interface FlameComponentProps {
   colors: ShapeColors;
 }
 
-export interface SealedFlameProps {
+export interface CompletedFlameProps {
   colors: ShapeColors;
 }
 
-export interface SealedSmokeEffectConfig {
-  type: 'sealedSmoke';
+export interface CompletedSmokeEffectConfig {
+  type: 'completedSmoke';
   wickY: number;
   wickX?: number;
   /** When true, uses the flame's medium color for the tendril instead of grey smoke */
   useFlameColor?: boolean;
-  /** Height of smoke column in SVG units — passed through to SealedSmokeWisps */
+  /** Height of smoke column in SVG units — passed through to CompletedSmokeWisps */
   riseHeight?: number;
-  /** When true, renders a single thin strand only — passed through to SealedSmokeWisps */
+  /** When true, renders a single thin strand only — passed through to CompletedSmokeWisps */
   simple?: boolean;
 }
 
-export type EffectConfig = FlameParticleEffect | SealedSmokeEffectConfig;
+export type EffectConfig = FlameParticleEffect | CompletedSmokeEffectConfig;
 
 export interface FlameDefinition {
   Flame: React.FC<FlameComponentProps>;
   Base?: React.FC;
-  SealedFlame?: React.FC<SealedFlameProps>;
+  CompletedFlame?: React.FC<CompletedFlameProps>;
 
   animation: {
     origin: { x: string; y: string };

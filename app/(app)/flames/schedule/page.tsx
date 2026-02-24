@@ -2,8 +2,8 @@ import { ChevronLeftIcon } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getServerToday } from '@/lib/timezone';
-import { getWeeklySchedule } from './queries';
 import { WeeklyPlanner } from './components/WeeklyPlanner';
+import { getWeeklySchedule } from './queries';
 
 export default async function SchedulePage() {
   const t = await getTranslations('schedule');

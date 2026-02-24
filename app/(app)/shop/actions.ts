@@ -68,11 +68,11 @@ export async function getUserInventory(): ActionResult<
 }
 
 /**
- * Credits sparks to the user for sealing a flame session.
+ * Credits sparks to the user for completing a flame session.
  * Idempotent: if the session was already credited, returns { sparks: 0 }.
  * Uses an atomic RPC to prevent race conditions on double-credit and balance update.
  */
-export async function creditSealReward(
+export async function creditCompletionReward(
   flameId: string,
   date: string,
 ): ActionResult<{ sparks: number }> {
@@ -112,7 +112,7 @@ export async function creditSealReward(
 
   // Atomic: insert transaction (idempotent) + increment balance
   const { data: credited, error: rpcError } = await supabase.rpc(
-    'credit_seal_sparks',
+    'credit_completion_sparks',
     {
       p_user_id: user.id,
       p_session_id: session.id,
@@ -124,7 +124,7 @@ export async function creditSealReward(
     return { success: false, error: rpcError };
   }
 
-  // No revalidatePath here — the seal completion action already revalidates
+  // No revalidatePath here — the completion action already revalidates
   // /flames, and premature revalidation would update the profile badge before
   // the flyover animation finishes.
 

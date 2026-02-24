@@ -1,16 +1,16 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import {
+  completedSmokeEffect,
   EMBER_EFFECT,
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
-  sealedSmokeEffect,
   smokeEffect,
 } from '../effects/presets';
 import type {
+  CompletedFlameProps,
   FlameComponentProps,
   FlameDefinition,
-  SealedFlameProps,
 } from '../effects/types';
 
 function CandleBase() {
@@ -69,7 +69,7 @@ function WickSmolder({ color }: { color: string }) {
   );
 }
 
-function CandleSealed({ colors }: SealedFlameProps) {
+function CandleCompleted({ colors }: CompletedFlameProps) {
   return (
     <>
       <CandleBase />
@@ -108,7 +108,7 @@ const smokeEffectStateConfig = {
 export const Candle: FlameDefinition = {
   Base: CandleBase,
   Flame: CandleFlame,
-  SealedFlame: CandleSealed,
+  CompletedFlame: CandleCompleted,
   animation: {
     origin: FLICKER_ORIGIN,
     variants: FLICKER_VARIANTS,
@@ -117,6 +117,6 @@ export const Candle: FlameDefinition = {
   effects: [
     EMBER_EFFECT,
     smokeEffect(smokeEffectStateConfig),
-    sealedSmokeEffect(65),
+    completedSmokeEffect(65),
   ],
 };

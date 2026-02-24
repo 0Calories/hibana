@@ -18,16 +18,16 @@ import {
 } from '@/components/ui/dialog';
 import {
   COMPLETION_THRESHOLD,
-  OVERBURN_GRACE,
   calculateSparks,
+  OVERBURN_GRACE,
 } from '@/lib/sparks';
+import { CompletionEmbers } from './CompletionEmbers';
+import { CompletionCelebration } from './flame-card/effects/CompletionCelebration';
 import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
 import { FlameRenderer } from './flame-card/effects/FlameRenderer';
-import { SealCelebration } from './flame-card/effects/SealCelebration';
 import type { EffectConfig, ShapeColors } from './flame-card/effects/types';
-import { SealEmbers } from './SealEmbers';
 
-interface SealSummaryModalProps {
+interface CompletionSummaryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   flameName: string;
@@ -106,7 +106,7 @@ function useCountUp(target: number, active: boolean) {
   return value;
 }
 
-function SealFuelMeter({
+function CompletionFuelMeter({
   elapsedSeconds,
   targetSeconds,
   animate,
@@ -260,7 +260,7 @@ function SparkShower({ active }: { active: boolean }) {
   );
 }
 
-export function SealSummaryModal({
+export function CompletionSummaryModal({
   open,
   onOpenChange,
   flameName,
@@ -269,8 +269,8 @@ export function SealSummaryModal({
   effects,
   elapsedSeconds,
   targetSeconds,
-}: SealSummaryModalProps) {
-  const t = useTranslations('flames.seal');
+}: CompletionSummaryModalProps) {
+  const t = useTranslations('flames.completion');
   const shouldReduceMotion = useReducedMotion();
   const rewards = calculateRewards(elapsedSeconds, targetSeconds, level);
   const sparksRef = useRef<HTMLDivElement>(null);
@@ -318,7 +318,7 @@ export function SealSummaryModal({
 
     // Staggered animation sequence:
     // 200ms: Dialog open animation settles, fire celebration burst
-    // 500ms: Burst nearing end, reveal sealed flame (it has its own bounce-in)
+    // 500ms: Burst nearing end, reveal completed flame (it has its own bounce-in)
     // 700ms: Title + subtitle fade in
     // 1000ms: Fuel gauge animates
     // 1200ms: Stats slide up
@@ -367,7 +367,9 @@ export function SealSummaryModal({
         </DialogTitle>
 
         {/* Floating ember particles */}
-        {open && !shouldReduceMotion && <SealEmbers color={colors.light} />}
+        {open && !shouldReduceMotion && (
+          <CompletionEmbers color={colors.light} />
+        )}
 
         <div className="relative flex flex-col items-center gap-3 py-2">
           {/* Header text — at top */}
@@ -389,16 +391,16 @@ export function SealSummaryModal({
           {/* Hero flame visual — center of dialog */}
           <div className="relative flex h-36 w-36 items-center justify-center overflow-visible">
             {/* Celebration burst — plays on open */}
-            <SealCelebration
+            <CompletionCelebration
               active={burstActive}
               color={colors.medium}
               onComplete={handleBurstComplete}
             />
 
-            {/* Sealed flame — revealed after burst */}
+            {/* Completed flame — revealed after burst */}
             {showFlame && (
               <FlameRenderer
-                state="sealed"
+                state="completed"
                 level={level}
                 colors={colors}
                 className="h-28 w-24"
@@ -411,7 +413,7 @@ export function SealSummaryModal({
                 <div className="relative h-full w-full">
                   <EffectsRenderer
                     effects={effects}
-                    state="sealed"
+                    state="completed"
                     colors={colors}
                   />
                 </div>
@@ -427,7 +429,7 @@ export function SealSummaryModal({
               animate={showGauge ? { opacity: 1 } : {}}
               transition={{ duration: 0.3 }}
             >
-              <SealFuelMeter
+              <CompletionFuelMeter
                 elapsedSeconds={elapsedSeconds}
                 targetSeconds={targetSeconds}
                 animate={showGauge}

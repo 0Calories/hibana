@@ -1,17 +1,17 @@
 import { motion } from 'framer-motion';
 import {
+  completedSmokeEffect,
   DANCING_EMBER_EFFECT,
   EMBER_EFFECT,
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
   FLICKER_VARIANTS,
-  sealedSmokeEffect,
   smokeEffect,
 } from '../effects/presets';
 import type {
+  CompletedFlameProps,
   FlameComponentProps,
   FlameDefinition,
-  SealedFlameProps,
 } from '../effects/types';
 
 function TorchBase() {
@@ -43,7 +43,7 @@ function TorchFlame({ colors }: FlameComponentProps) {
   );
 }
 
-function TorchSealed({ colors }: SealedFlameProps) {
+function TorchCompleted({ colors }: CompletedFlameProps) {
   return (
     <>
       <TorchBase />
@@ -66,7 +66,7 @@ function TorchSealed({ colors }: SealedFlameProps) {
 export const Torch: FlameDefinition = {
   Base: TorchBase,
   Flame: TorchFlame,
-  SealedFlame: TorchSealed,
+  CompletedFlame: TorchCompleted,
   animation: {
     origin: FLICKER_ORIGIN,
     variants: FLICKER_VARIANTS,
@@ -76,6 +76,6 @@ export const Torch: FlameDefinition = {
     EMBER_EFFECT,
     DANCING_EMBER_EFFECT,
     smokeEffect(),
-    sealedSmokeEffect(65),
+    completedSmokeEffect(65),
   ],
 };

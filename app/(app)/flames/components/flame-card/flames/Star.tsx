@@ -6,9 +6,9 @@ import {
   RADIATE_VARIANTS,
 } from '../effects/presets';
 import type {
+  CompletedFlameProps,
   FlameComponentProps,
   FlameDefinition,
-  SealedFlameProps,
 } from '../effects/types';
 
 function StarFlame({ colors }: FlameComponentProps) {
@@ -38,7 +38,7 @@ function StarFlame({ colors }: FlameComponentProps) {
   );
 }
 
-function StarSealed({ colors }: SealedFlameProps) {
+function StarCompleted({ colors }: CompletedFlameProps) {
   const shouldReduceMotion = useReducedMotion();
   return (
     <motion.g
@@ -60,7 +60,7 @@ function StarSealed({ colors }: SealedFlameProps) {
 
 export const Star: FlameDefinition = {
   Flame: StarFlame,
-  SealedFlame: StarSealed,
+  CompletedFlame: StarCompleted,
   animation: {
     origin: RADIATE_ORIGIN,
     variants: RADIATE_VARIANTS,

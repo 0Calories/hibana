@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-interface SealRingProgressProps {
+interface CompletionRingProgressProps {
   progress: number;
   visible: boolean;
 }
@@ -11,9 +11,12 @@ const RING_SIZE = 120;
 const STROKE_WIDTH = 8;
 const RADIUS = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const SEAL_COLOR = '#fbbf24';
+const COMPLETION_COLOR = '#fbbf24';
 
-export function SealRingProgress({ progress, visible }: SealRingProgressProps) {
+export function CompletionRingProgress({
+  progress,
+  visible,
+}: CompletionRingProgressProps) {
   const offset = CIRCUMFERENCE * (1 - progress);
 
   return (
@@ -39,7 +42,7 @@ export function SealRingProgress({ progress, visible }: SealRingProgressProps) {
               cy={RING_SIZE / 2}
               r={RADIUS}
               fill="none"
-              stroke={SEAL_COLOR}
+              stroke={COMPLETION_COLOR}
               strokeWidth={STROKE_WIDTH}
               opacity={0.15}
             />
@@ -49,7 +52,7 @@ export function SealRingProgress({ progress, visible }: SealRingProgressProps) {
               cy={RING_SIZE / 2}
               r={RADIUS}
               fill="none"
-              stroke={SEAL_COLOR}
+              stroke={COMPLETION_COLOR}
               strokeWidth={STROKE_WIDTH}
               strokeDasharray={CIRCUMFERENCE}
               strokeLinecap="round"

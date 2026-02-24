@@ -26,10 +26,10 @@ interface UseFlameTimerReturn {
   isOverburning: boolean;
   toggle: () => Promise<void>;
   isLoading: boolean;
-  isSealReady: boolean;
-  beginSealing: () => void;
-  cancelSealing: () => void;
-  completeSeal: () => Promise<boolean>;
+  isCompletionReady: boolean;
+  beginCompletion: () => void;
+  cancelCompletion: () => void;
+  completeFlame: () => Promise<boolean>;
 }
 
 export function useFlameState({
@@ -54,14 +54,15 @@ export function useFlameState({
 
   const targetSeconds = (flame.time_budget_minutes ?? 0) * 60;
 
-  const sealThresholdSeconds =
-    'seal_threshold_minutes' in flame && flame.seal_threshold_minutes
-      ? (flame.seal_threshold_minutes as number) * 60
+  const completionThresholdSeconds =
+    'completion_threshold_minutes' in flame &&
+    flame.completion_threshold_minutes
+      ? (flame.completion_threshold_minutes as number) * 60
       : (flame.time_budget_minutes ?? 0) * 30; // 50% of budget as default
 
   const deriveState = useCallback((): FlameState => {
     if (!session) return 'untended';
-    if (session.is_completed) return 'sealed';
+    if (session.is_completed) return 'completed';
     if (session.started_at && !session.ended_at) return 'burning';
     if (session.ended_at) return 'paused';
     return 'untended';
@@ -89,14 +90,14 @@ export function useFlameState({
     return total;
   }, [session]);
 
-  // Update state when session changes, but don't override transient 'sealing' state
+  // Update state when session changes, but don't override transient 'completing' state
   useEffect(() => {
     // Fresh session data arrived — clear optimistic fallback so
     // calculateElapsed uses the real server timestamps from now on.
     optimisticStartRef.current = null;
 
     setState((prev) => {
-      if (prev === 'sealing') return prev;
+      if (prev === 'completing') return prev;
       return deriveState();
     });
     setLocalElapsed(calculateElapsed());
@@ -229,8 +230,8 @@ export function useFlameState({
           break;
         }
 
-        case 'sealed':
-        case 'sealing':
+        case 'completed':
+        case 'completing':
           // No action
           break;
       }
@@ -243,26 +244,26 @@ export function useFlameState({
     }
   };
 
-  const isSealReady =
+  const isCompletionReady =
     state === 'paused' &&
-    sealThresholdSeconds > 0 &&
-    localElapsed >= sealThresholdSeconds;
+    completionThresholdSeconds > 0 &&
+    localElapsed >= completionThresholdSeconds;
 
-  const beginSealing = () => {
-    if (isSealReady) {
-      setState('sealing');
+  const beginCompletion = () => {
+    if (isCompletionReady) {
+      setState('completing');
     }
   };
 
-  const cancelSealing = () => {
-    if (state === 'sealing') {
+  const cancelCompletion = () => {
+    if (state === 'completing') {
       setState('paused');
     }
   };
 
-  const completeSeal = async (): Promise<boolean> => {
-    // Optimistically transition to sealed state so visual effects fire immediately
-    setState('sealed');
+  const completeFlame = async (): Promise<boolean> => {
+    // Optimistically transition to completed state so visual effects fire immediately
+    setState('completed');
     try {
       const result = await setFlameCompletion(flame.id, date, true);
       if (result.success) {
@@ -291,9 +292,9 @@ export function useFlameState({
     isOverburning,
     toggle,
     isLoading,
-    isSealReady,
-    beginSealing,
-    cancelSealing,
-    completeSeal,
+    isCompletionReady,
+    beginCompletion,
+    cancelCompletion,
+    completeFlame,
   };
 }

@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { useCallback, useEffect, useId, useMemo, useRef } from 'react';
 
-interface SealedSmokeWispsProps {
+interface CompletedSmokeWispsProps {
   /** Y coordinate of the wick / emission point in the 0-100 SVG viewBox */
   wickY: number;
   /** X coordinate of the emission origin (default: 50 = center) */
@@ -407,13 +407,13 @@ function buildPaths(
 // Component
 // ---------------------------------------------------------------------------
 
-export function SealedSmokeWisps({
+export function CompletedSmokeWisps({
   wickY,
   wickX = 50,
   color,
   riseHeight: riseHeightProp,
   simple = false,
-}: SealedSmokeWispsProps) {
+}: CompletedSmokeWispsProps) {
   const shouldReduceMotion = useReducedMotion();
   const rawId = useId();
   const id = rawId.replace(/:/g, '');

@@ -2,7 +2,7 @@ import type { TargetAndTransition } from 'framer-motion';
 import type { FlameState } from '../../../utils/types';
 import type { FlameParticleEffect, ParticleStateConfig } from '../../particles';
 import { generateHash } from '../../particles';
-import type { SealedSmokeEffectConfig } from './types';
+import type { CompletedSmokeEffectConfig } from './types';
 
 // ---------------------------------------------------------------------------
 // Animation variant maps
@@ -21,11 +21,11 @@ export const FLICKER_VARIANTS: Record<FlameState, TargetAndTransition> = {
     scaleY: [1, 0.98, 1.01, 0.99, 1],
     scaleX: [1, 1.01, 0.99, 1.005, 1],
   },
-  sealing: {
+  completing: {
     scaleY: [1, 1.12, 0.88, 1.15, 0.85, 1.1, 1],
     scaleX: [1, 0.9, 1.1, 0.88, 1.12, 0.92, 1],
   },
-  sealed: {
+  completed: {
     scaleY: 1,
     scaleX: 1,
   },
@@ -44,11 +44,11 @@ export const RADIATE_VARIANTS: Record<FlameState, TargetAndTransition> = {
     scale: [1, 1.05, 1.02, 1.04, 1],
     rotate: [0, 2, -1, 1, 0],
   },
-  sealing: {
+  completing: {
     scale: [1, 1.18, 1.05, 1.2, 1.08, 1.15, 1],
     rotate: [0, 6, -4, 5, -3, 4, 0],
   },
-  sealed: {
+  completed: {
     scale: 1,
     rotate: 0,
   },
@@ -62,16 +62,16 @@ export const FLICKER_DURATIONS: Record<FlameState, number> = {
   untended: 2,
   burning: 0.8,
   paused: 2,
-  sealing: 0,
-  sealed: 0,
+  completing: 0,
+  completed: 0,
 };
 
 export const RADIATE_DURATIONS: Record<FlameState, number> = {
   untended: 3,
   burning: 2,
   paused: 3,
-  sealing: 1.2,
-  sealed: 0,
+  completing: 1.2,
+  completed: 0,
 };
 
 // ---------------------------------------------------------------------------
@@ -91,21 +91,21 @@ const STANDARD_EMBER_STATES: ParticleStateConfig = {
   burning: { count: 16, sizeMultiplier: 1.4 },
   paused: { count: 5, sizeMultiplier: 1 },
   untended: { count: 1, sizeMultiplier: 1 },
-  sealing: { count: 12, sizeMultiplier: 1.6 },
-  sealed: { count: 0, sizeMultiplier: 0 },
+  completing: { count: 12, sizeMultiplier: 1.6 },
+  completed: { count: 0, sizeMultiplier: 0 },
 };
 
 const WISP_EMBER_STATES: ParticleStateConfig = {
   burning: { count: 12, sizeMultiplier: 2.4 },
   paused: { count: 5, sizeMultiplier: 1 },
   untended: { count: 3, sizeMultiplier: 1 },
-  sealing: { count: 24, sizeMultiplier: 1.6 },
-  sealed: { count: 3, sizeMultiplier: 0.6 },
+  completing: { count: 24, sizeMultiplier: 1.6 },
+  completed: { count: 3, sizeMultiplier: 0.6 },
 };
 
-const SEAL_READY_PALETTE: FlameParticleEffect['modifiers'] = [
+const COMPLETION_READY_PALETTE: FlameParticleEffect['modifiers'] = [
   {
-    condition: 'sealReady',
+    condition: 'completionReady',
     palette: (colors) => [
       colors.light,
       '#fbbf24',
@@ -131,15 +131,15 @@ export const EMBER_EFFECT: FlameParticleEffect = {
       x: [0, particle.drift],
     }),
   },
-  modifiers: SEAL_READY_PALETTE,
+  modifiers: COMPLETION_READY_PALETTE,
 };
 
 const DANCING_EMBER_STATES: ParticleStateConfig = {
   burning: { count: 3, sizeMultiplier: 1 },
   paused: { count: 1, sizeMultiplier: 1 },
   untended: { count: 0, sizeMultiplier: 1 },
-  sealing: { count: 3, sizeMultiplier: 1 },
-  sealed: { count: 0, sizeMultiplier: 0 },
+  completing: { count: 3, sizeMultiplier: 1 },
+  completed: { count: 0, sizeMultiplier: 0 },
 };
 
 /** Fast wiggly embers that rise in an S-shaped sine path */
@@ -183,7 +183,7 @@ export const DANCING_EMBER_EFFECT: FlameParticleEffect = {
       };
     },
   },
-  modifiers: SEAL_READY_PALETTE,
+  modifiers: COMPLETION_READY_PALETTE,
 };
 
 export const WISP_EMBER_EFFECT: FlameParticleEffect = {
@@ -195,8 +195,8 @@ export const STANDARD_SMOKE_STATES: ParticleStateConfig = {
   burning: { count: 15, sizeMultiplier: 1.5 },
   paused: { count: 4, sizeMultiplier: 1 },
   untended: { count: 2, sizeMultiplier: 1 },
-  sealing: { count: 10, sizeMultiplier: 1.3 },
-  sealed: { count: 0, sizeMultiplier: 0 },
+  completing: { count: 10, sizeMultiplier: 1.3 },
+  completed: { count: 0, sizeMultiplier: 0 },
 };
 
 const OVERBURN_GREY_PALETTE = [
@@ -253,18 +253,18 @@ export function smokeEffect(
   };
 }
 
-export function sealedSmokeEffect(
+export function completedSmokeEffect(
   wickY: number,
   wickX?: number,
-): SealedSmokeEffectConfig {
-  return { type: 'sealedSmoke', wickY, wickX };
+): CompletedSmokeEffectConfig {
+  return { type: 'completedSmoke', wickY, wickX };
 }
 
-export function simpleSealedSmokeEffect(
+export function simpleCompletedSmokeEffect(
   wickY: number,
-): SealedSmokeEffectConfig {
+): CompletedSmokeEffectConfig {
   return {
-    type: 'sealedSmoke',
+    type: 'completedSmoke',
     wickY,
     useFlameColor: true,
     riseHeight: 70,
