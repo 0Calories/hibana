@@ -1,6 +1,6 @@
 # Hibana
 
-Gamified habit tracker using fire/flame metaphors. Users create "flames" (habits), allocate daily "fuel" (time budgets), track sessions, and "seal" (complete) them with celebration animations.
+Gamified habit tracker using fire/flame metaphors. Users create "flames" (habits), allocate daily "fuel" (time budgets), track sessions, and "complete" them with celebration animations.
 
 ## Stack
 
@@ -32,9 +32,9 @@ messages/         # i18n translation files (en.json, ja.json)
 ## Domain Model
 
 - **Flame**: A habit/goal. Has name, color, icon, tracking_type (time|count), budget, schedule. Five visual levels: Candle, Torch, Blaze, Bonfire, Supernova.
-- **Flame State Machine**: untended → burning → paused → sealing → sealed
+- **Flame State Machine**: untended → burning → paused → completing → completed
 - **Flame Session**: A tracking instance (started_at, ended_at, duration_seconds, is_completed).
-- **Seal**: Completing a flame session. Triggers celebration animation.
+- **Completion**: Completing a flame session. Triggers celebration animation.
 - **Schedule**: `flame_schedules` — rolling weekly template (max 7 rows per user). Each row stores `fuel_budget`, `flame_ids[]`, and `flame_minutes[]` for one day-of-week. Flames are assigned to days through the schedule, not through per-flame `is_daily` flags.
 - **Flame Colors**: rose, orange, amber, indigo, teal, green, blue, sky, fuchsia (grouped: Earthly, Chemical, Cosmic).
 

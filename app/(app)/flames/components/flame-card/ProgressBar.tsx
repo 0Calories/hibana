@@ -15,7 +15,7 @@ interface ProgressBarProps {
   isOverburning?: boolean;
 }
 
-const SEALED_BAR_GRADIENT =
+const COMPLETED_BAR_GRADIENT =
   'linear-gradient(to right, #92400e, #d97706, #f59e0b, #fbbf24)';
 
 const OVERBURN_BAR_GRADIENT =
@@ -29,12 +29,12 @@ export function ProgressBar({
 }: ProgressBarProps) {
   const shouldReduceMotion = useReducedMotion();
   const isActive = state === 'burning';
-  const isSealed = state === 'sealed';
+  const isCompleted = state === 'completed';
 
-  const percentage = isSealed ? 100 : Math.round(progress * 100);
+  const percentage = isCompleted ? 100 : Math.round(progress * 100);
 
-  const barBackground = isSealed
-    ? SEALED_BAR_GRADIENT
+  const barBackground = isCompleted
+    ? COMPLETED_BAR_GRADIENT
     : isOverburning
       ? OVERBURN_BAR_GRADIENT
       : `linear-gradient(to right, ${colors.dark}, ${colors.medium}, ${colors.light})`;
@@ -43,7 +43,7 @@ export function ProgressBar({
     ? isOverburning
       ? '0 0 8px #ef4444, 0 0 16px #ef444440'
       : `0 0 8px ${colors.medium}, 0 0 16px ${colors.medium}40`
-    : isSealed
+    : isCompleted
       ? '0 0 6px #d9770640'
       : 'none';
 

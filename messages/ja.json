@@ -107,16 +107,16 @@
       "tended": "Tended",
       "blocked": "Idle",
       "noFuel": "No fuel",
-      "sealing": "封印中 ...",
-      "sealed": "封印済み",
-      "readyToSeal": "封印可能",
+      "completing": "達成中 ...",
+      "completed": "達成済み",
+      "readyToComplete": "達成可能",
       "overburning": "超過燃焼",
       "pauseError": "炎タイマーの一時停止に失敗しました。もう一度お試しください",
       "startError": "炎タイマーの開始に失敗しました。もう一度お試しください",
       "resumeError": "炎タイマーの再開に失敗しました。もう一度お試しください"
     },
-    "seal": {
-      "title": "炎を封印しました！",
+    "completion": {
+      "title": "炎を達成しました！",
       "subtitlesOverburn": [
         "情熱の炎は熱い。でも燃え尽きないように。",
         "すごい熱量 — 明日の分の燃料も残しておこう。",
@@ -142,7 +142,7 @@
       "xpEarned": "獲得ヒート",
       "minutes": "{count}分",
       "dismiss": "この調子で！",
-      "error": "封印に失敗しました。もう一度お試しください。"
+      "error": "達成に失敗しました。もう一度お試しください。"
     },
     "todayTitle": "今日のフレイム",
     "scheduleLink": "週間スケジュール",

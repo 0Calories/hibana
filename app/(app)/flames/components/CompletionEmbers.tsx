@@ -20,11 +20,11 @@ const EMBER_CONFIG = {
   driftRange: { min: -20, max: 20 },
 } as const;
 
-interface SealEmber extends Particle {
+interface CompletionEmber extends Particle {
   peakOpacity: number;
 }
 
-function createSealEmber(index: number): SealEmber {
+function createCompletionEmber(index: number): CompletionEmber {
   const base = generateFloatingParticle(index, EMBER_SEED, EMBER_CONFIG);
   const h = generateHash(index, 149);
   return {
@@ -33,13 +33,14 @@ function createSealEmber(index: number): SealEmber {
   };
 }
 
-interface SealEmbersProps {
+interface CompletionEmbersProps {
   color: string;
 }
 
-export function SealEmbers({ color }: SealEmbersProps) {
+export function CompletionEmbers({ color }: CompletionEmbersProps) {
   const particles = useMemo(
-    () => Array.from({ length: EMBER_COUNT }, (_, i) => createSealEmber(i)),
+    () =>
+      Array.from({ length: EMBER_COUNT }, (_, i) => createCompletionEmber(i)),
     [],
   );
 

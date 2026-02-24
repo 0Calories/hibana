@@ -4,10 +4,10 @@ import { useMemo } from 'react';
 import type { FlameState } from '../../../utils/types';
 import type { ParticleConditions } from '../../particles';
 import { FlameParticles } from '../../particles';
-import { SealedSmokeWisps } from './SealedSmokeWisps';
+import { CompletedSmokeWisps } from './CompletedSmokeWisps';
 import type {
+  CompletedSmokeEffectConfig,
   EffectConfig,
-  SealedSmokeEffectConfig,
   ShapeColors,
 } from './types';
 
@@ -16,15 +16,15 @@ interface EffectsRendererProps {
   state: FlameState;
   colors: ShapeColors;
   isOverburning?: boolean;
-  isSealReady?: boolean;
+  isCompletionReady?: boolean;
 }
 
-function isSealedSmokeEffect(
+function isCompletedSmokeEffect(
   effect: EffectConfig,
-): effect is SealedSmokeEffectConfig {
+): effect is CompletedSmokeEffectConfig {
   return (
     'type' in effect &&
-    (effect as SealedSmokeEffectConfig).type === 'sealedSmoke'
+    (effect as CompletedSmokeEffectConfig).type === 'completedSmoke'
   );
 }
 
@@ -33,18 +33,18 @@ export function EffectsRenderer({
   state,
   colors,
   isOverburning = false,
-  isSealReady = false,
+  isCompletionReady = false,
 }: EffectsRendererProps) {
   const conditions: ParticleConditions = useMemo(
-    () => ({ sealReady: isSealReady, overburning: isOverburning }),
-    [isSealReady, isOverburning],
+    () => ({ completionReady: isCompletionReady, overburning: isOverburning }),
+    [isCompletionReady, isOverburning],
   );
 
   return (
     <>
       {effects.map((effect) => {
-        if (isSealedSmokeEffect(effect)) {
-          if (state !== 'sealed') return null;
+        if (isCompletedSmokeEffect(effect)) {
+          if (state !== 'completed') return null;
           return (
             <div
               key={effect.type}
@@ -56,7 +56,7 @@ export function EffectsRenderer({
                 overflow="visible"
                 role="graphics-symbol"
               >
-                <SealedSmokeWisps
+                <CompletedSmokeWisps
                   wickY={effect.wickY}
                   wickX={effect.wickX}
                   color={effect.useFlameColor ? colors.medium : undefined}

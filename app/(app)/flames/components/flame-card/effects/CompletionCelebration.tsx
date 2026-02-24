@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { generateHash } from '../../particles';
 
-interface SealCelebrationProps {
+interface CompletionCelebrationProps {
   active: boolean;
   color: string;
   onComplete: () => void;
@@ -13,7 +13,7 @@ interface SealCelebrationProps {
 const PARTICLE_COUNT = 20;
 const DURATION_MS = 600;
 const GOLDEN_COLORS = ['#fbbf24', '#f59e0b', '#d97706', '#fcd34d'];
-const SEAL_GOLD = '#fbbf24';
+const COMPLETION_GOLD = '#fbbf24';
 
 interface CelebrationParticle {
   id: number;
@@ -24,11 +24,11 @@ interface CelebrationParticle {
   delay: number;
 }
 
-export function SealCelebration({
+export function CompletionCelebration({
   active,
   color,
   onComplete,
-}: SealCelebrationProps) {
+}: CompletionCelebrationProps) {
   const shouldReduceMotion = useReducedMotion();
   const [visible, setVisible] = useState(false);
 
@@ -73,7 +73,7 @@ export function SealCelebration({
         initial={{ opacity: 0 }}
         animate={{ opacity: [0, 0.4, 0] }}
         transition={{ duration: 0.5 }}
-        style={{ backgroundColor: SEAL_GOLD }}
+        style={{ backgroundColor: COMPLETION_GOLD }}
       />
     );
   }
@@ -84,7 +84,7 @@ export function SealCelebration({
       <motion.div
         className="absolute rounded-full"
         style={{
-          border: `2px solid ${SEAL_GOLD}`,
+          border: `2px solid ${COMPLETION_GOLD}`,
         }}
         initial={{ width: 0, height: 0, opacity: 0.9 }}
         animate={{ width: 160, height: 160, opacity: 0 }}
@@ -94,7 +94,7 @@ export function SealCelebration({
       <motion.div
         className="absolute rounded-full"
         style={{
-          border: `1.5px solid ${SEAL_GOLD}`,
+          border: `1.5px solid ${COMPLETION_GOLD}`,
         }}
         initial={{ width: 0, height: 0, opacity: 0.6 }}
         animate={{ width: 120, height: 120, opacity: 0 }}

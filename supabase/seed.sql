@@ -27,7 +27,7 @@
 
   -- Sample spark transactions (earn, earn, spend)
   insert into spark_transactions (user_id, amount, reason) values
-    ('11111111-1111-1111-1111-111111111111', 100, 'seal'),
+    ('11111111-1111-1111-1111-111111111111', 100, 'completion'),
     ('11111111-1111-1111-1111-111111111111', 100, 'streak_bonus'),
     ('11111111-1111-1111-1111-111111111111', -50, 'purchase');
     

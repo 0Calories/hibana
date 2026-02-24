@@ -99,8 +99,8 @@ export function getParticleIntensity(
       };
     case 'untended':
     case 'paused':
-    case 'sealed':
-    case 'sealing':
+    case 'completed':
+    case 'completing':
       return {
         opacity: config?.inactiveOpacity ?? 0.4,
         speed: config?.inactiveSpeed ?? 1,
@@ -113,6 +113,6 @@ export function shouldShowParticles(state: FlameState): boolean {
     state === 'burning' ||
     state === 'paused' ||
     state === 'untended' ||
-    state === 'sealing'
+    state === 'completing'
   );
 }

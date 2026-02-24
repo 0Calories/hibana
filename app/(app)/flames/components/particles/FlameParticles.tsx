@@ -57,11 +57,12 @@ export function FlameParticles({
   const activeModifiers = useMemo(
     () =>
       modifiers?.filter((m) => {
-        if (m.condition === 'sealReady') return conditions.sealReady;
+        if (m.condition === 'completionReady')
+          return conditions.completionReady;
         if (m.condition === 'overburning') return conditions.overburning;
         return false;
       }) ?? [],
-    [modifiers, conditions.sealReady, conditions.overburning],
+    [modifiers, conditions.completionReady, conditions.overburning],
   );
 
   // Merge state config with modifier overrides
@@ -96,11 +97,11 @@ export function FlameParticles({
   }, [activeModifiers]);
 
   // Visibility
-  const sealedCount = effectiveStateConfig.sealed?.count ?? 0;
+  const completedCount = effectiveStateConfig.completed?.count ?? 0;
   const customVisible = showWhen ? showWhen(state) : false;
   const active =
     shouldShowParticles(state) ||
-    (state === 'sealed' && sealedCount > 0) ||
+    (state === 'completed' && completedCount > 0) ||
     customVisible;
 
   const idCounter = useRef(0);

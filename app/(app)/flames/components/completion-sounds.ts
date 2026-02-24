@@ -1,11 +1,11 @@
 /**
- * Synthesized seal sound — plays during the long-press "seal" gesture.
+ * Synthesized completion sound — plays during the long-press "complete" gesture.
  * Crackling tension: noise grains that fire faster and faster,
- * building to a booming finish when the seal completes.
+ * building to a booming finish when the completion finishes.
  *
  * Uses Web Audio API — no audio files needed.
  *
- * Dev only: window.sealSound.demo() / .start() / .update(0.5) / .complete() / .cancel()
+ * Dev only: window.completionSound.demo() / .start() / .update(0.5) / .complete() / .cancel()
  */
 
 let ctx: AudioContext | null = null;
@@ -109,8 +109,8 @@ function stopDrone() {
 
 // ─── Public API ─────────────────────────────────────────────────────
 
-/** Start the crackling seal sound. Call once when sealing begins. */
-export function startSealSound() {
+/** Start the crackling completion sound. Call once when completing begins. */
+export function startCompletionSound() {
   const ac = getCtx();
   if (!ac) return;
   running = true;
@@ -137,8 +137,8 @@ export function startSealSound() {
   droneNodes = { osc, gain, filter };
 }
 
-/** Update crackling based on seal progress (0 → 1). Call every frame. */
-export function updateSealSound(progress: number) {
+/** Update crackling based on completion progress (0 → 1). Call every frame. */
+export function updateCompletionSound(progress: number) {
   if (!running) return;
   const ac = getCtx();
   if (!ac) return;
@@ -185,8 +185,8 @@ function makeDistortion(ac: AudioContext, amount: number): WaveShaperNode {
   return ws;
 }
 
-/** Seal completed — stop crackle, play boom. */
-export function completeSealSound() {
+/** Completion finished — stop crackle, play boom. */
+export function finishCompletionSound() {
   running = false;
   stopDrone();
   const ac = getCtx();
@@ -274,8 +274,8 @@ export function completeSealSound() {
   mid.stop(now + 0.2);
 }
 
-/** Seal cancelled — crackle fades out. */
-export function cancelSealSound() {
+/** Completion cancelled — crackle fades out. */
+export function cancelCompletionSound() {
   running = false;
   if (droneNodes) {
     const ac = getCtx();
@@ -298,26 +298,26 @@ export function cancelSealSound() {
 // ─── Dev console helpers (tree-shaken in production) ────────────────
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   function runDemo() {
-    startSealSound();
+    startCompletionSound();
     const start = Date.now();
     const duration = 2000;
     const tick = () => {
       const p = Math.min((Date.now() - start) / duration, 1);
-      updateSealSound(p);
+      updateCompletionSound(p);
       if (p < 1) {
         requestAnimationFrame(tick);
       } else {
-        completeSealSound();
+        finishCompletionSound();
       }
     };
     requestAnimationFrame(tick);
   }
 
-  (window as unknown as Record<string, unknown>).sealSound = {
-    start: startSealSound,
-    update: updateSealSound,
-    complete: completeSealSound,
-    cancel: cancelSealSound,
+  (window as unknown as Record<string, unknown>).completionSound = {
+    start: startCompletionSound,
+    update: updateCompletionSound,
+    complete: finishCompletionSound,
+    cancel: cancelCompletionSound,
     demo: runDemo,
   };
 }

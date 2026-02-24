@@ -6,9 +6,9 @@ import {
   RADIATE_VARIANTS,
 } from '../effects/presets';
 import type {
+  CompletedFlameProps,
   FlameComponentProps,
   FlameDefinition,
-  SealedFlameProps,
 } from '../effects/types';
 
 function SupernovaFlame({ colors }: FlameComponentProps) {
@@ -60,7 +60,7 @@ function SupernovaFlame({ colors }: FlameComponentProps) {
   );
 }
 
-function SupernovaSealed({ colors }: SealedFlameProps) {
+function SupernovaCompleted({ colors }: CompletedFlameProps) {
   const shouldReduceMotion = useReducedMotion();
   return (
     <motion.g
@@ -82,7 +82,7 @@ function SupernovaSealed({ colors }: SealedFlameProps) {
 
 export const Supernova: FlameDefinition = {
   Flame: SupernovaFlame,
-  SealedFlame: SupernovaSealed,
+  CompletedFlame: SupernovaCompleted,
   animation: {
     origin: RADIATE_ORIGIN,
     variants: RADIATE_VARIANTS,

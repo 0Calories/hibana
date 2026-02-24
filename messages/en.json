@@ -107,16 +107,16 @@
       "tended": "Tended",
       "blocked": "Idle",
       "noFuel": "No fuel",
-      "sealing": "Sealing ...",
-      "sealed": "Sealed",
-      "readyToSeal": "Ready to Seal",
+      "completing": "Completing ...",
+      "completed": "Completed",
+      "readyToComplete": "Ready to Complete",
       "overburning": "Overburn",
       "pauseError": "Failed to pause Flame timer — please try again",
       "startError": "Failed to start Flame timer — please try again",
       "resumeError": "Failed to resume Flame timer — please try again"
     },
-    "seal": {
-      "title": "Flame Sealed!",
+    "completion": {
+      "title": "Flame Completed!",
       "subtitlesOverburn": [
         "Your passion burns hot, but be careful not to burn out.",
         "Impressive heat — just remember to save fuel for tomorrow.",
@@ -142,7 +142,7 @@
       "xpEarned": "Heat Earned",
       "minutes": "{count} min",
       "dismiss": "Keep it up!",
-      "error": "Failed to seal flame. Please try again."
+      "error": "Failed to complete flame. Please try again."
     },
     "todayTitle": "Today's Flames",
     "scheduleLink": "Weekly schedule",
