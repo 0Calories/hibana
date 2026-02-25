@@ -86,8 +86,7 @@ export function FlameCard({
     isLoading ||
     state === 'completed' ||
     isBlocked ||
-    (isFuelDepleted && !canComplete) ||
-    state === 'completing';
+    (isFuelDepleted && !canComplete);
 
   const { handleClick, longPress, celebration } = useFlameInteractions({
     actions,
