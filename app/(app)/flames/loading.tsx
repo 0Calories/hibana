@@ -9,13 +9,11 @@ export default async function FlamesLoading() {
 
   return (
     <div className="size-full p-4 pb-24">
-      {/* Page title skeleton */}
-      <div className="mb-6 h-8 w-32 animate-pulse rounded-lg bg-muted" />
-
       <FuelMeterSkeleton label={t('fuel.label')} />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: Loading skeleton
           <FlameCardSkeleton key={i} />
         ))}
       </div>
