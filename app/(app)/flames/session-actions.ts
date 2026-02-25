@@ -126,17 +126,24 @@ export async function endSession(
 
   if (clientDuration != null) {
     // Client-provided duration — validate bounds
-    const wallClockMax =
-      currentDuration +
-      Math.floor((now.getTime() - startTime.getTime()) / 1000) +
-      60; // 60s tolerance for clock skew
-
-    if (clientDuration < 0 || clientDuration < currentDuration) {
+    if (
+      !Number.isFinite(clientDuration) ||
+      clientDuration < 0 ||
+      clientDuration < currentDuration
+    ) {
       return {
         success: false,
         error: new Error('Client duration cannot go backwards'),
       };
     }
+
+    const wallClockMax = Math.max(
+      currentDuration,
+      currentDuration +
+        Math.floor((now.getTime() - startTime.getTime()) / 1000) +
+        60, // 60s tolerance for clock skew
+    );
+
     // Clamp to wall clock max rather than rejecting — avoids spurious failures
     totalDuration = Math.min(clientDuration, wallClockMax);
   } else {
