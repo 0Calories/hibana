@@ -89,18 +89,14 @@ export function FlameCard({
     (isFuelDepleted && !canComplete) ||
     state === 'completing';
 
-  // Interaction hook (narrow — only event wiring + celebration)
-  // actions is always provided by FlamesList; when InteractiveFlameCard
-  // wrapper is introduced, it will always provide actions too
   const { handleClick, longPress, celebration } = useFlameInteractions({
-    actions: actions!,
+    actions,
     state,
     canComplete,
     onCompletionError: () =>
       toast.error(tCompletion('error'), { position: 'top-center' }),
   });
 
-  // State text
   const stateText = ((): string | null => {
     if (isFuelDepleted && !canComplete && state !== 'completed')
       return t('noFuel');

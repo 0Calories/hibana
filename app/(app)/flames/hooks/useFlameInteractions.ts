@@ -16,7 +16,7 @@ const COMPLETION_DURATION_MS = 2000;
 const COMPLETION_INTENT_THRESHOLD = 0.05;
 
 interface UseFlameInteractionsOptions {
-  actions: FlameCardActions;
+  actions: FlameCardActions | undefined;
   state: FlameState;
   canComplete: boolean;
   onCompletionError?: () => void;
@@ -39,7 +39,7 @@ export function useFlameInteractions({
     setCelebrationActive(true);
 
     try {
-      const success = await actions.onCompleteFlame();
+      const success = await actions?.onCompleteFlame();
       if (!success) onCompletionError?.();
     } catch {
       onCompletionError?.();
@@ -57,7 +57,7 @@ export function useFlameInteractions({
     enabled: canComplete,
     onProgress: (p) => {
       if (p > COMPLETION_INTENT_THRESHOLD && state !== 'completing') {
-        actions.onBeginCompletion();
+        actions?.onBeginCompletion();
         if (!shouldReduceMotion) startCompletionSound();
       }
       if (state === 'completing' && !shouldReduceMotion) {
@@ -67,14 +67,14 @@ export function useFlameInteractions({
     onComplete: handleCompletionFinish,
     onCancel: () => {
       if (!shouldReduceMotion) cancelCompletionSound();
-      actions.onCancelCompletion();
+      actions?.onCancelCompletion();
     },
   });
 
   // Click handler (suppressed when long press was triggered)
   const handleClick = useCallback(() => {
     if (longPress.longPressTriggered) return;
-    actions.onToggle();
+    actions?.onToggle();
   }, [actions, longPress.longPressTriggered]);
 
   return {
