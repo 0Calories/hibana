@@ -1,9 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
 import { useFlameInteractions } from '../../hooks/useFlameInteractions';
@@ -18,8 +16,6 @@ import { EffectsRenderer } from './effects/EffectsRenderer';
 import { FlameRenderer } from './effects/FlameRenderer';
 import { FlameGeometryProvider } from './FlameGeometryContext';
 import { FLAME_REGISTRY } from './flames';
-import { ProgressBar } from './ProgressBar';
-import { TimerDisplay } from './TimerDisplay';
 
 interface FlameCardProps {
   flame: Flame;
@@ -27,9 +23,51 @@ interface FlameCardProps {
   actions?: FlameCardActions;
   isFuelDepleted?: boolean;
   level?: number;
+  size?: 'default' | 'medium' | 'small' | 'mini';
+  footer?: React.ReactNode;
+  onCompletionError?: () => void;
 }
 
 type FlameColors = ReturnType<typeof getFlameColors>;
+
+const SIZE_CONFIG = {
+  default: {
+    card: 'w-full',
+    flameArea: 'h-28 sm:h-40 md:h-52',
+    effectsArea: 'top-8 h-28 sm:top-10 sm:h-40 md:h-52',
+    headerPadding: 'px-2 pt-2 sm:px-3 sm:pt-3',
+    footerPadding: 'px-2 py-2 sm:px-3 sm:py-3',
+    nameText: 'text-xs sm:text-sm md:text-base',
+    flameSvg: undefined as string | undefined,
+  },
+  medium: {
+    card: 'w-36 shrink-0 sm:w-44',
+    flameArea: 'h-24 sm:h-36',
+    effectsArea: 'top-8 h-24 sm:top-10 sm:h-36',
+    headerPadding: 'px-2 pt-2 sm:px-2.5 sm:pt-2.5',
+    footerPadding: 'px-2 py-2 sm:px-2.5',
+    nameText: 'text-xs sm:text-sm',
+    flameSvg: 'h-20 w-16 sm:h-28 sm:w-24',
+  },
+  small: {
+    card: 'w-32 shrink-0 sm:w-40',
+    flameArea: 'h-22 sm:h-32',
+    effectsArea: 'top-8 h-22 sm:top-10 sm:h-32',
+    headerPadding: 'px-1.5 pt-2 sm:px-2',
+    footerPadding: 'px-1.5 py-1.5 sm:px-2',
+    nameText: 'text-xs sm:text-sm',
+    flameSvg: 'h-18 w-14 sm:h-24 sm:w-20',
+  },
+  mini: {
+    card: 'w-28 shrink-0 sm:w-36',
+    flameArea: 'h-20 sm:h-28',
+    effectsArea: 'top-8 h-20 sm:top-10 sm:h-28',
+    headerPadding: 'px-1.5 pt-2 sm:px-2',
+    footerPadding: 'px-1.5 py-1.5 sm:px-2',
+    nameText: 'text-xs sm:text-sm',
+    flameSvg: 'h-16 w-14 sm:h-24 sm:w-20',
+  },
+} as const;
 
 function getBorderGlow(
   state: FlameState,
@@ -59,21 +97,22 @@ export function FlameCard({
   actions,
   isFuelDepleted = false,
   level: levelProp,
+  size = 'default',
+  footer,
+  onCompletionError,
 }: FlameCardProps) {
-  const t = useTranslations('flames.card');
-  const tCompletion = useTranslations('flames.completion');
   const shouldReduceMotion = useReducedMotion();
   const colors = getFlameColors(flame.color);
   const level = entry?.level ?? levelProp ?? 1;
   const levelInfo = getFlameLevel(level);
   const flameDef = FLAME_REGISTRY[level];
   const { effects } = flameDef;
+  const sizeConfig = SIZE_CONFIG[size];
 
   // State from entry or defaults for static display
   const state: FlameState = entry?.state ?? 'untended';
   const elapsedSeconds = entry?.elapsedSeconds ?? 0;
   const targetSeconds = entry?.targetSeconds ?? 0;
-  const progress = entry?.progress ?? 0;
   const isOverburning = entry?.isOverburning ?? false;
   const isLoading = entry?.isLoading ?? false;
   const isBlocked = entry?.isBlocked ?? false;
@@ -92,38 +131,10 @@ export function FlameCard({
     actions,
     state,
     canComplete,
-    onCompletionError: () =>
-      toast.error(tCompletion('error'), { position: 'top-center' }),
+    onCompletionError,
   });
 
-  const stateText = ((): string | null => {
-    if (isFuelDepleted && !canComplete && state !== 'completed')
-      return t('noFuel');
-    if (isBlocked && state !== 'completed') return null;
-    switch (state) {
-      case 'untended':
-        return t('ready');
-      case 'burning':
-        return isOverburning ? t('overburning') : t('burning');
-      case 'paused':
-        return canComplete ? t('readyToComplete') : t('resting');
-      case 'completing':
-        return t('completing');
-      case 'completed':
-        return t('completed');
-    }
-  })();
-
-  const stateTextClass =
-    canComplete || state === 'completing'
-      ? 'font-medium text-amber-500'
-      : isOverburning
-        ? 'font-medium text-red-500'
-        : state === 'completed'
-          ? 'font-medium'
-          : 'text-muted-foreground';
-
-  const ariaLabel = `${flame.name}.${stateText ?? ''}`;
+  const ariaLabel = flame.name;
 
   const borderGlowStyle = getBorderGlow(
     state,
@@ -177,13 +188,99 @@ export function FlameCard({
     [flameDef.xBounds, autoXBounds],
   );
 
+  const cardBody = (
+    <>
+      {/* Header - Name and Level */}
+      <div
+        className={cn(
+          sizeConfig.headerPadding,
+          state === 'completed' && 'opacity-50',
+        )}
+      >
+        <h3
+          className={cn(
+            'truncate text-center font-semibold leading-tight',
+            sizeConfig.nameText,
+          )}
+        >
+          {flame.name}
+        </h3>
+        <div
+          className="text-center text-[10px] font-medium sm:text-xs"
+          style={{ color: levelInfo.color }}
+        >
+          Lv. {levelInfo.level} · {levelInfo.name}
+        </div>
+      </div>
+
+      {/* Flame visual area */}
+      <div
+        className={cn(
+          'relative flex items-center justify-center',
+          sizeConfig.flameArea,
+        )}
+      >
+        <FlameRenderer
+          state={state}
+          level={level}
+          colors={colors}
+          completionProgress={state === 'completing' ? longPress.progress : 0}
+          isOverburning={isOverburning}
+          className={sizeConfig.flameSvg}
+        />
+
+        {/* Completion ring progress overlay */}
+        {actions && (
+          <CompletionRingProgress
+            progress={longPress.progress}
+            visible={state === 'completing'}
+          />
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className={cn('bg-muted', sizeConfig.footerPadding)}>
+        {footer ?? (
+          <div className="text-center text-[10px] text-muted-foreground sm:text-xs">
+            {'\u00A0'}
+          </div>
+        )}
+      </div>
+
+      {/* Loading overlay */}
+      {isLoading && state !== 'paused' && state !== 'burning' && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/30">
+          <div
+            className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
+            style={{ borderColor: `${colors.medium} transparent` }}
+          />
+        </div>
+      )}
+    </>
+  );
+
+  const cardClassName = cn(
+    'relative flex flex-col overflow-hidden rounded-xl border transition-colors',
+    sizeConfig.card,
+    'border-border bg-card text-foreground',
+    (canComplete || state === 'completing') && 'animate-completion-ready-glow',
+    isDimmed && 'opacity-40',
+  );
+
+  const cardStyle = {
+    ...borderGlowStyle,
+    ...(canComplete ? { touchAction: 'none' as const } : {}),
+  };
+
   return (
-    <div ref={cardRef} className="relative w-full">
+    <div ref={cardRef} className={cn('relative', sizeConfig.card)}>
       {/* Particle effects overlay - positioned outside button to avoid clipping */}
       <FlameGeometryProvider value={flameGeometry}>
         <div className="pointer-events-none absolute inset-0 z-10">
           <div className="relative h-full w-full">
-            <div className="absolute left-0 right-0 top-8 h-28 sm:top-10 sm:h-40 md:h-52">
+            <div
+              className={cn('absolute left-0 right-0', sizeConfig.effectsArea)}
+            >
               <EffectsRenderer
                 effects={effects}
                 state={state}
@@ -204,131 +301,32 @@ export function FlameCard({
         />
       )}
 
-      <motion.button
-        type="button"
-        onClick={actions ? handleClick : undefined}
-        disabled={isDisabled}
-        aria-label={ariaLabel}
-        className={cn(
-          'relative flex w-full flex-col overflow-hidden rounded-xl border transition-colors',
-          'border-border bg-card text-foreground',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-          (canComplete || state === 'completing') &&
-            'animate-completion-ready-glow',
-          isDimmed && 'opacity-40',
-          isDisabled ? 'cursor-default' : 'cursor-pointer',
-          isLoading && 'cursor-wait',
-        )}
-        style={{
-          ...borderGlowStyle,
-          ...(canComplete ? { touchAction: 'none' } : {}),
-        }}
-        initial="rest"
-        whileTap={isDisabled ? 'rest' : 'pressed'}
-        variants={cardVariants}
-        transition={cardTransition}
-        {...(actions && (canComplete || state === 'completing')
-          ? longPress.handlers
-          : {})}
-      >
-        {/* Header - Name and Level */}
-        <div
+      {actions ? (
+        <motion.button
+          type="button"
+          onClick={handleClick}
+          disabled={isDisabled}
+          aria-label={ariaLabel}
           className={cn(
-            'px-2 pt-2 sm:px-3 sm:pt-3',
-            state === 'completed' && 'opacity-50',
+            cardClassName,
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+            isDisabled ? 'cursor-default' : 'cursor-pointer',
+            isLoading && 'cursor-wait',
           )}
+          style={cardStyle}
+          initial="rest"
+          whileTap={isDisabled ? 'rest' : 'pressed'}
+          variants={cardVariants}
+          transition={cardTransition}
+          {...(canComplete || state === 'completing' ? longPress.handlers : {})}
         >
-          <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
-            {flame.name}
-          </h3>
-          <div
-            className="text-center text-[10px] font-medium sm:text-xs"
-            style={{ color: levelInfo.color }}
-          >
-            Lv. {levelInfo.level} · {levelInfo.name}
-          </div>
+          {cardBody}
+        </motion.button>
+      ) : (
+        <div className={cardClassName} style={cardStyle}>
+          {cardBody}
         </div>
-
-        {/* Flame visual area */}
-        <div className="relative flex h-28 items-center justify-center sm:h-40 md:h-52">
-          <FlameRenderer
-            state={state}
-            level={level}
-            colors={colors}
-            completionProgress={state === 'completing' ? longPress.progress : 0}
-            isOverburning={isOverburning}
-          />
-
-          {/* Completion ring progress overlay */}
-          {actions && (
-            <CompletionRingProgress
-              progress={longPress.progress}
-              visible={state === 'completing'}
-            />
-          )}
-        </div>
-
-        {/* Footer - Timer, Progress, State (only when entry is provided) */}
-        {entry ? (
-          <div className="flex flex-col gap-1 bg-muted px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
-            {flame.tracking_type === 'time' && targetSeconds > 0 && (
-              <div className={cn(state === 'completed' && 'opacity-40')}>
-                <TimerDisplay
-                  elapsedSeconds={elapsedSeconds}
-                  targetSeconds={targetSeconds}
-                  state={state}
-                  color={colors.light}
-                  isOverburning={isOverburning}
-                />
-              </div>
-            )}
-            {flame.tracking_type === 'time' && targetSeconds > 0 && (
-              <ProgressBar
-                progress={progress}
-                state={state}
-                colors={colors}
-                isOverburning={isOverburning}
-              />
-            )}
-            <div
-              className={cn(
-                'text-center text-[10px] sm:text-xs',
-                stateTextClass,
-              )}
-            >
-              {state === 'completed' ? (
-                <span
-                  className="bg-clip-text text-transparent"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(to right, #d97706, #fbbf24, #fde68a, #fbbf24, #d97706)',
-                  }}
-                >
-                  {stateText}
-                </span>
-              ) : (
-                (stateText ?? '\u00A0')
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-muted px-2 py-2 sm:px-3 sm:py-3">
-            <div className="text-center text-[10px] text-muted-foreground sm:text-xs">
-              {'\u00A0'}
-            </div>
-          </div>
-        )}
-
-        {/* Loading overlay — hidden during optimistic transitions */}
-        {isLoading && state !== 'paused' && state !== 'burning' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-black/30">
-            <div
-              className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
-              style={{ borderColor: `${colors.medium} transparent` }}
-            />
-          </div>
-        )}
-      </motion.button>
+      )}
 
       {actions && (
         <CompletionSummaryModal

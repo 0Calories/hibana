@@ -7,7 +7,7 @@ import type { FuelBudgetStatus } from '../actions';
 import { FlamesProvider, useFlamesContext } from '../hooks/useFlames';
 import { FlamesPageActions } from './FlamesPageActions';
 import { FuelMeter } from './FuelMeter';
-import { FlameCard } from './flame-card/FlameCard';
+import { InteractiveFlameCard } from './flame-card/InteractiveFlameCard';
 
 interface FlamesListProps {
   flames: Flame[];
@@ -80,7 +80,7 @@ function FlamesListContent() {
       </div>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {entries.map((entry) => (
-          <FlameCard
+          <InteractiveFlameCard
             key={entry.flame.id}
             flame={entry.flame}
             entry={entry}
