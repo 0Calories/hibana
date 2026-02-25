@@ -19,7 +19,7 @@ export function MyFlamesZone({ children }: FlamesDropZoneProps) {
         isOver && 'bg-muted/40',
       )}
     >
-      <div className="flex flex-wrap gap-1">{children}</div>
+      <div className="flex flex-wrap gap-2">{children}</div>
     </div>
   );
 }

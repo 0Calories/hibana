@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
 import { ASSIGNED_FLAME_ZONE_ID } from '../constants';
-import { DraggableFlame } from './DraggableFlame';
+import { DraggableFlameCard } from './DraggableFlameCard';
 
 interface AssignedFlamesZoneProps {
   flames: Flame[];
@@ -46,9 +46,9 @@ export function AssignedFlamesZone({
           {t('dragHere')}
         </p>
       ) : (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-2">
           {flames.map((flame) => (
-            <DraggableFlame
+            <DraggableFlameCard
               key={flame.id}
               flame={flame}
               level={flameLevels.get(flame.id) ?? 1}
