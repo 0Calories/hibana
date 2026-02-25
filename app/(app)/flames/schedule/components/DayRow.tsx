@@ -13,6 +13,7 @@ import { ChevronDown, FlameIcon, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { FlameCard } from '@/app/(app)/flames/components/flame-card/FlameCard';
 import { Button } from '@/components/ui/button';
 import { cn, parseLocalDate } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
@@ -24,7 +25,6 @@ import { AssignedFlamesZone } from './dialog/AssignedFlamesZone';
 import { DraggableFlame } from './dialog/DraggableFlame';
 import { FuelSlider } from './dialog/FuelSlider';
 import { MyFlamesZone } from './dialog/MyFlamesZone';
-import { MiniFlameCard } from './MiniFlameCard';
 
 interface DayRowProps {
   day: DayPlan;
@@ -326,19 +326,22 @@ export function DayRow({
               {assignedFlames.map((flame) => {
                 const level = flameLevels.get(flame.id) ?? 1;
                 return (
-                  <MiniFlameCard
+                  <FlameCard
                     key={flame.id}
                     flame={flame}
                     level={level}
-                    budgetLabel={
+                    size="mini"
+                    footer={
                       (day.flameAllocations[flame.id] ??
-                        flame.time_budget_minutes) != null
-                        ? formatMinutes(
+                        flame.time_budget_minutes) != null ? (
+                        <p className="text-center text-[10px] text-muted-foreground sm:text-xs">
+                          {formatMinutes(
                             day.flameAllocations[flame.id] ??
                               flame.time_budget_minutes ??
                               0,
-                          )
-                        : undefined
+                          )}
+                        </p>
+                      ) : undefined
                     }
                   />
                 );
