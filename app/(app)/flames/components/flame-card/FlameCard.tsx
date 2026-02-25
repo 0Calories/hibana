@@ -248,7 +248,7 @@ export function FlameCard({
       </div>
 
       {/* Loading overlay */}
-      {isLoading && state !== 'paused' && state !== 'burning' && (
+      {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/30">
           <div
             className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent"
