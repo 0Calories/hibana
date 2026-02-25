@@ -19,10 +19,11 @@ import { cn, parseLocalDate } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
 import { setDaySchedule } from '../actions';
 import type { DayPlan } from '../queries';
+import { formatMinutes } from '../utils';
 import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './constants';
 import { DayRowFuelBar } from './DayRowFuelBar';
 import { AssignedFlamesZone } from './dialog/AssignedFlamesZone';
-import { DraggableFlame } from './dialog/DraggableFlame';
+import { DraggableFlameCard } from './dialog/DraggableFlameCard';
 import { FuelSlider } from './dialog/FuelSlider';
 import { MyFlamesZone } from './dialog/MyFlamesZone';
 
@@ -133,13 +134,7 @@ export function DayRow({
     }),
   );
 
-  const formatMinutes = (mins: number) => {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h > 0 && m > 0) return `${h}${t('hours')} ${m}${t('minutes')}`;
-    if (h > 0) return `${h}${t('hours')}`;
-    return `${m}${t('minutes')}`;
-  };
+  const tLabels = { hours: t('hours'), minutes: t('minutes') };
 
   const formatFuelBrief = (mins: number) => {
     const h = Math.floor(mins / 60);
@@ -339,6 +334,7 @@ export function DayRow({
                             day.flameAllocations[flame.id] ??
                               flame.time_budget_minutes ??
                               0,
+                            tLabels,
                           )}
                         </p>
                       ) : undefined
@@ -382,7 +378,7 @@ export function DayRow({
                     <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
                       <Lock className="size-3.5 text-muted-foreground" />
                       <span className="text-sm">
-                        {formatMinutes(day.fuelBudget ?? 0)}
+                        {formatMinutes(day.fuelBudget ?? 0, tLabels)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {t('fuelLocked')}
@@ -441,7 +437,7 @@ export function DayRow({
                   </h3>
                   <MyFlamesZone>
                     {availableFlames.map((flame) => (
-                      <DraggableFlame
+                      <DraggableFlameCard
                         key={flame.id}
                         flame={flame}
                         level={flameLevels.get(flame.id) ?? 1}
