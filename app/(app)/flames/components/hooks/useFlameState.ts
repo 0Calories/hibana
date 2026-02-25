@@ -68,7 +68,7 @@ export function useFlameState({
   // --- Client-owned timer state ---
   const [state, setState] = useState<FlameState>(() => {
     if (!session) return 'untended';
-    if (session.is_completed) return 'sealed';
+    if (session.is_completed) return 'completed';
     if (session.started_at && !session.ended_at) return 'burning';
     if (session.ended_at) return 'paused';
     return 'untended';
