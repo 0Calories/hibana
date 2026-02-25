@@ -58,9 +58,11 @@ export function InteractiveFlameCard({
           ? 'font-medium'
           : 'text-muted-foreground';
 
+  const showTimer = flame.tracking_type === 'time' && entry.targetSeconds > 0;
+
   const footer = (
     <div className="flex flex-col gap-1 sm:gap-1.5">
-      {flame.tracking_type === 'time' && entry.targetSeconds > 0 && (
+      {showTimer && (
         <div className={cn(state === 'completed' && 'opacity-40')}>
           <TimerDisplay
             elapsedSeconds={entry.elapsedSeconds}
@@ -71,7 +73,7 @@ export function InteractiveFlameCard({
           />
         </div>
       )}
-      {flame.tracking_type === 'time' && entry.targetSeconds > 0 && (
+      {showTimer && (
         <ProgressBar
           progress={entry.progress}
           state={state}
