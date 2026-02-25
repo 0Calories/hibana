@@ -1,14 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import type { FuelBudgetStatus } from '../actions';
-import { endSession, getAllSessionsForDate } from '../session-actions';
+import { FlamesProvider, useFlamesContext } from '../hooks/useFlames';
 import { FlamesPageActions } from './FlamesPageActions';
 import { FuelMeter } from './FuelMeter';
 import { FlameCard } from './flame-card/FlameCard';
-import { useFuel } from './hooks/useFuel';
 
 interface FlamesListProps {
   flames: Flame[];
@@ -23,31 +22,20 @@ export function FlamesList({
   date,
   initialFuelBudget,
 }: FlamesListProps) {
-  const [sessions, setSessions] = useState<FlameSession[]>(initialSessions);
-
-  const handleFuelDepleted = useCallback(
-    async (activeFlameId: string) => {
-      await endSession(activeFlameId, date);
-      const result = await getAllSessionsForDate(date);
-      if (result.success && result.data) {
-        setSessions(result.data);
-      }
-    },
-    [date],
+  return (
+    <FlamesProvider
+      flames={flames}
+      initialSessions={initialSessions}
+      initialFuelBudget={initialFuelBudget}
+      date={date}
+    >
+      <FlamesListContent />
+    </FlamesProvider>
   );
+}
 
-  const {
-    budgetSeconds,
-    remainingSeconds,
-    isFuelDepleted,
-    hasBudget,
-    refetchFuel,
-  } = useFuel({
-    initialFuelBudget,
-    sessions,
-    date,
-    onFuelDepleted: handleFuelDepleted,
-  });
+function FlamesListContent() {
+  const { entries, activeFlameId, fuel, actions } = useFlamesContext();
 
   // Detect when the fuel bar becomes sticky
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -66,34 +54,6 @@ export function FlamesList({
     return () => observer.disconnect();
   }, []);
 
-  // Optimistic active flame ID — updated immediately on burn transitions,
-  // before the server round-trip. `undefined` = use server-derived value.
-  const [optimisticActiveFlameId, setOptimisticActiveFlameId] = useState<
-    string | null | undefined
-  >(undefined);
-
-  const refreshSessions = useCallback(async () => {
-    const result = await getAllSessionsForDate(date);
-    if (result.success && result.data) {
-      setSessions(result.data);
-      setOptimisticActiveFlameId(undefined);
-    }
-    await refetchFuel();
-  }, [date, refetchFuel]);
-
-  const getSessionForFlame = (flameId: string): FlameSession | null => {
-    return sessions.find((s) => s.flame_id === flameId) ?? null;
-  };
-
-  // Find which flame is currently burning (has a session with started_at but no ended_at)
-  const serverActiveFlameId =
-    sessions.find((s) => s.started_at && !s.ended_at)?.flame_id ?? null;
-
-  const activeFlameId =
-    optimisticActiveFlameId !== undefined
-      ? optimisticActiveFlameId
-      : serverActiveFlameId;
-
   return (
     <div>
       <div ref={sentinelRef} className="h-0" />
@@ -101,9 +61,9 @@ export function FlamesList({
         <div className="flex items-stretch gap-2">
           <div className="min-w-0 flex-1">
             <FuelMeter
-              budgetSeconds={budgetSeconds}
-              remainingSeconds={remainingSeconds}
-              hasBudget={hasBudget}
+              budgetSeconds={fuel.budgetSeconds}
+              remainingSeconds={fuel.remainingSeconds}
+              hasBudget={fuel.hasBudget}
               isBurning={activeFlameId !== null}
               isStuck={isStuck}
             />
@@ -119,19 +79,19 @@ export function FlamesList({
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {flames.map((flame, index) => (
+        {entries.map((entry) => (
           <FlameCard
-            key={flame.id}
-            flame={flame}
-            session={getSessionForFlame(flame.id)}
-            date={date}
-            onSessionUpdate={refreshSessions}
-            onBurnChange={(isBurning) =>
-              setOptimisticActiveFlameId(isBurning ? flame.id : null)
-            }
-            isBlocked={activeFlameId !== null && activeFlameId !== flame.id}
-            isFuelDepleted={isFuelDepleted || !hasBudget}
-            level={(index % 8) + 1} // Demo: cycle through levels 1-8
+            key={entry.flame.id}
+            flame={entry.flame}
+            entry={entry}
+            actions={{
+              onToggle: () => actions.toggle(entry.flame.id),
+              onBeginCompletion: () => actions.beginCompletion(entry.flame.id),
+              onCancelCompletion: () =>
+                actions.cancelCompletion(entry.flame.id),
+              onCompleteFlame: () => actions.completeFlame(entry.flame.id),
+            }}
+            isFuelDepleted={fuel.isFuelDepleted || !fuel.hasBudget}
           />
         ))}
       </div>
