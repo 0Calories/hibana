@@ -47,7 +47,7 @@ export function DraggableFlameCard({
     allocatedMinutes !== flame.time_budget_minutes;
 
   const handleTimeClick = (e: React.MouseEvent) => {
-    if (!onAllocationChange || !allocatedMinutes) return;
+    if (!onAllocationChange || allocatedMinutes == null) return;
     e.stopPropagation();
     e.preventDefault();
     setEditValue(String(allocatedMinutes));
