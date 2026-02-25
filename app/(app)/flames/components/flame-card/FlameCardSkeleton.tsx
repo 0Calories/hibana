@@ -52,7 +52,7 @@ export function FlameCardSkeleton() {
 
 export function FuelMeterSkeleton({ label }: { label: string }) {
   return (
-    <div className="sticky top-0 z-20 -mx-4 mb-4 bg-background/80 px-4 pt-4 pb-0 backdrop-blur-sm">
+    <div className="sticky top-0 z-20 -mx-4 mb-4 bg-background/80 px-4 pb-0 backdrop-blur-sm">
       <div className="rounded-lg border border-border bg-card px-3 py-2.5">
         <div className="flex items-center gap-2.5">
           {/* Icon + label — static, no skeleton needed */}
