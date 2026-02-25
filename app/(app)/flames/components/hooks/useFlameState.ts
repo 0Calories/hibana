@@ -11,7 +11,7 @@ import type { FlameState } from '../../utils/types';
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1500;
 
-interface UseFlameTimerOptions {
+interface UseFlameStateOptions {
   flame: Flame;
   session: FlameSession | null;
   date: string;
@@ -19,7 +19,7 @@ interface UseFlameTimerOptions {
   onBurnChange?: (isBurning: boolean) => void;
 }
 
-interface UseFlameTimerReturn {
+interface UseFlameStateReturn {
   state: FlameState;
   elapsedSeconds: number;
   targetSeconds: number;
@@ -62,7 +62,7 @@ export function useFlameState({
   date,
   onSessionUpdate,
   onBurnChange,
-}: UseFlameTimerOptions): UseFlameTimerReturn {
+}: UseFlameStateOptions): UseFlameStateReturn {
   const t = useTranslations('flames.card');
 
   // --- Client-owned timer state ---
