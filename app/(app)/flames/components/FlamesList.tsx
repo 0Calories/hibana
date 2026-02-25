@@ -11,22 +11,22 @@ import { FlameCard } from './flame-card/FlameCard';
 
 interface FlamesListProps {
   flames: Flame[];
-  initialSessions: FlameSession[];
+  sessions: FlameSession[];
   date: string;
-  initialFuelBudget: FuelBudgetStatus;
+  fuelBudget: FuelBudgetStatus;
 }
 
 export function FlamesList({
   flames,
-  initialSessions,
+  sessions,
   date,
-  initialFuelBudget,
+  fuelBudget,
 }: FlamesListProps) {
   return (
     <FlamesProvider
       flames={flames}
-      initialSessions={initialSessions}
-      initialFuelBudget={initialFuelBudget}
+      sessions={sessions}
+      fuelBudget={fuelBudget}
       date={date}
     >
       <FlamesListContent />

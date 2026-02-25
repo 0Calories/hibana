@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { Flame } from '@/utils/supabase/rows';
 import type { FlameCardActions, FlameEntry } from '../../hooks/useFlames';
+import { useLongPress } from '../../hooks/useLongPress';
 import { getFlameColors } from '../../utils/colors';
 import { getFlameLevel } from '../../utils/levels';
 import { CompletionSummaryModal } from '../CompletionSummaryModal';
@@ -16,7 +17,6 @@ import {
   startCompletionSound,
   updateCompletionSound,
 } from '../completion-sounds';
-import { useLongPress } from '../hooks/useLongPress';
 import { CompletionCelebration } from './effects/CompletionCelebration';
 import { CompletionRingProgress } from './effects/CompletionRingProgress';
 import { EffectsRenderer } from './effects/EffectsRenderer';

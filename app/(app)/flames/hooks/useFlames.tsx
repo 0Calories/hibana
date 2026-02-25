@@ -86,23 +86,23 @@ const FlamesContext = createContext<FlamesContextValue | null>(null);
 
 interface FlamesProviderProps {
   flames: Flame[];
-  initialSessions: FlameSession[];
-  initialFuelBudget: FuelBudgetStatus;
+  sessions: FlameSession[];
+  fuelBudget: FuelBudgetStatus;
   date: string;
   children: ReactNode;
 }
 
 export function FlamesProvider({
   flames,
-  initialSessions,
-  initialFuelBudget,
+  sessions,
+  fuelBudget,
   date,
   children,
 }: FlamesProviderProps) {
   const value = useFlamesEngine(
     flames,
-    initialSessions,
-    initialFuelBudget,
+    sessions,
+    fuelBudget,
     date,
   );
   return (
@@ -230,8 +230,8 @@ function deriveActiveFlameId(map: Map<string, FlameTimerState>): string | null {
 
 function useFlamesEngine(
   flames: Flame[],
-  initialSessions: FlameSession[],
-  initialFuelBudget: FuelBudgetStatus,
+  sessions: FlameSession[],
+  fuelBudget: FuelBudgetStatus,
   date: string,
 ): FlamesContextValue {
   const t = useTranslations('flames.card');
@@ -240,11 +240,11 @@ function useFlamesEngine(
   const timerMapRef = useRef<Map<string, FlameTimerState>>(new Map());
 
   // Fuel budget (re-synced from server after actions)
-  const [fuelBudget, setFuelBudget] =
-    useState<FuelBudgetStatus>(initialFuelBudget);
+  const [liveFuelBudget, setLiveFuelBudget] =
+    useState<FuelBudgetStatus>(fuelBudget);
 
   // Session cache for entry.session (informational, not used for timer logic)
-  const sessionsRef = useRef<FlameSession[]>(initialSessions);
+  const sessionsRef = useRef<FlameSession[]>(sessions);
 
   // Tick trigger — bumped to force re-render and recompute derived values
   const [tickNow, setTickNow] = useState(Date.now());
@@ -255,7 +255,7 @@ function useFlamesEngine(
     initializedRef.current = true;
     for (const flame of flames) {
       const session =
-        initialSessions.find((s) => s.flame_id === flame.id) ?? null;
+        sessions.find((s) => s.flame_id === flame.id) ?? null;
       timerMapRef.current.set(flame.id, initTimerState(session));
     }
   }
@@ -270,8 +270,8 @@ function useFlamesEngine(
   }, [activeFlameId]);
 
   // ── Fuel derived ────────────────────────────────────────────────
-  const hasBudget = fuelBudget !== null;
-  const budgetSeconds = fuelBudget ? fuelBudget.budgetMinutes * 60 : null;
+  const hasBudget = liveFuelBudget !== null;
+  const budgetSeconds = liveFuelBudget ? liveFuelBudget.budgetMinutes * 60 : null;
 
   // Total consumed: sum of elapsed across all flames (from timer state, not sessions)
   let totalConsumed = 0;
@@ -324,7 +324,7 @@ function useFlamesEngine(
         sessionsRef.current = sessResult.data;
       }
       if (fuelResult.success) {
-        setFuelBudget(fuelResult.data);
+        setLiveFuelBudget(fuelResult.data);
       }
       setTickNow(Date.now());
     })();
@@ -340,7 +340,7 @@ function useFlamesEngine(
       sessionsRef.current = sessResult.data;
     }
     if (fuelResult.success) {
-      setFuelBudget(fuelResult.data);
+      setLiveFuelBudget(fuelResult.data);
     }
     setTickNow(Date.now());
   }, [date]);
