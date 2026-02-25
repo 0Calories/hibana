@@ -144,26 +144,6 @@ export function FlameCard({
   const isDisabled =
     isLoading || isCompleted || isBlocked || isFuelBlocked || isCompleting;
 
-  const getAriaLabel = () => {
-    const baseName = flame.name;
-    if (isFuelBlocked) return `${baseName}. ${t('noFuel')}`;
-    if (isBlocked) return `${baseName}. ${t('blocked')}`;
-    switch (state) {
-      case 'untended':
-        return `${baseName}. ${t('ready')}`;
-      case 'burning':
-        return `${baseName}. ${t('burning')}`;
-      case 'paused':
-        return canComplete
-          ? `${baseName}. ${t('readyToComplete')}`
-          : `${baseName}. ${t('resting')}`;
-      case 'completing':
-        return `${baseName}. ${t('completing')}`;
-      case 'completed':
-        return `${baseName}. ${t('completed')}`;
-    }
-  };
-
   const getStateText = () => {
     if (isFuelBlocked && state !== 'completed') return t('noFuel');
     if (isBlocked && state !== 'completed') return null;
@@ -179,6 +159,11 @@ export function FlameCard({
       case 'completed':
         return t('completed');
     }
+  };
+
+  const getAriaLabel = () => {
+    const baseName = flame.name;
+    return `${baseName}.${getStateText()}`;
   };
 
   const cardVariants = {
