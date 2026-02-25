@@ -2,22 +2,16 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { creditCompletionReward } from '@/app/(app)/shop/actions';
 import { cn } from '@/lib/utils';
-import type { Flame, FlameSession } from '@/utils/supabase/rows';
+import type { Flame } from '@/utils/supabase/rows';
+import { useFlameInteractions } from '../../hooks/useFlameInteractions';
+import type { FlameCardActions, FlameEntry } from '../../hooks/useFlames';
 import { getFlameColors } from '../../utils/colors';
 import { getFlameLevel } from '../../utils/levels';
+import type { FlameState } from '../../utils/types';
 import { CompletionSummaryModal } from '../CompletionSummaryModal';
-import {
-  cancelCompletionSound,
-  finishCompletionSound,
-  startCompletionSound,
-  updateCompletionSound,
-} from '../completion-sounds';
-import { useFlameState } from '../hooks/useFlameState';
-import { useLongPress } from '../hooks/useLongPress';
 import { CompletionCelebration } from './effects/CompletionCelebration';
 import { CompletionRingProgress } from './effects/CompletionRingProgress';
 import { EffectsRenderer } from './effects/EffectsRenderer';
@@ -29,140 +23,82 @@ import { TimerDisplay } from './TimerDisplay';
 
 interface FlameCardProps {
   flame: Flame;
-  session: FlameSession | null;
-  date: string;
-  onSessionUpdate?: () => void;
-  isBlocked?: boolean;
+  entry?: FlameEntry;
+  actions?: FlameCardActions;
   isFuelDepleted?: boolean;
   level?: number;
 }
 
-const COMPLETION_DURATION_MS = 2000;
+type FlameColors = ReturnType<typeof getFlameColors>;
+
+function getBorderGlow(
+  state: FlameState,
+  canComplete: boolean,
+  isOverburning: boolean,
+  colors: FlameColors,
+): React.CSSProperties {
+  if (state === 'burning') {
+    return isOverburning
+      ? {
+          boxShadow: '0 0 15px #ef444450, 0 0 30px #ef444425',
+          borderColor: '#ef4444',
+        }
+      : {
+          boxShadow: `0 0 15px ${colors.medium}50, 0 0 30px ${colors.medium}25`,
+          borderColor: colors.medium,
+        };
+  }
+  if (canComplete || state === 'completing') return { borderColor: '#fbbf24' };
+  if (state === 'completed') return { borderColor: '#64748b50' };
+  return {};
+}
 
 export function FlameCard({
   flame,
-  session,
-  date,
-  onSessionUpdate,
-  isBlocked = false,
+  entry,
+  actions,
   isFuelDepleted = false,
-  level = 1,
+  level: levelProp,
 }: FlameCardProps) {
   const t = useTranslations('flames.card');
   const tCompletion = useTranslations('flames.completion');
   const shouldReduceMotion = useReducedMotion();
   const colors = getFlameColors(flame.color);
+  const level = entry?.level ?? levelProp ?? 1;
   const levelInfo = getFlameLevel(level);
+  const flameDef = FLAME_REGISTRY[level];
+  const { effects } = flameDef;
 
-  const {
-    state,
-    elapsedSeconds,
-    targetSeconds,
-    progress,
-    isOverburning,
-    toggle,
-    isLoading,
-    isCompletionReady,
-    beginCompletion,
-    cancelCompletion,
-    completeFlame,
-  } = useFlameState({
-    flame,
-    session,
-    date,
-    onSessionUpdate,
-  });
+  // State from entry or defaults for static display
+  const state: FlameState = entry?.state ?? 'untended';
+  const elapsedSeconds = entry?.elapsedSeconds ?? 0;
+  const targetSeconds = entry?.targetSeconds ?? 0;
+  const progress = entry?.progress ?? 0;
+  const isOverburning = entry?.isOverburning ?? false;
+  const isLoading = entry?.isLoading ?? false;
+  const isBlocked = entry?.isBlocked ?? false;
 
-  const [showSummary, setShowSummary] = useState(false);
-  const [celebrationActive, setCelebrationActive] = useState(false);
-
-  // Threshold: only treat as "long press" after 5% of duration (~100ms)
-  const COMPLETION_INTENT_THRESHOLD = 0.05;
-
-  const handleCompletionFinish = useCallback(async () => {
-    if (!shouldReduceMotion) finishCompletionSound();
-
-    setCelebrationActive(true);
-
-    // Server action + spark reward run in background
-    try {
-      const success = await completeFlame();
-      if (success) {
-        creditCompletionReward(flame.id, date).then((r) => {
-          if (!r.success)
-            console.error('Failed to credit completion reward:', r.error);
-        });
-      } else {
-        toast.error(tCompletion('error'), { position: 'top-center' });
-      }
-    } catch {
-      toast.error(tCompletion('error'), { position: 'top-center' });
-    }
-  }, [completeFlame, tCompletion, flame.id, date, shouldReduceMotion]);
-
-  const handleCelebrationComplete = useCallback(() => {
-    setCelebrationActive(false);
-    setShowSummary(true);
-  }, []);
-
-  const canComplete = isCompletionReady && !isBlocked;
-
-  const longPress = useLongPress({
-    duration: COMPLETION_DURATION_MS,
-    enabled: canComplete,
-    onProgress: (p) => {
-      // Only enter completing state after meaningful hold
-      if (p > COMPLETION_INTENT_THRESHOLD && state !== 'completing') {
-        beginCompletion();
-        if (!shouldReduceMotion) startCompletionSound();
-      }
-      // Update completion sound pitch/volume each frame
-      if (state === 'completing' && !shouldReduceMotion) {
-        updateCompletionSound(p);
-      }
-    },
-    onComplete: handleCompletionFinish,
-    onCancel: () => {
-      if (!shouldReduceMotion) cancelCompletionSound();
-      cancelCompletion();
-    },
-  });
-
-  const handleClick = useCallback(() => {
-    // Suppress click if a long press just occurred (user held long enough to show intent)
-    if (longPress.longPressTriggered) return;
-    toggle();
-  }, [toggle, longPress.longPressTriggered]);
-
-  const isActive = state === 'burning';
-  const isCompleting = state === 'completing';
-  const isCompleted = state === 'completed';
-  const isFuelBlocked = isFuelDepleted && !canComplete;
+  // Derived flags
+  const canComplete = (entry?.isCompletionReady ?? false) && !isBlocked;
+  const isDimmed = isBlocked || (isFuelDepleted && !canComplete);
   const isDisabled =
-    isLoading || isCompleted || isBlocked || isFuelBlocked || isCompleting;
+    !actions ||
+    isLoading ||
+    state === 'completed' ||
+    isBlocked ||
+    (isFuelDepleted && !canComplete);
 
-  const getAriaLabel = () => {
-    const baseName = flame.name;
-    if (isFuelBlocked) return `${baseName}. ${t('noFuel')}`;
-    if (isBlocked) return `${baseName}. ${t('blocked')}`;
-    switch (state) {
-      case 'untended':
-        return `${baseName}. ${t('ready')}`;
-      case 'burning':
-        return `${baseName}. ${t('burning')}`;
-      case 'paused':
-        return canComplete
-          ? `${baseName}. ${t('readyToComplete')}`
-          : `${baseName}. ${t('resting')}`;
-      case 'completing':
-        return `${baseName}. ${t('completing')}`;
-      case 'completed':
-        return `${baseName}. ${t('completed')}`;
-    }
-  };
+  const { handleClick, longPress, celebration } = useFlameInteractions({
+    actions,
+    state,
+    canComplete,
+    onCompletionError: () =>
+      toast.error(tCompletion('error'), { position: 'top-center' }),
+  });
 
-  const getStateText = () => {
-    if (isFuelBlocked && state !== 'completed') return t('noFuel');
+  const stateText = ((): string | null => {
+    if (isFuelDepleted && !canComplete && state !== 'completed')
+      return t('noFuel');
     if (isBlocked && state !== 'completed') return null;
     switch (state) {
       case 'untended':
@@ -176,7 +112,25 @@ export function FlameCard({
       case 'completed':
         return t('completed');
     }
-  };
+  })();
+
+  const stateTextClass =
+    canComplete || state === 'completing'
+      ? 'font-medium text-amber-500'
+      : isOverburning
+        ? 'font-medium text-red-500'
+        : state === 'completed'
+          ? 'font-medium'
+          : 'text-muted-foreground';
+
+  const ariaLabel = `${flame.name}.${stateText ?? ''}`;
+
+  const borderGlowStyle = getBorderGlow(
+    state,
+    canComplete,
+    isOverburning,
+    colors,
+  );
 
   const cardVariants = {
     rest: { scale: 1 },
@@ -190,27 +144,6 @@ export function FlameCard({
         stiffness: 400,
         damping: 25,
       };
-
-  const borderGlowStyle = isActive
-    ? isOverburning
-      ? {
-          boxShadow: '0 0 15px #ef444450, 0 0 30px #ef444425',
-          borderColor: '#ef4444',
-        }
-      : {
-          boxShadow: `0 0 15px ${colors.medium}50, 0 0 30px ${colors.medium}25`,
-          borderColor: colors.medium,
-        }
-    : canComplete || isCompleting
-      ? {
-          borderColor: '#fbbf24',
-        }
-      : isCompleted
-        ? { borderColor: '#64748b50' }
-        : {};
-
-  const flameDef = FLAME_REGISTRY[level];
-  const { effects } = flameDef;
 
   // Measure flame SVG position for particle X-axis constraint
   const cardRef = useRef<HTMLDivElement>(null);
@@ -263,25 +196,27 @@ export function FlameCard({
         </div>
       </FlameGeometryProvider>
 
-      <CompletionCelebration
-        active={celebrationActive}
-        color={colors.medium}
-        onComplete={handleCelebrationComplete}
-      />
+      {actions && (
+        <CompletionCelebration
+          active={celebration.active}
+          color={colors.medium}
+          onComplete={celebration.onComplete}
+        />
+      )}
 
       <motion.button
         type="button"
-        onClick={handleClick}
+        onClick={actions ? handleClick : undefined}
         disabled={isDisabled}
-        aria-label={getAriaLabel()}
+        aria-label={ariaLabel}
         className={cn(
           'relative flex w-full flex-col overflow-hidden rounded-xl border transition-colors',
           'border-border bg-card text-foreground',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer',
-          (canComplete || isCompleting) && 'animate-completion-ready-glow',
-          isCompleted && 'cursor-default',
-          isFuelBlocked && 'cursor-default opacity-40',
-          isBlocked && 'cursor-default opacity-40',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+          (canComplete || state === 'completing') &&
+            'animate-completion-ready-glow',
+          isDimmed && 'opacity-40',
+          isDisabled ? 'cursor-default' : 'cursor-pointer',
           isLoading && 'cursor-wait',
         )}
         style={{
@@ -292,13 +227,15 @@ export function FlameCard({
         whileTap={isDisabled ? 'rest' : 'pressed'}
         variants={cardVariants}
         transition={cardTransition}
-        {...(canComplete || isCompleting ? longPress.handlers : {})}
+        {...(actions && (canComplete || state === 'completing')
+          ? longPress.handlers
+          : {})}
       >
         {/* Header - Name and Level */}
         <div
           className={cn(
             'px-2 pt-2 sm:px-3 sm:pt-3',
-            isCompleted && 'opacity-50',
+            state === 'completed' && 'opacity-50',
           )}
         >
           <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
@@ -318,67 +255,71 @@ export function FlameCard({
             state={state}
             level={level}
             colors={colors}
-            completionProgress={isCompleting ? longPress.progress : 0}
+            completionProgress={state === 'completing' ? longPress.progress : 0}
             isOverburning={isOverburning}
           />
 
           {/* Completion ring progress overlay */}
-          <CompletionRingProgress
-            progress={longPress.progress}
-            visible={isCompleting}
-          />
-        </div>
-
-        {/* Footer - Timer, Progress, State */}
-        <div className="flex flex-col gap-1 bg-muted px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
-          {flame.tracking_type === 'time' && targetSeconds > 0 && (
-            <div className={cn(isCompleted && 'opacity-40')}>
-              <TimerDisplay
-                elapsedSeconds={elapsedSeconds}
-                targetSeconds={targetSeconds}
-                state={state}
-                color={colors.light}
-                isOverburning={isOverburning}
-              />
-            </div>
-          )}
-          {flame.tracking_type === 'time' && targetSeconds > 0 && (
-            <ProgressBar
-              progress={progress}
-              state={state}
-              colors={colors}
-              isOverburning={isOverburning}
+          {actions && (
+            <CompletionRingProgress
+              progress={longPress.progress}
+              visible={state === 'completing'}
             />
           )}
-          <div
-            className={cn(
-              'text-center text-[10px] sm:text-xs',
-              canComplete || isCompleting
-                ? 'font-medium text-amber-500'
-                : isOverburning
-                  ? 'font-medium text-red-500'
-                  : isCompleted
-                    ? 'font-medium'
-                    : 'text-muted-foreground',
-            )}
-          >
-            {isCompleted ? (
-              <span
-                className="bg-clip-text text-transparent"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(to right, #d97706, #fbbf24, #fde68a, #fbbf24, #d97706)',
-                }}
-              >
-                {getStateText()}
-              </span>
-            ) : (
-              (getStateText() ?? '\u00A0')
-            )}
-          </div>
         </div>
 
-        {/* Loading overlay — hidden during optimistic transitions (pause/start/resume) */}
+        {/* Footer - Timer, Progress, State (only when entry is provided) */}
+        {entry ? (
+          <div className="flex flex-col gap-1 bg-muted px-2 py-2 sm:gap-1.5 sm:px-3 sm:py-3">
+            {flame.tracking_type === 'time' && targetSeconds > 0 && (
+              <div className={cn(state === 'completed' && 'opacity-40')}>
+                <TimerDisplay
+                  elapsedSeconds={elapsedSeconds}
+                  targetSeconds={targetSeconds}
+                  state={state}
+                  color={colors.light}
+                  isOverburning={isOverburning}
+                />
+              </div>
+            )}
+            {flame.tracking_type === 'time' && targetSeconds > 0 && (
+              <ProgressBar
+                progress={progress}
+                state={state}
+                colors={colors}
+                isOverburning={isOverburning}
+              />
+            )}
+            <div
+              className={cn(
+                'text-center text-[10px] sm:text-xs',
+                stateTextClass,
+              )}
+            >
+              {state === 'completed' ? (
+                <span
+                  className="bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage:
+                      'linear-gradient(to right, #d97706, #fbbf24, #fde68a, #fbbf24, #d97706)',
+                  }}
+                >
+                  {stateText}
+                </span>
+              ) : (
+                (stateText ?? '\u00A0')
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-muted px-2 py-2 sm:px-3 sm:py-3">
+            <div className="text-center text-[10px] text-muted-foreground sm:text-xs">
+              {'\u00A0'}
+            </div>
+          </div>
+        )}
+
+        {/* Loading overlay — hidden during optimistic transitions */}
         {isLoading && state !== 'paused' && state !== 'burning' && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-black/30">
             <div
@@ -389,16 +330,18 @@ export function FlameCard({
         )}
       </motion.button>
 
-      <CompletionSummaryModal
-        open={showSummary}
-        onOpenChange={setShowSummary}
-        flameName={flame.name}
-        colors={colors}
-        level={level}
-        effects={effects}
-        elapsedSeconds={elapsedSeconds}
-        targetSeconds={targetSeconds}
-      />
+      {actions && (
+        <CompletionSummaryModal
+          open={celebration.showSummary}
+          onOpenChange={celebration.setShowSummary}
+          flameName={flame.name}
+          colors={colors}
+          level={level}
+          effects={effects}
+          elapsedSeconds={elapsedSeconds}
+          targetSeconds={targetSeconds}
+        />
+      )}
     </div>
   );
 }

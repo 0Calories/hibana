@@ -41,9 +41,9 @@ export default async function FlamesPage() {
       ) : (
         <FlamesList
           flames={flames}
-          initialSessions={sessions}
+          sessions={sessions}
           date={today}
-          initialFuelBudget={fuelBudget}
+          fuelBudget={fuelBudget}
         />
       )}
     </div>

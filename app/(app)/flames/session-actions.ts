@@ -81,7 +81,7 @@ export async function startSession(
 export async function endSession(
   flameId: string,
   date: string,
-  pausedAt?: string,
+  clientDuration?: number,
 ): ActionResult {
   const { supabase } = await createClientWithAuth();
 
@@ -119,26 +119,46 @@ export async function endSession(
     };
   }
 
-  // Math.max compensates for potential clock skew fuckery by avoiding negative values
+  const now = new Date();
   const currentDuration = Math.max(0, lastSessionData.duration_seconds);
   const startTime = new Date(lastSessionData.started_at);
-  const parsedPausedAt = pausedAt ? new Date(pausedAt) : null;
-  const now = new Date();
-  const endTime =
-    parsedPausedAt && !Number.isNaN(parsedPausedAt.getTime())
-      ? new Date(Math.min(parsedPausedAt.getTime(), now.getTime()))
-      : now;
+  let totalDuration: number;
 
-  const sessionDurationSeconds = Math.max(
-    0,
-    Math.floor((endTime.getTime() - startTime.getTime()) / 1000),
-  );
-  const totalDuration = currentDuration + sessionDurationSeconds;
+  if (clientDuration != null) {
+    // Client-provided duration — validate bounds
+    if (
+      !Number.isFinite(clientDuration) ||
+      clientDuration < 0 ||
+      clientDuration < currentDuration
+    ) {
+      return {
+        success: false,
+        error: new Error('Client duration cannot go backwards'),
+      };
+    }
+
+    const wallClockMax = Math.max(
+      currentDuration,
+      currentDuration +
+        Math.floor((now.getTime() - startTime.getTime()) / 1000) +
+        60, // 60s tolerance for clock skew
+    );
+
+    // Clamp to wall clock max rather than rejecting — avoids spurious failures
+    totalDuration = Math.min(clientDuration, wallClockMax);
+  } else {
+    // Fallback: server-computed duration (used by fuel auto-stop)
+    const sessionDurationSeconds = Math.max(
+      0,
+      Math.floor((now.getTime() - startTime.getTime()) / 1000),
+    );
+    totalDuration = currentDuration + sessionDurationSeconds;
+  }
 
   const { data, error } = await supabase
     .from('flame_sessions')
     .update({
-      ended_at: endTime.toISOString(),
+      ended_at: now.toISOString(),
       duration_seconds: totalDuration,
     })
     .eq('id', lastSessionData.id)
