@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -108,7 +109,7 @@ export function SignupForm() {
   }
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>{t('title')}</CardTitle>
         <CardDescription>{t('description')}</CardDescription>
@@ -209,7 +210,8 @@ export function SignupForm() {
               </Field>
 
               <FieldDescription className="px-6 text-center">
-                {t('hasAccount')} <a href="/login">{t('loginLink')}</a>
+                {t('hasAccount')}{' '}
+                <Link href="/login">{t('loginLink')}</Link>
               </FieldDescription>
             </FieldGroup>
           </FieldGroup>

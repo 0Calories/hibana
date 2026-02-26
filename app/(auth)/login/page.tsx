@@ -1,11 +1,21 @@
+import Image from 'next/image';
+import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { LoginForm } from './form';
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations('metadata');
+
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <LoginForm />
-      </div>
+    <div className="flex flex-col items-center gap-8">
+      <Link href="/" className="flex flex-col items-center gap-3">
+        <Image src="/logo.svg" alt="" width={48} height={48} />
+        <div className="flex flex-col items-center gap-1">
+          <h1 className="text-2xl font-extrabold tracking-tight">Hibana</h1>
+          <p className="text-sm text-muted-foreground">{t('description')}</p>
+        </div>
+      </Link>
+      <LoginForm />
     </div>
   );
 }
