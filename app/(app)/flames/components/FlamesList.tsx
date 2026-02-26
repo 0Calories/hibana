@@ -6,6 +6,7 @@ import type { Flame, FlameSession } from '@/utils/supabase/rows';
 import type { FuelBudgetStatus } from '../actions';
 import { FlamesProvider, useFlamesContext } from '../hooks/useFlames';
 import { FlamesPageActions } from './FlamesPageActions';
+import { FuelBarStickyContainer } from './FuelBarStickyContainer';
 import { FuelMeter } from './FuelMeter';
 import { InteractiveFlameCard } from './flame-card/InteractiveFlameCard';
 
@@ -57,7 +58,7 @@ function FlamesListContent() {
   return (
     <div>
       <div ref={sentinelRef} className="h-0" />
-      <div className="sticky top-12 z-20 -mx-4 mb-4 px-4 pt-2 md:top-14">
+      <FuelBarStickyContainer>
         <div className="flex items-stretch gap-2">
           <div className="min-w-0 flex-1">
             <FuelMeter
@@ -77,7 +78,7 @@ function FlamesListContent() {
             <FlamesPageActions />
           </div>
         </div>
-      </div>
+      </FuelBarStickyContainer>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {entries.map((entry) => (
           <InteractiveFlameCard
