@@ -6,22 +6,30 @@ import {
   motion,
   useMotionValue,
   useReducedMotion,
+  useTransform,
 } from 'framer-motion';
-import { SparklesIcon, UserIcon } from 'lucide-react';
+import {
+  LogOutIcon,
+  SettingsIcon,
+  SparklesIcon,
+  UserCircleIcon,
+  UserIcon,
+} from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-} from '@/components/ui/sheet';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
 import { type LandingState, useSparkFlyover } from './SparkFlyover';
 import { useUserState } from './UserStateProvider';
 
 interface ProfileBadgeProps {
   username?: string;
+  rankName?: string;
   sparks?: number;
   level?: number;
   xp?: number;
@@ -29,9 +37,10 @@ interface ProfileBadgeProps {
 }
 
 const MOCK_DATA = {
-  username: 'Smokesniffer',
+  username: 'Ash',
+  rankName: 'Smokesniffer',
   level: 3,
-  xp: 450,
+  xp: 690,
   xpToNext: 1000,
 };
 
@@ -53,7 +62,6 @@ function useInflatingPulse(landingState: LandingState | null) {
   useEffect(() => {
     if (shouldReduceMotion) return;
     if (landedCount > prevLanded.current) {
-      // Scale inflation
       decayRef.current?.stop();
       const bumped = Math.min(scale.get() + SCALE_BUMP, MAX_SCALE);
       scale.set(bumped);
@@ -62,7 +70,6 @@ function useInflatingPulse(landingState: LandingState | null) {
         ease: 'easeOut',
       });
 
-      // Color flash — snap to gold, CSS transition handles fade-out
       setFlashActive(true);
       clearTimeout(flashTimer.current);
       flashTimer.current = setTimeout(() => setFlashActive(false), 400);
@@ -95,20 +102,77 @@ function getDisplayedSparks(
   return baseSparks + Math.floor(landing.totalSparks * fraction);
 }
 
+// ─── XP Ring (CSS conic-gradient) ───────────────────────────────────
+// Ring dimensions for the 28px (size-7) container
+const RING_INNER = 10; // px from center
+const RING_OUTER = 12; // px from center → 2px stroke
+const RING_MASK = `radial-gradient(circle at center, transparent ${RING_INNER}px, black ${RING_INNER}px, black ${RING_OUTER}px, transparent ${RING_OUTER}px)`;
+
+function XPRing({ progress }: { progress: number }) {
+  const angle = useMotionValue(0);
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    const target = progress * 270;
+    if (shouldReduceMotion) {
+      angle.set(target);
+      return;
+    }
+    const controls = animate(angle, target, {
+      duration: 0.8,
+      ease: 'easeOut',
+    });
+    return () => controls.stop();
+  }, [progress, angle, shouldReduceMotion]);
+
+  // Gradient follows the arc: primary at start (7:30) → amber at end (4:30)
+  const progressBg = useTransform(
+    angle,
+    (a) =>
+      `conic-gradient(from 225deg, #fbbf24, var(--primary) ${a}deg, transparent ${a}deg)`,
+  );
+
+  const maskStyle = {
+    mask: RING_MASK,
+    WebkitMask: RING_MASK,
+  } as React.CSSProperties;
+
+  return (
+    <>
+      {/* Track — 270° muted arc */}
+      <div
+        className="absolute inset-0 rounded-full"
+        style={{
+          background:
+            'conic-gradient(from 225deg, var(--muted) 270deg, transparent 270deg)',
+          ...maskStyle,
+        }}
+      />
+      {/* Progress — animated gradient arc */}
+      <div className="absolute inset-0 rounded-full" style={maskStyle}>
+        <motion.div className="size-full" style={{ background: progressBg }} />
+      </div>
+    </>
+  );
+}
+
 // ─── Main component ─────────────────────────────────────────────────
 export function ProfileBadge({
   username = MOCK_DATA.username,
+  rankName = MOCK_DATA.rankName,
   level = MOCK_DATA.level,
   xp = MOCK_DATA.xp,
   xpToNext = MOCK_DATA.xpToNext,
 }: ProfileBadgeProps) {
   const { sparks_balance: sparks } = useUserState();
+  const levelInfo = getFlameLevel(level);
   const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
   const { registerTarget, landingState, sparksBoost, resetBoost } =
     useSparkFlyover();
+  const t = useTranslations('profile');
+  const sparkRef = useRef<HTMLDivElement>(null);
+  const { scale, flashActive } = useInflatingPulse(landingState);
 
-  // When the server value updates (e.g. on next navigation), it already
-  // includes the credited sparks — clear the local boost to avoid double-counting.
   const prevServerSparks = useRef(sparks);
   useEffect(() => {
     if (sparks !== prevServerSparks.current) {
@@ -117,197 +181,118 @@ export function ProfileBadge({
     }
   }, [sparks, resetBoost]);
 
-  // Base = server balance + accumulated boost from completed flyovers
   const effectiveSparks = sparks + sparksBoost;
 
-  return (
-    <>
-      {/* Desktop: Compact pill */}
-      <DesktopProfilePill
-        username={username}
-        sparks={effectiveSparks}
-        level={level}
-        registerTarget={registerTarget}
-        landingState={landingState}
-      />
-
-      {/* Mobile: Compact badge */}
-      <MobileProfileBadge
-        username={username}
-        sparks={effectiveSparks}
-        level={level}
-        xp={xp}
-        xpToNext={xpToNext}
-        xpProgress={xpProgress}
-        registerTarget={registerTarget}
-        landingState={landingState}
-      />
-    </>
-  );
-}
-
-// ─── Desktop ────────────────────────────────────────────────────────
-type DesktopProfilePillProps = ProfileBadgeProps & {
-  registerTarget: (el: HTMLElement | null) => void;
-  landingState: LandingState | null;
-};
-
-function DesktopProfilePill({
-  username,
-  sparks,
-  level,
-  registerTarget,
-  landingState,
-}: DesktopProfilePillProps) {
-  const sparkRef = useRef<HTMLDivElement>(null);
-  const { scale, flashActive } = useInflatingPulse(landingState);
-
   useEffect(() => {
     registerTarget(sparkRef.current);
   }, [registerTarget]);
 
-  const displayedSparks = getDisplayedSparks(sparks ?? 0, landingState);
+  const displayedSparks = getDisplayedSparks(effectiveSparks, landingState);
 
   return (
-    <div className="hidden md:flex items-center gap-0 rounded-full border border-border bg-muted/50 py-1 pl-1 pr-3">
-      <div className="relative mr-2">
-        <div className="flex size-7 items-center justify-center rounded-full bg-background">
-          <UserIcon className="size-3.5 text-muted-foreground" />
-        </div>
-        <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-muted text-[8px] font-bold leading-none ring-1 ring-border">
-          {level}
-        </span>
-      </div>
-      <span className="text-sm font-medium">{username}</span>
-      <span className="mx-1.5 text-border">·</span>
-      <motion.div
-        ref={sparkRef}
-        className={`flex items-center gap-1 text-sm transition-colors duration-300 ease-out ${flashActive ? 'text-amber-400' : 'text-primary'}`}
-        style={{ scale }}
-      >
-        <SparklesIcon className="size-3.5" />
-        <span className="font-medium tabular-nums">{displayedSparks}</span>
-      </motion.div>
-    </div>
-  );
-}
-
-// ─── Mobile ─────────────────────────────────────────────────────────
-type MobileProfileBadgeProps = ProfileBadgeProps & {
-  xpProgress: number;
-  registerTarget: (el: HTMLElement | null) => void;
-  landingState: LandingState | null;
-};
-
-function MobileProfileBadge({
-  username,
-  sparks,
-  level,
-  xp,
-  xpToNext,
-  xpProgress,
-  registerTarget,
-  landingState,
-}: MobileProfileBadgeProps) {
-  const [open, setOpen] = useState(false);
-  const t = useTranslations('profile');
-  const sparkRef = useRef<HTMLDivElement>(null);
-  const { scale, flashActive } = useInflatingPulse(landingState);
-
-  useEffect(() => {
-    registerTarget(sparkRef.current);
-  }, [registerTarget]);
-
-  const displayedSparks = getDisplayedSparks(sparks ?? 0, landingState);
-
-  return (
-    <div className="md:hidden">
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={t('title')}
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        className="flex items-center gap-2"
-      >
-        <motion.div
-          ref={sparkRef}
-          className={`flex items-center gap-1 text-xs transition-colors duration-300 ease-out ${flashActive ? 'text-amber-400' : 'text-primary'}`}
-          style={{ scale }}
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label={t('title')}
+          className="flex items-center rounded-full border border-border bg-muted/50 py-0.5 pl-0.5 pr-2.5"
         >
-          <SparklesIcon className="size-3.5" />
-          <span className="font-semibold tabular-nums">{displayedSparks}</span>
-        </motion.div>
-        <div className="relative">
-          <div className="flex size-7 items-center justify-center rounded-full bg-muted">
-            <UserIcon className="size-3.5 text-muted-foreground" />
+          {/* Avatar with XP ring + level badge */}
+          <div className="relative mr-1.5 flex size-7 items-center justify-center">
+            <XPRing progress={xpProgress} />
+            <div className="flex size-5 items-center justify-center rounded-full bg-background">
+              <UserIcon className="size-2.5 text-muted-foreground" />
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-muted text-[8px] font-bold leading-none ring-1 ring-border">
+              {level}
+            </span>
           </div>
-          <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-muted text-[8px] font-bold leading-none ring-1 ring-background">
-            {level}
+          {/* Username */}
+          <span className="max-w-24 truncate text-sm font-medium">
+            {username}
           </span>
-        </div>
-      </button>
+          {/* Separator */}
+          <span className="mx-1.5 text-border">&middot;</span>
+          {/* Sparks */}
+          <motion.div
+            ref={sparkRef}
+            className={`flex items-center gap-1 text-sm transition-colors duration-300 ease-out ${flashActive ? 'text-amber-400' : 'text-primary'}`}
+            style={{ scale }}
+          >
+            <SparklesIcon className="size-3.5" />
+            <span className="inline-block min-w-5 text-right font-medium tabular-nums">
+              {displayedSparks}
+            </span>
+          </motion.div>
+        </button>
+      </PopoverTrigger>
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="bottom">
-          <SheetTitle>{t('title')}</SheetTitle>
-          <SheetDescription className="sr-only">
-            {t('description')}
-          </SheetDescription>
+      <PopoverContent align="end" sideOffset={8} className="w-72 gap-0 p-0">
+        {/* Profile header */}
+        <div className="p-4">
+          <p className="truncate text-sm font-semibold">{username}</p>
+          <p className="text-xs font-medium" style={{ color: levelInfo.color }}>
+            Lv.{level} · {rankName}
+          </p>
 
-          <div className="flex flex-col gap-5 pt-2">
-            {/* User info */}
-            <div className="flex items-center gap-3">
-              <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                <UserIcon className="size-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-semibold">{username}</p>
-                <Badge variant="secondary" className="mt-1 text-xs">
-                  Lv.{level}
-                </Badge>
-              </div>
+          {/* Heat bar */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-xs">
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, #fbbf24, var(--primary))',
+                }}
+              >
+                {t('xpProgress')}
+              </span>
+              <span className="text-foreground">
+                {xp}/{xpToNext}
+              </span>
             </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg bg-muted/50 p-3">
-                <div className="flex items-center gap-1.5 text-primary">
-                  <SparklesIcon className="size-4" />
-                  <span className="text-lg font-bold">{displayedSparks}</span>
-                </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t('sparks')}
-                </p>
-              </div>
-              <div className="rounded-lg bg-muted/50 p-3">
-                <span className="text-lg font-bold">{level}</span>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t('level')}
-                </p>
-              </div>
-            </div>
-
-            {/* XP progress */}
-            <div>
-              <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
-                <span>{t('xpProgress')}</span>
-                <span>
-                  {xp} / {xpToNext} XP
-                </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <motion.div
-                  className="h-full rounded-full bg-primary"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${xpProgress * 100}%` }}
-                  transition={{ duration: 0.8, ease: 'easeOut' }}
-                />
-              </div>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${xpProgress * 100}%`,
+                  background:
+                    'linear-gradient(to right, #fbbf24, var(--primary))',
+                }}
+              />
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
-    </div>
+        </div>
+
+        {/* Nav links */}
+        <div className="border-t border-border px-1 py-1">
+          <Link
+            href="/profile"
+            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
+          >
+            <UserCircleIcon className="size-4" />
+            {t('viewProfile')}
+          </Link>
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
+          >
+            <SettingsIcon className="size-4" />
+            {t('settings')}
+          </Link>
+        </div>
+
+        {/* Sign out */}
+        <div className="border-t border-border px-1 py-1">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-accent"
+          >
+            <LogOutIcon className="size-4" />
+            {t('signOut')}
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }

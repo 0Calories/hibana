@@ -211,7 +211,11 @@
     "description": "Your gamification stats and profile",
     "sparks": "Sparks",
     "level": "Level",
-    "xpProgress": "XP Progress"
+    "xpProgress": "Heat",
+    "rank": "Rank",
+    "viewProfile": "Profile",
+    "settings": "Settings",
+    "signOut": "Sign Out"
   },
   "pages": {
     "tasks": "Tasks",
