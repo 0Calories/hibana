@@ -12,7 +12,9 @@
     "db:stop": "pnpx supabase stop",
     "db:reset": "pnpx supabase db reset",
     "db:push": "pnpx supabase db push",
-    "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts"
+    "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
@@ -43,6 +45,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
