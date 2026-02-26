@@ -211,7 +211,11 @@
     "description": "ゲーミフィケーションのステータスとプロフィール",
     "sparks": "スパーク",
     "level": "レベル",
-    "xpProgress": "XP進捗"
+    "xpProgress": "ヒート",
+    "rank": "ランク",
+    "viewProfile": "プロフィール",
+    "settings": "設定",
+    "signOut": "ログアウト"
   },
   "pages": {
     "tasks": "Tasks",
