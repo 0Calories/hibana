@@ -23,6 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
 import { type LandingState, useSparkFlyover } from './SparkFlyover';
 import { useUserState } from './UserStateProvider';
 
@@ -164,6 +165,7 @@ export function ProfileBadge({
   xpToNext = MOCK_DATA.xpToNext,
 }: ProfileBadgeProps) {
   const { sparks_balance: sparks } = useUserState();
+  const levelInfo = getFlameLevel(level);
   const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
   const { registerTarget, landingState, sparksBoost, resetBoost } =
     useSparkFlyover();
@@ -229,15 +231,23 @@ export function ProfileBadge({
         {/* Profile header */}
         <div className="p-4">
           <p className="truncate text-sm font-semibold">{username}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs font-medium" style={{ color: levelInfo.color }}>
             Lv.{level} · {rankName}
           </p>
 
           {/* Heat bar */}
           <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{t('xpProgress')}</span>
-              <span>
+            <div className="flex items-center justify-between text-xs">
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, #fbbf24, var(--primary))',
+                }}
+              >
+                {t('xpProgress')}
+              </span>
+              <span className="text-foreground">
                 {xp}/{xpToNext}
               </span>
             </div>
