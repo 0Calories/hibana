@@ -1,4 +1,5 @@
 import { Fuel } from 'lucide-react';
+import { FuelBarStickyContainer } from '../FuelBarStickyContainer';
 
 export function FlameCardSkeleton() {
   return (
@@ -52,7 +53,7 @@ export function FlameCardSkeleton() {
 
 export function FuelMeterSkeleton({ label }: { label: string }) {
   return (
-    <div className="sticky top-0 z-20 -mx-4 mb-4 bg-background/80 px-4 pb-0 backdrop-blur-sm">
+    <FuelBarStickyContainer className="bg-background/80 backdrop-blur-sm">
       <div className="rounded-lg border border-border bg-card px-3 py-2.5">
         <div className="flex items-center gap-2.5">
           {/* Icon + label — static, no skeleton needed */}
@@ -68,6 +69,6 @@ export function FuelMeterSkeleton({ label }: { label: string }) {
           <div className="h-3 w-14 shrink-0 animate-pulse rounded bg-muted" />
         </div>
       </div>
-    </div>
+    </FuelBarStickyContainer>
   );
 }
