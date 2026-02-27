@@ -24,13 +24,12 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
+import { getOrCreateUserState } from '@/app/(app)/shop/actions';
 import { type LandingState, useSparkFlyover } from './SparkFlyover';
-import { useUserState } from './UserStateProvider';
 
 interface ProfileBadgeProps {
   username?: string;
   rankName?: string;
-  sparks?: number;
   level?: number;
   xp?: number;
   xpToNext?: number;
@@ -156,6 +155,25 @@ function XPRing({ progress }: { progress: number }) {
   );
 }
 
+// ─── Skeleton ───────────────────────────────────────────────────────
+function ProfileBadgeSkeleton() {
+  return (
+    <div className="flex items-center rounded-full border border-border bg-muted/50 py-0.5 pl-0.5 pr-2.5">
+      <div className="relative mr-1.5 flex size-7 items-center justify-center">
+        <div className="flex size-5 items-center justify-center rounded-full bg-background">
+          <UserIcon className="size-2.5 text-muted-foreground" />
+        </div>
+      </div>
+      <div className="h-3.5 w-12 animate-pulse rounded bg-muted" />
+      <span className="mx-1.5 text-border">&middot;</span>
+      <div className="flex items-center gap-1">
+        <SparklesIcon className="size-3.5 text-muted-foreground" />
+        <div className="h-3.5 w-5 animate-pulse rounded bg-muted" />
+      </div>
+    </div>
+  );
+}
+
 // ─── Main component ─────────────────────────────────────────────────
 export function ProfileBadge({
   username = MOCK_DATA.username,
@@ -164,7 +182,7 @@ export function ProfileBadge({
   xp = MOCK_DATA.xp,
   xpToNext = MOCK_DATA.xpToNext,
 }: ProfileBadgeProps) {
-  const { sparks_balance: sparks } = useUserState();
+  const [sparks, setSparks] = useState<number | null>(null);
   const levelInfo = getFlameLevel(level);
   const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
   const { registerTarget, landingState, sparksBoost, resetBoost } =
@@ -173,21 +191,34 @@ export function ProfileBadge({
   const sparkRef = useRef<HTMLDivElement>(null);
   const { scale, flashActive } = useInflatingPulse(landingState);
 
+  useEffect(() => {
+    getOrCreateUserState().then((result) => {
+      if (result.success) {
+        setSparks(result.data.sparks_balance);
+      }
+    });
+  }, []);
+
   const prevServerSparks = useRef(sparks);
   useEffect(() => {
-    if (sparks !== prevServerSparks.current) {
+    if (sparks !== null && sparks !== prevServerSparks.current) {
       prevServerSparks.current = sparks;
       resetBoost();
     }
   }, [sparks, resetBoost]);
 
-  const effectiveSparks = sparks + sparksBoost;
+  const effectiveSparks = (sparks ?? 0) + sparksBoost;
 
+  const loaded = sparks !== null;
   useEffect(() => {
     registerTarget(sparkRef.current);
-  }, [registerTarget]);
+  }, [registerTarget, loaded]);
 
   const displayedSparks = getDisplayedSparks(effectiveSparks, landingState);
+
+  if (sparks === null) {
+    return <ProfileBadgeSkeleton />;
+  }
 
   return (
     <Popover>
