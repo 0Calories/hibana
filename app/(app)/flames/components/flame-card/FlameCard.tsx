@@ -267,10 +267,7 @@ export function FlameCard({
     isDimmed && 'opacity-40',
   );
 
-  const cardStyle = {
-    ...borderGlowStyle,
-    ...(canComplete ? { touchAction: 'none' as const } : {}),
-  };
+  const cardStyle = borderGlowStyle;
 
   return (
     <div ref={cardRef} className={cn('relative', sizeConfig.card)}>
