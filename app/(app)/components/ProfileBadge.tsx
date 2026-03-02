@@ -18,13 +18,13 @@ import {
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
+import { getOrCreateUserState } from '@/app/(app)/shop/actions';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
-import { getOrCreateUserState } from '@/app/(app)/shop/actions';
 import { type LandingState, useSparkFlyover } from './SparkFlyover';
 
 interface ProfileBadgeProps {
@@ -192,11 +192,20 @@ export function ProfileBadge({
   const { scale, flashActive } = useInflatingPulse(landingState);
 
   useEffect(() => {
-    getOrCreateUserState().then((result) => {
-      if (result.success) {
-        setSparks(result.data.sparks_balance);
+    let cancelled = false;
+    async function fetchUserState() {
+      try {
+        const result = await getOrCreateUserState();
+        if (cancelled) return;
+        setSparks(result.success ? result.data.sparks_balance : 0);
+      } catch {
+        if (!cancelled) setSparks(0);
       }
-    });
+    }
+    fetchUserState();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const prevServerSparks = useRef(sparks);
@@ -211,6 +220,7 @@ export function ProfileBadge({
 
   const loaded = sparks !== null;
   useEffect(() => {
+    if (!loaded) return;
     registerTarget(sparkRef.current);
   }, [registerTarget, loaded]);
 
