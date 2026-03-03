@@ -56,9 +56,8 @@ export function FuelMeterSkeleton() {
     <FuelBarStickyContainer className="bg-background/80 backdrop-blur-sm">
       <div className="rounded-lg border border-border bg-card px-3 py-2.5">
         <div className="flex items-center gap-2.5">
-          <div className="flex shrink-0 items-center gap-1 text-amber-600 dark:text-amber-400">
+          <div className="flex shrink-0 items-center text-amber-600 dark:text-amber-400">
             <Fuel className="h-3.5 w-3.5" />
-            <div className="h-3 w-8 animate-pulse rounded bg-amber-600/20 dark:bg-amber-400/20" />
           </div>
           {/* Bar placeholder */}
           <div className="h-3 flex-1 animate-pulse rounded-full bg-muted" />
