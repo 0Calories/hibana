@@ -329,19 +329,24 @@ export function CompletionSummaryModal({
   const sparksCount = useCountUp(rewards.sparks, showStats);
   const xpCount = useCountUp(rewards.xp, showStats);
 
-  const handleDismiss = useCallback(() => {
-    // Launch spark flyover from the spark count to the profile badge
-    if (sparksRef.current && rewards.sparks > 0) {
-      const rect = sparksRef.current.getBoundingClientRect();
-      triggerFlyover(rect, rewards.sparks);
-    }
-    onOpenChange(false);
-  }, [onOpenChange, triggerFlyover, rewards.sparks]);
+  const handleClose = useCallback(
+    (nextOpen: boolean) => {
+      if (!nextOpen) {
+        // Launch spark flyover from the spark count to the profile badge
+        if (sparksRef.current && rewards.sparks > 0) {
+          const rect = sparksRef.current.getBoundingClientRect();
+          triggerFlyover(rect, rewards.sparks);
+        }
+      }
+      onOpenChange(nextOpen);
+    },
+    [onOpenChange, triggerFlyover, rewards.sparks],
+  );
 
   const titleGradient = `linear-gradient(to right, ${colors.dark}, ${colors.medium}, ${colors.light})`;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         showCloseButton={false}
         className="overflow-visible border bg-card text-card-foreground"
@@ -489,7 +494,7 @@ export function CompletionSummaryModal({
 
         <DialogFooter>
           <Button
-            onClick={handleDismiss}
+            onClick={() => handleClose(false)}
             className="w-full text-white hover:brightness-110"
             style={{ backgroundColor: colors.medium }}
           >
