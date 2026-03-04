@@ -266,19 +266,20 @@ export function CompletionSummaryModal({
   const { triggerFlyover } = useSparkFlyover();
 
   // Pick a contextual subtitle based on fuel percentage
-  const subtitle = useMemo(() => {
+  const getSubtitle = () => {
     const pick = (key: string) => {
       const list = t.raw(key) as string[];
       return list[Math.floor(Math.random() * list.length)];
     };
-    if (targetSeconds <= 0) return pick('subtitlesPartial');
+
     const fuelPercent = elapsedSeconds / targetSeconds;
+
     if (fuelPercent > OVERBURN_GRACE) return pick('subtitlesOverburn');
     if (fuelPercent >= COMPLETION_THRESHOLD) return pick('subtitlesFull');
     if (fuelPercent >= 0.5) return pick('subtitlesPartial');
+
     return pick('subtitlesMinimal');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetSeconds, elapsedSeconds, t]);
+  };
 
   // Animation sequence state
   const [burstActive, setBurstActive] = useState(false);
@@ -374,7 +375,9 @@ export function CompletionSummaryModal({
             >
               {flameName} {t('title')}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {getSubtitle()}
+            </p>
           </motion.div>
 
           {/* Hero flame visual — center of dialog */}
