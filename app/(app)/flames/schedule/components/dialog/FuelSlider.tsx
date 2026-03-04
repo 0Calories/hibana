@@ -8,7 +8,7 @@ import {
   getFlameColors,
 } from '@/app/(app)/flames/utils/colors';
 import type { Flame } from '@/lib/supabase/rows';
-import { formatBudgetClock, parseBudgetClock } from '@/lib/time';
+import { formatTimer, parseBudgetClock } from '@/lib/time';
 import { cn } from '@/lib/utils';
 
 const MAX_MINUTES = 720; // 12 hours
@@ -195,7 +195,7 @@ export function FuelSlider({
 
   const handleLabelClick = () => {
     if (disabled) return;
-    setEditText(formatBudgetClock(value));
+    setEditText(formatTimer(value, 'minutes'));
     setIsEditing(true);
   };
 
@@ -338,7 +338,7 @@ export function FuelSlider({
             isOverCapacity ? 'text-destructive' : 'text-muted-foreground',
           )}
         >
-          {formatBudgetClock(value)}
+          {formatTimer(value, 'minutes')}
         </button>
       )}
     </div>

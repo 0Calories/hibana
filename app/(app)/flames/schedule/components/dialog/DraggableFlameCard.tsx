@@ -2,7 +2,7 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import { Pencil } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { FlameCard } from '@/app/(app)/flames/components/flame-card/FlameCard';
 import type { Flame } from '@/lib/supabase/rows';
@@ -29,6 +29,7 @@ export function DraggableFlameCard({
   onAllocationChange,
 }: DraggableFlameCardProps) {
   const t = useTranslations('schedule');
+  const locale = useLocale();
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: flame.id,
@@ -79,8 +80,6 @@ export function DraggableFlameCard({
       : {}),
   };
 
-  const tLabels = { hours: t('hours'), minutes: t('minutes') };
-
   const timeFooter =
     displayMinutes != null ? (
       <div className="flex items-center justify-center gap-1">
@@ -119,7 +118,7 @@ export function DraggableFlameCard({
               onAllocationChange ? (e) => e.stopPropagation() : undefined
             }
           >
-            {formatDuration(displayMinutes, tLabels)}
+            {formatDuration(displayMinutes, locale)}
             {isCustomAllocation && (
               <Pencil className="ml-0.5 inline size-2.5" />
             )}

@@ -10,7 +10,7 @@ import {
 } from '@dnd-kit/core';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, FlameIcon, Lock } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { FlameCard } from '@/app/(app)/flames/components/flame-card/FlameCard';
@@ -47,6 +47,7 @@ export function DayRow({
   onUpdate,
 }: DayRowProps) {
   const t = useTranslations('schedule');
+  const locale = useLocale();
   const date = parseLocalDate(day.date);
 
   // Locale-aware formatted dates — full on desktop, compact on mobile
@@ -133,8 +134,6 @@ export function DayRow({
       activationConstraint: { delay: 200, tolerance: 5 },
     }),
   );
-
-  const tLabels = { hours: t('hours'), minutes: t('minutes') };
 
   const handleDragEnd = (event: DragEndEvent) => {
     setIsDragging(false);
@@ -282,7 +281,7 @@ export function DayRow({
           )}
         >
           {day.fuelBudget != null
-            ? formatDuration(day.fuelBudget, tLabels)
+            ? formatDuration(day.fuelBudget, locale)
             : t('noBudgetSet')}
         </span>
 
@@ -326,7 +325,7 @@ export function DayRow({
                             day.flameAllocations[flame.id] ??
                               flame.time_budget_minutes ??
                               0,
-                            tLabels,
+                            locale,
                           )}
                         </p>
                       ) : undefined
@@ -370,7 +369,7 @@ export function DayRow({
                     <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
                       <Lock className="size-3.5 text-muted-foreground" />
                       <span className="text-sm">
-                        {formatDuration(day.fuelBudget ?? 0, tLabels)}
+                        {formatDuration(day.fuelBudget ?? 0, locale)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {t('fuelLocked')}

@@ -1,13 +1,37 @@
+// Intl.DurationFormat is supported in all modern browsers and Node 22+
+// but TS esnext lib doesn't include the types yet.
+declare namespace Intl {
+  class DurationFormat {
+    constructor(
+      locale?: string,
+      options?: { style?: string; minutesDisplay?: string },
+    );
+    format(duration: Record<string, number>): string;
+  }
+}
+
 /**
- * Seconds → digital clock display. Clamps to 0, rounds.
- * formatTimer(65)   → "01:05"
- * formatTimer(3661) → "1:01:01"
+ * Format a duration as a digital clock display.
+ *
+ * formatTimer(65)              → "01:05"     (seconds → MM:SS)
+ * formatTimer(3661)            → "1:01:01"   (seconds → H:MM:SS)
+ * formatTimer(150, 'minutes')  → "2:30"      (minutes → H:MM)
  */
-export function formatTimer(totalSeconds: number): string {
-  const s = Math.max(0, Math.round(totalSeconds));
-  const hours = Math.floor(s / 3600);
-  const minutes = Math.floor((s % 3600) / 60);
-  const seconds = s % 60;
+export function formatTimer(
+  value: number,
+  unit: 'seconds' | 'minutes' = 'seconds',
+): string {
+  const total = Math.max(0, Math.round(value));
+
+  if (unit === 'minutes') {
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    return `${h}:${String(m).padStart(2, '0')}`;
+  }
+
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
 
   if (hours > 0) {
     return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
@@ -16,29 +40,25 @@ export function formatTimer(totalSeconds: number): string {
 }
 
 /**
- * Minutes → human-readable localized duration.
- * formatDuration(150, { hours: 'hr', minutes: 'min' }) → "2hr 30min"
- * formatDuration(90, { hours: '時間', minutes: '分' })  → "1時間 30分"
+ * Minutes → localized human-readable duration via Intl.DurationFormat.
+ * formatDuration(150, 'en') → "2 hr, 30 min"
+ * formatDuration(45, 'ja')  → "45 分"
  */
-export function formatDuration(
-  mins: number,
-  labels: { hours: string; minutes: string },
-): string {
+export function formatDuration(mins: number, locale = 'en'): string {
   const h = Math.floor(mins / 60);
   const m = mins % 60;
-  if (h > 0 && m > 0) return `${h}${labels.hours} ${m}${labels.minutes}`;
-  if (h > 0) return `${h}${labels.hours}`;
-  return `${m}${labels.minutes}`;
-}
-
-/**
- * Minutes → clock notation for editable budget inputs.
- * formatBudgetClock(150) → "2:30"
- */
-export function formatBudgetClock(totalMinutes: number): string {
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  return `${h}:${String(m).padStart(2, '0')}`;
+  if (h === 0 && m === 0) {
+    return new Intl.DurationFormat(locale, {
+      style: 'short',
+      minutesDisplay: 'always',
+    }).format({ minutes: 0 });
+  }
+  const duration: Record<string, number> = {};
+  if (h > 0) duration.hours = h;
+  if (m > 0) duration.minutes = m;
+  return new Intl.DurationFormat(locale, { style: 'short' })
+    .format(duration)
+    .replace(/,/g, '');
 }
 
 /**
