@@ -2,8 +2,8 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
-import type { Flame } from '@/utils/supabase/rows';
 import { useFlameInteractions } from '../../hooks/useFlameInteractions';
 import type { FlameCardActions, FlameEntry } from '../../hooks/useFlames';
 import { getFlameColors } from '../../utils/colors';

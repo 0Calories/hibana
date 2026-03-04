@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
-import type { Flame } from '@/utils/supabase/rows';
 import type { FlameCardActions, FlameEntry } from '../../hooks/useFlames';
 import { getFlameColors } from '../../utils/colors';
 import { FlameCard } from './FlameCard';

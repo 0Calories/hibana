@@ -1,8 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { createClientWithAuth } from '@/lib/supabase/server';
 import type { ActionResult } from '@/lib/types';
-import { createClientWithAuth } from '@/utils/supabase/server';
 
 export async function setDaySchedule(
   dayOfWeek: number,

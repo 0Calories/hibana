@@ -6,8 +6,8 @@ import {
   FLAME_HEX_COLORS,
   getFlameColors,
 } from '@/app/(app)/flames/utils/colors';
+import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
-import type { Flame } from '@/utils/supabase/rows';
 
 const WARM_COLORS = new Set<string>([
   FLAME_HEX_COLORS.amber.medium,

@@ -5,8 +5,8 @@ import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { FlameCard } from '@/app/(app)/flames/components/flame-card/FlameCard';
+import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
-import type { Flame } from '@/utils/supabase/rows';
 import { formatMinutes } from '../../utils';
 
 interface DraggableFlameCardProps {

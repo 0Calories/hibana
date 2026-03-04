@@ -1,11 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { Flame, FlameSession } from '@/lib/supabase/rows';
+import { createClientWithAuth } from '@/lib/supabase/server';
+import type { TablesInsert } from '@/lib/supabase/types';
 import type { ActionResult } from '@/lib/types';
 import { isValidDateString, parseLocalDate } from '@/lib/utils';
-import type { Flame, FlameSession } from '@/utils/supabase/rows';
-import { createClientWithAuth } from '@/utils/supabase/server';
-import type { TablesInsert } from '@/utils/supabase/types';
 
 type FlameInput = Pick<
   Flame,

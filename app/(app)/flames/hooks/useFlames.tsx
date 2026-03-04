@@ -12,7 +12,7 @@ import {
 } from 'react';
 import { toast } from 'sonner';
 import { creditCompletionReward } from '@/app/(app)/shop/actions';
-import type { Flame, FlameSession } from '@/utils/supabase/rows';
+import type { Flame, FlameSession } from '@/lib/supabase/rows';
 import {
   type FuelBudgetStatus,
   getRemainingFuelBudget,
@@ -99,12 +99,7 @@ export function FlamesProvider({
   date,
   children,
 }: FlamesProviderProps) {
-  const value = useFlamesEngine(
-    flames,
-    sessions,
-    fuelBudget,
-    date,
-  );
+  const value = useFlamesEngine(flames, sessions, fuelBudget, date);
   return (
     <FlamesContext.Provider value={value}>{children}</FlamesContext.Provider>
   );
@@ -254,8 +249,7 @@ function useFlamesEngine(
   if (!initializedRef.current) {
     initializedRef.current = true;
     for (const flame of flames) {
-      const session =
-        sessions.find((s) => s.flame_id === flame.id) ?? null;
+      const session = sessions.find((s) => s.flame_id === flame.id) ?? null;
       timerMapRef.current.set(flame.id, initTimerState(session));
     }
   }
@@ -271,7 +265,9 @@ function useFlamesEngine(
 
   // ── Fuel derived ────────────────────────────────────────────────
   const hasBudget = liveFuelBudget !== null;
-  const budgetSeconds = liveFuelBudget ? liveFuelBudget.budgetMinutes * 60 : null;
+  const budgetSeconds = liveFuelBudget
+    ? liveFuelBudget.budgetMinutes * 60
+    : null;
 
   // Total consumed: sum of elapsed across all flames (from timer state, not sessions)
   let totalConsumed = 0;

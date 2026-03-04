@@ -3,8 +3,8 @@
 import { useDroppable } from '@dnd-kit/core';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
+import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
-import type { Flame } from '@/utils/supabase/rows';
 import { ASSIGNED_FLAME_ZONE_ID } from '../constants';
 import { DraggableFlameCard } from './DraggableFlameCard';
 
