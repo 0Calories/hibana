@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { FlameCard } from '@/app/(app)/flames/components/flame-card/FlameCard';
 import type { Flame } from '@/lib/supabase/rows';
+import { formatDuration } from '@/lib/time';
 import { cn } from '@/lib/utils';
-import { formatMinutes } from '../../utils';
 
 interface DraggableFlameCardProps {
   flame: Flame;
@@ -119,7 +119,7 @@ export function DraggableFlameCard({
               onAllocationChange ? (e) => e.stopPropagation() : undefined
             }
           >
-            {formatMinutes(displayMinutes, tLabels)}
+            {formatDuration(displayMinutes, tLabels)}
             {isCustomAllocation && (
               <Pencil className="ml-0.5 inline size-2.5" />
             )}

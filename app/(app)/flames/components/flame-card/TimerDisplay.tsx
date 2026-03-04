@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
+import { formatTimer } from '@/lib/time';
 import type { FlameState } from '../../utils/types';
 
 interface TimerDisplayProps {
@@ -9,17 +10,6 @@ interface TimerDisplayProps {
   state: FlameState;
   color: string;
   isOverburning?: boolean;
-}
-
-function formatTimeCompact(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 export function TimerDisplay({
@@ -32,8 +22,8 @@ export function TimerDisplay({
   const shouldReduceMotion = useReducedMotion();
   const isActive = state === 'burning';
 
-  const elapsedFormatted = formatTimeCompact(elapsedSeconds);
-  const targetFormatted = formatTimeCompact(targetSeconds);
+  const elapsedFormatted = formatTimer(elapsedSeconds);
+  const targetFormatted = formatTimer(targetSeconds);
 
   const displayText =
     targetSeconds > 0

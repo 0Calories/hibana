@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Fuel } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { formatTimer } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { FuelDroplets } from './FuelDroplets';
 import { SmokePuffs } from './SmokePuffs';
@@ -14,18 +15,6 @@ interface FuelMeterProps {
   hasBudget: boolean;
   isBurning: boolean;
   isStuck?: boolean;
-}
-
-function formatTime(totalSeconds: number): string {
-  const s = Math.max(0, Math.round(totalSeconds));
-  const hours = Math.floor(s / 3600);
-  const minutes = Math.floor((s % 3600) / 60);
-  const seconds = s % 60;
-
-  if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 export function FuelMeter({
@@ -276,9 +265,9 @@ export function FuelMeter({
             t('depleted')
           ) : (
             <>
-              <span className="md:hidden">{formatTime(remainingSeconds)}</span>
+              <span className="md:hidden">{formatTimer(remainingSeconds)}</span>
               <span className="hidden md:inline">
-                {t('remaining', { time: formatTime(remainingSeconds) })}
+                {t('remaining', { time: formatTimer(remainingSeconds) })}
               </span>
             </>
           )}

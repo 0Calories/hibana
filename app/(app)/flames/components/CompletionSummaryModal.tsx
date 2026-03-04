@@ -21,6 +21,7 @@ import {
   calculateSparks,
   OVERBURN_GRACE,
 } from '@/lib/sparks';
+import { formatTimer } from '@/lib/time';
 import { CompletionEmbers } from './CompletionEmbers';
 import { CompletionCelebration } from './flame-card/effects/CompletionCelebration';
 import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
@@ -50,18 +51,6 @@ function calculateRewards(
     sparks: calculateSparks(elapsedSeconds, targetSeconds, 1),
     xp: Math.floor(minutes * 1.5 * levelMultiplier),
   };
-}
-
-function formatTime(totalSeconds: number): string {
-  const s = Math.max(0, Math.round(totalSeconds));
-  const hours = Math.floor(s / 3600);
-  const minutes = Math.floor((s % 3600) / 60);
-  const seconds = s % 60;
-
-  if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 function useCountUp(target: number, active: boolean) {
@@ -180,7 +169,7 @@ function CompletionFuelMeter({
 
         {/* Time label */}
         <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
-          {formatTime(elapsedSeconds)} / {formatTime(targetSeconds)}
+          {formatTimer(elapsedSeconds)} / {formatTimer(targetSeconds)}
         </span>
       </div>
     </div>
