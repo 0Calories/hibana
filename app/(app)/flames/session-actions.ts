@@ -1,9 +1,9 @@
 'use server';
 
+import type { FlameSession } from '@/lib/supabase/rows';
+import { createClientWithAuth } from '@/lib/supabase/server';
 import type { ActionResult } from '@/lib/types';
 import { isValidDateString } from '@/lib/utils';
-import type { FlameSession } from '@/utils/supabase/rows';
-import { createClientWithAuth } from '@/utils/supabase/server';
 
 export async function startSession(
   flameId: string,

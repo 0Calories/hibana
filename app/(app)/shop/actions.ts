@@ -1,14 +1,14 @@
 'use server';
 
 import { calculateSparks } from '@/lib/sparks';
-import type { ActionResult } from '@/lib/types';
 import type {
   Item,
   SparkTransaction,
   UserInventory,
   UserState,
-} from '@/utils/supabase/rows';
-import { createClientWithAuth } from '@/utils/supabase/server';
+} from '@/lib/supabase/rows';
+import { createClientWithAuth } from '@/lib/supabase/server';
+import type { ActionResult } from '@/lib/types';
 
 /**
  * Returns the user's state row, lazy-creating one if it doesn't exist yet.

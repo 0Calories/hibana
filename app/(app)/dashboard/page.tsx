@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { StickyNoteBoard } from './components/StickyNoteBoard';
 
 export default async function DashboardPage() {

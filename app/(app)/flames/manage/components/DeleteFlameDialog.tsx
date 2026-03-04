@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type { Flame } from '@/utils/supabase/rows';
+import type { Flame } from '@/lib/supabase/rows';
 import { deleteFlame } from '../../actions';
 
 interface DeleteFlameDialogProps {

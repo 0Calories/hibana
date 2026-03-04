@@ -1,8 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createClient } from '@/utils/supabase/server';
-import type { TablesInsert } from '@/utils/supabase/types';
+import { createClient } from '@/lib/supabase/server';
+import type { TablesInsert } from '@/lib/supabase/types';
 
 export async function createTask(title: string, content?: string) {
   const supabase = await createClient();

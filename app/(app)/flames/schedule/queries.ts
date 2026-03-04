@@ -1,9 +1,9 @@
 import 'server-only';
 
+import type { Flame } from '@/lib/supabase/rows';
+import { createClientWithAuth } from '@/lib/supabase/server';
 import type { ActionResult } from '@/lib/types';
 import { parseLocalDate } from '@/lib/utils';
-import type { Flame } from '@/utils/supabase/rows';
-import { createClientWithAuth } from '@/utils/supabase/server';
 import { getWeekDates, getWeekStartDate } from './utils';
 
 // --- Types ---

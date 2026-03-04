@@ -21,8 +21,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
-import type { Flame } from '@/utils/supabase/rows';
 import { archiveFlame } from '../../actions';
 import { CreateFlameDialog } from '../../components/CreateFlameDialog';
 import { StaticFlameIcon } from '../../components/StaticFlameIcon';

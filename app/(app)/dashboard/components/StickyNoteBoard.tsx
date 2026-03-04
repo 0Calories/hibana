@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
-import type { Note, Task } from '@/utils/supabase/rows';
+import type { Note, Task } from '@/lib/supabase/rows';
 import { StickyNoteDialog } from './StickyNoteDialog';
 
 const CARD_COLOURS = [
