@@ -266,7 +266,7 @@ export function CompletionSummaryModal({
   const { triggerFlyover } = useSparkFlyover();
 
   // Pick a contextual subtitle based on fuel percentage
-  const getSubtitle = useCallback(() => {
+  const subtitle = useMemo(() => {
     const pick = (key: string) => {
       const list = t.raw(key) as string[];
       return list[Math.floor(Math.random() * list.length)];
@@ -375,9 +375,7 @@ export function CompletionSummaryModal({
             >
               {flameName} {t('title')}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {getSubtitle()}
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           </motion.div>
 
           {/* Hero flame visual — center of dialog */}
