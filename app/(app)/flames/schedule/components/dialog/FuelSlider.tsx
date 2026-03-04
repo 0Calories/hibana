@@ -8,6 +8,7 @@ import {
   getFlameColors,
 } from '@/app/(app)/flames/utils/colors';
 import type { Flame } from '@/lib/supabase/rows';
+import { formatTimer, parseBudgetClock } from '@/lib/time';
 import { cn } from '@/lib/utils';
 
 const MAX_MINUTES = 720; // 12 hours
@@ -30,30 +31,6 @@ interface FuelSliderProps {
 
 function snapTo(minutes: number): number {
   return Math.round(minutes / SNAP_INCREMENT) * SNAP_INCREMENT;
-}
-
-function formatTime(totalMinutes: number): string {
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  return `${h}:${String(m).padStart(2, '0')}`;
-}
-
-function parseTime(input: string): number | null {
-  // Accept H:MM or just a number (treated as hours)
-  const colonMatch = input.match(/^(\d{1,2}):(\d{0,2})$/);
-  if (colonMatch) {
-    const h = Number.parseInt(colonMatch[1], 10);
-    const m = Number.parseInt(colonMatch[2] || '0', 10);
-    if (h >= 0 && h <= 12 && m >= 0 && m < 60) {
-      return Math.min(h * 60 + m, MAX_MINUTES);
-    }
-  }
-  // Try as plain number of hours
-  const num = Number.parseFloat(input);
-  if (!Number.isNaN(num) && num >= 0) {
-    return Math.min(Math.round(num * 60), MAX_MINUTES);
-  }
-  return null;
 }
 
 const MIN_ALLOCATION = 15;
@@ -218,12 +195,12 @@ export function FuelSlider({
 
   const handleLabelClick = () => {
     if (disabled) return;
-    setEditText(formatTime(value));
+    setEditText(formatTimer(value, 'minutes'));
     setIsEditing(true);
   };
 
   const commitEdit = () => {
-    const parsed = parseTime(editText);
+    const parsed = parseBudgetClock(editText, MAX_MINUTES);
     if (parsed !== null) {
       onChange(snapTo(parsed));
     }
@@ -361,7 +338,7 @@ export function FuelSlider({
             isOverCapacity ? 'text-destructive' : 'text-muted-foreground',
           )}
         >
-          {formatTime(value)}
+          {formatTimer(value, 'minutes')}
         </button>
       )}
     </div>

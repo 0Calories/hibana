@@ -10,16 +10,16 @@ import {
 } from '@dnd-kit/core';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, FlameIcon, Lock } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { FlameCard } from '@/app/(app)/flames/components/flame-card/FlameCard';
 import { Button } from '@/components/ui/button';
 import type { Flame } from '@/lib/supabase/rows';
+import { formatDuration } from '@/lib/time';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { setDaySchedule } from '../actions';
 import type { DayPlan } from '../queries';
-import { formatMinutes } from '../utils';
 import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './constants';
 import { DayRowFuelBar } from './DayRowFuelBar';
 import { AssignedFlamesZone } from './dialog/AssignedFlamesZone';
@@ -47,6 +47,7 @@ export function DayRow({
   onUpdate,
 }: DayRowProps) {
   const t = useTranslations('schedule');
+  const locale = useLocale();
   const date = parseLocalDate(day.date);
 
   // Locale-aware formatted dates — full on desktop, compact on mobile
@@ -133,16 +134,6 @@ export function DayRow({
       activationConstraint: { delay: 200, tolerance: 5 },
     }),
   );
-
-  const tLabels = { hours: t('hours'), minutes: t('minutes') };
-
-  const formatFuelBrief = (mins: number) => {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h > 0 && m > 0) return `${h}h${m}m`;
-    if (h > 0) return `${h}h`;
-    return `${m}m`;
-  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     setIsDragging(false);
@@ -290,7 +281,7 @@ export function DayRow({
           )}
         >
           {day.fuelBudget != null
-            ? formatFuelBrief(day.fuelBudget)
+            ? formatDuration(day.fuelBudget, locale)
             : t('noBudgetSet')}
         </span>
 
@@ -330,11 +321,11 @@ export function DayRow({
                       (day.flameAllocations[flame.id] ??
                         flame.time_budget_minutes) != null ? (
                         <p className="text-center text-[10px] text-muted-foreground sm:text-xs">
-                          {formatMinutes(
+                          {formatDuration(
                             day.flameAllocations[flame.id] ??
                               flame.time_budget_minutes ??
                               0,
-                            tLabels,
+                            locale,
                           )}
                         </p>
                       ) : undefined
@@ -378,7 +369,7 @@ export function DayRow({
                     <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
                       <Lock className="size-3.5 text-muted-foreground" />
                       <span className="text-sm">
-                        {formatMinutes(day.fuelBudget ?? 0, tLabels)}
+                        {formatDuration(day.fuelBudget ?? 0, locale)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {t('fuelLocked')}
