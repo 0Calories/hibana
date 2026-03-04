@@ -271,14 +271,15 @@ export function CompletionSummaryModal({
       const list = t.raw(key) as string[];
       return list[Math.floor(Math.random() * list.length)];
     };
-    if (targetSeconds <= 0) return pick('subtitlesPartial');
-    const fuelPercent = elapsedSeconds / targetSeconds;
+
+    const fuelPercent = targetSeconds > 0 ? elapsedSeconds / targetSeconds : 0;
+
     if (fuelPercent > OVERBURN_GRACE) return pick('subtitlesOverburn');
     if (fuelPercent >= COMPLETION_THRESHOLD) return pick('subtitlesFull');
     if (fuelPercent >= 0.5) return pick('subtitlesPartial');
+
     return pick('subtitlesMinimal');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetSeconds, elapsedSeconds, t]);
+  }, [elapsedSeconds, targetSeconds, t]);
 
   // Animation sequence state
   const [burstActive, setBurstActive] = useState(false);
