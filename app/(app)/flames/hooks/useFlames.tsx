@@ -18,11 +18,7 @@ import {
   getRemainingFuelBudget,
   setFlameCompletion,
 } from '../actions';
-import {
-  endSession,
-  getAllSessionsForDate,
-  startSession,
-} from '../session-actions';
+import { getAllSessionsForDate, toggleSession } from '../session-actions';
 import type { FlameState } from '../utils/types';
 
 // ─── Types ───────────────────────────────────────────────────────────
@@ -311,7 +307,7 @@ function useFlamesEngine(
     // End session on server (no clientDuration — server computes)
     const depletedFlameId = activeFlameId;
     (async () => {
-      await endSession(depletedFlameId, date);
+      await retryAction(() => toggleSession(depletedFlameId, date, 'pause'));
       const [sessResult, fuelResult] = await Promise.all([
         getAllSessionsForDate(date),
         getRemainingFuelBudget(date),
@@ -363,7 +359,7 @@ function useFlamesEngine(
             setTickNow(Date.now());
 
             const started = await retryAction(() =>
-              startSession(flameId, date),
+              toggleSession(flameId, date, 'start'),
             );
             if (!started) {
               timerMapRef.current.set(flameId, {
@@ -394,7 +390,7 @@ function useFlamesEngine(
             setTickNow(Date.now());
 
             const persisted = await retryAction(() =>
-              endSession(flameId, date, finalElapsed),
+              toggleSession(flameId, date, 'pause', finalElapsed),
             );
             if (!persisted) {
               toast.error(t('pauseError'), { position: 'top-center' });
@@ -413,7 +409,7 @@ function useFlamesEngine(
             setTickNow(Date.now());
 
             const resumed = await retryAction(() =>
-              startSession(flameId, date),
+              toggleSession(flameId, date, 'start'),
             );
             if (!resumed) {
               timerMapRef.current.set(flameId, {
@@ -431,8 +427,6 @@ function useFlamesEngine(
           default:
             break;
         }
-
-        await refreshFromServer();
       } catch (error) {
         console.error('Failed to toggle flame timer:', error);
       } finally {
@@ -443,7 +437,7 @@ function useFlamesEngine(
         }
       }
     },
-    [date, t, refreshFromServer],
+    [date, t],
   );
 
   const beginCompletion = useCallback(
