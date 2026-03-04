@@ -266,20 +266,20 @@ export function CompletionSummaryModal({
   const { triggerFlyover } = useSparkFlyover();
 
   // Pick a contextual subtitle based on fuel percentage
-  const getSubtitle = () => {
+  const getSubtitle = useCallback(() => {
     const pick = (key: string) => {
       const list = t.raw(key) as string[];
       return list[Math.floor(Math.random() * list.length)];
     };
 
-    const fuelPercent = elapsedSeconds / targetSeconds;
+    const fuelPercent = targetSeconds > 0 ? elapsedSeconds / targetSeconds : 0;
 
     if (fuelPercent > OVERBURN_GRACE) return pick('subtitlesOverburn');
     if (fuelPercent >= COMPLETION_THRESHOLD) return pick('subtitlesFull');
     if (fuelPercent >= 0.5) return pick('subtitlesPartial');
 
     return pick('subtitlesMinimal');
-  };
+  }, [elapsedSeconds, targetSeconds, t]);
 
   // Animation sequence state
   const [burstActive, setBurstActive] = useState(false);
