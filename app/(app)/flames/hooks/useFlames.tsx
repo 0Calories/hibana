@@ -307,7 +307,7 @@ function useFlamesEngine(
     // End session on server (no clientDuration — server computes)
     const depletedFlameId = activeFlameId;
     (async () => {
-      await toggleSession(depletedFlameId, date, 'pause');
+      await retryAction(() => toggleSession(depletedFlameId, date, 'pause'));
       const [sessResult, fuelResult] = await Promise.all([
         getAllSessionsForDate(date),
         getRemainingFuelBudget(date),
