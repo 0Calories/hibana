@@ -61,10 +61,10 @@ export function FuelSlider({
     (sum, f) => sum + getAllocation(f),
     0,
   );
+
   const isOverCapacity = allocatedMinutes > value;
 
   // Build colored segments for the gauge from assigned flames
-
   const segments = useMemo(() => {
     type FuelSegment = {
       flameId: string;
@@ -80,7 +80,8 @@ export function FuelSlider({
 
     const result = assignedFlames.reduce(
       (acc: { segments: FuelSegment[]; cursor: number }, flame) => {
-        const budget = getAllocation(flame);
+        const budget =
+          allocations?.[flame.id] ?? flame.time_budget_minutes ?? 0;
         if (budget <= 0) {
           return acc;
         }
@@ -103,7 +104,6 @@ export function FuelSlider({
     );
 
     return result.segments;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assignedFlames, allocations]);
 
   const renderRemainderSegment = () => {
@@ -281,6 +281,7 @@ export function FuelSlider({
                     e,
                     seg.flameId,
                     getAllocation(
+                      // biome-ignore lint/style/noNonNullAssertion: Flame for selected segment will always exist
                       assignedFlames.find((f) => f.id === seg.flameId)!,
                     ),
                   )

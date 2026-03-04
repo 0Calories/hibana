@@ -2,7 +2,7 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import { Pencil } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { useRef, useState } from 'react';
 import { FlameCard } from '@/app/(app)/flames/components/flame-card/FlameCard';
 import type { Flame } from '@/lib/supabase/rows';
@@ -28,7 +28,6 @@ export function DraggableFlameCard({
   allocatedMinutes,
   onAllocationChange,
 }: DraggableFlameCardProps) {
-  const t = useTranslations('schedule');
   const locale = useLocale();
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
