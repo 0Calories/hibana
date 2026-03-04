@@ -58,7 +58,13 @@ export async function toggleSession(
       user_id: user.id,
     });
 
-    if (error) return { success: false, error };
+    // Unique constraint violation (23505) = concurrent insert race — treat as no-op
+    if (error) {
+      if (error.code === '23505') {
+        return { success: true, data: 'Session already exists (concurrent)' };
+      }
+      return { success: false, error };
+    }
     return { success: true, data: 'Session started' };
   }
 
