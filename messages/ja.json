@@ -52,6 +52,7 @@
     "habits": "Habits",
     "tasks": "Tasks",
     "schedule": "スケジュール",
+    "shop": "ショップ",
     "signUp": "Sign Up",
     "logIn": "Log In"
   },
@@ -284,5 +285,30 @@
       "tagline": "やる気に火をつけろ",
       "copyright": "© {year} Hibana. All rights reserved."
     }
+  },
+  "shop": {
+    "pageTitle": "ショップ",
+    "catalog": "カタログ",
+    "inventory": "インベントリ",
+    "balance": "残高",
+    "buy": "購入",
+    "cost": "価格",
+    "balanceCurrent": "現在の残高",
+    "balanceAfter": "購入後の残高",
+    "owned": "所持",
+    "quantity": "x{count}",
+    "insufficientSparks": "スパーク不足",
+    "purchaseTitle": "{name}を購入",
+    "purchaseDescription": "{name}を購入しますか？",
+    "purchaseConfirm": "購入を確定",
+    "purchasing": "購入中...",
+    "purchaseSuccess": "購入しました！",
+    "purchaseError": "購入に失敗しました。もう一度お試しください。",
+    "emptyShop": "まだアイテムがありません。",
+    "emptyInventory": "まだアイテムを所持していません。",
+    "equipped": "装備中",
+    "equip": "装備",
+    "unequip": "解除",
+    "equipError": "アイテムの更新に失敗しました。もう一度お試しください。"
   }
 }

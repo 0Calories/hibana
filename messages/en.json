@@ -52,6 +52,7 @@
     "habits": "Habits",
     "tasks": "Tasks",
     "schedule": "Schedule",
+    "shop": "Shop",
     "signUp": "Sign Up",
     "logIn": "Log In"
   },
@@ -284,5 +285,30 @@
       "tagline": "Set your motivation ablaze",
       "copyright": "© {year} Hibana. All rights reserved."
     }
+  },
+  "shop": {
+    "pageTitle": "Shop",
+    "catalog": "Catalog",
+    "inventory": "Inventory",
+    "balance": "Balance",
+    "buy": "Buy",
+    "cost": "Cost",
+    "balanceCurrent": "Current balance",
+    "balanceAfter": "After purchase",
+    "owned": "Owned",
+    "quantity": "x{count}",
+    "insufficientSparks": "Not enough sparks",
+    "purchaseTitle": "Buy {name}",
+    "purchaseDescription": "Are you sure you want to purchase {name}?",
+    "purchaseConfirm": "Confirm Purchase",
+    "purchasing": "Purchasing...",
+    "purchaseSuccess": "Purchase successful!",
+    "purchaseError": "Purchase failed. Please try again.",
+    "emptyShop": "No items available yet.",
+    "emptyInventory": "You don't own any items yet.",
+    "equipped": "Equipped",
+    "equip": "Equip",
+    "unequip": "Unequip",
+    "equipError": "Failed to update item. Please try again."
   }
 }

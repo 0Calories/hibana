@@ -1,0 +1,116 @@
+'use client';
+
+import { SparklesIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import type { InventoryItemWithDetails, ShopPageData } from '../actions';
+import { InventoryList } from './InventoryList';
+import { ItemCard } from './ItemCard';
+
+type Tab = 'catalog' | 'inventory';
+
+export function ShopContent({ data }: { data: ShopPageData }) {
+  const t = useTranslations('shop');
+  const [tab, setTab] = useState<Tab>('catalog');
+  const [balance, setBalance] = useState(data.balance);
+  const [inventory, setInventory] = useState<InventoryItemWithDetails[]>(
+    data.inventory,
+  );
+
+  const handlePurchase = (itemId: string, cost: number) => {
+    setBalance((b) => b - cost);
+
+    // Optimistically update inventory
+    const existing = inventory.find((inv) => inv.item_id === itemId);
+    if (existing) {
+      setInventory((prev) =>
+        prev.map((inv) =>
+          inv.item_id === itemId ? { ...inv, quantity: inv.quantity + 1 } : inv,
+        ),
+      );
+    } else {
+      const item = data.items.find((i) => i.id === itemId);
+      if (item) {
+        setInventory((prev) => [
+          {
+            id: crypto.randomUUID(),
+            user_id: '',
+            item_id: itemId,
+            quantity: 1,
+            is_equipped: false,
+            acquired_at: new Date().toISOString(),
+            items: item,
+          },
+          ...prev,
+        ]);
+      }
+    }
+  };
+
+  const getOwnedQuantity = (itemId: string) => {
+    return inventory.find((inv) => inv.item_id === itemId)?.quantity ?? 0;
+  };
+
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-6">
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t('pageTitle')}</h1>
+        <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-semibold">
+          <SparklesIcon className="size-4 text-amber-500" />
+          <span>{balance}</span>
+        </div>
+      </div>
+
+      <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1">
+        <button
+          type="button"
+          onClick={() => setTab('catalog')}
+          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            tab === 'catalog'
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {t('catalog')}
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('inventory')}
+          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+            tab === 'inventory'
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {t('inventory')}
+        </button>
+      </div>
+
+      {tab === 'catalog' ? (
+        data.items.length === 0 ? (
+          <p className="py-12 text-center text-muted-foreground">
+            {t('emptyShop')}
+          </p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {data.items.map((item) => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                balance={balance}
+                ownedQuantity={getOwnedQuantity(item.id)}
+                onPurchase={handlePurchase}
+              />
+            ))}
+          </div>
+        )
+      ) : inventory.length === 0 ? (
+        <p className="py-12 text-center text-muted-foreground">
+          {t('emptyInventory')}
+        </p>
+      ) : (
+        <InventoryList inventory={inventory} setInventory={setInventory} />
+      )}
+    </div>
+  );
+}
