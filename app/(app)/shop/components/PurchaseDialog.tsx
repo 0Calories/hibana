@@ -67,7 +67,7 @@ export function PurchaseDialog({
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t('cost')}</span>
                   <span className="flex items-center gap-1 font-semibold text-foreground">
-                    <SparklesIcon className="size-3.5 text-amber-500" />
+                    <SparklesIcon className="size-3.5 text-primary" />
                     {item.cost_sparks}
                   </span>
                 </div>
@@ -76,7 +76,7 @@ export function PurchaseDialog({
                     {t('balanceCurrent')}
                   </span>
                   <span className="flex items-center gap-1 font-semibold text-foreground">
-                    <SparklesIcon className="size-3.5 text-amber-500" />
+                    <SparklesIcon className="size-3.5 text-primary" />
                     {balance}
                   </span>
                 </div>
@@ -86,7 +86,7 @@ export function PurchaseDialog({
                       {t('balanceAfter')}
                     </span>
                     <span className="flex items-center gap-1 font-semibold text-foreground">
-                      <SparklesIcon className="size-3.5 text-amber-500" />
+                      <SparklesIcon className="size-3.5 text-primary" />
                       {balanceAfter}
                     </span>
                   </div>

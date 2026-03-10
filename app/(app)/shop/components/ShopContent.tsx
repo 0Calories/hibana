@@ -1,6 +1,5 @@
 'use client';
 
-import { SparklesIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import type { InventoryItemWithDetails, ShopPageData } from '../actions';
@@ -52,38 +51,34 @@ export function ShopContent({ data }: { data: ShopPageData }) {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6">
+    <div className="mx-auto max-w-3xl px-4 py-6">
+      {/* Header — title left, tabs right */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('pageTitle')}</h1>
-        <div className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-semibold">
-          <SparklesIcon className="size-4 text-amber-500" />
-          <span>{balance}</span>
+        <h1 className="text-xl font-bold sm:text-2xl">{t('pageTitle')}</h1>
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
+          <button
+            type="button"
+            onClick={() => setTab('catalog')}
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors sm:text-sm ${
+              tab === 'catalog'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {t('catalog')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('inventory')}
+            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors sm:text-sm ${
+              tab === 'inventory'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {t('inventory')}
+          </button>
         </div>
-      </div>
-
-      <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1">
-        <button
-          type="button"
-          onClick={() => setTab('catalog')}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-            tab === 'catalog'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          {t('catalog')}
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('inventory')}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-            tab === 'inventory'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          {t('inventory')}
-        </button>
       </div>
 
       {tab === 'catalog' ? (
@@ -92,7 +87,7 @@ export function ShopContent({ data }: { data: ShopPageData }) {
             {t('emptyShop')}
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.items.map((item) => (
               <ItemCard
                 key={item.id}
