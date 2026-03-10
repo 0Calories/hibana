@@ -26,29 +26,29 @@ export function ItemCard({
 
   return (
     <>
-      <div className="relative flex flex-col overflow-hidden rounded-xl border border-border bg-card text-foreground transition-colors hover:border-primary/50">
+      <div className="relative flex w-40 flex-col overflow-hidden rounded-xl border border-border bg-card text-foreground transition-colors hover:border-primary/50 sm:w-48 md:w-56">
         {/* Header — Name + type */}
-        <div className="px-3 pt-3">
-          <h3 className="truncate text-center text-sm font-semibold leading-tight">
+        <div className="px-2 pt-2 sm:px-3 sm:pt-3">
+          <h3 className="truncate text-center text-xs font-semibold leading-tight sm:text-sm md:text-base">
             {item.name}
           </h3>
-          <div className="text-center text-[10px] font-medium text-muted-foreground">
+          <div className="text-center text-[10px] font-medium text-muted-foreground sm:text-xs">
             {item.type}
           </div>
         </div>
 
         {/* Visual area */}
-        <div className="flex h-32 items-center justify-center sm:h-44">
-          <div className="h-24 w-24 sm:h-32 sm:w-32">
+        <div className="flex h-24 items-center justify-center sm:h-32 md:h-40">
+          <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32">
             <ItemVisual itemName={item.name} />
           </div>
         </div>
 
         {/* Footer — Price + buy */}
-        <div className="flex items-center justify-between bg-muted px-3 py-2.5">
+        <div className="flex items-center justify-between bg-muted px-2 py-2 sm:px-3 sm:py-3">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-full bg-background px-2 py-0.5 text-xs font-semibold">
-              <SparklesIcon className="size-3 text-primary" />
+            <div className="flex items-center gap-1 rounded-full bg-background px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:text-xs">
+              <SparklesIcon className="size-2.5 text-primary sm:size-3" />
               <span>{item.cost_sparks}</span>
             </div>
             {ownedQuantity > 0 && (
@@ -61,7 +61,7 @@ export function ItemCard({
             type="button"
             disabled={!canAfford}
             onClick={() => setDialogOpen(true)}
-            className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3 sm:text-xs"
           >
             {canAfford ? t('buy') : t('insufficientSparks')}
           </button>

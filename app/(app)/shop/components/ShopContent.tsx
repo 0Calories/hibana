@@ -51,9 +51,9 @@ export function ShopContent({ data }: { data: ShopPageData }) {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <div className="size-full p-4 pb-24">
       {/* Header — title left, tabs right */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-bold sm:text-2xl">{t('pageTitle')}</h1>
         <div className="flex gap-1 rounded-lg bg-muted p-1">
           <button
@@ -87,7 +87,7 @@ export function ShopContent({ data }: { data: ShopPageData }) {
             {t('emptyShop')}
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto grid w-fit grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
             {data.items.map((item) => (
               <ItemCard
                 key={item.id}

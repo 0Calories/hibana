@@ -20,7 +20,7 @@ export function InventoryList({ inventory, setInventory }: InventoryListProps) {
   };
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="mx-auto grid w-fit grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
       {inventory.map((inv) => (
         <InventoryItem
           key={inv.id}
