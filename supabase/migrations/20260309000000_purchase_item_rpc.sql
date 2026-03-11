@@ -1,10 +1,12 @@
 -- RPC: purchase_item
 -- Atomically deducts sparks and adds the item to the user's inventory.
 -- Returns the cost on success, 0 on failure (insufficient balance, invalid item, etc.)
+-- p_request_id provides idempotency — duplicate calls with the same ID are no-ops.
 
 create or replace function public.purchase_item(
   p_user_id uuid,
-  p_item_id uuid
+  p_item_id uuid,
+  p_request_id uuid
 )
 returns integer
 language plpgsql
@@ -14,16 +16,18 @@ as $$
 declare
   v_cost integer;
   v_balance integer;
+  v_inserted boolean;
 begin
   -- Guard: caller must be the target user
   if auth.uid() is null or auth.uid() <> p_user_id then
     return 0;
   end if;
 
-  -- Guard: item must exist and be active
+  -- Guard: item must exist, be active, and have a valid cost
   select cost_sparks into v_cost
   from public.items
-  where id = p_item_id and is_active = true;
+  where id = p_item_id and is_active = true
+  for share;
 
   if not found or v_cost <= 0 then
     return 0;
@@ -44,15 +48,22 @@ begin
     return 0;
   end if;
 
+  -- Record transaction (idempotent via unique constraint on reference_id + reason)
+  insert into public.spark_transactions (user_id, amount, reason, reference_id)
+  values (p_user_id, -v_cost, 'purchase', p_request_id)
+  on conflict (reference_id, reason) do nothing;
+
+  -- If the row already existed, this is a duplicate request — abort
+  get diagnostics v_inserted = row_count;
+  if v_inserted = 0 then
+    return 0;
+  end if;
+
   -- Decrement balance
   update public.user_state
   set sparks_balance = sparks_balance - v_cost,
       updated_at = now()
   where user_id = p_user_id;
-
-  -- Record transaction (reference_id = NULL so unique constraint allows multiple purchases)
-  insert into public.spark_transactions (user_id, amount, reason, reference_id)
-  values (p_user_id, -v_cost, 'purchase', null);
 
   -- Upsert inventory
   insert into public.user_inventory (user_id, item_id, quantity)
