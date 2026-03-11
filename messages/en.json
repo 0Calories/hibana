@@ -309,6 +309,8 @@
     "equipped": "Equipped",
     "equip": "Equip",
     "unequip": "Unequip",
-    "equipError": "Failed to update item. Please try again."
+    "equipError": "Failed to update item. Please try again.",
+    "buyFor": "Buy for",
+    "back": "Back"
   }
 }
