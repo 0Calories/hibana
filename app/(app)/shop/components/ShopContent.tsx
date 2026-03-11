@@ -3,14 +3,10 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import type { InventoryItemWithDetails, ShopPageData } from '../actions';
-import { InventoryList } from './InventoryList';
 import { ItemCard } from './ItemCard';
-
-type Tab = 'catalog' | 'inventory';
 
 export function ShopContent({ data }: { data: ShopPageData }) {
   const t = useTranslations('shop');
-  const [tab, setTab] = useState<Tab>('catalog');
   const [balance, setBalance] = useState(data.balance);
   const [inventory, setInventory] = useState<InventoryItemWithDetails[]>(
     data.inventory,
@@ -52,59 +48,22 @@ export function ShopContent({ data }: { data: ShopPageData }) {
 
   return (
     <div className="size-full p-4 pb-24">
-      {/* Header — title left, tabs right */}
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold sm:text-2xl">{t('pageTitle')}</h1>
-        <div className="flex gap-1 rounded-lg bg-muted p-1">
-          <button
-            type="button"
-            onClick={() => setTab('catalog')}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors sm:text-sm ${
-              tab === 'catalog'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {t('catalog')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('inventory')}
-            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors sm:text-sm ${
-              tab === 'inventory'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {t('inventory')}
-          </button>
-        </div>
-      </div>
-
-      {tab === 'catalog' ? (
-        data.items.length === 0 ? (
-          <p className="py-12 text-center text-muted-foreground">
-            {t('emptyShop')}
-          </p>
-        ) : (
-          <div className="mx-auto grid w-fit grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {data.items.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                balance={balance}
-                ownedQuantity={getOwnedQuantity(item.id)}
-                onPurchase={handlePurchase}
-              />
-            ))}
-          </div>
-        )
-      ) : inventory.length === 0 ? (
+      {data.items.length === 0 ? (
         <p className="py-12 text-center text-muted-foreground">
-          {t('emptyInventory')}
+          {t('emptyShop')}
         </p>
       ) : (
-        <InventoryList inventory={inventory} setInventory={setInventory} />
+        <div className="mx-auto grid w-fit grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {data.items.map((item) => (
+            <ItemCard
+              key={item.id}
+              item={item}
+              balance={balance}
+              ownedQuantity={getOwnedQuantity(item.id)}
+              onPurchase={handlePurchase}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
