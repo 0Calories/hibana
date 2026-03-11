@@ -1,11 +1,11 @@
 /**
- * Sticky Note Pack SVG — 3D stack of 5 colorful post-it pads.
+ * Sticky Note Pack SVG — 3D stack of 4 colorful post-it pads.
  * Right face + top face show pad edges using flame colors.
  * ClipPath rounds outer silhouette. Inner pad corners are sharp
  * so each layer connects flush — the pad behind fills the visual gap.
  *
- * Geometry: front face (18,25) 50×50, depth dx=+15 dy=-10.
- * Each pad strip: dx=3 dy=2. Pads front→back: teal→indigo→fuchsia→rose→orange.
+ * Geometry: front face (18,25) 50×50, depth dx=+12 dy=-8 (4 layers).
+ * Each pad strip: dx=3 dy=2. Pads front→back: teal→indigo→fuchsia→rose.
  */
 import { motion, useReducedMotion } from 'framer-motion';
 
@@ -31,23 +31,21 @@ export function StickyNotePack({ className }: { className?: string }) {
     >
       <defs>
         <clipPath id="snp-clip">
-          <path d="M21 75 L65 75 Q68 75 70.5 73.3 L80.5 66.7 Q83 65 83 62 L83 18 Q83 15 80 15 L36 15 Q33 15 30.5 16.7 L20.5 23.3 Q18 25 18 28 L18 72 Q18 75 21 75 Z" />
+          <path d="M21 75 L65 75 Q68 75 70.5 73.3 L77.5 68.7 Q80 67 80 64 L80 20 Q80 17 77 17 L33 17 Q30 17 27.5 18.7 L20.5 23.3 Q18 25 18 28 L18 72 Q18 75 21 75 Z" />
         </clipPath>
       </defs>
 
       <g clipPath="url(#snp-clip)">
-        {/* Right face — 5 vertical strips, back→front (dark shades)
-             Each strip extends 0.5px past its left edge to prevent anti-aliasing seams */}
-        <path d="M80 17 L83 15 L83 65.5 L80 67.5 Z" fill="#ea580c" />
-        <path d="M77 19 L80 17 L80 67.5 L77 69.5 Z" fill="#e11d48" />
+        {/* Right face — 4 vertical strips, back→front (dark shades)
+             Each strip extends 0.5px past its bottom edge to prevent anti-aliasing seams */}
+        <path d="M77 19 L80 17 L80 67.5 L77 69.5 Z" fill="#ea580c" />
         <path d="M74 21 L77 19 L77 69.5 L74 71.5 Z" fill="#c026d3" />
         <path d="M71 23 L74 21 L74 71.5 L71 73.5 Z" fill="#4f46e5" />
         <path d="M68 25 L71 23 L71 73.5 L68 75.5 Z" fill="#0d9488" />
 
-        {/* Top face — 5 horizontal strips, back→front (light shades)
+        {/* Top face — 4 horizontal strips, back→front (light shades)
              Each strip extends 0.5px past its bottom edge to prevent anti-aliasing seams */}
-        <path d="M29.25 17.5 L79.25 17.5 L83 15 L33 15 Z" fill="#fdba74" />
-        <path d="M26.25 19.5 L76.25 19.5 L80 17 L30 17 Z" fill="#fda4af" />
+        <path d="M26.25 19.5 L76.25 19.5 L80 17 L30 17 Z" fill="#fdba74" />
         <path d="M23.25 21.5 L73.25 21.5 L77 19 L27 19 Z" fill="#f0abfc" />
         <path d="M20.25 23.5 L70.25 23.5 L74 21 L24 21 Z" fill="#a5b4fc" />
         <path d="M17.25 25.5 L67.25 25.5 L71 23 L21 23 Z" fill="#5eead4" />
@@ -78,7 +76,7 @@ export function StickyNotePack({ className }: { className?: string }) {
         {/* Packaging band — front face */}
         <rect x={18} y={44} width={50} height={12} fill="#f0fdf9" />
         {/* Packaging band — right face */}
-        <path d="M68 44 L83 34 L83 46 L68 56 Z" fill="#d1e8e4" />
+        <path d="M68 44 L80 36 L80 48 L68 56 Z" fill="#d1e8e4" />
 
         {/* Hibana logo on band */}
         <g transform="translate(38 45) scale(0.0143)" opacity={0.9}>
