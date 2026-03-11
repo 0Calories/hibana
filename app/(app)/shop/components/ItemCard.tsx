@@ -4,7 +4,7 @@ import { SparklesIcon } from 'lucide-react';
 import { useState } from 'react';
 import type { Item } from '@/lib/supabase/rows';
 import { ItemDetailDialog } from './ItemDetailDialog';
-import { ItemVisual } from './ItemVisual';
+import { ItemRenderer } from './ItemRenderer';
 
 interface ItemCardProps {
   item: Item;
@@ -35,8 +35,8 @@ export function ItemCard({
               {item.name}
             </h3>
             <div className="flex shrink-0 items-center gap-0.5">
-              <SparklesIcon className="size-2.5 text-primary sm:size-3" />
-              <span className="text-[10px] font-semibold text-foreground sm:text-xs">
+              <SparklesIcon className="size-3 text-primary sm:size-3.5" />
+              <span className="text-xs font-semibold text-foreground sm:text-sm">
                 {item.cost_sparks}
               </span>
             </div>
@@ -46,7 +46,7 @@ export function ItemCard({
         {/* Visual area */}
         <div className="flex min-h-28 flex-1 items-center justify-center px-2 pb-2 sm:min-h-0 sm:px-3 sm:pb-3">
           <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32">
-            <ItemVisual itemName={item.name} />
+            <ItemRenderer itemName={item.name} />
           </div>
         </div>
       </button>

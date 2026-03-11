@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/tooltip';
 import type { Item } from '@/lib/supabase/rows';
 import { purchaseItem } from '../actions';
-import { ItemVisual } from './ItemVisual';
+import { ItemRenderer } from './ItemRenderer';
 
 interface ItemDetailDialogProps {
   item: Item;
@@ -90,7 +90,7 @@ export function ItemDetailDialog({
             {/* Visual */}
             <div className="flex justify-center py-2">
               <div className="h-32 w-32 sm:h-40 sm:w-40">
-                <ItemVisual itemName={item.name} />
+                <ItemRenderer itemName={item.name} />
               </div>
             </div>
 

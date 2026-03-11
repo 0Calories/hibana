@@ -47,7 +47,7 @@ export function ShopContent({ data }: { data: ShopPageData }) {
   };
 
   return (
-    <div className="size-full p-4 pb-24">
+    <div className="size-full p-4 pt-8 pb-24">
       {data.items.length === 0 ? (
         <p className="py-12 text-center text-muted-foreground">
           {t('emptyShop')}

@@ -7,14 +7,27 @@
  * Geometry: front face (18,25) 50×50, depth dx=+15 dy=-10.
  * Each pad strip: dx=3 dy=2. Pads front→back: teal→indigo→fuchsia→rose→orange.
  */
+import { motion, useReducedMotion } from 'framer-motion';
+
 export function StickyNotePack({ className }: { className?: string }) {
+  const shouldReduceMotion = useReducedMotion();
+  const Wrapper = shouldReduceMotion ? 'svg' : motion.svg;
+
   return (
-    <svg
+    <Wrapper
       viewBox="0 0 100 100"
       role="img"
       aria-label="Sticky Note Pack"
       className={className}
       xmlns="http://www.w3.org/2000/svg"
+      {...(!shouldReduceMotion && {
+        animate: { y: [4, -2, 4] },
+        transition: {
+          duration: 3,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'easeInOut',
+        },
+      })}
     >
       <defs>
         <clipPath id="snp-clip">
@@ -23,19 +36,21 @@ export function StickyNotePack({ className }: { className?: string }) {
       </defs>
 
       <g clipPath="url(#snp-clip)">
-        {/* Right face — 5 vertical strips, back→front (dark shades) */}
-        <path d="M80 17 L83 15 L83 65 L80 67 Z" fill="#ea580c" />
-        <path d="M77 19 L80 17 L80 67 L77 69 Z" fill="#e11d48" />
-        <path d="M74 21 L77 19 L77 69 L74 71 Z" fill="#c026d3" />
-        <path d="M71 23 L74 21 L74 71 L71 73 Z" fill="#4f46e5" />
-        <path d="M68 25 L71 23 L71 73 L68 75 Z" fill="#0d9488" />
+        {/* Right face — 5 vertical strips, back→front (dark shades)
+             Each strip extends 0.5px past its left edge to prevent anti-aliasing seams */}
+        <path d="M80 17 L83 15 L83 65.5 L80 67.5 Z" fill="#ea580c" />
+        <path d="M77 19 L80 17 L80 67.5 L77 69.5 Z" fill="#e11d48" />
+        <path d="M74 21 L77 19 L77 69.5 L74 71.5 Z" fill="#c026d3" />
+        <path d="M71 23 L74 21 L74 71.5 L71 73.5 Z" fill="#4f46e5" />
+        <path d="M68 25 L71 23 L71 73.5 L68 75.5 Z" fill="#0d9488" />
 
-        {/* Top face — 5 horizontal strips, back→front (light shades) */}
-        <path d="M30 17 L80 17 L83 15 L33 15 Z" fill="#fdba74" />
-        <path d="M27 19 L77 19 L80 17 L30 17 Z" fill="#fda4af" />
-        <path d="M24 21 L74 21 L77 19 L27 19 Z" fill="#f0abfc" />
-        <path d="M21 23 L71 23 L74 21 L24 21 Z" fill="#a5b4fc" />
-        <path d="M18 25 L68 25 L71 23 L21 23 Z" fill="#5eead4" />
+        {/* Top face — 5 horizontal strips, back→front (light shades)
+             Each strip extends 0.5px past its bottom edge to prevent anti-aliasing seams */}
+        <path d="M29.25 17.5 L79.25 17.5 L83 15 L33 15 Z" fill="#fdba74" />
+        <path d="M26.25 19.5 L76.25 19.5 L80 17 L30 17 Z" fill="#fda4af" />
+        <path d="M23.25 21.5 L73.25 21.5 L77 19 L27 19 Z" fill="#f0abfc" />
+        <path d="M20.25 23.5 L70.25 23.5 L74 21 L24 21 Z" fill="#a5b4fc" />
+        <path d="M17.25 25.5 L67.25 25.5 L71 23 L21 23 Z" fill="#5eead4" />
 
         {/* Front face — top pad surface (light shade for paper feel) */}
         <rect x={18} y={25} width={50} height={50} fill="#5eead4" />
@@ -91,6 +106,6 @@ export function StickyNotePack({ className }: { className?: string }) {
           </g>
         </g>
       </g>
-    </svg>
+    </Wrapper>
   );
 }

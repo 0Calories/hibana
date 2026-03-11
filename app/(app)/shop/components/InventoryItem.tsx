@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import type { InventoryItemWithDetails } from '../actions';
 import { toggleEquipItem } from '../actions';
-import { ItemVisual } from './ItemVisual';
+import { ItemRenderer } from './ItemRenderer';
 
 interface InventoryItemProps {
   inventoryItem: InventoryItemWithDetails;
@@ -34,7 +34,7 @@ export function InventoryItem({
       {/* Visual area */}
       <div className="flex h-24 items-center justify-center sm:h-32 md:h-40">
         <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32">
-          <ItemVisual itemName={inv.items.name} />
+          <ItemRenderer itemName={inv.items.name} />
         </div>
       </div>
 
