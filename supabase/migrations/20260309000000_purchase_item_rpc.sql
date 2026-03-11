@@ -25,7 +25,7 @@ begin
   from public.items
   where id = p_item_id and is_active = true;
 
-  if not found then
+  if not found or v_cost <= 0 then
     return 0;
   end if;
 
