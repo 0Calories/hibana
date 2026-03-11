@@ -44,7 +44,7 @@ export function ItemCard({
         </div>
 
         {/* Visual area */}
-        <div className="flex flex-1 items-center justify-center px-2 pb-2 sm:px-3 sm:pb-3">
+        <div className="flex min-h-28 flex-1 items-center justify-center px-2 pb-2 sm:min-h-0 sm:px-3 sm:pb-3">
           <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32">
             <ItemVisual itemName={item.name} />
           </div>
