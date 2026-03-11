@@ -16,7 +16,7 @@ as $$
 declare
   v_cost integer;
   v_balance integer;
-  v_inserted boolean;
+  v_inserted integer;
 begin
   -- Guard: caller must be the target user
   if auth.uid() is null or auth.uid() <> p_user_id then
