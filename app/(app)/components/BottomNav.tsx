@@ -1,6 +1,6 @@
 'use client';
 
-import { Flame, LayoutList, LucideHome, Sparkles } from 'lucide-react';
+import { Flame, LayoutDashboard, LayoutList, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -10,7 +10,7 @@ export function BottomNav() {
   const t = useTranslations('navigation');
 
   const navItems = [
-    { icon: <LucideHome />, label: t('home'), href: '/dashboard' },
+    { icon: <LayoutDashboard />, label: t('home'), href: '/dashboard' },
     {
       icon: <Flame />,
       label: t('flames'),
