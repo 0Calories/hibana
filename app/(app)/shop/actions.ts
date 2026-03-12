@@ -12,6 +12,7 @@ import {
   createServiceClient,
 } from '@/lib/supabase/server';
 import type { ActionResult } from '@/lib/types';
+import { parseLocalDate } from '@/lib/utils';
 
 /**
  * Returns the user's state row, lazy-creating one if it doesn't exist yet.
@@ -81,18 +82,28 @@ export async function creditCompletionReward(
 ): ActionResult<{ sparks: number }> {
   const { supabase, user } = await createClientWithAuth();
 
-  // Fetch the completed session for this flame+date, joined with flame budget
-  const { data: session, error: sessionError } = await supabase
-    .from('flame_sessions')
-    .select('id, duration_seconds, is_completed, flames(time_budget_minutes)')
-    .eq('flame_id', flameId)
-    .eq('date', date)
-    .maybeSingle();
+  // Fetch the completed session and the schedule-based budget for this day
+  const dayOfWeek = parseLocalDate(date).getDay();
+  const [sessionResult, scheduleResult] = await Promise.all([
+    supabase
+      .from('flame_sessions')
+      .select('id, duration_seconds, is_completed')
+      .eq('flame_id', flameId)
+      .eq('date', date)
+      .maybeSingle(),
+    supabase
+      .from('flame_schedules')
+      .select('flame_ids, flame_minutes')
+      .eq('user_id', user.id)
+      .eq('day_of_week', dayOfWeek)
+      .maybeSingle(),
+  ]);
 
-  if (sessionError) {
-    return { success: false, error: sessionError };
+  if (sessionResult.error) {
+    return { success: false, error: sessionResult.error };
   }
 
+  const session = sessionResult.data;
   if (!session || !session.is_completed) {
     return {
       success: false,
@@ -100,13 +111,16 @@ export async function creditCompletionReward(
     };
   }
 
+  // Resolve the flame's budget from the schedule (same logic as getFlamesForDay)
+  const schedule = scheduleResult.data;
+  const flameIndex = schedule?.flame_ids?.indexOf(flameId) ?? -1;
+  const scheduledMinutes =
+    flameIndex >= 0 ? (schedule?.flame_minutes?.[flameIndex] ?? 0) : 0;
+
   // Compute sparks (level hardcoded to 1 until flame leveling ships)
   const level = 1;
   const elapsedSeconds = session.duration_seconds;
-  const flame = session.flames as unknown as {
-    time_budget_minutes: number | null;
-  };
-  const targetSeconds = (flame?.time_budget_minutes ?? 0) * 60;
+  const targetSeconds = scheduledMinutes * 60;
   const sparks = calculateSparks(elapsedSeconds, targetSeconds, level);
 
   if (sparks <= 0) {
