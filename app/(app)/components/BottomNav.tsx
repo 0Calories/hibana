@@ -33,7 +33,7 @@ export function BottomNav() {
                     layoutId={
                       shouldReduceMotion ? undefined : 'bottomnav-active'
                     }
-                    className="absolute inset-x-3 inset-y-1.5 rounded-xl bg-muted/20"
+                    className="absolute inset-x-3 inset-y-1.5 rounded-xl"
                     transition={{
                       type: 'spring',
                       stiffness: 500,
