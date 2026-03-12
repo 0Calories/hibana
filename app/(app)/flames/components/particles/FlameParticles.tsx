@@ -219,7 +219,7 @@ export function FlameParticles({
 
   return (
     <ParticleField
-      key={`${key}-${state}`}
+      key={`${key}-${state}-${conditions.overburning}`}
       particles={particles}
       active={active}
       className="pointer-events-none absolute inset-0 scale-75 md:scale-100"

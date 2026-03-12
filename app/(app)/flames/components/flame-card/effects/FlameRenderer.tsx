@@ -141,6 +141,7 @@ export function FlameRenderer({
       >
         {Base && <Base />}
         <motion.g
+          key={`${state}-${isOverburning}`}
           style={{ originX: animation.origin.x, originY: animation.origin.y }}
           animate={animation.variants[state]}
           transition={animTransition}
