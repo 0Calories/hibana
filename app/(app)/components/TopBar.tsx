@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 import { CreateButton } from '@/app/(app)/dashboard/components/CreateButton';
 import { ProfileBadge } from './ProfileBadge';
 
-const NAV_ITEMS = [
+export const NAV_ITEMS = [
   { key: 'home', href: '/dashboard', icon: LayoutDashboardIcon },
   { key: 'flames', href: '/flames', icon: FlameIcon, matchPrefix: true },
   { key: 'habits', href: '/habits', icon: SparklesIcon },

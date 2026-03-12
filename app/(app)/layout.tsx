@@ -12,7 +12,9 @@ export default function AppLayout({
     <main className="h-screen w-full">
       <SparkFlyoverProvider>
         <TopBar />
-        <section className="h-full w-full pt-12 md:pt-14">{children}</section>
+        <section className="h-full w-full pt-12 pb-24 md:pt-14 md:pb-0">
+          {children}
+        </section>
         <BottomNav />
         <TimezoneSync />
       </SparkFlyoverProvider>
