@@ -22,6 +22,7 @@ interface FlameCardProps {
   entry?: FlameEntry;
   actions?: FlameCardActions;
   isFuelDepleted?: boolean;
+  isOverburning?: boolean;
   level?: number;
   size?: 'default' | 'medium' | 'small' | 'mini';
   footer?: React.ReactNode;
@@ -99,6 +100,7 @@ export function FlameCard({
   level: levelProp,
   size = 'default',
   footer,
+  isOverburning = false,
   onCompletionError,
 }: FlameCardProps) {
   const shouldReduceMotion = useReducedMotion();
@@ -113,7 +115,6 @@ export function FlameCard({
   const state: FlameState = entry?.state ?? 'untended';
   const elapsedSeconds = entry?.elapsedSeconds ?? 0;
   const targetSeconds = entry?.targetSeconds ?? 0;
-  const isOverburning = entry?.isOverburning ?? false;
   const isLoading = entry?.isLoading ?? false;
   const isBlocked = entry?.isBlocked ?? false;
 

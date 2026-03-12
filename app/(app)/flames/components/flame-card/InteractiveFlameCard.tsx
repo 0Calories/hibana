@@ -106,6 +106,7 @@ export function InteractiveFlameCard({
       actions={actions}
       isFuelDepleted={isFuelDepleted}
       footer={footer}
+      isOverburning={isOverburning}
       onCompletionError={() =>
         toast.error(tCompletion('error'), { position: 'top-center' })
       }
