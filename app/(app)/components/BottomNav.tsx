@@ -1,6 +1,5 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -9,7 +8,6 @@ import { NAV_ITEMS } from './TopBar';
 export function BottomNav() {
   const pathname = usePathname();
   const t = useTranslations('navigation');
-  const shouldReduceMotion = useReducedMotion();
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
@@ -28,20 +26,6 @@ export function BottomNav() {
                 href={item.href}
                 className="relative flex flex-col items-center justify-center gap-0.5"
               >
-                {isActive && (
-                  <motion.div
-                    layoutId={
-                      shouldReduceMotion ? undefined : 'bottomnav-active'
-                    }
-                    className="absolute bottom-1 h-0.5 w-8 rounded-full bg-primary"
-                    transition={{
-                      type: 'spring',
-                      stiffness: 500,
-                      damping: 40,
-                      bounce: 0,
-                    }}
-                  />
-                )}
                 <span
                   className={`relative z-10 text-xl leading-none transition-colors duration-200 ${
                     isActive
