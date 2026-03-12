@@ -102,6 +102,11 @@ export async function creditCompletionReward(
   if (sessionResult.error) {
     return { success: false, error: sessionResult.error };
   }
+  if (scheduleResult.error) {
+    return { success: false, error: scheduleResult.error };
+  }
+
+  const session = sessionResult.data;
 
   const session = sessionResult.data;
   if (!session || !session.is_completed) {
