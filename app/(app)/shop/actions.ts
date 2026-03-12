@@ -7,7 +7,10 @@ import type {
   UserInventory,
   UserState,
 } from '@/lib/supabase/rows';
-import { createClientWithAuth } from '@/lib/supabase/server';
+import {
+  createClientWithAuth,
+  createServiceClient,
+} from '@/lib/supabase/server';
 import type { ActionResult } from '@/lib/types';
 
 /**
@@ -111,7 +114,9 @@ export async function creditCompletionReward(
   }
 
   // Atomic: insert transaction (idempotent) + increment balance
-  const { data: credited, error: rpcError } = await supabase.rpc(
+  // Uses service-role client because execute is REVOKE'd from authenticated
+  const serviceClient = createServiceClient();
+  const { data: credited, error: rpcError } = await serviceClient.rpc(
     'credit_completion_sparks',
     {
       p_user_id: user.id,
