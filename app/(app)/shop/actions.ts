@@ -235,11 +235,14 @@ export async function getShopPageData(): ActionResult<ShopPageData> {
 export async function purchaseItem(
   itemId: string,
 ): ActionResult<{ cost: number }> {
-  const { supabase, user } = await createClientWithAuth();
+  const { user } = await createClientWithAuth();
 
-  const { data: cost, error } = await supabase.rpc('purchase_item', {
+  // Uses service-role client because execute is REVOKE'd from authenticated
+  const serviceClient = createServiceClient();
+  const { data: cost, error } = await serviceClient.rpc('purchase_item', {
     p_user_id: user.id,
     p_item_id: itemId,
+    p_request_id: crypto.randomUUID(),
   });
 
   if (error) {

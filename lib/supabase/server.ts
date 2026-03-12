@@ -2,7 +2,6 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient as createJsClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { getSupabaseCredentials } from './env';
-import type { ServiceDatabase } from './service-types';
 import type { Database } from './types';
 
 export async function createClient() {
@@ -63,7 +62,7 @@ export function createServiceClient() {
     );
   }
 
-  return createJsClient<ServiceDatabase>(publicUrl, secretKey, {
+  return createJsClient<Database>(publicUrl, secretKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
