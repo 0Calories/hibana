@@ -117,9 +117,14 @@ export async function creditCompletionReward(
   // Resolve the flame's budget from the schedule (same logic as getFlamesForDay)
   const schedule = scheduleResult.data;
   const flameIndex = schedule?.flame_ids?.indexOf(flameId) ?? -1;
-  const scheduledMinutes =
-    flameIndex >= 0 ? (schedule?.flame_minutes?.[flameIndex] ?? 0) : 0;
+  if (!schedule?.flame_minutes?.[flameIndex]) {
+    return {
+      success: false,
+      error: new Error('No scheduled budget found for completed flame session'),
+    };
+  }
 
+  const scheduledMinutes = schedule.flame_minutes[flameIndex];
   // Compute sparks (level hardcoded to 1 until flame leveling ships)
   const level = 1;
   const elapsedSeconds = session.duration_seconds;
