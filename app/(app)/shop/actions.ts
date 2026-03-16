@@ -107,8 +107,6 @@ export async function creditCompletionReward(
   }
 
   const session = sessionResult.data;
-
-  const session = sessionResult.data;
   if (!session || !session.is_completed) {
     return {
       success: false,
