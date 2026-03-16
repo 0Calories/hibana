@@ -1,24 +1,12 @@
 'use client';
 
-import {
-  FlameIcon,
-  LayoutDashboardIcon,
-  LayoutListIcon,
-  SparklesIcon,
-} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { CreateButton } from '@/app/(app)/dashboard/components/CreateButton';
+import { NAV_ITEMS } from './nav-items';
 import { ProfileBadge } from './ProfileBadge';
-
-export const NAV_ITEMS = [
-  { key: 'home', href: '/dashboard', icon: LayoutDashboardIcon },
-  { key: 'flames', href: '/flames', icon: FlameIcon, matchPrefix: true },
-  { key: 'habits', href: '/habits', icon: SparklesIcon },
-  { key: 'tasks', href: '/tasks', icon: LayoutListIcon },
-] as const;
 
 export function TopBar() {
   const pathname = usePathname();
