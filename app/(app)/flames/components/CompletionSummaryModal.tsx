@@ -16,6 +16,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { calculateHeat } from '@/lib/heat';
 import {
   COMPLETION_THRESHOLD,
   calculateSparks,
@@ -44,12 +45,9 @@ function calculateRewards(
   targetSeconds: number,
   level: number,
 ) {
-  const levelMultiplier = 1 + (level - 1) * 0.1;
-  const minutes = Math.floor(elapsedSeconds / 60);
-  // Sparks use level hardcoded to 1 until flame leveling ships (must match backend)
   return {
-    sparks: calculateSparks(elapsedSeconds, targetSeconds, 1),
-    xp: Math.floor(minutes * 1.5 * levelMultiplier),
+    sparks: calculateSparks(elapsedSeconds, targetSeconds, level),
+    heat: calculateHeat(elapsedSeconds, level),
   };
 }
 
@@ -328,7 +326,7 @@ export function CompletionSummaryModal({
   }, []);
 
   const sparksCount = useCountUp(rewards.sparks, showStats);
-  const xpCount = useCountUp(rewards.xp, showStats);
+  const heatCount = useCountUp(rewards.heat, showStats);
 
   const handleClose = useCallback(
     (nextOpen: boolean) => {
@@ -483,11 +481,11 @@ export function CompletionSummaryModal({
               <div className="flex items-center gap-1.5">
                 <FlameIcon className="size-4" style={{ color: '#f59e0b' }} />
                 <span className="text-2xl font-bold tabular-nums">
-                  +{xpCount}
+                  +{heatCount}
                 </span>
               </div>
               <span className="text-xs text-muted-foreground">
-                {t('xpEarned')}
+                {t('heatEarned')}
               </span>
             </motion.div>
           </div>

@@ -13,3 +13,5 @@ export type UserInventory =
   Database['public']['Tables']['user_inventory']['Row'];
 export type SparkTransaction =
   Database['public']['Tables']['spark_transactions']['Row'];
+export type HeatTransaction =
+  Database['public']['Tables']['heat_transactions']['Row'];
