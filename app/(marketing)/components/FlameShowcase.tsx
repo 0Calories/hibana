@@ -3,11 +3,9 @@
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import { EffectsRenderer } from '@/app/(app)/flames/components/flame-card/effects/EffectsRenderer';
-import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
-import { FLAME_REGISTRY } from '@/app/(app)/flames/components/flame-card/flames';
-import { FLAME_HEX_COLORS } from '@/app/(app)/flames/utils/colors';
-import { FLAME_LEVELS } from '@/app/(app)/flames/utils/levels';
+import { FLAME_HEX_COLORS } from '@/lib/flames/colors';
+import { FLAME_LEVELS } from '@/lib/flames/levels';
+import { ShowcaseFlame } from './ShowcaseFlame';
 import { ShowcaseFuelBar } from './ShowcaseFuelBar';
 
 const EASE_OUT_EXPO = [0.21, 0.47, 0.32, 0.98] as const;
@@ -58,19 +56,11 @@ export function FlameShowcase() {
             >
               <div className="relative mb-3 flex h-28 w-20 items-center justify-center">
                 {revealed ? (
-                  <>
-                    <FlameRenderer
-                      state="burning"
-                      level={level.level}
-                      colors={colors}
-                      className="h-24 w-20"
-                    />
-                    <EffectsRenderer
-                      effects={FLAME_REGISTRY[level.level].effects}
-                      state="paused"
-                      colors={colors}
-                    />
-                  </>
+                  <ShowcaseFlame
+                    level={level.level}
+                    colors={colors}
+                    className="h-24 w-20"
+                  />
                 ) : (
                   <div className="relative flex h-full w-full items-center justify-center">
                     <div
@@ -139,19 +129,11 @@ export function FlameShowcase() {
               >
                 <div className="relative mb-3 flex h-24 w-18 items-center justify-center">
                   {revealed ? (
-                    <>
-                      <FlameRenderer
-                        state="burning"
-                        level={level.level}
-                        colors={colors}
-                        className="h-20 w-16"
-                      />
-                      <EffectsRenderer
-                        effects={FLAME_REGISTRY[level.level].effects}
-                        state="paused"
-                        colors={colors}
-                      />
-                    </>
+                    <ShowcaseFlame
+                      level={level.level}
+                      colors={colors}
+                      className="h-20 w-16"
+                    />
                   ) : (
                     <div className="relative flex h-full w-full items-center justify-center">
                       <div
