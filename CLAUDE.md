@@ -13,6 +13,6 @@ Gamified productivity platform using fire/flame metaphors. Habits are Flames, Ti
 ## Scripts
 See @package.json for available scripts for this project.
 
-## Repo Practices
+## Workflow
 - Run linter and formatter before committing changes
 - Regenerate types after making DB changes
