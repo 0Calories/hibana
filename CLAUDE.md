@@ -1,88 +1,18 @@
 # Hibana
 
-Gamified habit tracker using fire/flame metaphors. Users create "flames" (habits), allocate daily "fuel" (time budgets), track sessions, and "complete" them with celebration animations.
+Gamified productivity platform using fire/flame metaphors. Habits are Flames, Time is Fuel, and Sparks are currency that can be redeemed for prizes.
 
-## Stack
-
-- **Framework**: Next.js 16 (App Router, React 19, React Compiler enabled)
-- **Language**: TypeScript 5 (strict mode)
-- **Database**: Supabase (PostgreSQL + Auth + RLS)
-- **UI**: shadcn/ui + Radix UI + Tailwind CSS 4
-- **Linting/Formatting**: Biome (single quotes, 2-space indent, organized imports)
-- **i18n**: next-intl (en, ja)
-- **Animation**: framer-motion
-- **Forms**: react-hook-form + Zod
-- **Package Manager**: pnpm
-- **Testing**: Playwright (E2E)
-
-## Project Structure
-
-```
-app/
-  (app)/          # Authenticated routes (flames, schedule, dashboard, habits, tasks)
-  (auth)/         # Login/signup
-  (marketing)/    # Landing page
-components/ui/    # shadcn/ui components
-lib/              # Utils, types, Zod schemas
-utils/supabase/   # Supabase clients, generated types, row type exports
-supabase/         # Migrations, seed, config
-messages/         # i18n translation files (en.json, ja.json)
-```
-
-## Domain Model
-
-- **Flame**: A habit/goal. Has name, color, icon, tracking_type (time|count), budget, schedule. Five visual levels: Candle, Torch, Blaze, Bonfire, Supernova.
-- **Flame State Machine**: untended → burning → paused → completing → completed
-- **Flame Session**: A tracking instance (started_at, ended_at, duration_seconds, is_completed).
-- **Completion**: Completing a flame session. Triggers celebration animation.
-- **Schedule**: `flame_schedules` — rolling weekly template (max 7 rows per user). Each row stores `fuel_budget`, `flame_ids[]`, and `flame_minutes[]` for one day-of-week. Flames are assigned to days through the schedule, not through per-flame `is_daily` flags.
-- **Flame Colors**: rose, orange, amber, indigo, teal, green, blue, sky, fuchsia (grouped: Earthly, Chemical, Cosmic).
-
-## Architecture Patterns
-
-- **Server Components by default**. Add `'use client'` only when interactivity is needed.
-- **Fetch where you render**: Read data directly in Server Components, not through Server Actions. Colocate data fetching with the route that needs it.
-- **Data Access Layer**: Consolidated fetch functions (e.g. `getFlamesPageData`) that verify auth once, run parallel queries, and return minimal consumer-shaped objects. One function per page/view, not per table.
-- **Server Actions for mutations only**: `'use server'` functions handle writes (create, update, delete). Never use Server Actions for reads. Call `revalidatePath()` after mutations. One action per user intent.
-- **Client-side reads via Server Actions**: Exception — client components that need to refetch data (e.g. `useFuel` polling remaining budget) can call Server Actions that perform reads, since they can't call server-only functions directly.
-- **Local state only** (useState). No global state library. Server is the source of truth.
-- **Custom hooks**: `useFlameState`, `useFuel`, `useLongPress` — colocated in `/hooks` folders.
-- **Supabase auth**: `createClientWithAuth()` for authenticated access, `createClient()` for public.
-- **RLS enforced**: All tables have row-level security policies scoping data to the authenticated user.
-
-## Code Conventions
-
-- **Components**: PascalCase filenames (`FlameCard.tsx`)
-- **Actions**: `actions.ts` or `*-actions.ts`
-- **Hooks**: `use*` prefix, in colocated `/hooks` dirs
-- **Types**: colocated or in `types.ts`. Suffix `Props` for component props, `Schema` for Zod, `Result` for action returns
-- **Translations**: Always use `useTranslations()` from next-intl. All user-facing strings go in `messages/en.json` and `messages/ja.json`.
-- **Formatting**: Run `pnpm biome check --write` before committing. Single quotes, 2-space indent.
-- **Theme Colors**: Use CSS theme tokens from `globals.css` instead of hard-coded Tailwind color classes. The theme system handles light/dark mode automatically.
-  - Backgrounds: `bg-background`, `bg-card`, `bg-muted` — NOT `bg-white`, `bg-slate-50`, `bg-slate-200`
-  - Text: `text-foreground`, `text-muted-foreground`, `text-card-foreground` — NOT `text-slate-900`, `text-slate-500`, `text-gray-400`
-  - Borders: `border-border` — NOT `border-slate-200`
-  - SVG fills: `fill-muted` — NOT `fill-slate-200`
-  - Do NOT add `dark:` overrides for colors that the theme already handles (e.g. `dark:text-white` alongside `text-foreground` is redundant)
-  - Flame-specific status colors (`text-amber-500`, `text-red-500`, gradient hex values) are intentionally NOT theme tokens — keep those as-is
-
-## Git Conventions
+## Git Naming Conventions
 
 - **Conventional Commits**: `type(scope): message`
 - **Types**: feat, fix, chore, ref, polish, revert
-- **Scope**: `(fnf)` = Feature Not Finalized (work in progress)
-- **Examples**: `feat(fnf): Add flame scheduling view`, `fix: Correct fuel calculation on overburn`
+- **Scope**: Refers to the domain or epic feature being covered e.g ui, test, db, tooling, fnf (fire and flames feature), sparks (currency feature). Can be excluded if scope is general
+- **Examples**: `feat(ui): Update visual design of scheduling page`, `fix(db): RLS policy on flames table`, `chore(fnf): Add i18n strings for reward messages`, `fix: Correct fuel calculation on overburn`
+- **Branch Naming**: Prefixed by type, followed by kebab-case name for the branch, e.g. `feat/flame-visual-design`, `fix/overburn-calculation`
 
-## Database
+## Scripts
+See @package.json for available scripts for this project.
 
-Key tables: `flames`, `flame_schedules` (consolidated weekly template with fuel budget + flame assignments), `flame_sessions`, `tasks`, `notes`, `waitlist`. Migrations in `supabase/migrations/`. Generated types in `utils/supabase/types.ts`, row helpers in `utils/supabase/rows.ts`.
-
-## Common Commands
-
-```bash
-pnpm dev              # Start dev server
-pnpm build            # Production build
-pnpm biome check --write  # Lint + format
-pnpx supabase db push      # Push migrations
-pnpx supabase gen types typescript --local > utils/supabase/types.ts  # Regenerate types
-```
+## Repo Practices
+- Run linter and formatter before committing changes
+- Regenerate types after making DB changes
