@@ -14,5 +14,7 @@ Gamified productivity platform using fire/flame metaphors. Habits are Flames, Ti
 See @package.json for available scripts for this project.
 
 ## Workflow
-- Run linter and formatter before committing changes
-- Regenerate types after making DB changes
+- Create a new appropriately named branch before making changes
+- Run linter and formatter before committing
+- Regenerate types and run migrations after making DB changes
+- Include a brief and well-structured summarization of your changes in the commit message
