@@ -56,7 +56,7 @@ export const FLAME_LEVELS: FlameLevel[] = [
   },
 ];
 
-export function getFlameLevel(level: number): FlameLevel {
+export function getFlameLevel(level = 1): FlameLevel {
   const clamped = Math.max(1, Math.min(8, level));
   const def = FLAME_LEVELS[clamped - 1];
   // For levels > 8: return Supernova definition with actual level number

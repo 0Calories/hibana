@@ -62,12 +62,6 @@ export function DayRow({
     day: 'numeric',
   });
 
-  // Fake levels — matches current behavior (i % 8 + 1)
-  const flameLevels = useMemo(
-    () => new Map(flames.map((f, i) => [f.id, (i % 8) + 1])),
-    [flames],
-  );
-
   const assignedFlames = useMemo(
     () =>
       day.assignedFlameIds
@@ -310,7 +304,7 @@ export function DayRow({
           {assignedFlames.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {assignedFlames.map((flame) => {
-                const level = flameLevels.get(flame.id) ?? 1;
+                const level = flame.level;
                 return (
                   <FlameCard
                     key={flame.id}
@@ -431,7 +425,7 @@ export function DayRow({
                       <DraggableFlameCard
                         key={flame.id}
                         flame={flame}
-                        level={flameLevels.get(flame.id) ?? 1}
+                        level={flame.level}
                         disabled={false}
                       />
                     ))}

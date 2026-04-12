@@ -18,7 +18,6 @@ import {
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
 import { getOrCreateUserState } from '@/app/(app)/shop/actions';
 import {
   Popover,
@@ -26,6 +25,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { heatProgress } from '@/lib/heat';
+import { getUserRank } from '@/lib/ranks';
 import { type LandingState, useSparkFlyover } from './SparkFlyover';
 
 interface ProfileBadgeProps {
@@ -169,7 +169,7 @@ export function ProfileBadge({ username = 'User' }: ProfileBadgeProps) {
   const [userHeat, setUserHeat] = useState(0);
   const [userLevel, setUserLevel] = useState(1);
   const hp = heatProgress(userHeat);
-  const levelInfo = getFlameLevel(userLevel);
+  const rank = getUserRank(userLevel);
   const xpProgress =
     hp.required > 0 ? Math.min(1, Math.max(0, hp.current / hp.required)) : 0;
   const { registerTarget, landingState, sparksBoost, resetBoost } =
@@ -186,8 +186,8 @@ export function ProfileBadge({ username = 'User' }: ProfileBadgeProps) {
         if (cancelled) return;
         if (result.success) {
           setSparks(result.data.sparks_balance);
-          setUserHeat(result.data.heat);
-          setUserLevel(result.data.level);
+          setUserHeat(result.data.heat ?? 0);
+          setUserLevel(result.data.level ?? 1);
         } else {
           setSparks(0);
         }
@@ -265,8 +265,8 @@ export function ProfileBadge({ username = 'User' }: ProfileBadgeProps) {
         {/* Profile header */}
         <div className="p-4">
           <p className="truncate text-sm font-semibold">{username}</p>
-          <p className="text-xs font-medium" style={{ color: levelInfo.color }}>
-            Lv.{userLevel} · {levelInfo.name}
+          <p className="text-xs font-medium text-muted-foreground">
+            Lv.{userLevel} · {rank.name}
           </p>
 
           {/* Heat bar */}
