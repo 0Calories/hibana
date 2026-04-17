@@ -10,44 +10,36 @@ export function BottomNav() {
   const t = useTranslations('navigation');
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-      <div className="rounded-3xl border border-border/50 bg-card/40 backdrop-blur-xl">
-        <div className="grid h-16 grid-cols-4">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              ('matchPrefix' in item &&
-                item.matchPrefix &&
-                pathname.startsWith(item.href));
+    <nav className="md:hidden w-full fixed bottom-0 left-0 border-t backdrop-blur-lg dark:backdrop-blur-lg z-40">
+      <div className="grid h-16 grid-cols-5">
+        {NAV_ITEMS.map((item) => {
+          const isActive =
+            pathname === item.href ||
+            ('matchPrefix' in item &&
+              item.matchPrefix &&
+              pathname.startsWith(item.href));
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="relative flex flex-col items-center justify-center gap-0.5"
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
+                isActive
+                  ? 'text-primary'
+                  : 'text-muted-foreground active:scale-95'
+              }`}
+            >
+              <span className="text-xl leading-none">
+                <item.icon className="size-5" />
+              </span>
+              <span
+                className={`text-xs font-medium ${isActive ? 'font-semibold' : ''}`}
               >
-                <span
-                  className={`relative z-10 text-xl leading-none transition-colors duration-200 ${
-                    isActive
-                      ? 'text-primary'
-                      : 'text-muted-foreground active:scale-95'
-                  }`}
-                >
-                  <item.icon className="size-5" />
-                </span>
-                <span
-                  className={`relative z-10 text-xs transition-colors duration-200 ${
-                    isActive
-                      ? 'font-semibold text-primary'
-                      : 'font-medium text-muted-foreground'
-                  }`}
-                >
-                  {t(item.key)}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+                {t(item.key)}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

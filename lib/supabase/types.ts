@@ -432,7 +432,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      credit_completion_sparks: {
+        Args: { p_amount: number; p_session_id: string; p_user_id: string }
+        Returns: number
+      }
+      purchase_item: {
+        Args: { p_item_id: string; p_request_id: string; p_user_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

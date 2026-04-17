@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { calculateSparks } from '@/lib/sparks';
 import type {
   Item,
@@ -13,6 +14,14 @@ import {
 } from '@/lib/supabase/server';
 import type { ActionResult } from '@/lib/types';
 import { parseLocalDate } from '@/lib/utils';
+
+export type InventoryItemWithDetails = UserInventory & { items: Item };
+
+export type ShopPageData = {
+  items: Item[];
+  balance: number;
+  inventory: InventoryItemWithDetails[];
+};
 
 /**
  * Returns the user's state row, lazy-creating one if it doesn't exist yet.
@@ -47,8 +56,6 @@ export async function getOrCreateUserState(): ActionResult<UserState> {
 
   return { success: true, data: created };
 }
-
-type InventoryItemWithDetails = UserInventory & { items: Item };
 
 /**
  * Returns the user's inventory with joined item details.
@@ -178,4 +185,101 @@ export async function getSparkTransactions(
   }
 
   return { success: true, data };
+}
+
+/**
+ * Consolidated fetch for the shop page.
+ * Returns items catalog, user balance, and inventory in parallel.
+ */
+export async function getShopPageData(): ActionResult<ShopPageData> {
+  const { supabase, user } = await createClientWithAuth();
+
+  const [itemsResult, stateResult, inventoryResult] = await Promise.all([
+    supabase
+      .from('items')
+      .select()
+      .eq('is_active', true)
+      .order('cost_sparks', { ascending: true }),
+    supabase.from('user_state').select().eq('user_id', user.id).maybeSingle(),
+    supabase
+      .from('user_inventory')
+      .select('*, items(*)')
+      .eq('user_id', user.id)
+      .order('acquired_at', { ascending: false }),
+  ]);
+
+  if (itemsResult.error) {
+    return { success: false, error: itemsResult.error };
+  }
+  if (stateResult.error) {
+    return { success: false, error: stateResult.error };
+  }
+  if (inventoryResult.error) {
+    return { success: false, error: inventoryResult.error };
+  }
+
+  return {
+    success: true,
+    data: {
+      items: itemsResult.data,
+      balance: stateResult.data?.sparks_balance ?? 0,
+      inventory: inventoryResult.data as InventoryItemWithDetails[],
+    },
+  };
+}
+
+/**
+ * Purchases an item via the atomic purchase_item RPC.
+ * Does not revalidate — client handles balance update via animation.
+ */
+export async function purchaseItem(
+  itemId: string,
+): ActionResult<{ cost: number }> {
+  const { user } = await createClientWithAuth();
+
+  // Uses service-role client because execute is REVOKE'd from authenticated
+  const serviceClient = createServiceClient();
+  const { data: cost, error } = await serviceClient.rpc('purchase_item', {
+    p_user_id: user.id,
+    p_item_id: itemId,
+    p_request_id: crypto.randomUUID(),
+  });
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  if (!cost || cost === 0) {
+    return {
+      success: false,
+      error: new Error(
+        'Purchase failed — insufficient balance or invalid item',
+      ),
+    };
+  }
+
+  return { success: true, data: { cost } };
+}
+
+/**
+ * Toggles the equipped state of an inventory item.
+ */
+export async function toggleEquipItem(
+  inventoryId: string,
+  equip: boolean,
+): ActionResult {
+  const { supabase, user } = await createClientWithAuth();
+
+  const { error } = await supabase
+    .from('user_inventory')
+    .update({ is_equipped: equip })
+    .eq('id', inventoryId)
+    .eq('user_id', user.id);
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  revalidatePath('/shop');
+  return { success: true, data: 'OK' };
 }
