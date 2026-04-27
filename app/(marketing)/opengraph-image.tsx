@@ -48,6 +48,7 @@ export default function OGImage() {
 
       {/* Decorative petal — top right, faded */}
       <svg
+        role="image"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 699 699"
         width="320"
@@ -68,6 +69,7 @@ export default function OGImage() {
 
       {/* Decorative petal — bottom left, faded */}
       <svg
+        role="image"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 699 699"
         width="280"
@@ -113,6 +115,7 @@ export default function OGImage() {
       >
         {/* Logo mark */}
         <svg
+          role="image"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 699 699"
           width="120"
