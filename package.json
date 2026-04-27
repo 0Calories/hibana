@@ -12,7 +12,8 @@
     "db:stop": "pnpx supabase stop",
     "db:reset": "pnpx supabase db reset",
     "db:push": "pnpx supabase db push",
-    "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts"
+    "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
