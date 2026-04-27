@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# ─── Colors & Formatting ────────────────────────────────
+BOLD='\033[1m'
+DIM='\033[2m'
+RESET='\033[0m'
+RED='\033[31m'
+GREEN='\033[32m'
+CYAN='\033[36m'
+
+# ─── Header ──────────────────────────────────────────────
+printf "\n"
+printf "  %b🔥 hibana%b %bpre-push%b\n" "$BOLD" "$RESET" "$DIM" "$RESET"
+printf "  %b━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%b\n\n" "$DIM" "$RESET"
+
+# ─── Push info ───────────────────────────────────────────
+BRANCH=$(git branch --show-current)
+REMOTE="$1"
+COMMIT_COUNT=$(git log --oneline "${REMOTE}/${BRANCH}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
+
+printf "  %b▸%b pushing %b%s%b → %b%s%b" "$CYAN" "$RESET" "$BOLD" "$BRANCH" "$RESET" "$DIM" "$REMOTE" "$RESET"
+if [ "$COMMIT_COUNT" -gt 0 ] 2>/dev/null; then
+  printf " %b(%s commit%s)%b" "$DIM" "$COMMIT_COUNT" "$([ "$COMMIT_COUNT" -ne 1 ] && echo 's')" "$RESET"
+fi
+printf "\n"
+
+# ─── Build ───────────────────────────────────────────────
+printf "\n  %b▸%b running next build %b(type-check + compile)%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+
+START_TIME=$(date +%s)
+
+if OUTPUT=$(pnpm build 2>&1); then
+  STATUS=0
+else
+  STATUS=$?
+fi
+
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+
+if [ $STATUS -ne 0 ]; then
+  # Strip pnpm noise, show only meaningful error lines
+  printf "\n"
+  printf "%s\n" "$OUTPUT" \
+    | grep -v "^>" \
+    | grep -v "ELIFECYCLE" \
+    | grep -v "^$" \
+    | tail -40 \
+    | while IFS= read -r line; do
+        printf "    %s\n" "$line"
+      done
+  printf "\n  %b✗ pre-push failed%b %b— build errors must be fixed before pushing (%ss)%b\n\n" "$RED" "$RESET" "$DIM" "$DURATION" "$RESET"
+  exit $STATUS
+fi
+
+printf "    %b✓ build succeeded in %ss%b\n" "$DIM" "$DURATION" "$RESET"
+printf "\n  %b✓%b good to push\n" "$GREEN" "$RESET"
+
+printf "\n"

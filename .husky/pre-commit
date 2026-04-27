@@ -37,14 +37,19 @@ else
   STATUS=$?
 fi
 
-# Strip pnpm script header noise, keep only biome output
-OUTPUT=$(printf "%s\n" "$OUTPUT" | grep -v "^>" | grep -v "^$" | sed 's/^ *//')
+# Strip pnpm + biome wrapper noise, keep only diagnostics and summary
+OUTPUT=$(printf "%s\n" "$OUTPUT" | grep -v "^>" | grep -v "ELIFECYCLE" | grep -v "^check " | grep -v "Some errors were emitted" | grep -v "^$" | sed 's/^ *//')
 
 if [ $STATUS -ne 0 ]; then
+  # Split output: biome summary line goes after diagnostics
+  DIAGNOSTICS=$(printf "%s\n" "$OUTPUT" | grep -v "^Checked \|^Found ")
+  SUMMARY=$(printf "%s\n" "$OUTPUT" | grep "^Checked \|^Found ")
+
   printf "\n"
-  printf "%s\n" "$OUTPUT" | while IFS= read -r line; do
+  printf "%s\n" "$DIAGNOSTICS" | while IFS= read -r line; do
     printf "    %s\n" "$line"
   done
+  printf "\n    %b%s%b\n" "$DIM" "$SUMMARY" "$RESET"
   printf "\n  %b✗ pre-commit failed%b %b— fix errors above and retry%b\n\n" "$RED" "$RESET" "$DIM" "$RESET"
   exit $STATUS
 fi
