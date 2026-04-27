@@ -12,7 +12,9 @@
     "db:stop": "pnpx supabase stop",
     "db:reset": "pnpx supabase db reset",
     "db:push": "pnpx supabase db push",
-    "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts"
+    "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts",
+    "prepare": "husky",
+    "test": "echo \"No tests configured yet\""
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
@@ -48,9 +50,16 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "supabase": "^2.72.3",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json}": [
+      "biome check --write --unsafe"
+    ]
   },
   "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
 }

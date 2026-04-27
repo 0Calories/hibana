@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# ─── Colors & Formatting ────────────────────────────────
+BOLD='\033[1m'
+DIM='\033[2m'
+RESET='\033[0m'
+RED='\033[31m'
+GREEN='\033[32m'
+CYAN='\033[36m'
+
+# ─── Header ──────────────────────────────────────────────
+printf "\n"
+printf "  %b🔥 hibana%b %bpre-commit%b\n" "$BOLD" "$RESET" "$DIM" "$RESET"
+printf "  %b━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%b\n\n" "$DIM" "$RESET"
+
+# ─── Collect staged files ────────────────────────────────
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+
+if [ -z "$STAGED" ]; then
+  printf "  %bno files to check%b\n\n" "$DIM" "$RESET"
+  exit 0
+fi
+
+FILE_COUNT=$(printf "%s\n" "$STAGED" | wc -l | tr -d ' ')
+printf "  %b▸%b %b%s%b file(s) staged\n" "$CYAN" "$RESET" "$BOLD" "$FILE_COUNT" "$RESET"
+printf "%s\n" "$STAGED" | while IFS= read -r f; do
+  printf "    %b%s%b\n" "$DIM" "$f" "$RESET"
+done
+
+# ─── Run lint-staged ─────────────────────────────────────
+printf "\n  %b▸%b running lint-staged %b(biome check + auto-fix)%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+
+if OUTPUT=$(pnpm lint-staged --quiet 2>&1); then
+  printf "\n  %b✓%b all clean\n" "$GREEN" "$RESET"
+else
+  STATUS=$?
+
+  # Strip biome wrapper noise, keep diagnostics and summary
+  OUTPUT=$(printf "%s\n" "$OUTPUT" | grep -v "^check " | grep -v "Some errors were emitted" | grep -v "^$" | sed 's/^ *//')
+
+  DIAGNOSTICS=$(printf "%s\n" "$OUTPUT" | grep -v "^Checked \|^Found ")
+  SUMMARY=$(printf "%s\n" "$OUTPUT" | grep "^Checked \|^Found ")
+
+  printf "\n"
+  printf "%s\n" "$DIAGNOSTICS" | while IFS= read -r line; do
+    printf "    %s\n" "$line"
+  done
+  printf "\n    %b%s%b\n" "$DIM" "$SUMMARY" "$RESET"
+  printf "\n  %b✗ pre-commit failed%b %b— fix errors above and retry%b\n\n" "$RED" "$RESET" "$DIM" "$RESET"
+  exit $STATUS
+fi
+
+printf "\n"

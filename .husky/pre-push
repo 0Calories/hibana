@@ -1,0 +1,105 @@
+#!/bin/sh
+
+# ─── Colors & Formatting ────────────────────────────────
+BOLD='\033[1m'
+DIM='\033[2m'
+RESET='\033[0m'
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+CYAN='\033[36m'
+
+# ─── Header ──────────────────────────────────────────────
+printf "\n"
+printf "  %b🔥 hibana%b %bpre-push%b\n" "$BOLD" "$RESET" "$DIM" "$RESET"
+printf "  %b━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%b\n\n" "$DIM" "$RESET"
+
+# ─── Push info ───────────────────────────────────────────
+BRANCH=$(git branch --show-current)
+REMOTE="$1"
+COMMIT_COUNT=$(git log --oneline "${REMOTE}/${BRANCH}..HEAD" 2>/dev/null | wc -l | tr -d ' ')
+
+printf "  %b▸%b pushing %b%s%b → %b%s%b" "$CYAN" "$RESET" "$BOLD" "$BRANCH" "$RESET" "$DIM" "$REMOTE" "$RESET"
+if [ "$COMMIT_COUNT" -gt 0 ] 2>/dev/null; then
+  printf " %b(%s commit%s)%b" "$DIM" "$COMMIT_COUNT" "$([ "$COMMIT_COUNT" -ne 1 ] && echo 's')" "$RESET"
+fi
+printf "\n"
+
+FAILED=0
+
+# ─── Lint (full project) ─────────────────────────────────
+printf "\n  %b▸%b running full project lint\n" "$CYAN" "$RESET"
+
+if LINT_OUTPUT=$(pnpm lint 2>&1); then
+  LINT_SUMMARY=$(printf "%s\n" "$LINT_OUTPUT" | grep -v "^>" | grep -v "^$" | sed 's/^ *//')
+  printf "    %b%s%b\n" "$DIM" "$LINT_SUMMARY" "$RESET"
+  printf "  %b✓%b lint passed\n" "$GREEN" "$RESET"
+else
+  FAILED=1
+  printf "\n"
+  printf "%s\n" "$LINT_OUTPUT" \
+    | grep -v "^>" \
+    | grep -v "ELIFECYCLE" \
+    | grep -v "^check " \
+    | grep -v "Some errors were emitted" \
+    | grep -v "^$" \
+    | sed 's/^ *//' \
+    | while IFS= read -r line; do
+        printf "    %s\n" "$line"
+      done
+  printf "\n  %b✗ lint failed%b\n" "$RED" "$RESET"
+fi
+
+# ─── Type check ──────────────────────────────────────────
+printf "\n  %b▸%b running type check\n" "$CYAN" "$RESET"
+
+if TSC_OUTPUT=$(pnpm tsc --noEmit 2>&1); then
+  printf "  %b✓%b types passed\n" "$GREEN" "$RESET"
+else
+  FAILED=1
+  printf "\n"
+  printf "%s\n" "$TSC_OUTPUT" \
+    | grep -v "^>" \
+    | grep -v "ELIFECYCLE" \
+    | grep -v "^$" \
+    | sed 's/^ *//' \
+    | while IFS= read -r line; do
+        printf "    %s\n" "$line"
+      done
+  printf "\n  %b✗ type check failed%b\n" "$RED" "$RESET"
+fi
+
+# ─── Tests ───────────────────────────────────────────────
+printf "\n  %b▸%b running tests\n" "$CYAN" "$RESET"
+
+if TEST_OUTPUT=$(pnpm test 2>&1); then
+  TEST_SUMMARY=$(printf "%s\n" "$TEST_OUTPUT" | grep -v "^>" | grep -v "^$" | sed 's/^ *//')
+  if printf "%s" "$TEST_SUMMARY" | grep -qi "no tests"; then
+    printf "    %b%s%b\n" "$DIM" "$TEST_SUMMARY" "$RESET"
+    printf "  %b⊘%b no tests configured %b— skipping%b\n" "$YELLOW" "$RESET" "$DIM" "$RESET"
+  else
+    printf "    %b%s%b\n" "$DIM" "$TEST_SUMMARY" "$RESET"
+    printf "  %b✓%b tests passed\n" "$GREEN" "$RESET"
+  fi
+else
+  FAILED=1
+  printf "\n"
+  printf "%s\n" "$TEST_OUTPUT" \
+    | grep -v "^>" \
+    | grep -v "ELIFECYCLE" \
+    | grep -v "^$" \
+    | tail -40 \
+    | while IFS= read -r line; do
+        printf "    %s\n" "$line"
+      done
+  printf "\n  %b✗ tests failed%b\n" "$RED" "$RESET"
+fi
+
+# ─── Result ──────────────────────────────────────────────
+printf "\n"
+if [ $FAILED -ne 0 ]; then
+  printf "  %b✗ pre-push failed%b %b— fix errors above before pushing%b\n\n" "$RED" "$RESET" "$DIM" "$RESET"
+  exit 1
+fi
+
+printf "  %b✓%b good to push\n\n" "$GREEN" "$RESET"
