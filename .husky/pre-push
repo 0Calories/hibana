@@ -50,6 +50,25 @@ else
   printf "\n  %b✗ lint failed%b\n" "$RED" "$RESET"
 fi
 
+# ─── Type check ──────────────────────────────────────────
+printf "\n  %b▸%b running type check\n" "$CYAN" "$RESET"
+
+if TSC_OUTPUT=$(pnpm tsc --noEmit 2>&1); then
+  printf "  %b✓%b types passed\n" "$GREEN" "$RESET"
+else
+  FAILED=1
+  printf "\n"
+  printf "%s\n" "$TSC_OUTPUT" \
+    | grep -v "^>" \
+    | grep -v "ELIFECYCLE" \
+    | grep -v "^$" \
+    | sed 's/^ *//' \
+    | while IFS= read -r line; do
+        printf "    %s\n" "$line"
+      done
+  printf "\n  %b✗ type check failed%b\n" "$RED" "$RESET"
+fi
+
 # ─── Tests ───────────────────────────────────────────────
 printf "\n  %b▸%b running tests\n" "$CYAN" "$RESET"
 
