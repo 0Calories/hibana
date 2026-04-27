@@ -14,7 +14,8 @@
     "db:push": "pnpx supabase db push",
     "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts",
     "prepare": "husky",
-    "precommit": "biome check --write --unsafe --no-errors-on-unmatched --staged"
+    "precommit": "biome check --write --unsafe --no-errors-on-unmatched --staged",
+    "test": "echo \"No tests configured yet\""
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
