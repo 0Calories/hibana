@@ -5,13 +5,16 @@ import { useEffect } from 'react';
 export function TimezoneSync() {
   useEffect(() => {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const current = document.cookie
-      .split('; ')
-      .find((c) => c.startsWith('timezone='))
-      ?.split('=')[1];
-    if (current !== tz) {
-      document.cookie = `timezone=${tz}; path=/; max-age=31536000; SameSite=Lax`;
-    }
+    cookieStore.get('timezone').then((cookie) => {
+      if (cookie?.value !== tz) {
+        cookieStore.set({
+          name: 'timezone',
+          value: tz,
+          path: '/',
+          sameSite: 'lax',
+        });
+      }
+    });
   }, []);
 
   return null;
