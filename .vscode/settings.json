@@ -1,3 +1,9 @@
 {
-  "i18n-ally.localesPaths": ["i18n", "messages"]
+  "i18n-ally.localesPaths": ["i18n", "messages"],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "editor.defaultFormatter": "biomejs.biome"
 }
