@@ -5,7 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --animate-completion-ready-glow: completion-ready-glow 2.5s ease-in-out infinite;
+  --animate-completion-ready-glow: completion-ready-glow 2.5s ease-in-out
+    infinite;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-latin), var(--font-ja);
@@ -129,16 +130,23 @@
 @keyframes completion-ready-glow {
   0%,
   100% {
-    box-shadow: 0 0 8px #fbbf2435, 0 0 16px #fbbf2420;
+    box-shadow:
+      0 0 8px #fbbf2435,
+      0 0 16px #fbbf2420;
   }
   50% {
-    box-shadow: 0 0 18px #fbbf2465, 0 0 36px #fbbf2438, 0 0 54px #fbbf2418;
+    box-shadow:
+      0 0 18px #fbbf2465,
+      0 0 36px #fbbf2438,
+      0 0 54px #fbbf2418;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-completion-ready-glow {
     animation: none;
-    box-shadow: 0 0 15px #fbbf2450, 0 0 30px #fbbf2425;
+    box-shadow:
+      0 0 15px #fbbf2450,
+      0 0 30px #fbbf2425;
   }
 }

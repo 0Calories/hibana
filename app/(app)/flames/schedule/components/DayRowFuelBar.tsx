@@ -48,7 +48,7 @@ export function DayRowFuelBar({
     const result: Segment[] = [];
 
     for (const flame of assignedFlames) {
-      const budget = getAllocation(flame);
+      const budget = allocations?.[flame.id] ?? flame.time_budget_minutes ?? 0;
       if (budget <= 0) continue;
 
       const startPct = (cursor / fuelMinutes) * 100;

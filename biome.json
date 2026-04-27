@@ -32,11 +32,22 @@
       "react": "recommended"
     }
   },
+  "overrides": [
+    {
+      "includes": ["components/ui/**"],
+      "linter": { "enabled": false }
+    }
+  ],
   "assist": {
     "actions": {
       "source": {
         "organizeImports": "on"
       }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   }
 }
