@@ -27,10 +27,11 @@ printf "\n"
 
 FAILED=0
 
-# ─── Lint (full project) ────────────────────────────────
-printf "\n  %b▸%b running full project lint\n" "$CYAN" "$RESET"
+# ─── Lint (changed files since master) ───────────────────
+BASE_BRANCH="master"
+printf "\n  %b▸%b linting changes since %b%s%b\n" "$CYAN" "$RESET" "$DIM" "$BASE_BRANCH" "$RESET"
 
-if LINT_OUTPUT=$(pnpm lint 2>&1); then
+if LINT_OUTPUT=$(pnpm biome check --changed --since="$BASE_BRANCH" 2>&1); then
   LINT_SUMMARY=$(printf "%s\n" "$LINT_OUTPUT" | grep -v "^>" | grep -v "^$" | sed 's/^ *//')
   printf "    %b%s%b\n" "$DIM" "$LINT_SUMMARY" "$RESET"
   printf "  %b✓%b lint passed\n" "$GREEN" "$RESET"
