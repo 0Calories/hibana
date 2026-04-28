@@ -21,7 +21,7 @@ export async function getUserState(): ActionResult<UserState> {
   const { supabase, user } = await createClientWithAuth();
 
   const { data, error } = await supabase
-    .from('user_state')
+    .from('user_states')
     .select()
     .eq('user_id', user.id)
     .single();

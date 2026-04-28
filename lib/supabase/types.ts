@@ -385,7 +385,7 @@ export type Database = {
         };
         Relationships: [];
       };
-      user_state: {
+      user_states: {
         Row: {
           heat_level: number;
           sparks_balance: number;
