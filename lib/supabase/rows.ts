@@ -7,7 +7,7 @@ export type FlameSchedule =
   Database['public']['Tables']['flame_schedules']['Row'];
 export type FlameSession =
   Database['public']['Tables']['flame_sessions']['Row'];
-export type UserState = Database['public']['Tables']['user_state']['Row'];
+export type UserState = Database['public']['Tables']['user_states']['Row'];
 export type Item = Database['public']['Tables']['items']['Row'];
 export type UserItem = Database['public']['Tables']['user_items']['Row'];
 export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];

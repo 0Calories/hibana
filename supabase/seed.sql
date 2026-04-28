@@ -14,7 +14,7 @@
     ('11111111-1111-1111-1111-111111111111', 'Read', 'count');
 
   -- Test user state (row auto-created by handle_new_user trigger)
-  update user_state set sparks_balance = 42069
+  update user_states set sparks_balance = 42069
   where user_id = '11111111-1111-1111-1111-111111111111';
 
   -- Sample items
