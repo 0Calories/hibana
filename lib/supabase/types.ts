@@ -112,9 +112,11 @@ export type Database = {
           count_target: number | null;
           count_unit: string | null;
           created_at: string;
+          heat: number;
           icon: string | null;
           id: string;
           is_archived: boolean;
+          level: number;
           name: string;
           time_budget_minutes: number | null;
           tracking_type: string;
@@ -127,9 +129,11 @@ export type Database = {
           count_target?: number | null;
           count_unit?: string | null;
           created_at?: string;
+          heat?: number;
           icon?: string | null;
           id?: string;
           is_archived?: boolean;
+          level?: number;
           name: string;
           time_budget_minutes?: number | null;
           tracking_type: string;
@@ -142,9 +146,11 @@ export type Database = {
           count_target?: number | null;
           count_unit?: string | null;
           created_at?: string;
+          heat?: number;
           icon?: string | null;
           id?: string;
           is_archived?: boolean;
+          level?: number;
           name?: string;
           time_budget_minutes?: number | null;
           tracking_type?: string;
@@ -194,6 +200,44 @@ export type Database = {
           user?: string;
         };
         Relationships: [];
+      };
+      heat_transactions: {
+        Row: {
+          amount: number;
+          created_at: string;
+          flame_id: string;
+          id: string;
+          reason: string;
+          reference_id: string | null;
+          user_id: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          flame_id: string;
+          id?: string;
+          reason: string;
+          reference_id?: string | null;
+          user_id: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          flame_id?: string;
+          id?: string;
+          reason?: string;
+          reference_id?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'heat_transactions_flame_id_fkey';
+            columns: ['flame_id'];
+            isOneToOne: false;
+            referencedRelation: 'flames';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       items: {
         Row: {
@@ -391,18 +435,24 @@ export type Database = {
       user_state: {
         Row: {
           created_at: string;
+          heat: number;
+          level: number;
           sparks_balance: number;
           updated_at: string;
           user_id: string;
         };
         Insert: {
           created_at?: string;
+          heat?: number;
+          level?: number;
           sparks_balance?: number;
           updated_at?: string;
           user_id: string;
         };
         Update: {
           created_at?: string;
+          heat?: number;
+          level?: number;
           sparks_balance?: number;
           updated_at?: string;
           user_id?: string;
@@ -432,6 +482,17 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      compute_level_from_heat: { Args: { p_heat: number }; Returns: number };
+      credit_completion_rewards: {
+        Args: {
+          p_flame_id: string;
+          p_heat: number;
+          p_session_id: string;
+          p_sparks: number;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       credit_completion_sparks: {
         Args: { p_amount: number; p_session_id: string; p_user_id: string };
         Returns: number;
