@@ -11,6 +11,7 @@
     "db:start": "pnpx supabase start",
     "db:stop": "pnpx supabase stop",
     "db:reset": "pnpx supabase db reset",
+    "db:migrate": "pnpx supabase migration up",
     "db:push": "pnpx supabase db push",
     "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts",
     "prepare": "husky",
