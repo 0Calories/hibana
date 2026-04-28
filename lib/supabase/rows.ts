@@ -9,7 +9,6 @@ export type FlameSession =
   Database['public']['Tables']['flame_sessions']['Row'];
 export type UserState = Database['public']['Tables']['user_state']['Row'];
 export type Item = Database['public']['Tables']['items']['Row'];
-export type UserInventory =
-  Database['public']['Tables']['user_inventory']['Row'];
+export type UserItem = Database['public']['Tables']['user_items']['Row'];
 export type SparkTransaction =
   Database['public']['Tables']['spark_transactions']['Row'];

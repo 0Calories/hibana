@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
-import { getOrCreateUserState } from '@/app/(app)/shop/actions';
+import { getUserState } from '@/app/(app)/shop/actions';
 import {
   Popover,
   PopoverContent,
@@ -195,7 +195,7 @@ export function ProfileBadge({
     let cancelled = false;
     async function fetchUserState() {
       try {
-        const result = await getOrCreateUserState();
+        const result = await getUserState();
         if (cancelled) return;
         setSparks(result.success ? result.data.sparks_balance : 0);
       } catch {

@@ -13,17 +13,17 @@
     ('11111111-1111-1111-1111-111111111111', 'Exercise', 'time'),
     ('11111111-1111-1111-1111-111111111111', 'Read', 'count');
 
-  -- Test user state 
-  insert into user_state (user_id, sparks_balance)
-  values ('11111111-1111-1111-1111-111111111111', 42069);
+  -- Test user state (row auto-created by handle_new_user trigger)
+  update user_state set sparks_balance = 42069
+  where user_id = '11111111-1111-1111-1111-111111111111';
 
   -- Sample items
   insert into items (id, name, description, type, cost_sparks) values
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Sticky Note Pack', 'Open to get sticky notes to post on your wall', 'item', 100);
 
   -- Inventory entries for test user
-  insert into user_inventory (user_id, item_id, quantity, is_equipped) values
-    ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1, false);
+  insert into user_items (user_id, item_id, quantity) values
+    ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 1);
 
   -- Sample spark transactions (earn, earn, spend)
   insert into spark_transactions (user_id, amount, reason) values

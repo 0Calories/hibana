@@ -4,7 +4,7 @@ import { calculateSparks } from '@/lib/sparks';
 import type {
   Item,
   SparkTransaction,
-  UserInventory,
+  UserItem,
   UserState,
 } from '@/lib/supabase/rows';
 import {
@@ -15,51 +15,34 @@ import type { ActionResult } from '@/lib/types';
 import { parseLocalDate } from '@/lib/utils';
 
 /**
- * Returns the user's state row, lazy-creating one if it doesn't exist yet.
+ * Returns the user's state row (auto-created on signup by handle_new_user trigger).
  */
-export async function getOrCreateUserState(): ActionResult<UserState> {
+export async function getUserState(): ActionResult<UserState> {
   const { supabase, user } = await createClientWithAuth();
 
   const { data, error } = await supabase
     .from('user_state')
     .select()
     .eq('user_id', user.id)
-    .maybeSingle();
+    .single();
 
   if (error) {
     return { success: false, error };
   }
 
-  if (data) {
-    return { success: true, data };
-  }
-
-  // Lazy-insert a fresh row
-  const { data: created, error: insertError } = await supabase
-    .from('user_state')
-    .insert({ user_id: user.id })
-    .select()
-    .single();
-
-  if (insertError) {
-    return { success: false, error: insertError };
-  }
-
-  return { success: true, data: created };
+  return { success: true, data };
 }
 
-type InventoryItemWithDetails = UserInventory & { items: Item };
+type UserItemWithDetails = UserItem & { items: Item };
 
 /**
- * Returns the user's inventory with joined item details.
+ * Returns the user's items with joined item details.
  */
-export async function getUserInventory(): ActionResult<
-  InventoryItemWithDetails[]
-> {
+export async function getUserItems(): ActionResult<UserItemWithDetails[]> {
   const { supabase, user } = await createClientWithAuth();
 
   const { data, error } = await supabase
-    .from('user_inventory')
+    .from('user_items')
     .select('*, items(*)')
     .eq('user_id', user.id)
     .order('acquired_at', { ascending: false });
@@ -68,7 +51,7 @@ export async function getUserInventory(): ActionResult<
     return { success: false, error };
   }
 
-  return { success: true, data: data as InventoryItemWithDetails[] };
+  return { success: true, data: data as UserItemWithDetails[] };
 }
 
 /**
