@@ -8,7 +8,12 @@ import { CreateButton } from '@/app/(app)/dashboard/components/CreateButton';
 import { NAV_ITEMS } from './nav-items';
 import { ProfileBadge } from './ProfileBadge';
 
-export function TopBar() {
+interface TopBarProps {
+  username: string;
+  sparks: number;
+}
+
+export function TopBar({ username, sparks }: TopBarProps) {
   const pathname = usePathname();
   const t = useTranslations('navigation');
 
@@ -53,7 +58,7 @@ export function TopBar() {
         <div className="flex items-center gap-2">
           <CreateButton />
           <div className="mx-1 h-5 w-px bg-border" />
-          <ProfileBadge />
+          <ProfileBadge username={username} sparks={sparks} />
         </div>
       </div>
 
@@ -66,7 +71,7 @@ export function TopBar() {
           <Image src="/logo.svg" alt="" width={20} height={20} />
           <span className="text-sm">Hibana</span>
         </Link>
-        <ProfileBadge />
+        <ProfileBadge username={username} sparks={sparks} />
       </div>
     </header>
   );
