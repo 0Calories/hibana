@@ -12,7 +12,7 @@
     "db:stop": "pnpx supabase stop",
     "db:reset": "pnpx supabase db reset",
     "db:push": "pnpx supabase db push",
-    "db:gentypes": "pnpx supabase gen types typescript --local > utils/supabase/types.ts",
+    "db:types": "pnpx supabase gen types typescript --local > lib/supabase/types.ts && biome format --write lib/supabase/types.ts",
     "prepare": "husky",
     "test": "echo \"No tests configured yet\""
   },
