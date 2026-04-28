@@ -29,5 +29,14 @@ Create a `.env.local` file with your Supabase credentials:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+SUPABASE_SECRET_KEY=your_supabase_secret_key
 ```
+
+The publishable key (`sb_publishable_...`) is safe to expose in the browser and
+is used by the client and SSR Supabase clients. The secret key (`sb_secret_...`)
+must never be exposed publicly — it is only read server-side for privileged
+operations that bypass RLS.
+
+For local development, run `pnpx supabase start` and copy the `Publishable key`
+and `Secret key` it prints into your `.env.local`.
