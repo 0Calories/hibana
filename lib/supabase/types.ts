@@ -255,30 +255,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      profiles: {
-        Row: {
-          avatar_url: string | null;
-          bio: string | null;
-          created_at: string;
-          id: string;
-          username: string | null;
-        };
-        Insert: {
-          avatar_url?: string | null;
-          bio?: string | null;
-          created_at?: string;
-          id: string;
-          username?: string | null;
-        };
-        Update: {
-          avatar_url?: string | null;
-          bio?: string | null;
-          created_at?: string;
-          id?: string;
-          username?: string | null;
-        };
-        Relationships: [];
-      };
       spark_transactions: {
         Row: {
           amount: number;
@@ -384,6 +360,30 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      user_profiles: {
+        Row: {
+          avatar_url: string | null;
+          bio: string | null;
+          created_at: string;
+          id: string;
+          username: string | null;
+        };
+        Insert: {
+          avatar_url?: string | null;
+          bio?: string | null;
+          created_at?: string;
+          id: string;
+          username?: string | null;
+        };
+        Update: {
+          avatar_url?: string | null;
+          bio?: string | null;
+          created_at?: string;
+          id?: string;
+          username?: string | null;
+        };
+        Relationships: [];
       };
       user_state: {
         Row: {
