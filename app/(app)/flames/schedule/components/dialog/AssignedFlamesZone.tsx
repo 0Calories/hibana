@@ -2,7 +2,6 @@
 
 import { useDroppable } from '@dnd-kit/core';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
 import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
 import { ASSIGNED_FLAME_ZONE_ID } from '../constants';
@@ -21,13 +20,6 @@ export function AssignedFlamesZone({
   allocations,
   onAllocationChange,
 }: AssignedFlamesZoneProps) {
-  // Map flame id → level based on index in the full flames array
-  // This is only for testing purposes and must be replaced by actual levels once the data model for flames is updated
-  const flameLevels = useMemo(
-    () => new Map(flames.map((f, i) => [f.id, (i % 8) + 1])),
-    [flames],
-  );
-
   const t = useTranslations('schedule');
   const { isOver, setNodeRef } = useDroppable({ id: ASSIGNED_FLAME_ZONE_ID });
 
@@ -51,7 +43,7 @@ export function AssignedFlamesZone({
             <DraggableFlameCard
               key={flame.id}
               flame={flame}
-              level={flameLevels.get(flame.id) ?? 1}
+              level={flame.level}
               onClick={() => onRemove(flame.id)}
               allocatedMinutes={allocations[flame.id]}
               onAllocationChange={(mins) => onAllocationChange(flame.id, mins)}

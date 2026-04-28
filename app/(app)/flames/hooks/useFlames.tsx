@@ -499,7 +499,7 @@ function useFlamesEngine(
   // Suppress lint: tickNow is intentionally read to force recomputation
   void tickNow;
 
-  const entries: FlameEntry[] = flames.map((flame, index) => {
+  const entries: FlameEntry[] = flames.map((flame) => {
     const ts = timerMapRef.current.get(flame.id) ?? {
       state: 'untended' as FlameState,
       baseElapsed: 0,
@@ -531,7 +531,7 @@ function useFlamesEngine(
       isLoading: ts.isLoading,
       isCompletionReady,
       isBlocked,
-      level: (index % 8) + 1, // Demo: cycle through levels
+      level: flame.level ?? 1,
     };
   });
 

@@ -18,30 +18,19 @@ import {
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
 import { getOrCreateUserState } from '@/app/(app)/shop/actions';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { heatProgress } from '@/lib/heat';
+import { getUserRank } from '@/lib/ranks';
 import { type LandingState, useSparkFlyover } from './SparkFlyover';
 
 interface ProfileBadgeProps {
   username?: string;
-  rankName?: string;
-  level?: number;
-  xp?: number;
-  xpToNext?: number;
 }
-
-const MOCK_DATA = {
-  username: 'Ash',
-  rankName: 'Smokesniffer',
-  level: 3,
-  xp: 690,
-  xpToNext: 1000,
-};
 
 // ─── Inflation/deflation pulse hook ─────────────────────────────────
 const SCALE_BUMP = 0.08;
@@ -175,16 +164,14 @@ function ProfileBadgeSkeleton() {
 }
 
 // ─── Main component ─────────────────────────────────────────────────
-export function ProfileBadge({
-  username = MOCK_DATA.username,
-  rankName = MOCK_DATA.rankName,
-  level = MOCK_DATA.level,
-  xp = MOCK_DATA.xp,
-  xpToNext = MOCK_DATA.xpToNext,
-}: ProfileBadgeProps) {
+export function ProfileBadge({ username = 'User' }: ProfileBadgeProps) {
   const [sparks, setSparks] = useState<number | null>(null);
-  const levelInfo = getFlameLevel(level);
-  const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
+  const [userHeat, setUserHeat] = useState(0);
+  const [userLevel, setUserLevel] = useState(1);
+  const hp = heatProgress(userHeat);
+  const rank = getUserRank(userLevel);
+  const xpProgress =
+    hp.required > 0 ? Math.min(1, Math.max(0, hp.current / hp.required)) : 0;
   const { registerTarget, landingState, sparksBoost, resetBoost } =
     useSparkFlyover();
   const t = useTranslations('profile');
@@ -197,7 +184,13 @@ export function ProfileBadge({
       try {
         const result = await getOrCreateUserState();
         if (cancelled) return;
-        setSparks(result.success ? result.data.sparks_balance : 0);
+        if (result.success) {
+          setSparks(result.data.sparks_balance);
+          setUserHeat(result.data.heat ?? 0);
+          setUserLevel(result.data.level ?? 1);
+        } else {
+          setSparks(0);
+        }
       } catch {
         if (!cancelled) setSparks(0);
       }
@@ -245,7 +238,7 @@ export function ProfileBadge({
               <UserIcon className="size-2.5 text-muted-foreground" />
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-muted text-[8px] font-bold leading-none ring-1 ring-border">
-              {level}
+              {userLevel}
             </span>
           </div>
           {/* Username */}
@@ -272,8 +265,8 @@ export function ProfileBadge({
         {/* Profile header */}
         <div className="p-4">
           <p className="truncate text-sm font-semibold">{username}</p>
-          <p className="text-xs font-medium" style={{ color: levelInfo.color }}>
-            Lv.{level} · {rankName}
+          <p className="text-xs font-medium text-muted-foreground">
+            Lv.{userLevel} · {rank.name}
           </p>
 
           {/* Heat bar */}
@@ -286,10 +279,10 @@ export function ProfileBadge({
                     'linear-gradient(to right, #fbbf24, var(--primary))',
                 }}
               >
-                {t('xpProgress')}
+                {t('heatProgress')}
               </span>
               <span className="text-foreground">
-                {xp}/{xpToNext}
+                {hp.current}/{hp.required}
               </span>
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">

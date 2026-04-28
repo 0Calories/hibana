@@ -1,5 +1,6 @@
 'use server';
 
+import { calculateHeat } from '@/lib/heat';
 import { calculateSparks } from '@/lib/sparks';
 import type {
   Item,
@@ -79,12 +80,12 @@ export async function getUserInventory(): ActionResult<
 export async function creditCompletionReward(
   flameId: string,
   date: string,
-): ActionResult<{ sparks: number }> {
+): ActionResult<{ sparks: number; heat: number }> {
   const { supabase, user } = await createClientWithAuth();
 
-  // Fetch the completed session and the schedule-based budget for this day
+  // Fetch the completed session, the schedule-based budget, and flame level
   const dayOfWeek = parseLocalDate(date).getDay();
-  const [sessionResult, scheduleResult] = await Promise.all([
+  const [sessionResult, scheduleResult, flameResult] = await Promise.all([
     supabase
       .from('flame_sessions')
       .select('id, duration_seconds, is_completed')
@@ -97,6 +98,7 @@ export async function creditCompletionReward(
       .eq('user_id', user.id)
       .eq('day_of_week', dayOfWeek)
       .maybeSingle(),
+    supabase.from('flames').select('level').eq('id', flameId).single(),
   ]);
 
   if (sessionResult.error) {
@@ -104,6 +106,9 @@ export async function creditCompletionReward(
   }
   if (scheduleResult.error) {
     return { success: false, error: scheduleResult.error };
+  }
+  if (flameResult.error) {
+    return { success: false, error: flameResult.error };
   }
 
   const session = sessionResult.data;
@@ -125,25 +130,27 @@ export async function creditCompletionReward(
   }
 
   const scheduledMinutes = schedule.flame_minutes[flameIndex];
-  // Compute sparks (level hardcoded to 1 until flame leveling ships)
-  const level = 1;
+  const flameLevel = flameResult.data.level;
   const elapsedSeconds = session.duration_seconds;
   const targetSeconds = scheduledMinutes * 60;
-  const sparks = calculateSparks(elapsedSeconds, targetSeconds, level);
+  const sparks = calculateSparks(elapsedSeconds, targetSeconds, flameLevel);
+  const heat = calculateHeat(elapsedSeconds, flameLevel);
 
-  if (sparks <= 0) {
-    return { success: true, data: { sparks: 0 } };
+  if (sparks <= 0 && heat <= 0) {
+    return { success: true, data: { sparks: 0, heat: 0 } };
   }
 
-  // Atomic: insert transaction (idempotent) + increment balance
+  // Atomic: insert transactions (idempotent) + increment balances + recompute levels
   // Uses service-role client because execute is REVOKE'd from authenticated
   const serviceClient = createServiceClient();
-  const { data: credited, error: rpcError } = await serviceClient.rpc(
-    'credit_completion_sparks',
+  const { data: result, error: rpcError } = await serviceClient.rpc(
+    'credit_completion_rewards',
     {
       p_user_id: user.id,
       p_session_id: session.id,
-      p_amount: sparks,
+      p_flame_id: flameId,
+      p_sparks: sparks,
+      p_heat: heat,
     },
   );
 
@@ -155,7 +162,11 @@ export async function creditCompletionReward(
   // /flames, and premature revalidation would update the profile badge before
   // the flyover animation finishes.
 
-  return { success: true, data: { sparks: credited ?? 0 } };
+  const credited = result as { sparks: number; heat: number } | null;
+  return {
+    success: true,
+    data: { sparks: credited?.sparks ?? 0, heat: credited?.heat ?? 0 },
+  };
 }
 
 /**

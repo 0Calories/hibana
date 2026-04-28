@@ -139,7 +139,7 @@
       ],
       "fuelSpent": "消費した燃料",
       "sparksEarned": "獲得スパーク",
-      "xpEarned": "獲得ヒート",
+      "heatEarned": "獲得ヒート",
       "minutes": "{count}分",
       "dismiss": "この調子で！",
       "error": "達成に失敗しました。もう一度お試しください。"
@@ -211,7 +211,7 @@
     "description": "ゲーミフィケーションのステータスとプロフィール",
     "sparks": "スパーク",
     "level": "レベル",
-    "xpProgress": "ヒート",
+    "heatProgress": "ヒート",
     "rank": "ランク",
     "viewProfile": "プロフィール",
     "settings": "設定",
