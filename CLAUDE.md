@@ -22,7 +22,6 @@ See @package.json for available scripts for this project.
 
 ## Workflow
 - Create a new appropriately named branch before making changes
-- Run linter and formatter before committing
 - Regenerate types and run migrations after making DB changes
 - Keep commits as atomically scoped as possible to allow ease of reading history
 - If making a new PR, include a brief and well-structured summarization of your changes in the description
