@@ -14,6 +14,11 @@ Gamified productivity platform using fire/flame metaphors. Habits are Flames, Ti
 ## Scripts
 See @package.json for available scripts for this project.
 
+## Database Migrations
+
+- **RLS Policy Principle of Least Privilege**: Before adding an INSERT, UPDATE, or DELETE RLS policy, consider whether the operation is performed by the client (via `createClientWithAuth`) or by the server (via SECURITY DEFINER RPCs / `createServiceClient`). If a table is only mutated by server-side RPCs, clients should only have a SELECT policy. SECURITY DEFINER functions bypass RLS, so they don't need client-facing write policies.
+- **Trigger-managed rows**: Tables like `profiles` and `user_state` that are auto-created by database triggers (SECURITY DEFINER) don't need client INSERT policies.
+
 ## Workflow
 - Create a new appropriately named branch before making changes
 - Run linter and formatter before committing
