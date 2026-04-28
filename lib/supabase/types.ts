@@ -202,6 +202,7 @@ export type Database = {
           description: string | null;
           id: string;
           is_active: boolean;
+          is_equippable: boolean;
           metadata: Json;
           name: string;
           type: string;
@@ -212,6 +213,7 @@ export type Database = {
           description?: string | null;
           id?: string;
           is_active?: boolean;
+          is_equippable?: boolean;
           metadata?: Json;
           name: string;
           type: string;
@@ -222,6 +224,7 @@ export type Database = {
           description?: string | null;
           id?: string;
           is_active?: boolean;
+          is_equippable?: boolean;
           metadata?: Json;
           name?: string;
           type?: string;
@@ -257,24 +260,21 @@ export type Database = {
           avatar_url: string | null;
           bio: string | null;
           created_at: string;
-          id: number;
-          user_id: string | null;
+          id: string;
           username: string | null;
         };
         Insert: {
           avatar_url?: string | null;
           bio?: string | null;
           created_at?: string;
-          id?: number;
-          user_id?: string | null;
+          id: string;
           username?: string | null;
         };
         Update: {
           avatar_url?: string | null;
           bio?: string | null;
           created_at?: string;
-          id?: number;
-          user_id?: string | null;
+          id?: string;
           username?: string | null;
         };
         Relationships: [];
@@ -353,11 +353,10 @@ export type Database = {
           },
         ];
       };
-      user_inventory: {
+      user_items: {
         Row: {
           acquired_at: string;
           id: string;
-          is_equipped: boolean;
           item_id: string;
           quantity: number;
           user_id: string;
@@ -365,7 +364,6 @@ export type Database = {
         Insert: {
           acquired_at?: string;
           id?: string;
-          is_equipped?: boolean;
           item_id: string;
           quantity?: number;
           user_id: string;
@@ -373,7 +371,6 @@ export type Database = {
         Update: {
           acquired_at?: string;
           id?: string;
-          is_equipped?: boolean;
           item_id?: string;
           quantity?: number;
           user_id?: string;
@@ -390,21 +387,18 @@ export type Database = {
       };
       user_state: {
         Row: {
-          created_at: string;
+          heat_level: number;
           sparks_balance: number;
-          updated_at: string;
           user_id: string;
         };
         Insert: {
-          created_at?: string;
+          heat_level?: number;
           sparks_balance?: number;
-          updated_at?: string;
           user_id: string;
         };
         Update: {
-          created_at?: string;
+          heat_level?: number;
           sparks_balance?: number;
-          updated_at?: string;
           user_id?: string;
         };
         Relationships: [];
@@ -432,7 +426,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      credit_completion_sparks: {
+        Args: { p_amount: number; p_session_id: string; p_user_id: string };
+        Returns: number;
+      };
+      purchase_item: {
+        Args: { p_item_id: string; p_request_id: string; p_user_id: string };
+        Returns: number;
+      };
     };
     Enums: {
       [_ in never]: never;
