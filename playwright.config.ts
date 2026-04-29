@@ -1,17 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
 
-// Load .env.local so setup/teardown can access Supabase credentials
-for (const line of readFileSync(
-  resolve(__dirname, '.env.local'),
-  'utf-8',
-).split('\n')) {
-  const match = line.match(/^([^#=]+)=(.*)$/);
-  if (match && !process.env[match[1]]) {
-    process.env[match[1].trim()] = match[2].trim().replace(/^["']|["']$/g, '');
-  }
-}
+dotenv.config({ path: path.resolve(__dirname, '.env.local') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.

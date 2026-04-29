@@ -54,6 +54,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "dotenv": "^17.4.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "supabase": "^2.72.3",
