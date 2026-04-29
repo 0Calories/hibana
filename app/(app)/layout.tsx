@@ -24,6 +24,14 @@ export default async function AppLayout({
       .single(),
   ]);
 
+  if (profileResult.error)
+    console.error(
+      '[AppLayout] user_profiles query failed',
+      profileResult.error,
+    );
+  if (stateResult.error)
+    console.error('[AppLayout] user_states query failed', stateResult.error);
+
   const username = profileResult.data?.username ?? 'User';
   const sparks = stateResult.data?.sparks_balance ?? 0;
 
