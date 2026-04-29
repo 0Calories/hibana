@@ -19,7 +19,6 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
-import { getUserState } from '@/app/(app)/shop/actions';
 import {
   Popover,
   PopoverContent,
@@ -28,7 +27,8 @@ import {
 import { type LandingState, useSparkFlyover } from './SparkFlyover';
 
 interface ProfileBadgeProps {
-  username?: string;
+  username: string;
+  sparks: number;
   rankName?: string;
   level?: number;
   xp?: number;
@@ -36,7 +36,6 @@ interface ProfileBadgeProps {
 }
 
 const MOCK_DATA = {
-  username: 'Ash',
   rankName: 'Smokesniffer',
   level: 3,
   xp: 690,
@@ -155,34 +154,15 @@ function XPRing({ progress }: { progress: number }) {
   );
 }
 
-// ─── Skeleton ───────────────────────────────────────────────────────
-function ProfileBadgeSkeleton() {
-  return (
-    <div className="flex items-center rounded-full border border-border bg-muted/50 py-0.5 pl-0.5 pr-2.5">
-      <div className="relative mr-1.5 flex size-7 items-center justify-center">
-        <div className="flex size-5 items-center justify-center rounded-full bg-background">
-          <UserIcon className="size-2.5 text-muted-foreground" />
-        </div>
-      </div>
-      <div className="h-3.5 w-12 animate-pulse rounded bg-muted" />
-      <span className="mx-1.5 text-border">&middot;</span>
-      <div className="flex items-center gap-1">
-        <SparklesIcon className="size-3.5 text-muted-foreground" />
-        <div className="h-3.5 w-5 animate-pulse rounded bg-muted" />
-      </div>
-    </div>
-  );
-}
-
 // ─── Main component ─────────────────────────────────────────────────
 export function ProfileBadge({
-  username = MOCK_DATA.username,
+  username,
+  sparks,
   rankName = MOCK_DATA.rankName,
   level = MOCK_DATA.level,
   xp = MOCK_DATA.xp,
   xpToNext = MOCK_DATA.xpToNext,
 }: ProfileBadgeProps) {
-  const [sparks, setSparks] = useState<number | null>(null);
   const levelInfo = getFlameLevel(level);
   const xpProgress = xpToNext > 0 ? Math.min(1, Math.max(0, xp / xpToNext)) : 0;
   const { registerTarget, landingState, sparksBoost, resetBoost } =
@@ -191,44 +171,21 @@ export function ProfileBadge({
   const sparkRef = useRef<HTMLDivElement>(null);
   const { scale, flashActive } = useInflatingPulse(landingState);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function fetchUserState() {
-      try {
-        const result = await getUserState();
-        if (cancelled) return;
-        setSparks(result.success ? result.data.sparks_balance : 0);
-      } catch {
-        if (!cancelled) setSparks(0);
-      }
-    }
-    fetchUserState();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const prevServerSparks = useRef(sparks);
   useEffect(() => {
-    if (sparks !== null && sparks !== prevServerSparks.current) {
+    if (sparks !== prevServerSparks.current) {
       prevServerSparks.current = sparks;
       resetBoost();
     }
   }, [sparks, resetBoost]);
 
-  const effectiveSparks = (sparks ?? 0) + sparksBoost;
+  const effectiveSparks = sparks + sparksBoost;
 
-  const loaded = sparks !== null;
   useEffect(() => {
-    if (!loaded) return;
     registerTarget(sparkRef.current);
-  }, [registerTarget, loaded]);
+  }, [registerTarget]);
 
   const displayedSparks = getDisplayedSparks(effectiveSparks, landingState);
-
-  if (sparks === null) {
-    return <ProfileBadgeSkeleton />;
-  }
 
   return (
     <Popover>
