@@ -1,27 +1,16 @@
--- Rename profiles → user_profiles for consistency with other user tables
--- (user_state, user_items, etc.)
+-- Rename profiles → user_profiles for consistency with other user tables.
+-- The reconcile migration that follows drops and recreates user_profiles
+-- with the proper schema, so this migration only needs to do the rename.
 
--- Drop existing RLS policies (they reference the old table name)
-drop policy if exists "Anyone can view profiles" on public.profiles;
-drop policy if exists "Users can update own profile" on public.profiles;
+-- Drop existing RLS policy (original name from initial migration)
+drop policy if exists "Enable read access for all users" on public.profiles;
 
 -- Rename table
 alter table public.profiles rename to user_profiles;
 
--- Rename indexes for clarity
-alter index profiles_pkey rename to user_profiles_pkey;
-alter index profiles_username_key rename to user_profiles_username_key;
-
--- Recreate RLS policies with consistent naming
-create policy "Anyone can view user_profiles"
-  on public.user_profiles for select
-  using (true);
-
-create policy "Users can update own user_profile"
-  on public.user_profiles for update
-  using (auth.uid() = id);
-
 -- Update trigger function to reference new table name
+-- (plpgsql validates at call time, and the trigger doesn't exist yet,
+-- so the bigint/uuid mismatch on user_profiles.id is harmless here)
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
