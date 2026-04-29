@@ -9,7 +9,7 @@ for (const line of readFileSync(
 ).split('\n')) {
   const match = line.match(/^([^#=]+)=(.*)$/);
   if (match && !process.env[match[1]]) {
-    process.env[match[1].trim()] = match[2].trim();
+    process.env[match[1].trim()] = match[2].trim().replace(/^["']|["']$/g, '');
   }
 }
 
