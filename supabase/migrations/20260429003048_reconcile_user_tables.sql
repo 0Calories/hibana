@@ -2,18 +2,19 @@
 -- clean up user_state → user_states, tighten RLS, update RPCs and triggers.
 --
 -- Replaces the out-of-order migrations 20260428204748 and 20260428220400.
--- Accounts for remote state: profiles already renamed to user_profiles (20260428213825),
--- heat/level columns on user_state (20260404000000 leveling migration).
+-- Accounts for remote state: 20260428213825 is recorded as applied but its
+-- rename of profiles → user_profiles may have rolled back (index rename failed).
+-- heat/level columns on user_state from 20260404000000 leveling migration.
 
 -- ============================================================
 -- 1. RESTRUCTURE user_profiles (table is empty — safe to recreate)
 --    Currently has old schema (bigint PK, no FK to auth.users).
 --    Recreate with uuid PK referencing auth.users.
+--    Handle both names: profiles (if rename rolled back) or user_profiles.
 -- ============================================================
 
-drop policy if exists "Anyone can view user_profiles" on public.user_profiles;
-drop policy if exists "Users can update own user_profile" on public.user_profiles;
 drop table if exists public.user_profiles;
+drop table if exists public.profiles;
 
 create table public.user_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
