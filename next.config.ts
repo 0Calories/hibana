@@ -46,5 +46,9 @@ export default withSentryConfig(withNextIntl(nextConfig), {
       // Automatically tree-shake Sentry logger statements to reduce bundle size
       removeDebugLogging: true,
     },
+
+    reactComponentAnnotation: {
+      enabled: true,
+    },
   },
 });
