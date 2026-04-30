@@ -34,7 +34,7 @@ export default defineConfig({
     // Setup & teardown
     {
       name: 'setup',
-      testMatch: /auth\.setup\.ts/,
+      testMatch: /global\.setup\.ts/,
       teardown: 'teardown',
     },
     {
