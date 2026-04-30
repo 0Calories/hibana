@@ -1,0 +1,71 @@
+name: Database Migrations
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - 'supabase/seed.sql'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - 'supabase/seed.sql'
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    name: Validate Migrations
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Enable pnpm via corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v2
+
+      - name: Start Supabase
+        run: supabase start --exclude studio,imgproxy,edge-runtime,logflare,vector
+
+      - name: Verify generated types are up to date
+        run: |
+          pnpm db:types
+          if ! git diff --exit-code lib/supabase/types.ts; then
+            echo "::error::Generated types are out of date. Run 'pnpm db:types' and commit the result."
+            exit 1
+          fi
+
+  deploy:
+    if: github.event_name == 'push'
+    name: Deploy Migrations to Production
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v2
+
+      - name: Link to production
+        run: supabase link --project-ref ${{ secrets.PRODUCTION_PROJECT_ID }}
+
+      - name: Push migrations
+        run: supabase db push
