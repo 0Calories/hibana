@@ -1,8 +1,8 @@
 import { test as setup } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
-import { TEST_USER } from './test-user';
+import { isTestUserEmail } from './test-user';
 
-setup('seed test user', async () => {
+setup('clean up stale test users', async () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SECRET_KEY;
 
@@ -20,23 +20,13 @@ setup('seed test user', async () => {
     },
   });
 
-  // Clean up any leftover test user from a previous failed run
+  // Remove any leftover test users from a previous failed run
   const { data: existingUsers } = await supabase.auth.admin.listUsers();
-  const existing = existingUsers?.users.find(
-    (u) => u.email === TEST_USER.email,
-  );
-  if (existing) {
-    await supabase.auth.admin.deleteUser(existing.id);
-  }
+  const staleUsers =
+    existingUsers?.users.filter((u) => u.email && isTestUserEmail(u.email)) ??
+    [];
 
-  // Create a fresh test user
-  const { error: createError } = await supabase.auth.admin.createUser({
-    email: TEST_USER.email,
-    password: TEST_USER.password,
-    email_confirm: true,
-  });
-
-  if (createError) {
-    throw new Error(`Failed to create test user: ${createError.message}`);
+  for (const user of staleUsers) {
+    await supabase.auth.admin.deleteUser(user.id);
   }
 });

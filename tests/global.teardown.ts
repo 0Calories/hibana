@@ -1,9 +1,8 @@
 import { test as teardown } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
+import { isTestUserEmail } from './test-user';
 
-const TEST_USER_EMAIL = 'e2e-test@hibana.com';
-
-teardown('delete test user and clean up data', async () => {
+teardown('delete all test users', async () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SECRET_KEY;
 
@@ -21,14 +20,14 @@ teardown('delete test user and clean up data', async () => {
     },
   });
 
-  // Find and delete the test user — cascading deletes clean up related data
   const { data: users } = await supabase.auth.admin.listUsers();
-  const testUser = users?.users.find((u) => u.email === TEST_USER_EMAIL);
+  const testUsers =
+    users?.users.filter((u) => u.email && isTestUserEmail(u.email)) ?? [];
 
-  if (testUser) {
-    const { error } = await supabase.auth.admin.deleteUser(testUser.id);
+  for (const user of testUsers) {
+    const { error } = await supabase.auth.admin.deleteUser(user.id);
     if (error) {
-      console.error(`Failed to delete test user: ${error.message}`);
+      console.error(`Failed to delete ${user.email}: ${error.message}`);
     }
   }
 });

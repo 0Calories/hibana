@@ -38,11 +38,6 @@ export default defineConfig({
       teardown: 'teardown',
     },
     {
-      name: 'auth',
-      testMatch: /auth\.setup\.ts/,
-      dependencies: ['setup'],
-    },
-    {
       name: 'teardown',
       testMatch: /global\.teardown\.ts/,
     },
@@ -50,45 +45,30 @@ export default defineConfig({
     // Desktop browsers
     {
       name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'playwright/.auth/user.json',
-      },
-      dependencies: ['auth'],
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
     },
     {
       name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        storageState: 'playwright/.auth/user.json',
-      },
-      dependencies: ['auth'],
+      use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
     },
     {
       name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-        storageState: 'playwright/.auth/user.json',
-      },
-      dependencies: ['auth'],
+      use: { ...devices['Desktop Safari'] },
+      dependencies: ['setup'],
     },
 
     // Mobile viewports
     {
       name: 'Mobile Chrome',
-      use: {
-        ...devices['Pixel 5'],
-        storageState: 'playwright/.auth/user.json',
-      },
-      dependencies: ['auth'],
+      use: { ...devices['Pixel 5'] },
+      dependencies: ['setup'],
     },
     {
       name: 'Mobile Safari',
-      use: {
-        ...devices['iPhone 12'],
-        storageState: 'playwright/.auth/user.json',
-      },
-      dependencies: ['auth'],
+      use: { ...devices['iPhone 12'] },
+      dependencies: ['setup'],
     },
   ],
 
