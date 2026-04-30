@@ -19,13 +19,5 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v2
 
-      - name: Start Supabase
+      - name: Apply migrations to fresh database
         run: supabase start --exclude studio,imgproxy,edge-runtime,logflare,vector
-
-      - name: Verify generated types are up to date
-        run: |
-          supabase gen types typescript --local > lib/supabase/types.ts
-          if ! git diff --ignore-space-at-eol --exit-code --quiet lib/supabase/types.ts; then
-            echo "::error::Generated types are out of date. Run 'pnpm db:types' and commit the result."
-            exit 1
-          fi

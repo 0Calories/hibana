@@ -4,623 +4,626 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type Database = {
   graphql_public: {
     Tables: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       graphql: {
         Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       flame_schedules: {
         Row: {
-          day_of_week: number
-          flame_ids: string[]
-          flame_minutes: number[]
-          fuel_budget: number
-          user_id: string
-        }
+          day_of_week: number;
+          flame_ids: string[];
+          flame_minutes: number[];
+          fuel_budget: number;
+          user_id: string;
+        };
         Insert: {
-          day_of_week: number
-          flame_ids?: string[]
-          flame_minutes?: number[]
-          fuel_budget?: number
-          user_id: string
-        }
+          day_of_week: number;
+          flame_ids?: string[];
+          flame_minutes?: number[];
+          fuel_budget?: number;
+          user_id: string;
+        };
         Update: {
-          day_of_week?: number
-          flame_ids?: string[]
-          flame_minutes?: number[]
-          fuel_budget?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
+          day_of_week?: number;
+          flame_ids?: string[];
+          flame_minutes?: number[];
+          fuel_budget?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       flame_sessions: {
         Row: {
-          created_at: string
-          date: string
-          duration_seconds: number
-          ended_at: string | null
-          flame_id: string
-          id: string
-          is_completed: boolean
-          notes: string | null
-          started_at: string | null
-          user_id: string
-        }
+          created_at: string;
+          date: string;
+          duration_seconds: number;
+          ended_at: string | null;
+          flame_id: string;
+          id: string;
+          is_completed: boolean;
+          notes: string | null;
+          started_at: string | null;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          date?: string
-          duration_seconds?: number
-          ended_at?: string | null
-          flame_id: string
-          id?: string
-          is_completed?: boolean
-          notes?: string | null
-          started_at?: string | null
-          user_id: string
-        }
+          created_at?: string;
+          date?: string;
+          duration_seconds?: number;
+          ended_at?: string | null;
+          flame_id: string;
+          id?: string;
+          is_completed?: boolean;
+          notes?: string | null;
+          started_at?: string | null;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          date?: string
-          duration_seconds?: number
-          ended_at?: string | null
-          flame_id?: string
-          id?: string
-          is_completed?: boolean
-          notes?: string | null
-          started_at?: string | null
-          user_id?: string
-        }
+          created_at?: string;
+          date?: string;
+          duration_seconds?: number;
+          ended_at?: string | null;
+          flame_id?: string;
+          id?: string;
+          is_completed?: boolean;
+          notes?: string | null;
+          started_at?: string | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "flame_sessions_flame_id_fkey"
-            columns: ["flame_id"]
-            isOneToOne: false
-            referencedRelation: "flames"
-            referencedColumns: ["id"]
+            foreignKeyName: 'flame_sessions_flame_id_fkey';
+            columns: ['flame_id'];
+            isOneToOne: false;
+            referencedRelation: 'flames';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       flames: {
         Row: {
-          color: string | null
-          completion_threshold_minutes: number | null
-          count_target: number | null
-          count_unit: string | null
-          created_at: string
-          heat: number
-          icon: string | null
-          id: string
-          is_archived: boolean
-          level: number
-          name: string
-          time_budget_minutes: number | null
-          tracking_type: string
-          updated_at: string
-          user_id: string
-        }
+          color: string | null;
+          completion_threshold_minutes: number | null;
+          count_target: number | null;
+          count_unit: string | null;
+          created_at: string;
+          heat: number;
+          icon: string | null;
+          id: string;
+          is_archived: boolean;
+          level: number;
+          name: string;
+          time_budget_minutes: number | null;
+          tracking_type: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          color?: string | null
-          completion_threshold_minutes?: number | null
-          count_target?: number | null
-          count_unit?: string | null
-          created_at?: string
-          heat?: number
-          icon?: string | null
-          id?: string
-          is_archived?: boolean
-          level?: number
-          name: string
-          time_budget_minutes?: number | null
-          tracking_type: string
-          updated_at?: string
-          user_id: string
-        }
+          color?: string | null;
+          completion_threshold_minutes?: number | null;
+          count_target?: number | null;
+          count_unit?: string | null;
+          created_at?: string;
+          heat?: number;
+          icon?: string | null;
+          id?: string;
+          is_archived?: boolean;
+          level?: number;
+          name: string;
+          time_budget_minutes?: number | null;
+          tracking_type: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          color?: string | null
-          completion_threshold_minutes?: number | null
-          count_target?: number | null
-          count_unit?: string | null
-          created_at?: string
-          heat?: number
-          icon?: string | null
-          id?: string
-          is_archived?: boolean
-          level?: number
-          name?: string
-          time_budget_minutes?: number | null
-          tracking_type?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          color?: string | null;
+          completion_threshold_minutes?: number | null;
+          count_target?: number | null;
+          count_unit?: string | null;
+          created_at?: string;
+          heat?: number;
+          icon?: string | null;
+          id?: string;
+          is_archived?: boolean;
+          level?: number;
+          name?: string;
+          time_budget_minutes?: number | null;
+          tracking_type?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       habits: {
         Row: {
-          action: string | null
-          completion_logs: string[] | null
-          created_at: string
-          description: string | null
-          icon: number | null
-          id: number
-          location: string | null
-          name: string | null
-          time: string | null
-          type: number
-          user: string
-        }
+          action: string | null;
+          completion_logs: string[] | null;
+          created_at: string;
+          description: string | null;
+          icon: number | null;
+          id: number;
+          location: string | null;
+          name: string | null;
+          time: string | null;
+          type: number;
+          user: string;
+        };
         Insert: {
-          action?: string | null
-          completion_logs?: string[] | null
-          created_at?: string
-          description?: string | null
-          icon?: number | null
-          id?: number
-          location?: string | null
-          name?: string | null
-          time?: string | null
-          type?: number
-          user: string
-        }
+          action?: string | null;
+          completion_logs?: string[] | null;
+          created_at?: string;
+          description?: string | null;
+          icon?: number | null;
+          id?: number;
+          location?: string | null;
+          name?: string | null;
+          time?: string | null;
+          type?: number;
+          user: string;
+        };
         Update: {
-          action?: string | null
-          completion_logs?: string[] | null
-          created_at?: string
-          description?: string | null
-          icon?: number | null
-          id?: number
-          location?: string | null
-          name?: string | null
-          time?: string | null
-          type?: number
-          user?: string
-        }
-        Relationships: []
-      }
+          action?: string | null;
+          completion_logs?: string[] | null;
+          created_at?: string;
+          description?: string | null;
+          icon?: number | null;
+          id?: number;
+          location?: string | null;
+          name?: string | null;
+          time?: string | null;
+          type?: number;
+          user?: string;
+        };
+        Relationships: [];
+      };
       heat_transactions: {
         Row: {
-          amount: number
-          created_at: string
-          flame_id: string
-          id: string
-          reason: string
-          reference_id: string | null
-          user_id: string
-        }
+          amount: number;
+          created_at: string;
+          flame_id: string;
+          id: string;
+          reason: string;
+          reference_id: string | null;
+          user_id: string;
+        };
         Insert: {
-          amount: number
-          created_at?: string
-          flame_id: string
-          id?: string
-          reason: string
-          reference_id?: string | null
-          user_id: string
-        }
+          amount: number;
+          created_at?: string;
+          flame_id: string;
+          id?: string;
+          reason: string;
+          reference_id?: string | null;
+          user_id: string;
+        };
         Update: {
-          amount?: number
-          created_at?: string
-          flame_id?: string
-          id?: string
-          reason?: string
-          reference_id?: string | null
-          user_id?: string
-        }
+          amount?: number;
+          created_at?: string;
+          flame_id?: string;
+          id?: string;
+          reason?: string;
+          reference_id?: string | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "heat_transactions_flame_id_fkey"
-            columns: ["flame_id"]
-            isOneToOne: false
-            referencedRelation: "flames"
-            referencedColumns: ["id"]
+            foreignKeyName: 'heat_transactions_flame_id_fkey';
+            columns: ['flame_id'];
+            isOneToOne: false;
+            referencedRelation: 'flames';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       items: {
         Row: {
-          cost_sparks: number
-          created_at: string
-          description: string | null
-          id: string
-          is_active: boolean
-          is_equippable: boolean
-          metadata: Json
-          name: string
-          type: string
-        }
+          cost_sparks: number;
+          created_at: string;
+          description: string | null;
+          id: string;
+          is_active: boolean;
+          is_equippable: boolean;
+          metadata: Json;
+          name: string;
+          type: string;
+        };
         Insert: {
-          cost_sparks: number
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          is_equippable?: boolean
-          metadata?: Json
-          name: string
-          type: string
-        }
+          cost_sparks?: number;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean;
+          is_equippable?: boolean;
+          metadata?: Json;
+          name: string;
+          type: string;
+        };
         Update: {
-          cost_sparks?: number
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          is_equippable?: boolean
-          metadata?: Json
-          name?: string
-          type?: string
-        }
-        Relationships: []
-      }
+          cost_sparks?: number;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean;
+          is_equippable?: boolean;
+          metadata?: Json;
+          name?: string;
+          type?: string;
+        };
+        Relationships: [];
+      };
       notes: {
         Row: {
-          content: string | null
-          created_at: string
-          id: number
-          title: string | null
-          user_id: string | null
-        }
+          content: string | null;
+          created_at: string;
+          id: number;
+          title: string | null;
+          user_id: string | null;
+        };
         Insert: {
-          content?: string | null
-          created_at?: string
-          id?: number
-          title?: string | null
-          user_id?: string | null
-        }
+          content?: string | null;
+          created_at?: string;
+          id?: number;
+          title?: string | null;
+          user_id?: string | null;
+        };
         Update: {
-          content?: string | null
-          created_at?: string
-          id?: number
-          title?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+          content?: string | null;
+          created_at?: string;
+          id?: number;
+          title?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       spark_transactions: {
         Row: {
-          amount: number
-          created_at: string
-          id: string
-          reason: string
-          reference_id: string | null
-          user_id: string
-        }
+          amount: number;
+          created_at: string;
+          id: string;
+          reason: string;
+          reference_id: string | null;
+          user_id: string;
+        };
         Insert: {
-          amount: number
-          created_at?: string
-          id?: string
-          reason: string
-          reference_id?: string | null
-          user_id: string
-        }
+          amount: number;
+          created_at?: string;
+          id?: string;
+          reason: string;
+          reference_id?: string | null;
+          user_id: string;
+        };
         Update: {
-          amount?: number
-          created_at?: string
-          id?: string
-          reason?: string
-          reference_id?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
+          amount?: number;
+          created_at?: string;
+          id?: string;
+          reason?: string;
+          reference_id?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       tasks: {
         Row: {
-          content: string | null
-          created_at: string
-          due_date: string | null
-          effort: number | null
-          id: number
-          parent_task: number | null
-          priority: number | null
-          status: number | null
-          title: string | null
-          user: string | null
-        }
+          content: string | null;
+          created_at: string;
+          due_date: string | null;
+          effort: number | null;
+          id: number;
+          parent_task: number | null;
+          priority: number | null;
+          status: number | null;
+          title: string | null;
+          user: string | null;
+        };
         Insert: {
-          content?: string | null
-          created_at?: string
-          due_date?: string | null
-          effort?: number | null
-          id?: number
-          parent_task?: number | null
-          priority?: number | null
-          status?: number | null
-          title?: string | null
-          user?: string | null
-        }
+          content?: string | null;
+          created_at?: string;
+          due_date?: string | null;
+          effort?: number | null;
+          id?: number;
+          parent_task?: number | null;
+          priority?: number | null;
+          status?: number | null;
+          title?: string | null;
+          user?: string | null;
+        };
         Update: {
-          content?: string | null
-          created_at?: string
-          due_date?: string | null
-          effort?: number | null
-          id?: number
-          parent_task?: number | null
-          priority?: number | null
-          status?: number | null
-          title?: string | null
-          user?: string | null
-        }
+          content?: string | null;
+          created_at?: string;
+          due_date?: string | null;
+          effort?: number | null;
+          id?: number;
+          parent_task?: number | null;
+          priority?: number | null;
+          status?: number | null;
+          title?: string | null;
+          user?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "todos_parent_task_fkey"
-            columns: ["parent_task"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
+            foreignKeyName: 'todos_parent_task_fkey';
+            columns: ['parent_task'];
+            isOneToOne: false;
+            referencedRelation: 'tasks';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       user_items: {
         Row: {
-          acquired_at: string
-          id: string
-          item_id: string
-          quantity: number
-          user_id: string
-        }
+          acquired_at: string;
+          id: string;
+          item_id: string;
+          quantity: number;
+          user_id: string;
+        };
         Insert: {
-          acquired_at?: string
-          id?: string
-          item_id: string
-          quantity?: number
-          user_id: string
-        }
+          acquired_at?: string;
+          id?: string;
+          item_id: string;
+          quantity?: number;
+          user_id: string;
+        };
         Update: {
-          acquired_at?: string
-          id?: string
-          item_id?: string
-          quantity?: number
-          user_id?: string
-        }
+          acquired_at?: string;
+          id?: string;
+          item_id?: string;
+          quantity?: number;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "user_inventory_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
+            foreignKeyName: 'user_inventory_item_id_fkey';
+            columns: ['item_id'];
+            isOneToOne: false;
+            referencedRelation: 'items';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       user_profiles: {
         Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string
-          id: string
-          username: string | null
-        }
+          avatar_url: string | null;
+          bio: string | null;
+          created_at: string;
+          id: string;
+          username: string | null;
+        };
         Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          id: string
-          username?: string | null
-        }
+          avatar_url?: string | null;
+          bio?: string | null;
+          created_at?: string;
+          id: string;
+          username?: string | null;
+        };
         Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          id?: string
-          username?: string | null
-        }
-        Relationships: []
-      }
+          avatar_url?: string | null;
+          bio?: string | null;
+          created_at?: string;
+          id?: string;
+          username?: string | null;
+        };
+        Relationships: [];
+      };
       user_states: {
         Row: {
-          heat: number
-          heat_level: number
-          level: number
-          sparks_balance: number
-          user_id: string
-        }
+          heat: number;
+          heat_level: number;
+          level: number;
+          sparks_balance: number;
+          user_id: string;
+        };
         Insert: {
-          heat?: number
-          heat_level?: number
-          level?: number
-          sparks_balance?: number
-          user_id: string
-        }
+          heat?: number;
+          heat_level?: number;
+          level?: number;
+          sparks_balance?: number;
+          user_id: string;
+        };
         Update: {
-          heat?: number
-          heat_level?: number
-          level?: number
-          sparks_balance?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
+          heat?: number;
+          heat_level?: number;
+          level?: number;
+          sparks_balance?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       waitlist: {
         Row: {
-          created_at: string
-          email: string
-          id: string
-        }
+          created_at: string;
+          email: string;
+          id: string;
+        };
         Insert: {
-          created_at?: string
-          email: string
-          id?: string
-        }
+          created_at?: string;
+          email: string;
+          id?: string;
+        };
         Update: {
-          created_at?: string
-          email?: string
-          id?: string
-        }
-        Relationships: []
-      }
-    }
+          created_at?: string;
+          email?: string;
+          id?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      compute_level_from_heat: { Args: { p_heat: number }; Returns: number }
+      compute_level_from_heat: { Args: { p_heat: number }; Returns: number };
       credit_completion_rewards: {
         Args: {
-          p_flame_id: string
-          p_heat: number
-          p_session_id: string
-          p_sparks: number
-          p_user_id: string
-        }
-        Returns: Json
-      }
+          p_flame_id: string;
+          p_heat: number;
+          p_session_id: string;
+          p_sparks: number;
+          p_user_id: string;
+        };
+        Returns: Json;
+      };
       credit_completion_sparks: {
-        Args: { p_amount: number; p_session_id: string; p_user_id: string }
-        Returns: number
-      }
+        Args: { p_amount: number; p_session_id: string; p_user_id: string };
+        Returns: number;
+      };
       purchase_item: {
-        Args: { p_item_id: string; p_request_id: string; p_user_id: string }
-        Returns: number
-      }
-    }
+        Args: { p_item_id: string; p_request_id: string; p_user_id: string };
+        Returns: number;
+      };
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  'public'
+>];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Insert: infer I;
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Update: infer U;
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
+    | keyof DefaultSchema['Enums']
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
+    | keyof DefaultSchema['CompositeTypes']
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+    : never;
 
 export const Constants = {
   graphql_public: {
@@ -629,5 +632,4 @@ export const Constants = {
   public: {
     Enums: {},
   },
-} as const
-
+} as const;
