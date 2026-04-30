@@ -12,6 +12,7 @@ on:
       - 'supabase/migrations/**'
       - 'supabase/config.toml'
       - 'supabase/seed.sql'
+  workflow_dispatch:
 
 jobs:
   validate:
@@ -43,7 +44,7 @@ jobs:
       - name: Verify generated types are up to date
         run: |
           pnpm db:types
-          if ! git diff --exit-code lib/supabase/types.ts; then
+          if ! git diff --ignore-space-at-eol --exit-code --quiet lib/supabase/types.ts; then
             echo "::error::Generated types are out of date. Run 'pnpm db:types' and commit the result."
             exit 1
           fi
@@ -57,6 +58,7 @@ jobs:
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.PRODUCTION_PROJECT_ID }}
 
     steps:
       - uses: actions/checkout@v6
@@ -65,7 +67,7 @@ jobs:
         uses: supabase/setup-cli@v2
 
       - name: Link to production
-        run: supabase link --project-ref ${{ secrets.PRODUCTION_PROJECT_ID }}
+        run: supabase link --project-ref $SUPABASE_PROJECT_ID
 
       - name: Push migrations
         run: supabase db push
