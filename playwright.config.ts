@@ -38,6 +38,11 @@ export default defineConfig({
       teardown: 'teardown',
     },
     {
+      name: 'auth',
+      testMatch: /auth\.setup\.ts/,
+      dependencies: ['setup'],
+    },
+    {
       name: 'teardown',
       testMatch: /global\.teardown\.ts/,
     },
@@ -49,7 +54,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['auth'],
     },
     {
       name: 'firefox',
@@ -57,7 +62,7 @@ export default defineConfig({
         ...devices['Desktop Firefox'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['auth'],
     },
     {
       name: 'webkit',
@@ -65,7 +70,7 @@ export default defineConfig({
         ...devices['Desktop Safari'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['auth'],
     },
 
     // Mobile viewports
@@ -75,7 +80,7 @@ export default defineConfig({
         ...devices['Pixel 5'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['auth'],
     },
     {
       name: 'Mobile Safari',
@@ -83,7 +88,7 @@ export default defineConfig({
         ...devices['iPhone 12'],
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['auth'],
     },
   ],
 
