@@ -50,7 +50,6 @@
     "home": "Home",
     "flames": "Flames",
     "habits": "Habits",
-    "tasks": "Tasks",
     "schedule": "スケジュール",
     "signUp": "Sign Up",
     "logIn": "Log In"
@@ -218,7 +217,6 @@
     "signOut": "ログアウト"
   },
   "pages": {
-    "tasks": "Tasks",
     "habits": "Habits",
     "schedule": "Schedule"
   },

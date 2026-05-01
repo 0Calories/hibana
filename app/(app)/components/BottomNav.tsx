@@ -12,7 +12,7 @@ export function BottomNav() {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
       <div className="rounded-3xl border border-border/50 bg-card/40 backdrop-blur-xl">
-        <div className="grid h-16 grid-cols-4">
+        <div className="grid h-16 grid-cols-2">
           {NAV_ITEMS.map((item) => {
             const isActive =
               pathname === item.href ||
