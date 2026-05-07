@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import type { Flame } from '@/lib/supabase/rows';
 import { formatDuration } from '@/lib/time';
+import { cn } from '@/lib/utils';
 import { setDailyPlan } from '../actions';
 import { CreateFlameDialog } from './CreateFlameDialog';
 import { AssignedFlamesZone } from './planner/AssignedFlamesZone';
@@ -161,8 +162,8 @@ export function PlanningCanvas({
           onAllocationChange={handleAllocationChange}
         />
 
-        <div className="space-y-1.5">
-          <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="space-y-2">
+          <h2 className="text-sm font-medium text-muted-foreground">
             {t('availableHeading')}
           </h2>
           <MyFlamesZone>
@@ -176,10 +177,18 @@ export function PlanningCanvas({
             <button
               type="button"
               onClick={() => setCreateOpen(true)}
-              className="inline-flex items-center gap-1 self-center rounded-full border border-dashed border-border px-3 py-1.5 text-xs hover:bg-muted/40 transition-colors"
+              className={cn(
+                'flex w-28 shrink-0 sm:w-36 flex-col items-center justify-center gap-2',
+                'rounded-xl border-2 border-dashed border-border bg-card/40',
+                'min-h-40 sm:min-h-52',
+                'text-muted-foreground transition-colors',
+                'hover:border-amber-400/60 hover:bg-amber-500/5',
+                'hover:text-amber-600 dark:hover:text-amber-400',
+              )}
+              aria-label={t('createNewFlame')}
             >
-              <PlusIcon className="size-3" />
-              {t('createNewFlame')}
+              <PlusIcon className="size-6" />
+              <span className="text-xs font-medium">{t('createNewFlame')}</span>
             </button>
           </MyFlamesZone>
         </div>
@@ -191,14 +200,14 @@ export function PlanningCanvas({
             disabled={assignedFlameIds.length === 0}
             className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
-            {t('clear')}
+            {t('reset')}
           </button>
           <Button
             onClick={handleLockIn}
             disabled={assignedFlameIds.length === 0 || submitting}
             size="lg"
           >
-            {t('lockIn')}
+            {t('confirm')}
           </Button>
         </div>
       </div>
