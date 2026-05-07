@@ -105,6 +105,15 @@
       "addedToBalance": "{amount} added to fuel",
       "simpleRefilled": "Refilled {amount} of fuel"
     },
+    "edit": {
+      "title": "Edit lineup",
+      "locked": "Already tended — locked for the day",
+      "remove": "Remove from lineup",
+      "addFlame": "+ Add flame",
+      "createNewFlame": "+ New flame",
+      "added": "Added to today",
+      "removed": "Removed from today"
+    },
     "plan": {
       "summary": "{time} planned · {count, plural, one {# flame} other {# flames}}",
       "heading": "Plan today's flames",
