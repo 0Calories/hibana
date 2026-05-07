@@ -96,6 +96,15 @@
       "label": "Fuel",
       "refill": "Refill"
     },
+    "refill": {
+      "title": "Refill fuel",
+      "open": "Open ({qty})",
+      "buyAndOpen": "Buy & open",
+      "insufficientSparks": "Not enough sparks",
+      "appliedItem": "Caught up {detail}",
+      "addedToBalance": "{amount} added to fuel",
+      "simpleRefilled": "Refilled {amount} of fuel"
+    },
     "plan": {
       "summary": "{time} planned · {count, plural, one {# flame} other {# flames}}",
       "heading": "Plan today's flames",
