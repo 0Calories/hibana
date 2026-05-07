@@ -13,7 +13,10 @@
       "!.next",
       "!dist",
       "!build",
-      "!lib/supabase/types.ts"
+      "!lib/supabase/types.ts",
+      "!.claude",
+      "!.zed",
+      "!.vscode"
     ]
   },
   "formatter": {
