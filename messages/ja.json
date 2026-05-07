@@ -50,7 +50,6 @@
     "home": "Home",
     "flames": "Flames",
     "habits": "Habits",
-    "schedule": "スケジュール",
     "signUp": "Sign Up",
     "logIn": "Log In"
   },
@@ -203,32 +202,6 @@
       "actionsMenu": "操作"
     }
   },
-  "schedule": {
-    "pageTitle": "週間プラン",
-    "backToFlames": "フレイムに戻る",
-    "today": "今日",
-    "fuelBudget": "燃料予算",
-    "fuelLocked": "今日の予算はロック済み",
-    "fuelLockedWarning": "一度設定すると変更できません",
-    "noFuel": "未設定",
-    "flames": "フレイム",
-    "assigned": "割り当て済み",
-    "assignedHint": "フレームをここへドラッグ",
-    "capacity": "容量",
-    "full": "満杯",
-    "exceeds": "予算超過",
-    "alreadyBurning": "燃焼中",
-    "save": "保存",
-    "saved": "{day}のスケジュールを保存しました",
-    "saving": "スケジュールを保存中...",
-    "overCapacity": "割り当てたフレイムが燃料予算を超えています",
-    "clearDay": "クリア",
-    "hours": "時間",
-    "minutes": "分",
-    "dragHere": "ここにフレイムをドラッグ",
-    "noBudgetSet": "未設定",
-    "loadError": "スケジュールの読み込みに失敗しました。"
-  },
   "profile": {
     "title": "プロフィール",
     "description": "ゲーミフィケーションのステータスとプロフィール",
@@ -241,8 +214,7 @@
     "signOut": "ログアウト"
   },
   "pages": {
-    "habits": "Habits",
-    "schedule": "Schedule"
+    "habits": "Habits"
   },
   "metadata": {
     "title": "Hibana",

@@ -50,7 +50,6 @@
     "home": "Home",
     "flames": "Flames",
     "habits": "Habits",
-    "schedule": "Schedule",
     "signUp": "Sign Up",
     "logIn": "Log In"
   },
@@ -203,32 +202,6 @@
       "actionsMenu": "Actions"
     }
   },
-  "schedule": {
-    "pageTitle": "Weekly Plan",
-    "backToFlames": "Back to flames",
-    "today": "Today",
-    "fuelBudget": "Fuel Budget",
-    "fuelLocked": "Budget locked for today",
-    "fuelLockedWarning": "This can't be changed once set",
-    "noFuel": "No budget",
-    "flames": "Flames",
-    "assigned": "Assigned",
-    "assignedHint": "Drag Flames here",
-    "capacity": "Capacity",
-    "full": "Full",
-    "exceeds": "Exceeds budget",
-    "alreadyBurning": "Already burning",
-    "save": "Save",
-    "saved": "Schedule saved for {day}",
-    "saving": "Saving schedule...",
-    "overCapacity": "Assigned flames exceed the fuel budget",
-    "clearDay": "Clear day",
-    "hours": "hr",
-    "minutes": "min",
-    "dragHere": "Drag flames here",
-    "noBudgetSet": "No budget set",
-    "loadError": "Failed to load schedule."
-  },
   "profile": {
     "title": "Profile",
     "description": "Your gamification stats and profile",
@@ -241,8 +214,7 @@
     "signOut": "Sign Out"
   },
   "pages": {
-    "habits": "Habits",
-    "schedule": "Schedule"
+    "habits": "Habits"
   },
   "metadata": {
     "title": "Hibana",
