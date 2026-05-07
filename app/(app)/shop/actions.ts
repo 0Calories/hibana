@@ -12,7 +12,6 @@ import {
   createServiceClient,
 } from '@/lib/supabase/server';
 import type { ActionResult } from '@/lib/types';
-import { parseLocalDate } from '@/lib/utils';
 
 /**
  * Returns the user's state row (auto-created on signup by handle_new_user trigger).
@@ -65,61 +64,42 @@ export async function creditCompletionReward(
 ): ActionResult<{ sparks: number }> {
   const { supabase, user } = await createClientWithAuth();
 
-  // Fetch the completed session and the schedule-based budget for this day
-  const dayOfWeek = parseLocalDate(date).getDay();
-  const [sessionResult, scheduleResult] = await Promise.all([
-    supabase
-      .from('flame_sessions')
-      .select('id, duration_seconds, is_completed')
-      .eq('flame_id', flameId)
-      .eq('date', date)
-      .maybeSingle(),
-    supabase
-      .from('flame_schedules')
-      .select('flame_ids, flame_minutes')
-      .eq('user_id', user.id)
-      .eq('day_of_week', dayOfWeek)
-      .maybeSingle(),
-  ]);
+  const { data: session, error: sessionError } = await supabase
+    .from('flame_sessions')
+    .select('id, fueled_seconds, target_seconds, is_completed')
+    .eq('flame_id', flameId)
+    .eq('date', date)
+    .maybeSingle();
 
-  if (sessionResult.error) {
-    return { success: false, error: sessionResult.error };
+  if (sessionError) {
+    return { success: false, error: sessionError };
   }
-  if (scheduleResult.error) {
-    return { success: false, error: scheduleResult.error };
-  }
-
-  const session = sessionResult.data;
   if (!session || !session.is_completed) {
     return {
       success: false,
       error: new Error('No completed session found'),
     };
   }
-
-  // Resolve the flame's budget from the schedule (same logic as getFlamesForDay)
-  const schedule = scheduleResult.data;
-  const flameIndex = schedule?.flame_ids?.indexOf(flameId) ?? -1;
-  if (!schedule?.flame_minutes?.[flameIndex]) {
+  if (!session.target_seconds) {
     return {
       success: false,
-      error: new Error('No scheduled budget found for completed flame session'),
+      error: new Error('Session has no target — cannot credit'),
     };
   }
 
-  const scheduledMinutes = schedule.flame_minutes[flameIndex];
-  // Compute sparks (level hardcoded to 1 until flame leveling ships)
+  // Sparks are awarded on fueled_seconds (the rewards-eligible portion).
+  // Level hardcoded to 1 until flame leveling is wired into completions.
   const level = 1;
-  const elapsedSeconds = session.duration_seconds;
-  const targetSeconds = scheduledMinutes * 60;
-  const sparks = calculateSparks(elapsedSeconds, targetSeconds, level);
+  const sparks = calculateSparks(
+    session.fueled_seconds,
+    session.target_seconds,
+    level,
+  );
 
   if (sparks <= 0) {
     return { success: true, data: { sparks: 0 } };
   }
 
-  // Atomic: insert transaction (idempotent) + increment balance
-  // Uses service-role client because execute is REVOKE'd from authenticated
   const serviceClient = createServiceClient();
   const { data: credited, error: rpcError } = await serviceClient.rpc(
     'credit_completion_sparks',
@@ -133,10 +113,6 @@ export async function creditCompletionReward(
   if (rpcError) {
     return { success: false, error: rpcError };
   }
-
-  // No revalidatePath here — the completion action already revalidates
-  // /flames, and premature revalidation would update the profile badge before
-  // the flyover animation finishes.
 
   return { success: true, data: { sparks: credited ?? 0 } };
 }
