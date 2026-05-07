@@ -3,11 +3,14 @@
 import {
   DndContext,
   type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import { AnimatePresence, motion } from 'framer-motion';
 import { PlusIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useMemo, useState } from 'react';
@@ -18,6 +21,7 @@ import { formatDuration } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { setDailyPlan } from '../actions';
 import { CreateFlameDialog } from './CreateFlameDialog';
+import { FlameCard } from './flame-card/FlameCard';
 import { AssignedFlamesZone } from './planner/AssignedFlamesZone';
 import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './planner/constants';
 import { DraggableFlameCard } from './planner/DraggableFlameCard';
@@ -34,6 +38,13 @@ interface PlanningCanvasProps {
 
 const DEFAULT_MINUTES = 30;
 
+const SLIDE_TRANSITION = {
+  type: 'spring' as const,
+  stiffness: 500,
+  damping: 38,
+  mass: 0.6,
+};
+
 export function PlanningCanvas({
   flames,
   date,
@@ -46,6 +57,20 @@ export function PlanningCanvas({
   const [allocations, setAllocations] = useState<Record<string, number>>({});
   const [createOpen, setCreateOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [activeFlameId, setActiveFlameId] = useState<string | null>(null);
+
+  // When the user moves a flame via DRAG, we skip the source-side exit
+  // animation — the card is visually at the cursor (DragOverlay), so animating
+  // an exit at the now-empty source slot is meaningless. The id of the flame
+  // currently being drag-removed is held here for one render so the motion.div
+  // exit prop becomes undefined for that child before AnimatePresence captures
+  // the unmount. Click moves don't set this — they get the full exit animation.
+  const [skipExitForId, setSkipExitForId] = useState<string | null>(null);
+
+  const activeFlame = useMemo(
+    () => flames.find((f) => f.id === activeFlameId) ?? null,
+    [flames, activeFlameId],
+  );
 
   const flameLevels = useMemo(
     () => new Map(flames.map((f, i) => [f.id, (i % 8) + 1])),
@@ -77,8 +102,28 @@ export function PlanningCanvas({
     }),
   );
 
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveFlameId(String(event.active.id));
+  }, []);
+
+  // Apply a state mutation while skipping the exit animation for one flame.
+  // Sequence: setSkipExitForId triggers a render where the doomed motion.div's
+  // exit prop becomes undefined; on the next frame we apply the actual list
+  // mutation, so AnimatePresence captures the no-exit prop before the unmount.
+  const applyDragMutation = useCallback(
+    (flameId: string, mutate: () => void) => {
+      setSkipExitForId(flameId);
+      requestAnimationFrame(() => {
+        mutate();
+        setSkipExitForId(null);
+      });
+    },
+    [],
+  );
+
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
+      setActiveFlameId(null);
       const { active, over } = event;
       if (!over) return;
       const flameId = String(active.id);
@@ -88,16 +133,40 @@ export function PlanningCanvas({
         const seconds = lastUsedTargetsByFlameId[flameId];
         const minutes =
           seconds != null ? Math.round(seconds / 60) : DEFAULT_MINUTES;
-        setAssignedFlameIds((prev) => [...prev, flameId]);
-        setAllocations((prev) => ({ ...prev, [flameId]: minutes }));
+        applyDragMutation(flameId, () => {
+          setAssignedFlameIds((prev) => [...prev, flameId]);
+          setAllocations((prev) => ({ ...prev, [flameId]: minutes }));
+        });
       } else if (over.id === MY_FLAMES_ZONE_ID) {
-        setAssignedFlameIds((prev) => prev.filter((id) => id !== flameId));
-        setAllocations((prev) => {
-          const next = { ...prev };
-          delete next[flameId];
-          return next;
+        if (!assignedFlameIds.includes(flameId)) return;
+        applyDragMutation(flameId, () => {
+          setAssignedFlameIds((prev) => prev.filter((id) => id !== flameId));
+          setAllocations((prev) => {
+            const next = { ...prev };
+            delete next[flameId];
+            return next;
+          });
         });
       }
+    },
+    [applyDragMutation, assignedFlameIds, lastUsedTargetsByFlameId],
+  );
+
+  const handleDragCancel = useCallback(() => {
+    setActiveFlameId(null);
+  }, []);
+
+  // Click-to-assign on a pool flame. State updates directly (no skipExit) so
+  // the source pool item plays its full exit animation as it transitions to
+  // the lineup.
+  const handlePoolClickAssign = useCallback(
+    (flameId: string) => {
+      if (assignedFlameIds.includes(flameId)) return;
+      const seconds = lastUsedTargetsByFlameId[flameId];
+      const minutes =
+        seconds != null ? Math.round(seconds / 60) : DEFAULT_MINUTES;
+      setAssignedFlameIds((prev) => [...prev, flameId]);
+      setAllocations((prev) => ({ ...prev, [flameId]: minutes }));
     },
     [assignedFlameIds, lastUsedTargetsByFlameId],
   );
@@ -144,7 +213,12 @@ export function PlanningCanvas({
   });
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
       <div className="flex flex-col gap-4">
         <div className="flex items-baseline justify-between gap-3">
           <h1 className="text-lg font-semibold">{t('heading')}</h1>
@@ -160,6 +234,7 @@ export function PlanningCanvas({
           onRemove={handleRemove}
           allocations={allocations}
           onAllocationChange={handleAllocationChange}
+          skipExitForId={skipExitForId}
         />
 
         <div className="space-y-2">
@@ -167,49 +242,77 @@ export function PlanningCanvas({
             {t('availableHeading')}
           </h2>
           <MyFlamesZone>
-            {availableFlames.map((flame) => (
-              <DraggableFlameCard
-                key={flame.id}
-                flame={flame}
-                level={flameLevels.get(flame.id) ?? 1}
-              />
-            ))}
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className={cn(
-                'flex w-28 shrink-0 sm:w-36 flex-col overflow-hidden',
-                'rounded-xl border border-dashed border-border bg-card/40',
-                'text-muted-foreground transition-colors',
-                'hover:border-amber-400/60 hover:bg-amber-500/5',
-                'hover:text-amber-600 dark:hover:text-amber-400',
-              )}
-              aria-label={t('createNewFlame')}
-            >
-              {/* Header spacer — mirrors mini FlameCard header (name + level) */}
-              <div className="px-1.5 pt-2 sm:px-2 invisible" aria-hidden="true">
-                <div className="text-center font-semibold leading-tight text-xs sm:text-sm">
-                  .
-                </div>
-                <div className="text-center text-[10px] sm:text-xs">.</div>
-              </div>
-
-              {/* Flame area — same height as mini FlameCard, holds the affordance */}
-              <div className="flex h-20 sm:h-28 flex-col items-center justify-center gap-1.5">
-                <PlusIcon className="size-6" />
-                <span className="text-xs font-medium">
-                  {t('createNewFlame')}
-                </span>
-              </div>
-
-              {/* Footer spacer — mirrors mini FlameCard footer */}
-              <div
-                className="bg-muted/40 px-1.5 py-1.5 sm:px-2 invisible"
-                aria-hidden="true"
+            <AnimatePresence mode="popLayout" initial={false}>
+              {availableFlames.map((flame) => (
+                <motion.div
+                  key={flame.id}
+                  layout="position"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={
+                    skipExitForId === flame.id
+                      ? undefined
+                      : { opacity: 0, scale: 0.9 }
+                  }
+                  transition={SLIDE_TRANSITION}
+                  // While skipping the exit animation, hide the source slot
+                  // immediately so siblings reflow without the flash that
+                  // would otherwise occur between dnd-kit clearing
+                  // `isDragging` and the next state-driven render.
+                  style={
+                    skipExitForId === flame.id ? { display: 'none' } : undefined
+                  }
+                >
+                  <DraggableFlameCard
+                    flame={flame}
+                    level={flameLevels.get(flame.id) ?? 1}
+                    onClick={() => handlePoolClickAssign(flame.id)}
+                  />
+                </motion.div>
+              ))}
+              <motion.button
+                key="create-new-flame"
+                type="button"
+                layout="position"
+                transition={SLIDE_TRANSITION}
+                onClick={() => setCreateOpen(true)}
+                className={cn(
+                  'flex w-28 shrink-0 sm:w-36 flex-col overflow-hidden',
+                  'rounded-xl border border-dashed border-border bg-card/40',
+                  'text-muted-foreground transition-colors',
+                  'hover:border-amber-400/60 hover:bg-amber-500/5',
+                  'hover:text-amber-600 dark:hover:text-amber-400',
+                )}
+                aria-label={t('createNewFlame')}
               >
-                <div className="text-center text-[10px] sm:text-xs">.</div>
-              </div>
-            </button>
+                {/* Header spacer — mirrors mini FlameCard header (name + level) */}
+                <div
+                  className="px-1.5 pt-2 sm:px-2 invisible"
+                  aria-hidden="true"
+                >
+                  <div className="text-center font-semibold leading-tight text-xs sm:text-sm">
+                    .
+                  </div>
+                  <div className="text-center text-[10px] sm:text-xs">.</div>
+                </div>
+
+                {/* Flame area — same height as mini FlameCard, holds the affordance */}
+                <div className="flex h-20 sm:h-28 flex-col items-center justify-center gap-1.5">
+                  <PlusIcon className="size-6" />
+                  <span className="text-xs font-medium">
+                    {t('createNewFlame')}
+                  </span>
+                </div>
+
+                {/* Footer spacer — mirrors mini FlameCard footer */}
+                <div
+                  className="bg-muted/40 px-1.5 py-1.5 sm:px-2 invisible"
+                  aria-hidden="true"
+                >
+                  <div className="text-center text-[10px] sm:text-xs">.</div>
+                </div>
+              </motion.button>
+            </AnimatePresence>
           </MyFlamesZone>
         </div>
 
@@ -241,6 +344,21 @@ export function PlanningCanvas({
           setCreateOpen(false);
         }}
       />
+
+      {/* DragOverlay renders a floating clone of the dragged flame at the
+          cursor. The source DraggableFlameCard hides itself via opacity:0
+          while isDragging, so the user sees the overlay instead. On drop,
+          the overlay disappears with a snap and AnimatePresence handles the
+          source removal / target insertion — no transform-release flash. */}
+      <DragOverlay dropAnimation={null}>
+        {activeFlame ? (
+          <FlameCard
+            flame={activeFlame}
+            level={flameLevels.get(activeFlame.id) ?? 1}
+            size="mini"
+          />
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

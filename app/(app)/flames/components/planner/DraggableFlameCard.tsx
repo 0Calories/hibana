@@ -123,7 +123,9 @@ export function DraggableFlameCard({
       style={style}
       onClick={onClick}
       className={cn(
-        isDragging && 'opacity-80 shadow-lg',
+        // Hide the source while a DragOverlay clone follows the cursor.
+        // This prevents the dnd-kit transform-release "snap back" flash on drop.
+        isDragging && 'opacity-0',
         disabled
           ? 'cursor-default opacity-70'
           : onClick
