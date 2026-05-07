@@ -3,7 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { COMPLETION_THRESHOLD } from '@/lib/sparks';
 import type { Flame, FlameSession } from '@/lib/supabase/rows';
-import { createClientWithAuth } from '@/lib/supabase/server';
+import {
+  createClientWithAuth,
+  createServiceClient,
+} from '@/lib/supabase/server';
 import type { TablesInsert } from '@/lib/supabase/types';
 import type { ActionResult } from '@/lib/types';
 import { isValidDateString, parseLocalDate } from '@/lib/utils';
@@ -442,4 +445,95 @@ export async function getLastUsedTargetsMap(): ActionResult<
     }
   }
   return { success: true, data: map };
+}
+
+export type RefillResult = {
+  applied: Array<{ flameId: string; secondsApplied: number }>;
+  remainderSecondsAdded: number;
+  canisterSeconds: number;
+};
+
+/**
+ * Opens a canister the user already owns and applies its fuel
+ * (auto-claims unfueled time on today's incomplete sessions first,
+ * banks any remainder).
+ */
+export async function openCanister(
+  itemId: string,
+  date: string,
+): ActionResult<RefillResult> {
+  const { user } = await createClientWithAuth();
+
+  if (!isValidDateString(date)) {
+    return {
+      success: false,
+      error: new Error('Date string must be of the format YYYY-MM-DD'),
+    };
+  }
+
+  const serviceClient = createServiceClient();
+  const { data, error } = await serviceClient.rpc('refill_fuel', {
+    p_user_id: user.id,
+    p_item_id: itemId,
+    p_date: date,
+  });
+
+  if (error) return { success: false, error };
+
+  const result = data as {
+    applied?: Array<{ flame_id: string; seconds_applied: number }>;
+    remainder_seconds_added?: number;
+    canister_seconds?: number;
+    error?: string;
+  };
+
+  if (result.error) {
+    return { success: false, error: new Error(result.error) };
+  }
+
+  revalidatePath('/flames');
+  return {
+    success: true,
+    data: {
+      applied: (result.applied ?? []).map((a) => ({
+        flameId: a.flame_id,
+        secondsApplied: a.seconds_applied,
+      })),
+      remainderSecondsAdded: result.remainder_seconds_added ?? 0,
+      canisterSeconds: result.canister_seconds ?? 0,
+    },
+  };
+}
+
+/**
+ * Purchases a canister and immediately opens it. Two sequential RPC calls;
+ * if the second fails after the first succeeds, the canister sits in
+ * inventory and the user can call openCanister later — no integrity issue.
+ */
+export async function purchaseAndOpenCanister(
+  itemId: string,
+  date: string,
+  requestId: string,
+): ActionResult<RefillResult> {
+  const { user } = await createClientWithAuth();
+
+  const serviceClient = createServiceClient();
+  const { data: cost, error: purchaseError } = await serviceClient.rpc(
+    'purchase_item',
+    {
+      p_user_id: user.id,
+      p_item_id: itemId,
+      p_request_id: requestId,
+    },
+  );
+
+  if (purchaseError) return { success: false, error: purchaseError };
+  if (!cost || cost === 0) {
+    return {
+      success: false,
+      error: new Error('Purchase failed (insufficient sparks or invalid item)'),
+    };
+  }
+
+  return openCanister(itemId, date);
 }
