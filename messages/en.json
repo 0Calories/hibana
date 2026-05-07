@@ -99,6 +99,9 @@
       "noBudget": "No fuel budget set",
       "scheduleLink": "View schedule"
     },
+    "plan": {
+      "summary": "{time} planned · {count, plural, one {# flame} other {# flames}}"
+    },
     "card": {
       "ready": "Ready",
       "burning": "Burning ...",
