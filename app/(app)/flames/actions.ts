@@ -396,3 +396,37 @@ export async function getDailyPlan(date: string): ActionResult<DailyPlanData> {
     },
   };
 }
+
+/**
+ * Returns a map of flame_id → most-recent target_seconds, for every flame
+ * the caller has ever planned with a non-null target. Used to populate the
+ * default minutes value when adding a flame to today's lineup.
+ *
+ * Implementation note: uses Postgres DISTINCT ON to pick the latest row
+ * per flame_id by date in a single query.
+ */
+export async function getLastUsedTargetsMap(): ActionResult<
+  Record<string, number>
+> {
+  const { supabase, user } = await createClientWithAuth();
+
+  // Fetch all sessions with non-null target, ordered so the first match per
+  // flame_id is the most recent. We sort client-side by date desc then take
+  // the first per flame_id since Supabase JS doesn't support DISTINCT ON.
+  const { data, error } = await supabase
+    .from('flame_sessions')
+    .select('flame_id, target_seconds, date')
+    .eq('user_id', user.id)
+    .not('target_seconds', 'is', null)
+    .order('date', { ascending: false });
+
+  if (error) return { success: false, error };
+
+  const map: Record<string, number> = {};
+  for (const row of data ?? []) {
+    if (!(row.flame_id in map) && row.target_seconds != null) {
+      map[row.flame_id] = row.target_seconds;
+    }
+  }
+  return { success: true, data: map };
+}
