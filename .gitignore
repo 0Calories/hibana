@@ -51,3 +51,6 @@ node_modules/
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Superpowers brainstorming session files
+.superpowers/
