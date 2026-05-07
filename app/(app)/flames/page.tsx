@@ -1,18 +1,22 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getServerToday } from '@/lib/timezone';
-import { getFlamesPageData } from './actions';
+import { getAllFlames, getDailyPlan, getLastUsedTargetsMap } from './actions';
 import { FlamesList } from './components/FlamesList';
 import { FlamesPageActions } from './components/FlamesPageActions';
+import { PlanningCanvas } from './components/PlanningCanvas';
 
 export default async function FlamesPage() {
   const t = await getTranslations('flames');
   const today = await getServerToday();
 
-  const result = await getFlamesPageData(today);
+  const [planResult, flamesResult, lastUsedResult] = await Promise.all([
+    getDailyPlan(today),
+    getAllFlames(),
+    getLastUsedTargetsMap(),
+  ]);
 
-  // TODO: Handle error display, this is incorrectly showing a loading state
-  if (!result.success) {
+  if (!planResult.success) {
     return (
       <div className="size-full p-4 pb-24">
         <div className="flex justify-end mb-4">
@@ -23,29 +27,55 @@ export default async function FlamesPage() {
     );
   }
 
-  const { flames, sessions, fuelBudget } = result.data;
+  const { entries, fuelBalanceSeconds } = planResult.data;
+  const allFlames = flamesResult.success ? flamesResult.data : [];
+  const lastUsedTargetsByFlameId = lastUsedResult.success
+    ? lastUsedResult.data
+    : {};
 
+  // No plan yet for today → show planning canvas.
+  if (entries.length === 0) {
+    if (allFlames.length === 0) {
+      return (
+        <div className="size-full p-4 pb-24">
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+            <FlamesPageActions />
+            <p className="text-muted-foreground text-sm">{t('emptyToday')}</p>
+            <Link
+              href="/flames/manage"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {t('emptyTodayAction')}
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="size-full p-4 pb-24">
+        <div className="flex justify-end mb-4">
+          <FlamesPageActions />
+        </div>
+        <PlanningCanvas
+          flames={allFlames}
+          date={today}
+          lastUsedTargetsByFlameId={lastUsedTargetsByFlameId}
+        />
+      </div>
+    );
+  }
+
+  // Plan exists → tending mode.
   return (
     <div className="size-full p-4 pb-24">
-      {flames.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <FlamesPageActions />
-          <p className="text-muted-foreground text-sm">{t('emptyToday')}</p>
-          <Link
-            href="/flames/manage"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            {t('emptyTodayAction')}
-          </Link>
-        </div>
-      ) : (
-        <FlamesList
-          flames={flames}
-          sessions={sessions}
-          date={today}
-          fuelBudget={fuelBudget}
-        />
-      )}
+      <FlamesList
+        entries={entries}
+        date={today}
+        fuelBalanceSeconds={fuelBalanceSeconds}
+        allFlames={allFlames}
+        lastUsedTargetsByFlameId={lastUsedTargetsByFlameId}
+      />
     </div>
   );
 }
