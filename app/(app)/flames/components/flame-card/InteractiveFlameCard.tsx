@@ -31,6 +31,16 @@ export function InteractiveFlameCard({
   const canComplete = entry.isCompletionReady && !entry.isBlocked;
   const isOverburning = entry.isOverburning;
 
+  // Show the needs-more-fuel hint when the flame is paused and completion is
+  // gated by insufficient fueled time (user has tended but fuel was low).
+  const showNeedsMoreFuelHint =
+    state === 'paused' &&
+    !canComplete &&
+    !isFuelDepleted &&
+    entry.fueledSeconds > 0 &&
+    entry.targetSeconds > 0 &&
+    !entry.isCompletionReady;
+
   const stateText = ((): string | null => {
     if (isFuelDepleted && !canComplete && state !== 'completed')
       return t('noFuel');
@@ -75,10 +85,8 @@ export function InteractiveFlameCard({
       )}
       {showTimer && (
         <ProgressBar
-          progress={entry.progress}
-          state={state}
-          colors={colors}
-          isOverburning={isOverburning}
+          fueledFraction={entry.fueledFraction}
+          unfueledFraction={entry.unfueledFraction}
         />
       )}
       <div className={cn('text-center text-[10px] sm:text-xs', stateTextClass)}>
@@ -96,6 +104,11 @@ export function InteractiveFlameCard({
           (stateText ?? '\u00A0')
         )}
       </div>
+      {showNeedsMoreFuelHint && (
+        <div className="text-center text-[10px] text-muted-foreground sm:text-xs">
+          {t('needsMoreFuel')}
+        </div>
+      )}
     </div>
   );
 
