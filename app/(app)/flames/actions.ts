@@ -230,6 +230,61 @@ export async function setFlameCompletion(
   };
 }
 
+type PlanPick = { flameId: string; targetSeconds: number };
+
+/**
+ * Locks in today's lineup. Inserts session rows in a single transaction.
+ * Idempotent at the DB level via the (flame_id, date) unique constraint —
+ * if a row already exists for a flame on that date, we update its
+ * target_seconds rather than erroring (the user re-locked-in).
+ */
+export async function setDailyPlan(
+  date: string,
+  picks: PlanPick[],
+): ActionResult {
+  const { supabase, user } = await createClientWithAuth();
+
+  if (!isValidDateString(date)) {
+    return {
+      success: false,
+      error: new Error('Date string must be of the format YYYY-MM-DD'),
+    };
+  }
+
+  if (picks.length === 0) {
+    return { success: true, data: 'no picks' };
+  }
+
+  const rows = picks.map((p) => ({
+    user_id: user.id,
+    flame_id: p.flameId,
+    date,
+    target_seconds: p.targetSeconds,
+    duration_seconds: 0,
+    fueled_seconds: 0,
+  }));
+
+  const { error } = await supabase
+    .from('flame_sessions')
+    .upsert(rows, { onConflict: 'flame_id,date' });
+
+  if (error) return { success: false, error };
+
+  revalidatePath('/flames');
+  return { success: true, data: `Saved plan for ${date}` };
+}
+
+/**
+ * Mid-day add of a single flame to today's lineup.
+ */
+export async function addToDailyPlan(
+  date: string,
+  flameId: string,
+  targetSeconds: number,
+): ActionResult {
+  return setDailyPlan(date, [{ flameId, targetSeconds }]);
+}
+
 // New: replaces getFlamesPageData. Returns today's plan as a list of session
 // rows joined with their flame, plus the user's fuel balance.
 
