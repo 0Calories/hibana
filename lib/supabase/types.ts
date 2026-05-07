@@ -34,30 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      flame_schedules: {
-        Row: {
-          day_of_week: number
-          flame_ids: string[]
-          flame_minutes: number[]
-          fuel_budget: number
-          user_id: string
-        }
-        Insert: {
-          day_of_week: number
-          flame_ids?: string[]
-          flame_minutes?: number[]
-          fuel_budget?: number
-          user_id: string
-        }
-        Update: {
-          day_of_week?: number
-          flame_ids?: string[]
-          flame_minutes?: number[]
-          fuel_budget?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
       flame_sessions: {
         Row: {
           created_at: string
