@@ -178,17 +178,37 @@ export function PlanningCanvas({
               type="button"
               onClick={() => setCreateOpen(true)}
               className={cn(
-                'flex w-28 shrink-0 sm:w-36 flex-col items-center justify-center gap-2',
-                'rounded-xl border-2 border-dashed border-border bg-card/40',
-                'min-h-40 sm:min-h-52',
+                'flex w-28 shrink-0 sm:w-36 flex-col overflow-hidden',
+                'rounded-xl border border-dashed border-border bg-card/40',
                 'text-muted-foreground transition-colors',
                 'hover:border-amber-400/60 hover:bg-amber-500/5',
                 'hover:text-amber-600 dark:hover:text-amber-400',
               )}
               aria-label={t('createNewFlame')}
             >
-              <PlusIcon className="size-6" />
-              <span className="text-xs font-medium">{t('createNewFlame')}</span>
+              {/* Header spacer — mirrors mini FlameCard header (name + level) */}
+              <div className="px-1.5 pt-2 sm:px-2 invisible" aria-hidden="true">
+                <div className="text-center font-semibold leading-tight text-xs sm:text-sm">
+                  .
+                </div>
+                <div className="text-center text-[10px] sm:text-xs">.</div>
+              </div>
+
+              {/* Flame area — same height as mini FlameCard, holds the affordance */}
+              <div className="flex h-20 sm:h-28 flex-col items-center justify-center gap-1.5">
+                <PlusIcon className="size-6" />
+                <span className="text-xs font-medium">
+                  {t('createNewFlame')}
+                </span>
+              </div>
+
+              {/* Footer spacer — mirrors mini FlameCard footer */}
+              <div
+                className="bg-muted/40 px-1.5 py-1.5 sm:px-2 invisible"
+                aria-hidden="true"
+              >
+                <div className="text-center text-[10px] sm:text-xs">.</div>
+              </div>
             </button>
           </MyFlamesZone>
         </div>
