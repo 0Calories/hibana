@@ -230,79 +230,20 @@ export async function setFlameCompletion(
   };
 }
 
-// --- Fuel ---
+// New: replaces getFlamesPageData. Returns today's plan as a list of session
+// rows joined with their flame, plus the user's fuel balance.
 
-export type FuelBudgetStatus = {
-  budgetMinutes: number;
-  remainingMinutes: number;
-} | null;
-
-export async function getRemainingFuelBudget(
-  date: string,
-): ActionResult<FuelBudgetStatus> {
-  const { supabase, user } = await createClientWithAuth();
-
-  if (!isValidDateString(date)) {
-    return {
-      success: false,
-      error: new Error('Date string must be of the format YYYY-MM-DD'),
-    };
-  }
-
-  const d = parseLocalDate(date);
-  const dayOfWeek = d.getDay();
-
-  const { data: schedule, error: scheduleError } = await supabase
-    .from('flame_schedules')
-    .select('fuel_budget')
-    .eq('user_id', user.id)
-    .eq('day_of_week', dayOfWeek)
-    .maybeSingle();
-
-  if (scheduleError) {
-    return { success: false, error: scheduleError };
-  }
-
-  const budgetMinutes = schedule?.fuel_budget ?? null;
-
-  if (budgetMinutes === null) {
-    return { success: true, data: null };
-  }
-
-  const { data: sessions, error: fuelSpentError } = await supabase
-    .from('flame_sessions')
-    .select('duration_seconds')
-    .eq('user_id', user.id)
-    .eq('date', date);
-
-  if (fuelSpentError) {
-    return { success: false, error: fuelSpentError };
-  }
-
-  const totalSeconds = sessions.reduce(
-    (sum, entry) => sum + entry.duration_seconds,
-    0,
-  );
-  const totalMinutes = totalSeconds / 60;
-  const remainingMinutes = budgetMinutes - totalMinutes;
-
-  return {
-    success: true,
-    data: { budgetMinutes, remainingMinutes },
-  };
-}
-
-// --- Flames page data (consolidated fetch) ---
-
-export type FlamesPageData = {
-  flames: Flame[];
-  sessions: FlameSession[];
-  fuelBudget: FuelBudgetStatus;
+export type DailyPlanEntry = {
+  flame: Flame;
+  session: FlameSession; // always present — session row IS the plan record
 };
 
-export async function getFlamesPageData(
-  date: string,
-): ActionResult<FlamesPageData> {
+export type DailyPlanData = {
+  entries: DailyPlanEntry[];
+  fuelBalanceSeconds: number;
+};
+
+export async function getDailyPlan(date: string): ActionResult<DailyPlanData> {
   const { supabase, user } = await createClientWithAuth();
 
   if (!isValidDateString(date)) {
@@ -312,80 +253,36 @@ export async function getFlamesPageData(
     };
   }
 
-  const d = parseLocalDate(date);
-  const dayOfWeek = d.getDay();
-
-  // Single auth context, parallel independent queries
-  const [scheduleResult, sessionsResult] = await Promise.all([
-    supabase
-      .from('flame_schedules')
-      .select('fuel_budget, flame_ids, flame_minutes')
-      .eq('user_id', user.id)
-      .eq('day_of_week', dayOfWeek)
-      .maybeSingle(),
+  const [sessionsResult, stateResult] = await Promise.all([
     supabase
       .from('flame_sessions')
-      .select('*')
+      .select('*, flames!inner(*)')
       .eq('user_id', user.id)
-      .eq('date', date),
+      .eq('date', date)
+      .eq('flames.is_archived', false)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('user_states')
+      .select('fuel_balance_seconds')
+      .eq('user_id', user.id)
+      .single(),
   ]);
 
-  if (scheduleResult.error) {
-    return { success: false, error: scheduleResult.error };
-  }
-  if (sessionsResult.error) {
+  if (sessionsResult.error)
     return { success: false, error: sessionsResult.error };
-  }
+  if (stateResult.error) return { success: false, error: stateResult.error };
 
-  const schedule = scheduleResult.data;
-  const sessions = sessionsResult.data;
-
-  // Compute fuel budget status
-  let fuelBudget: FuelBudgetStatus = null;
-  if (schedule?.fuel_budget != null) {
-    const totalSeconds = sessions.reduce(
-      (sum, entry) => sum + entry.duration_seconds,
-      0,
-    );
-    fuelBudget = {
-      budgetMinutes: schedule.fuel_budget,
-      remainingMinutes: schedule.fuel_budget - totalSeconds / 60,
-    };
-  }
-
-  // No flames scheduled
-  if (!schedule?.flame_ids || schedule.flame_ids.length === 0) {
-    return { success: true, data: { flames: [], sessions, fuelBudget } };
-  }
-
-  // Fetch assigned flames
-  const { data: flames, error: flamesError } = await supabase
-    .from('flames')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('is_archived', false)
-    .in('id', schedule.flame_ids);
-
-  if (flamesError) {
-    return { success: false, error: flamesError };
-  }
-
-  // Apply per-flame time allocations and preserve order
-  const flameMap = new Map((flames ?? []).map((f) => [f.id, f]));
-  const orderedFlames = schedule.flame_ids
-    .map((id, i) => {
-      const flame = flameMap.get(id);
-      if (!flame) return null;
-      const minutes = schedule.flame_minutes?.[i];
-      if (minutes != null && minutes > 0) {
-        return { ...flame, time_budget_minutes: minutes };
-      }
-      return flame;
-    })
-    .filter((f): f is NonNullable<typeof f> => f !== null);
+  // Reshape: pull the joined flame off each session row.
+  const entries: DailyPlanEntry[] = (sessionsResult.data ?? []).map((row) => {
+    const { flames, ...session } = row as FlameSession & { flames: Flame };
+    return { flame: flames, session };
+  });
 
   return {
     success: true,
-    data: { flames: orderedFlames, sessions, fuelBudget },
+    data: {
+      entries,
+      fuelBalanceSeconds: stateResult.data.fuel_balance_seconds,
+    },
   };
 }
