@@ -35,18 +35,18 @@ export function AssignedFlamesZone({
     <div
       ref={setNodeRef}
       className={cn(
-        'min-h-32 rounded-lg border-2 border-dashed p-2 transition-colors',
+        'flex min-h-44 sm:min-h-52 rounded-lg border-2 border-dashed p-2 transition-colors',
         isOver
           ? 'border-amber-400 bg-amber-50/50 dark:border-amber-500/50 dark:bg-amber-500/5'
           : 'border-muted-foreground/20',
       )}
     >
       {flames.length === 0 ? (
-        <p className="flex h-full min-h-24 items-center justify-center text-sm text-muted-foreground">
+        <p className="flex w-full items-center justify-center text-sm text-muted-foreground">
           {t('dragHere')}
         </p>
       ) : (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap content-start gap-2">
           {flames.map((flame) => (
             <DraggableFlameCard
               key={flame.id}
