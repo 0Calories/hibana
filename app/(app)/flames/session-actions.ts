@@ -1,7 +1,10 @@
 'use server';
 
 import type { FlameSession } from '@/lib/supabase/rows';
-import { createClientWithAuth } from '@/lib/supabase/server';
+import {
+  createClientWithAuth,
+  createServiceClient,
+} from '@/lib/supabase/server';
 import type { ActionResult } from '@/lib/types';
 import { isValidDateString } from '@/lib/utils';
 
@@ -151,3 +154,70 @@ export async function getAllSessionsForDate(
 
 // Edge cases to consider for the future:
 // - If a user never ends their session, it should be automatically closed or cleaned up at some point via a job
+
+/**
+ * Wraps the pause branch of toggleSession with fuel accounting.
+ * 1. Reads the session's pre-pause duration_seconds.
+ * 2. Calls toggleSession to commit the pause (writes the new duration_seconds).
+ * 3. Computes the delta and calls record_fuel_burn via the service client.
+ *
+ * toggleSession itself is left untouched per the project's "don't modify
+ * the time-tracking mechanism in this rework" constraint.
+ */
+export async function pauseSession(
+  flameId: string,
+  date: string,
+  clientDuration?: number,
+): ActionResult {
+  const { supabase, user } = await createClientWithAuth();
+
+  // 1. Snapshot pre-pause duration
+  const { data: before, error: beforeError } = await supabase
+    .from('flame_sessions')
+    .select('id, duration_seconds')
+    .eq('user_id', user.id)
+    .eq('flame_id', flameId)
+    .eq('date', date)
+    .maybeSingle();
+
+  if (beforeError) return { success: false, error: beforeError };
+  if (!before)
+    return { success: false, error: new Error('No session to pause') };
+
+  const beforeDuration = before.duration_seconds;
+
+  // 2. Run the existing pause logic
+  const pauseResult = await toggleSession(
+    flameId,
+    date,
+    'pause',
+    clientDuration,
+  );
+  if (!pauseResult.success) return pauseResult;
+
+  // 3. Re-read after the pause to compute the delta
+  const { data: after, error: afterError } = await supabase
+    .from('flame_sessions')
+    .select('id, duration_seconds')
+    .eq('id', before.id)
+    .single();
+
+  if (afterError) return { success: false, error: afterError };
+
+  const deltaSeconds = after.duration_seconds - beforeDuration;
+  if (deltaSeconds <= 0) {
+    return { success: true, data: 'paused (no fuel burn)' };
+  }
+
+  // 4. Burn fuel via SECURITY DEFINER RPC
+  const serviceClient = createServiceClient();
+  const { error: rpcError } = await serviceClient.rpc('record_fuel_burn', {
+    p_user_id: user.id,
+    p_session_id: after.id,
+    p_delta_seconds: deltaSeconds,
+  });
+
+  if (rpcError) return { success: false, error: rpcError };
+
+  return { success: true, data: 'paused and fuel recorded' };
+}
