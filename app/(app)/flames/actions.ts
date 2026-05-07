@@ -13,13 +13,7 @@ import { isValidDateString, parseLocalDate } from '@/lib/utils';
 
 type FlameInput = Pick<
   Flame,
-  | 'name'
-  | 'color'
-  | 'icon'
-  | 'time_budget_minutes'
-  | 'tracking_type'
-  | 'count_target'
-  | 'count_unit'
+  'name' | 'color' | 'icon' | 'tracking_type' | 'count_target' | 'count_unit'
 >;
 
 export async function createFlame(flameInput: FlameInput): ActionResult<Flame> {

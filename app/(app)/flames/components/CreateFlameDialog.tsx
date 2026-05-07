@@ -42,13 +42,13 @@ interface CreateFlameDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   flame?: Flame;
+  onCreated?: (flame: Flame) => void;
 }
 
 const defaultCreateValues: CreateFlameFormData = {
   name: '',
   color: 'rose',
   tracking_type: 'time',
-  time_budget_minutes: 60,
   count_target: undefined,
 };
 
@@ -56,6 +56,7 @@ export function CreateFlameDialog({
   open,
   onOpenChange,
   flame,
+  onCreated,
 }: CreateFlameDialogProps) {
   const t = useTranslations('flames.create');
   const tCommon = useTranslations('common');
@@ -74,7 +75,6 @@ export function CreateFlameDialog({
           name: flame.name,
           color: flame.color ?? 'rose',
           tracking_type: flame.tracking_type as 'time' | 'count',
-          time_budget_minutes: flame.time_budget_minutes ?? 60,
           count_target: flame.count_target ?? undefined,
         }
       : defaultCreateValues,
@@ -86,7 +86,6 @@ export function CreateFlameDialog({
         name: flame.name,
         color: flame.color ?? 'rose',
         tracking_type: flame.tracking_type as 'time' | 'count',
-        time_budget_minutes: flame.time_budget_minutes ?? 60,
         count_target: flame.count_target ?? undefined,
       });
     } else {
@@ -109,27 +108,37 @@ export function CreateFlameDialog({
       icon: null,
       color: data.color,
       tracking_type: data.tracking_type,
-      time_budget_minutes: data.time_budget_minutes ?? null,
       count_target: data.count_target ?? null,
       count_unit: data.count_unit ?? 'number',
     };
 
-    const result = isEditMode
-      ? await updateFlame(flame.id, flameData)
-      : await createFlame(flameData);
-
-    if (result.success) {
-      toast.success(isEditMode ? t('updateSuccess') : t('success'), {
-        id: toastId,
-        position: 'top-center',
-      });
-      if (!isEditMode) reset();
-      onOpenChange(false);
+    if (isEditMode) {
+      const result = await updateFlame(flame.id, flameData);
+      if (result.success) {
+        toast.success(t('updateSuccess'), {
+          id: toastId,
+          position: 'top-center',
+        });
+        onOpenChange(false);
+      } else {
+        toast.error(result.error.message, {
+          id: toastId,
+          position: 'top-center',
+        });
+      }
     } else {
-      toast.error(result.error.message, {
-        id: toastId,
-        position: 'top-center',
-      });
+      const result = await createFlame(flameData);
+      if (result.success) {
+        toast.success(t('success'), { id: toastId, position: 'top-center' });
+        onCreated?.(result.data);
+        reset();
+        onOpenChange(false);
+      } else {
+        toast.error(result.error.message, {
+          id: toastId,
+          position: 'top-center',
+        });
+      }
     }
   };
 
@@ -243,38 +252,8 @@ export function CreateFlameDialog({
               )}
             />
 
-            {/* Fuel Budget / Target Count */}
-            {trackingType === 'time' ? (
-              <Controller
-                name="time_budget_minutes"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="time_budget_minutes">
-                      {t('fuelBudget')}
-                    </FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        {...field}
-                        id={field.name}
-                        type="number"
-                        min={1}
-                        aria-invalid={fieldState.invalid}
-                        value={field.value ?? ''}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : undefined,
-                          )
-                        }
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <InputGroupText>{t('unitMinutes')}</InputGroupText>
-                      </InputGroupAddon>
-                    </InputGroup>
-                  </Field>
-                )}
-              />
-            ) : (
+            {/* Target Count (only shown for count-based flames) */}
+            {trackingType === 'count' && (
               <Controller
                 name="count_target"
                 control={control}

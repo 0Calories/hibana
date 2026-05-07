@@ -7,22 +7,9 @@ export const createFlameSchema = z
     color: z.string(),
     category_id: z.string().optional(),
     tracking_type: z.enum(['time', 'count']),
-    time_budget_minutes: z.number().min(1).optional(),
     count_target: z.number().min(1).optional(),
     count_unit: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      if (data.tracking_type === 'time') {
-        return data.time_budget_minutes !== undefined;
-      }
-      return true;
-    },
-    {
-      message: 'Time budget is required for time-based flames',
-      path: ['time_budget_minutes'],
-    },
-  )
   .refine(
     (data) => {
       if (data.tracking_type === 'count') {
