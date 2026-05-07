@@ -118,6 +118,21 @@ export async function creditCompletionReward(
 }
 
 /**
+ * Returns all active fuel canister items from the shop catalog, ordered by cost.
+ */
+export async function getFuelCanisterCatalog(): ActionResult<Item[]> {
+  const { supabase } = await createClientWithAuth();
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('type', 'fuel_canister')
+    .eq('is_active', true)
+    .order('cost_sparks', { ascending: true });
+  if (error) return { success: false, error };
+  return { success: true, data };
+}
+
+/**
  * Returns recent spark transactions, newest-first.
  */
 export async function getSparkTransactions(
