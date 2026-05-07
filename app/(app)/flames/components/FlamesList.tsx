@@ -1,17 +1,15 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import {
   getFuelCanisterCatalog,
   getUserItems,
   getUserState,
 } from '@/app/(app)/shop/actions';
-import type { Flame, Item, UserItem } from '@/lib/supabase/rows';
+import type { Item, UserItem } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
 import type { DailyPlanEntry } from '../actions';
 import { FlamesProvider, useFlamesContext } from '../hooks/useFlames';
-import { EditLineupSheet } from './EditLineupSheet';
 import { FlamesPageActions } from './FlamesPageActions';
 import { FuelBarStickyContainer } from './FuelBarStickyContainer';
 import { FuelMeter } from './FuelMeter';
@@ -22,16 +20,12 @@ interface FlamesListProps {
   entries: DailyPlanEntry[];
   date: string;
   fuelBalanceSeconds: number;
-  allFlames: Flame[];
-  lastUsedTargetsByFlameId: Record<string, number>;
 }
 
 export function FlamesList({
   entries,
   date,
   fuelBalanceSeconds,
-  allFlames,
-  lastUsedTargetsByFlameId,
 }: FlamesListProps) {
   // Derive flames and sessions arrays for the FlamesProvider
   const flames = entries.map((e) => e.flame);
@@ -44,12 +38,7 @@ export function FlamesList({
       fuelBalanceSeconds={fuelBalanceSeconds}
       date={date}
     >
-      <FlamesListContent
-        entries={entries}
-        date={date}
-        allFlames={allFlames}
-        lastUsedTargetsByFlameId={lastUsedTargetsByFlameId}
-      />
+      <FlamesListContent entries={entries} date={date} />
     </FlamesProvider>
   );
 }
@@ -57,25 +46,16 @@ export function FlamesList({
 interface FlamesListContentProps {
   entries: DailyPlanEntry[];
   date: string;
-  allFlames: Flame[];
-  lastUsedTargetsByFlameId: Record<string, number>;
 }
 
-function FlamesListContent({
-  entries,
-  date,
-  allFlames,
-  lastUsedTargetsByFlameId,
-}: FlamesListContentProps) {
-  const t = useTranslations('flames');
+function FlamesListContent({ entries, date }: FlamesListContentProps) {
   const { entries: flameEntries, fuel, actions } = useFlamesContext();
 
   // Detect when the fuel bar becomes sticky
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [isStuck, setIsStuck] = useState(false);
 
-  // Modal state
-  const [editOpen, setEditOpen] = useState(false);
+  // Refill modal state
   const [refillOpen, setRefillOpen] = useState(false);
 
   // Shop catalog + inventory for the refill modal
@@ -114,10 +94,6 @@ function FlamesListContent({
       if (stateResult.success) setSparks(stateResult.data.sparks_balance);
     })();
   }, []);
-
-  const unscheduledFlames = allFlames.filter(
-    (f) => !entries.some((e) => e.flame.id === f.id),
-  );
 
   return (
     <div>
@@ -159,24 +135,6 @@ function FlamesListContent({
           />
         ))}
       </div>
-      <div className="mt-4 flex justify-center">
-        <button
-          type="button"
-          onClick={() => setEditOpen(true)}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {t('editLineup')}
-        </button>
-      </div>
-
-      <EditLineupSheet
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        date={date}
-        entries={entries}
-        unscheduledFlames={unscheduledFlames}
-        lastUsedTargetsByFlameId={lastUsedTargetsByFlameId}
-      />
 
       <RefillModal
         open={refillOpen}

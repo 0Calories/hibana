@@ -73,8 +73,6 @@ export default async function FlamesPage() {
         entries={entries}
         date={today}
         fuelBalanceSeconds={fuelBalanceSeconds}
-        allFlames={allFlames}
-        lastUsedTargetsByFlameId={lastUsedTargetsByFlameId}
       />
     </div>
   );

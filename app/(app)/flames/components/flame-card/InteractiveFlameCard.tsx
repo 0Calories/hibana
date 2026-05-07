@@ -87,6 +87,9 @@ export function InteractiveFlameCard({
         <ProgressBar
           fueledFraction={entry.fueledFraction}
           unfueledFraction={entry.unfueledFraction}
+          state={state}
+          colors={colors}
+          isOverburning={isOverburning}
         />
       )}
       <div className={cn('text-center text-[10px] sm:text-xs', stateTextClass)}>
