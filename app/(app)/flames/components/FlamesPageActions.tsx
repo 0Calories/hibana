@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarDaysIcon, SlidersHorizontalIcon } from 'lucide-react';
+import { SlidersHorizontalIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
@@ -16,18 +16,6 @@ export function FlamesPageActions() {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex items-center gap-1">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              href="/flames/schedule"
-              className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted"
-              aria-label={t('scheduleLink')}
-            >
-              <CalendarDaysIcon className="size-4.5" />
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">{t('scheduleLink')}</TooltipContent>
-        </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
