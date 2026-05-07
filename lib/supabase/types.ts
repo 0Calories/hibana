@@ -504,6 +504,14 @@ export type Database = {
         Args: { p_item_id: string; p_request_id: string; p_user_id: string }
         Returns: number
       }
+      record_fuel_burn: {
+        Args: {
+          p_delta_seconds: number
+          p_session_id: string
+          p_user_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
@@ -639,3 +647,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
