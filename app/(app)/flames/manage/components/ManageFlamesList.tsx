@@ -192,14 +192,6 @@ export function ManageFlamesList({ flames }: ManageFlamesListProps) {
                       {t('archived')}
                     </Badge>
                   )}
-                  {flame.tracking_type === 'time' &&
-                    flame.time_budget_minutes && (
-                      <Badge variant="outline" className="text-xs tabular-nums">
-                        {t('budgetMinutes', {
-                          count: String(flame.time_budget_minutes),
-                        })}
-                      </Badge>
-                    )}
                 </div>
 
                 {/* Actions menu */}

@@ -9,7 +9,7 @@ import {
 } from '@/lib/supabase/server';
 import type { TablesInsert } from '@/lib/supabase/types';
 import type { ActionResult } from '@/lib/types';
-import { isValidDateString, parseLocalDate } from '@/lib/utils';
+import { isValidDateString } from '@/lib/utils';
 
 type FlameInput = Pick<
   Flame,
@@ -85,63 +85,6 @@ export async function updateFlame(
   };
 }
 
-/**
- * Returns the Flames that must be tended to for a specific date.
- * Queries the consolidated flame_schedules table for the day_of_week.
- *
- * @param date  Must be provided in the 'YYYY-MM-DD' format
- */
-export async function getFlamesForDay(date: string) {
-  const { supabase, user } = await createClientWithAuth();
-
-  const d = parseLocalDate(date);
-  const dayOfWeek = d.getDay();
-
-  // Query the consolidated schedule for this day
-  const { data: schedule, error: scheduleError } = await supabase
-    .from('flame_schedules')
-    .select('flame_ids, flame_minutes')
-    .eq('user_id', user.id)
-    .eq('day_of_week', dayOfWeek)
-    .maybeSingle();
-
-  if (scheduleError) {
-    return { success: false, error: scheduleError };
-  }
-
-  if (!schedule?.flame_ids || schedule.flame_ids.length === 0) {
-    return { success: true, data: [] };
-  }
-
-  // Fetch the assigned flames by ID
-  const { data: flames, error } = await supabase
-    .from('flames')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('is_archived', false)
-    .in('id', schedule.flame_ids);
-
-  if (error) {
-    return { success: false, error };
-  }
-
-  // Apply per-flame time allocations and preserve the user's custom order
-  const flameMap = new Map((flames ?? []).map((f) => [f.id, f]));
-  const orderedFlames = schedule.flame_ids
-    .map((id, i) => {
-      const flame = flameMap.get(id);
-      if (!flame) return null;
-      const minutes = schedule.flame_minutes?.[i];
-      if (minutes != null && minutes > 0) {
-        return { ...flame, time_budget_minutes: minutes };
-      }
-      return flame;
-    })
-    .filter((f): f is NonNullable<typeof f> => f !== null);
-
-  return { success: true, data: orderedFlames };
-}
-
 export async function getAllFlames(): ActionResult<Flame[]> {
   const { supabase, user } = await createClientWithAuth();
 
@@ -161,7 +104,7 @@ export async function getAllFlames(): ActionResult<Flame[]> {
 export async function deleteFlame(flameId: string) {
   const { supabase, user } = await createClientWithAuth();
 
-  // Schedule data will also be automatically deleted due to cascade, no need to explicitly clean up
+  // Session data will also be automatically deleted due to cascade, no need to explicitly clean up
   const { data, error } = await supabase
     .from('flames')
     .delete()

@@ -124,7 +124,6 @@ export type Database = {
           is_archived: boolean
           level: number
           name: string
-          time_budget_minutes: number | null
           tracking_type: string
           updated_at: string
           user_id: string
@@ -141,7 +140,6 @@ export type Database = {
           is_archived?: boolean
           level?: number
           name: string
-          time_budget_minutes?: number | null
           tracking_type: string
           updated_at?: string
           user_id: string
@@ -158,7 +156,6 @@ export type Database = {
           is_archived?: boolean
           level?: number
           name?: string
-          time_budget_minutes?: number | null
           tracking_type?: string
           updated_at?: string
           user_id?: string

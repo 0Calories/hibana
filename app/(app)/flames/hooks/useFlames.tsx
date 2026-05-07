@@ -480,8 +480,7 @@ function useFlamesEngine(
     const elapsed = computeElapsed(ts);
     const session =
       sessionsRef.current.find((s) => s.flame_id === flame.id) ?? null;
-    const targetSeconds =
-      session?.target_seconds ?? (flame.time_budget_minutes ?? 0) * 60;
+    const targetSeconds = session?.target_seconds ?? 0;
     const fueledSeconds = session?.fueled_seconds ?? 0;
 
     const fueledFraction =
