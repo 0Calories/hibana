@@ -135,7 +135,8 @@
       "overburning": "Overburn",
       "pauseError": "Failed to pause Flame timer — please try again",
       "startError": "Failed to start Flame timer — please try again",
-      "resumeError": "Failed to resume Flame timer — please try again"
+      "resumeError": "Failed to resume Flame timer — please try again",
+      "needsMoreFuel": "Need more fueled time to complete this flame"
     },
     "completion": {
       "title": "Flame Completed!",

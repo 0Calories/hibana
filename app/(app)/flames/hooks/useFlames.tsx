@@ -12,13 +12,14 @@ import {
 } from 'react';
 import { toast } from 'sonner';
 import { creditCompletionReward } from '@/app/(app)/shop/actions';
+import { COMPLETION_THRESHOLD } from '@/lib/sparks';
 import type { Flame, FlameSession } from '@/lib/supabase/rows';
+import { getDailyPlan, setFlameCompletion } from '../actions';
 import {
-  type FuelBudgetStatus,
-  getRemainingFuelBudget,
-  setFlameCompletion,
-} from '../actions';
-import { getAllSessionsForDate, toggleSession } from '../session-actions';
+  getAllSessionsForDate,
+  pauseSession,
+  toggleSession,
+} from '../session-actions';
 import type { FlameState } from '../utils/types';
 
 // ─── Types ───────────────────────────────────────────────────────────
@@ -27,21 +28,23 @@ export interface FlameEntry {
   flame: Flame;
   session: FlameSession | null;
   state: FlameState;
-  elapsedSeconds: number;
-  targetSeconds: number;
-  progress: number;
+  elapsedSeconds: number; // duration_seconds + in-flight tick
+  fueledSeconds: number; // session.fueled_seconds (does not include in-flight)
+  targetSeconds: number; // session.target_seconds, defaulting to flame's last-used
+  fueledFraction: number; // fueledSeconds / targetSeconds, capped at 1
+  unfueledFraction: number; // (elapsedSeconds - fueledSeconds) / targetSeconds, capped at 1 - fueledFraction
+  progress: number; // legacy: fueledFraction (kept for callers not yet updated)
   isOverburning: boolean;
   isLoading: boolean;
-  isCompletionReady: boolean;
+  isCompletionReady: boolean; // fueledSeconds >= targetSeconds * COMPLETION_THRESHOLD
   isBlocked: boolean;
   level: number;
 }
 
 export interface FuelState {
-  budgetSeconds: number | null;
-  remainingSeconds: number;
-  isFuelDepleted: boolean;
-  hasBudget: boolean;
+  balanceSeconds: number;
+  isEmpty: boolean;
+  hasUnfueled: boolean; // true if any of today's sessions has duration_seconds > fueled_seconds
 }
 
 export interface FlameActions {
@@ -83,7 +86,7 @@ const FlamesContext = createContext<FlamesContextValue | null>(null);
 interface FlamesProviderProps {
   flames: Flame[];
   sessions: FlameSession[];
-  fuelBudget: FuelBudgetStatus;
+  fuelBalanceSeconds: number;
   date: string;
   children: ReactNode;
 }
@@ -91,11 +94,11 @@ interface FlamesProviderProps {
 export function FlamesProvider({
   flames,
   sessions,
-  fuelBudget,
+  fuelBalanceSeconds,
   date,
   children,
 }: FlamesProviderProps) {
-  const value = useFlamesEngine(flames, sessions, fuelBudget, date);
+  const value = useFlamesEngine(flames, sessions, fuelBalanceSeconds, date);
   return (
     <FlamesContext.Provider value={value}>{children}</FlamesContext.Provider>
   );
@@ -200,16 +203,6 @@ function computeElapsed(ts: FlameTimerState): number {
   return ts.baseElapsed;
 }
 
-function computeCompletionThreshold(flame: Flame): number {
-  if (
-    'completion_threshold_minutes' in flame &&
-    flame.completion_threshold_minutes
-  ) {
-    return (flame.completion_threshold_minutes as number) * 60;
-  }
-  return (flame.time_budget_minutes ?? 0) * 30; // 50% of budget
-}
-
 function deriveActiveFlameId(map: Map<string, FlameTimerState>): string | null {
   for (const [id, ts] of map) {
     if (ts.state === 'burning') return id;
@@ -222,7 +215,7 @@ function deriveActiveFlameId(map: Map<string, FlameTimerState>): string | null {
 function useFlamesEngine(
   flames: Flame[],
   sessions: FlameSession[],
-  fuelBudget: FuelBudgetStatus,
+  fuelBalanceSeconds: number,
   date: string,
 ): FlamesContextValue {
   const t = useTranslations('flames.card');
@@ -230,9 +223,9 @@ function useFlamesEngine(
   // Per-flame timer state in a ref (mutated directly, re-render via tickNow)
   const timerMapRef = useRef<Map<string, FlameTimerState>>(new Map());
 
-  // Fuel budget (re-synced from server after actions)
-  const [liveFuelBudget, setLiveFuelBudget] =
-    useState<FuelBudgetStatus>(fuelBudget);
+  // Fuel balance (re-synced from server after actions)
+  const [liveFuelBalance, setLiveFuelBalance] =
+    useState<number>(fuelBalanceSeconds);
 
   // Session cache for entry.session (informational, not used for timer logic)
   const sessionsRef = useRef<FlameSession[]>(sessions);
@@ -259,42 +252,36 @@ function useFlamesEngine(
     return () => clearInterval(id);
   }, [activeFlameId]);
 
-  // ── Fuel derived ────────────────────────────────────────────────
-  const hasBudget = liveFuelBudget !== null;
-  const budgetSeconds = liveFuelBudget
-    ? liveFuelBudget.budgetMinutes * 60
-    : null;
-
-  // Total consumed: sum of elapsed across all flames (from timer state, not sessions)
-  let totalConsumed = 0;
-  for (const flame of flames) {
-    const ts = timerMapRef.current.get(flame.id);
-    if (ts) totalConsumed += computeElapsed(ts);
-  }
-
-  const remainingSeconds = hasBudget
-    ? Math.max(0, (budgetSeconds ?? 0) - totalConsumed)
-    : 0;
-  const isFuelDepleted = hasBudget && remainingSeconds <= 0;
+  // ── Server refresh ──────────────────────────────────────────────
+  const refreshFromServer = useCallback(async () => {
+    const [sessResult, planResult] = await Promise.all([
+      getAllSessionsForDate(date),
+      getDailyPlan(date),
+    ]);
+    if (sessResult.success && sessResult.data) {
+      sessionsRef.current = sessResult.data;
+    }
+    if (planResult.success) {
+      setLiveFuelBalance(planResult.data.fuelBalanceSeconds);
+    }
+    setTickNow(Date.now());
+  }, [date]);
 
   // ── Fuel depletion auto-stop ────────────────────────────────────
+  // Auto-pause when fuel depletes — keeps the user in the loop about refilling.
   const hasFiredDepletedRef = useRef(false);
 
   useEffect(() => {
-    if (!activeFlameId) {
+    if (!activeFlameId || liveFuelBalance > 0) {
       hasFiredDepletedRef.current = false;
-    }
-  }, [activeFlameId]);
-
-  useEffect(() => {
-    if (!isFuelDepleted || !activeFlameId || hasFiredDepletedRef.current)
       return;
+    }
+    if (hasFiredDepletedRef.current) return;
     hasFiredDepletedRef.current = true;
 
     const ts = timerMapRef.current.get(activeFlameId);
     if (!ts || ts.state !== 'burning') return;
 
-    // Pause immediately
     const finalElapsed = computeElapsed(ts);
     timerMapRef.current.set(activeFlameId, {
       state: 'paused',
@@ -304,38 +291,14 @@ function useFlamesEngine(
     });
     setTickNow(Date.now());
 
-    // End session on server (no clientDuration — server computes)
     const depletedFlameId = activeFlameId;
-    (async () => {
-      await retryAction(() => toggleSession(depletedFlameId, date, 'pause'));
-      const [sessResult, fuelResult] = await Promise.all([
-        getAllSessionsForDate(date),
-        getRemainingFuelBudget(date),
-      ]);
-      if (sessResult.success && sessResult.data) {
-        sessionsRef.current = sessResult.data;
-      }
-      if (fuelResult.success) {
-        setLiveFuelBudget(fuelResult.data);
-      }
-      setTickNow(Date.now());
+    void (async () => {
+      await retryAction(() =>
+        pauseSession(depletedFlameId, date, finalElapsed),
+      );
+      await refreshFromServer();
     })();
-  }, [isFuelDepleted, activeFlameId, date]);
-
-  // ── Server refresh ──────────────────────────────────────────────
-  const refreshFromServer = useCallback(async () => {
-    const [sessResult, fuelResult] = await Promise.all([
-      getAllSessionsForDate(date),
-      getRemainingFuelBudget(date),
-    ]);
-    if (sessResult.success && sessResult.data) {
-      sessionsRef.current = sessResult.data;
-    }
-    if (fuelResult.success) {
-      setLiveFuelBudget(fuelResult.data);
-    }
-    setTickNow(Date.now());
-  }, [date]);
+  }, [liveFuelBalance, activeFlameId, date, refreshFromServer]);
 
   // ── Actions ─────────────────────────────────────────────────────
   const toggle = useCallback(
@@ -390,7 +353,7 @@ function useFlamesEngine(
             setTickNow(Date.now());
 
             const persisted = await retryAction(() =>
-              toggleSession(flameId, date, 'pause', finalElapsed),
+              pauseSession(flameId, date, finalElapsed),
             );
             if (!persisted) {
               toast.error(t('pauseError'), { position: 'top-center' });
@@ -440,23 +403,21 @@ function useFlamesEngine(
     [date, t],
   );
 
-  const beginCompletion = useCallback(
-    (flameId: string) => {
-      const ts = timerMapRef.current.get(flameId);
-      if (!ts) return;
+  const beginCompletion = useCallback((flameId: string) => {
+    const ts = timerMapRef.current.get(flameId);
+    if (!ts) return;
 
-      const elapsed = computeElapsed(ts);
-      const flame = flames.find((f) => f.id === flameId);
-      if (!flame) return;
+    const session = sessionsRef.current.find((s) => s.flame_id === flameId);
+    const isReady =
+      session != null &&
+      session.target_seconds != null &&
+      session.fueled_seconds >= session.target_seconds * COMPLETION_THRESHOLD;
 
-      const threshold = computeCompletionThreshold(flame);
-      if (ts.state === 'paused' && elapsed >= threshold) {
-        timerMapRef.current.set(flameId, { ...ts, state: 'completing' });
-        setTickNow(Date.now());
-      }
-    },
-    [flames],
-  );
+    if (ts.state === 'paused' && isReady) {
+      timerMapRef.current.set(flameId, { ...ts, state: 'completing' });
+      setTickNow(Date.now());
+    }
+  }, []);
 
   const cancelCompletion = useCallback((flameId: string) => {
     const ts = timerMapRef.current.get(flameId);
@@ -468,7 +429,16 @@ function useFlamesEngine(
   const completeFlame = useCallback(
     async (flameId: string): Promise<boolean> => {
       const ts = timerMapRef.current.get(flameId);
-      if (!ts) return false;
+      const session = sessionsRef.current.find((s) => s.flame_id === flameId);
+      if (!ts || !session) return false;
+
+      if (
+        session.target_seconds != null &&
+        session.fueled_seconds < session.target_seconds * COMPLETION_THRESHOLD
+      ) {
+        toast.error(t('needsMoreFuel'), { position: 'top-center' });
+        return false;
+      }
 
       timerMapRef.current.set(flameId, { ...ts, state: 'completed' });
       setTickNow(Date.now());
@@ -492,7 +462,7 @@ function useFlamesEngine(
         return false;
       }
     },
-    [date, refreshFromServer],
+    [date, refreshFromServer, t],
   );
 
   // ── Build entries ───────────────────────────────────────────────
@@ -508,25 +478,43 @@ function useFlamesEngine(
     };
 
     const elapsed = computeElapsed(ts);
-    const targetSeconds = (flame.time_budget_minutes ?? 0) * 60;
-    const progress =
-      targetSeconds > 0 ? Math.min(elapsed / targetSeconds, 1) : 0;
-    const isOverburning =
-      ts.state === 'burning' && targetSeconds > 0 && elapsed > targetSeconds;
-    const threshold = computeCompletionThreshold(flame);
-    const isCompletionReady =
-      ts.state === 'paused' && threshold > 0 && elapsed >= threshold;
-    const isBlocked = activeFlameId !== null && activeFlameId !== flame.id;
     const session =
       sessionsRef.current.find((s) => s.flame_id === flame.id) ?? null;
+    const targetSeconds =
+      session?.target_seconds ?? (flame.time_budget_minutes ?? 0) * 60;
+    const fueledSeconds = session?.fueled_seconds ?? 0;
+
+    const fueledFraction =
+      targetSeconds > 0 ? Math.min(fueledSeconds / targetSeconds, 1) : 0;
+    const unfueledFraction =
+      targetSeconds > 0
+        ? Math.max(
+            0,
+            Math.min(
+              (elapsed - fueledSeconds) / targetSeconds,
+              1 - fueledFraction,
+            ),
+          )
+        : 0;
+
+    const isOverburning =
+      ts.state === 'burning' && targetSeconds > 0 && elapsed > targetSeconds;
+    const isCompletionReady =
+      session != null &&
+      session.target_seconds != null &&
+      session.fueled_seconds >= session.target_seconds * COMPLETION_THRESHOLD;
+    const isBlocked = activeFlameId !== null && activeFlameId !== flame.id;
 
     return {
       flame,
       session,
       state: ts.state,
       elapsedSeconds: elapsed,
+      fueledSeconds,
       targetSeconds,
-      progress,
+      fueledFraction,
+      unfueledFraction,
+      progress: fueledFraction, // legacy alias
       isOverburning,
       isLoading: ts.isLoading,
       isCompletionReady,
@@ -535,11 +523,14 @@ function useFlamesEngine(
     };
   });
 
+  const hasUnfueled = sessionsRef.current.some(
+    (s) => s.duration_seconds > s.fueled_seconds,
+  );
+
   const fuel: FuelState = {
-    budgetSeconds,
-    remainingSeconds,
-    isFuelDepleted,
-    hasBudget,
+    balanceSeconds: liveFuelBalance,
+    isEmpty: liveFuelBalance <= 0,
+    hasUnfueled,
   };
 
   const actions: FlameActions = {
