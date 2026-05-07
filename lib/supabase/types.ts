@@ -431,6 +431,7 @@ export type Database = {
       }
       user_states: {
         Row: {
+          fuel_balance_seconds: number
           heat: number
           heat_level: number
           level: number
@@ -438,6 +439,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          fuel_balance_seconds?: number
           heat?: number
           heat_level?: number
           level?: number
@@ -445,6 +447,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          fuel_balance_seconds?: number
           heat?: number
           heat_level?: number
           level?: number
