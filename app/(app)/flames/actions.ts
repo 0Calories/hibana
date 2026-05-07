@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { COMPLETION_THRESHOLD } from '@/lib/sparks';
 import type { Flame, FlameSession } from '@/lib/supabase/rows';
 import { createClientWithAuth } from '@/lib/supabase/server';
 import type { TablesInsert } from '@/lib/supabase/types';
@@ -194,10 +195,9 @@ export async function setFlameCompletion(
     };
   }
 
-  // Check if session exists for this date
   const { data: session, error: fetchError } = await supabase
     .from('flame_sessions')
-    .select()
+    .select('id, target_seconds, fueled_seconds')
     .eq('flame_id', flameId)
     .eq('date', date)
     .maybeSingle();
@@ -213,7 +213,20 @@ export async function setFlameCompletion(
     };
   }
 
-  // RLS already enforces that the user can only manage their own flame session records
+  // Gate: must reach 90% fueled (matches existing COMPLETION_THRESHOLD used
+  // by the spark calculation). If target_seconds is null (legacy session),
+  // skip the gate.
+  if (
+    isCompleted &&
+    session.target_seconds != null &&
+    session.fueled_seconds < session.target_seconds * COMPLETION_THRESHOLD
+  ) {
+    return {
+      success: false,
+      error: new Error('Need more fueled time to complete this flame'),
+    };
+  }
+
   const { error } = await supabase
     .from('flame_sessions')
     .update({ is_completed: isCompleted })
