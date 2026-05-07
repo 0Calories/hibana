@@ -285,6 +285,61 @@ export async function addToDailyPlan(
   return setDailyPlan(date, [{ flameId, targetSeconds }]);
 }
 
+/**
+ * Drops a flame from today's lineup.
+ * Server-enforces the rule: removable only if duration_seconds <= 300
+ * AND is_completed = false. (5-minute grace window for accidental taps
+ * and early pivots; sealed/in-progress flames are committed to.)
+ */
+export async function removeFromDailyPlan(
+  date: string,
+  flameId: string,
+): ActionResult {
+  const { supabase, user } = await createClientWithAuth();
+
+  if (!isValidDateString(date)) {
+    return {
+      success: false,
+      error: new Error('Date string must be of the format YYYY-MM-DD'),
+    };
+  }
+
+  const { data: session, error: lookupError } = await supabase
+    .from('flame_sessions')
+    .select('id, duration_seconds, is_completed')
+    .eq('user_id', user.id)
+    .eq('flame_id', flameId)
+    .eq('date', date)
+    .maybeSingle();
+
+  if (lookupError) return { success: false, error: lookupError };
+  if (!session) return { success: true, data: 'not in lineup' };
+
+  if (session.is_completed) {
+    return {
+      success: false,
+      error: new Error('Cannot drop a completed flame'),
+    };
+  }
+
+  if (session.duration_seconds > 300) {
+    return {
+      success: false,
+      error: new Error('Cannot drop a flame after 5 minutes of tending'),
+    };
+  }
+
+  const { error: deleteError } = await supabase
+    .from('flame_sessions')
+    .delete()
+    .eq('id', session.id);
+
+  if (deleteError) return { success: false, error: deleteError };
+
+  revalidatePath('/flames');
+  return { success: true, data: `Removed flame ${flameId} from ${date}` };
+}
+
 // New: replaces getFlamesPageData. Returns today's plan as a list of session
 // rows joined with their flame, plus the user's fuel balance.
 
