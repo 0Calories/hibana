@@ -1,3 +1,4 @@
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -65,10 +66,12 @@ export type Database = {
           duration_seconds: number
           ended_at: string | null
           flame_id: string
+          fueled_seconds: number
           id: string
           is_completed: boolean
           notes: string | null
           started_at: string | null
+          target_seconds: number | null
           user_id: string
         }
         Insert: {
@@ -77,10 +80,12 @@ export type Database = {
           duration_seconds?: number
           ended_at?: string | null
           flame_id: string
+          fueled_seconds?: number
           id?: string
           is_completed?: boolean
           notes?: string | null
           started_at?: string | null
+          target_seconds?: number | null
           user_id: string
         }
         Update: {
@@ -89,10 +94,12 @@ export type Database = {
           duration_seconds?: number
           ended_at?: string | null
           flame_id?: string
+          fueled_seconds?: number
           id?: string
           is_completed?: boolean
           notes?: string | null
           started_at?: string | null
+          target_seconds?: number | null
           user_id?: string
         }
         Relationships: [
@@ -634,3 +641,4 @@ export const Constants = {
   },
 } as const
 
+<claude-code-hint v="1" type="plugin" value="supabase@claude-plugins-official" />
