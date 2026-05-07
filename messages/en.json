@@ -94,10 +94,7 @@
     },
     "fuel": {
       "label": "Fuel",
-      "remaining": "{time} remaining",
-      "depleted": "No fuel remaining",
-      "noBudget": "No fuel budget set",
-      "scheduleLink": "View schedule"
+      "refill": "Refill"
     },
     "plan": {
       "summary": "{time} planned · {count, plural, one {# flame} other {# flames}}"
