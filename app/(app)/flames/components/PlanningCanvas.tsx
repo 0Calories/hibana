@@ -5,38 +5,33 @@ import {
   type DragEndEvent,
   PointerSensor,
   TouchSensor,
-  useDraggable,
-  useDroppable,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import { PlusIcon } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import type { Flame } from '@/lib/supabase/rows';
-import { cn } from '@/lib/utils';
+import { formatDuration } from '@/lib/time';
 import { setDailyPlan } from '../actions';
-import { getFlameColors } from '../utils/colors';
 import { CreateFlameDialog } from './CreateFlameDialog';
-import { MinutesPill } from './MinutesPill';
-import { PlanSumBar } from './PlanSumBar';
-import { StaticFlameIcon } from './StaticFlameIcon';
+import { AssignedFlamesZone } from './planner/AssignedFlamesZone';
+import { ASSIGNED_FLAME_ZONE_ID, MY_FLAMES_ZONE_ID } from './planner/constants';
+import { DraggableFlameCard } from './planner/DraggableFlameCard';
+import { MyFlamesZone } from './planner/MyFlamesZone';
 
 interface PlanningCanvasProps {
   /** All non-archived flames (planned + unplanned). */
   flames: Flame[];
   /** Today's date (YYYY-MM-DD, server-resolved). */
   date: string;
-  /** Pre-resolved last-used target_seconds per flame, fall back to undefined. */
-  lastUsedTargetsByFlameId: Record<string, number | undefined>;
+  /** Pre-resolved last-used target_seconds per flame. */
+  lastUsedTargetsByFlameId: Record<string, number>;
 }
 
-const LINEUP_ZONE_ID = 'planning-lineup-zone';
-const POOL_ZONE_ID = 'planning-pool-zone';
-
-type Pick = { flame: Flame; targetSeconds: number };
+const DEFAULT_MINUTES = 30;
 
 export function PlanningCanvas({
   flames,
@@ -44,15 +39,35 @@ export function PlanningCanvas({
   lastUsedTargetsByFlameId,
 }: PlanningCanvasProps) {
   const t = useTranslations('flames.plan');
-  const [picks, setPicks] = useState<Pick[]>([]);
+  const locale = useLocale();
+
+  const [assignedFlameIds, setAssignedFlameIds] = useState<string[]>([]);
+  const [allocations, setAllocations] = useState<Record<string, number>>({});
   const [createOpen, setCreateOpen] = useState(false);
-  const [pendingTargetForNew, _setPendingTargetForNew] = useState<number>(
-    30 * 60,
-  );
   const [submitting, setSubmitting] = useState(false);
 
-  const pickedIds = new Set(picks.map((p) => p.flame.id));
-  const pool = flames.filter((f) => !pickedIds.has(f.id));
+  const flameLevels = useMemo(
+    () => new Map(flames.map((f, i) => [f.id, (i % 8) + 1])),
+    [flames],
+  );
+
+  const assignedFlames = useMemo(
+    () =>
+      assignedFlameIds
+        .map((id) => flames.find((f) => f.id === id))
+        .filter(Boolean) as Flame[],
+    [flames, assignedFlameIds],
+  );
+
+  const availableFlames = useMemo(
+    () => flames.filter((f) => !assignedFlameIds.includes(f.id)),
+    [flames, assignedFlameIds],
+  );
+
+  const totalMinutes = assignedFlames.reduce(
+    (sum, f) => sum + (allocations[f.id] ?? 0),
+    0,
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -67,105 +82,120 @@ export function PlanningCanvas({
       if (!over) return;
       const flameId = String(active.id);
 
-      if (over.id === LINEUP_ZONE_ID) {
-        if (pickedIds.has(flameId)) return;
-        const flame = flames.find((f) => f.id === flameId);
-        if (!flame) return;
-        const target = lastUsedTargetsByFlameId[flameId] ?? 30 * 60; // 30 min default
-        setPicks((prev) => [...prev, { flame, targetSeconds: target }]);
-      } else if (over.id === POOL_ZONE_ID) {
-        setPicks((prev) => prev.filter((p) => p.flame.id !== flameId));
+      if (over.id === ASSIGNED_FLAME_ZONE_ID) {
+        if (assignedFlameIds.includes(flameId)) return;
+        const seconds = lastUsedTargetsByFlameId[flameId];
+        const minutes =
+          seconds != null ? Math.round(seconds / 60) : DEFAULT_MINUTES;
+        setAssignedFlameIds((prev) => [...prev, flameId]);
+        setAllocations((prev) => ({ ...prev, [flameId]: minutes }));
+      } else if (over.id === MY_FLAMES_ZONE_ID) {
+        setAssignedFlameIds((prev) => prev.filter((id) => id !== flameId));
+        setAllocations((prev) => {
+          const next = { ...prev };
+          delete next[flameId];
+          return next;
+        });
       }
     },
-    [flames, lastUsedTargetsByFlameId, pickedIds],
+    [assignedFlameIds, lastUsedTargetsByFlameId],
   );
 
-  const handleRemove = (flameId: string) => {
-    setPicks((prev) => prev.filter((p) => p.flame.id !== flameId));
-  };
+  const handleRemove = useCallback((flameId: string) => {
+    setAssignedFlameIds((prev) => prev.filter((id) => id !== flameId));
+    setAllocations((prev) => {
+      const next = { ...prev };
+      delete next[flameId];
+      return next;
+    });
+  }, []);
 
-  const handleSetMinutes = (flameId: string, seconds: number) => {
-    setPicks((prev) =>
-      prev.map((p) =>
-        p.flame.id === flameId ? { ...p, targetSeconds: seconds } : p,
-      ),
-    );
+  const handleAllocationChange = useCallback(
+    (flameId: string, minutes: number) => {
+      setAllocations((prev) => ({ ...prev, [flameId]: minutes }));
+    },
+    [],
+  );
+
+  const handleClear = () => {
+    setAssignedFlameIds([]);
+    setAllocations({});
   };
 
   const handleLockIn = async () => {
-    if (picks.length === 0) return;
+    if (assignedFlameIds.length === 0) return;
     setSubmitting(true);
-    const result = await setDailyPlan(
-      date,
-      picks.map((p) => ({
-        flameId: p.flame.id,
-        targetSeconds: p.targetSeconds,
-      })),
-    );
+    const picks = assignedFlameIds.map((id) => ({
+      flameId: id,
+      targetSeconds: (allocations[id] ?? DEFAULT_MINUTES) * 60,
+    }));
+    const result = await setDailyPlan(date, picks);
     setSubmitting(false);
     if (!result.success) {
       toast.error(result.error.message, { position: 'top-center' });
-      return;
     }
-    // Page revalidates and re-renders into State 2 (tending grid).
+    // On success, page revalidates and re-renders into State 2 (tending grid).
   };
 
-  const handleClear = () => setPicks([]);
+  const summary = t('summary', {
+    time: formatDuration(totalMinutes, locale),
+    count: assignedFlameIds.length,
+  });
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-4">
-        <h1 className="text-lg font-semibold">{t('heading')}</h1>
-
-        <PlanSumBar picks={picks} />
-
-        <LineupDropZone>
-          {picks.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              {t('lineupEmpty')}
-            </p>
-          ) : (
-            picks.map((p) => (
-              <LineupCard
-                key={p.flame.id}
-                flame={p.flame}
-                targetSeconds={p.targetSeconds}
-                onChangeSeconds={(s) => handleSetMinutes(p.flame.id, s)}
-                onRemove={() => handleRemove(p.flame.id)}
-              />
-            ))
+        <div className="flex items-baseline justify-between gap-3">
+          <h1 className="text-lg font-semibold">{t('heading')}</h1>
+          {assignedFlameIds.length > 0 && (
+            <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+              {summary}
+            </span>
           )}
-        </LineupDropZone>
+        </div>
 
-        <PoolDropZone>
-          {pool.map((flame) => (
-            <DraggablePoolChip key={flame.id} flame={flame} />
-          ))}
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className={cn(
-              'inline-flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-1.5 text-xs',
-              'hover:bg-muted/40 transition-colors',
-            )}
-          >
-            <PlusIcon className="size-3" />
-            {t('createNewFlame')}
-          </button>
-        </PoolDropZone>
+        <AssignedFlamesZone
+          flames={assignedFlames}
+          onRemove={handleRemove}
+          allocations={allocations}
+          onAllocationChange={handleAllocationChange}
+        />
+
+        <div className="space-y-1.5">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t('availableHeading')}
+          </h2>
+          <MyFlamesZone>
+            {availableFlames.map((flame) => (
+              <DraggableFlameCard
+                key={flame.id}
+                flame={flame}
+                level={flameLevels.get(flame.id) ?? 1}
+              />
+            ))}
+            <button
+              type="button"
+              onClick={() => setCreateOpen(true)}
+              className="inline-flex items-center gap-1 self-center rounded-full border border-dashed border-border px-3 py-1.5 text-xs hover:bg-muted/40 transition-colors"
+            >
+              <PlusIcon className="size-3" />
+              {t('createNewFlame')}
+            </button>
+          </MyFlamesZone>
+        </div>
 
         <div className="flex items-center justify-between pt-2">
           <button
             type="button"
             onClick={handleClear}
-            disabled={picks.length === 0}
+            disabled={assignedFlameIds.length === 0}
             className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
             {t('clear')}
           </button>
           <Button
             onClick={handleLockIn}
-            disabled={picks.length === 0 || submitting}
+            disabled={assignedFlameIds.length === 0 || submitting}
             size="lg"
           >
             {t('lockIn')}
@@ -175,123 +205,13 @@ export function PlanningCanvas({
 
       <CreateFlameDialog
         open={createOpen}
-        onOpenChange={(open) => setCreateOpen(open)}
+        onOpenChange={setCreateOpen}
         onCreated={(flame) => {
-          setPicks((prev) => [
-            ...prev,
-            { flame, targetSeconds: pendingTargetForNew },
-          ]);
+          setAssignedFlameIds((prev) => [...prev, flame.id]);
+          setAllocations((prev) => ({ ...prev, [flame.id]: DEFAULT_MINUTES }));
           setCreateOpen(false);
         }}
       />
     </DndContext>
-  );
-}
-
-function LineupDropZone({ children }: { children: React.ReactNode }) {
-  const { isOver, setNodeRef } = useDroppable({ id: LINEUP_ZONE_ID });
-  return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        'rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 p-2 transition-colors',
-        isOver && 'bg-amber-500/10',
-      )}
-    >
-      <div className="flex flex-col gap-1.5">{children}</div>
-    </div>
-  );
-}
-
-function PoolDropZone({ children }: { children: React.ReactNode }) {
-  const { setNodeRef } = useDroppable({ id: POOL_ZONE_ID });
-  return (
-    <div ref={setNodeRef} className="flex flex-wrap gap-2">
-      {children}
-    </div>
-  );
-}
-
-interface LineupCardProps {
-  flame: Flame;
-  targetSeconds: number;
-  onChangeSeconds: (s: number) => void;
-  onRemove: () => void;
-}
-
-function LineupCard({
-  flame,
-  targetSeconds,
-  onChangeSeconds,
-  onRemove,
-}: LineupCardProps) {
-  // Whole card is the drag handle (no visible grip).
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: flame.id });
-
-  const colors = getFlameColors(flame.color);
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={
-        transform
-          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-          : undefined
-      }
-      className={cn(
-        'flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2',
-        isDragging && 'opacity-50',
-      )}
-      {...attributes}
-      {...listeners}
-    >
-      <StaticFlameIcon level={1} colors={colors} className="size-7 shrink-0" />
-      <span className="flex-1 truncate text-sm font-medium">{flame.name}</span>
-      <MinutesPill value={targetSeconds} onChange={onChangeSeconds} />
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
-        className="size-6 rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-        aria-label="Remove from lineup"
-      >
-        ×
-      </button>
-    </div>
-  );
-}
-
-function DraggablePoolChip({ flame }: { flame: Flame }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: flame.id });
-  const colors = getFlameColors(flame.color);
-  return (
-    <button
-      ref={setNodeRef}
-      type="button"
-      style={
-        transform
-          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-          : undefined
-      }
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1.5 text-xs',
-        'hover:bg-muted/40 transition-colors',
-        isDragging && 'opacity-50',
-      )}
-      {...attributes}
-      {...listeners}
-    >
-      <span
-        className="size-3 rounded-full"
-        style={{
-          background: `linear-gradient(135deg, ${colors.medium}, ${colors.light})`,
-        }}
-      />
-      {flame.name}
-    </button>
   );
 }

@@ -114,9 +114,10 @@
       "removed": "Removed from today"
     },
     "plan": {
-      "summary": "{time} planned · {count, plural, one {# flame} other {# flames}}",
+      "summary": "{time} · {count, plural, one {# flame} other {# flames}}",
       "heading": "Plan today's flames",
-      "lineupEmpty": "Drag flames here to add them to today",
+      "availableHeading": "All flames",
+      "dragHere": "Drag flames here to add them to today",
       "createNewFlame": "+ New flame",
       "clear": "Clear",
       "lockIn": "Lock in today"
