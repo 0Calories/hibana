@@ -8,7 +8,7 @@ import { FlamesProvider, useFlamesContext } from '../hooks/useFlames';
 import { FlamesPageActions } from './FlamesPageActions';
 import { FuelBarStickyContainer } from './FuelBarStickyContainer';
 import { FuelMeter } from './FuelMeter';
-import { InteractiveFlameCard } from './flame-card/InteractiveFlameCard';
+import { FlameCard } from './flame-card';
 
 interface FlamesListProps {
   flames: Flame[];
@@ -81,18 +81,27 @@ function FlamesListContent() {
       </FuelBarStickyContainer>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {entries.map((entry) => (
-          <InteractiveFlameCard
+          // <InteractiveFlameCard
+          //   key={entry.flame.id}
+          //   flame={entry.flame}
+          //   entry={entry}
+          //   actions={{
+          //     onToggle: () => actions.toggle(entry.flame.id),
+          //     onBeginCompletion: () => actions.beginCompletion(entry.flame.id),
+          //     onCancelCompletion: () =>
+          //       actions.cancelCompletion(entry.flame.id),
+          //     onCompleteFlame: () => actions.completeFlame(entry.flame.id),
+          //   }}
+          //   isFuelDepleted={fuel.isFuelDepleted || !fuel.hasBudget}
+          // />
+          <FlameCard
             key={entry.flame.id}
-            flame={entry.flame}
-            entry={entry}
-            actions={{
-              onToggle: () => actions.toggle(entry.flame.id),
-              onBeginCompletion: () => actions.beginCompletion(entry.flame.id),
-              onCancelCompletion: () =>
-                actions.cancelCompletion(entry.flame.id),
-              onCompleteFlame: () => actions.completeFlame(entry.flame.id),
-            }}
-            isFuelDepleted={fuel.isFuelDepleted || !fuel.hasBudget}
+            name={entry.flame.name}
+            level={entry.flame.level}
+            color={entry.flame.color ?? ''}
+            flameState="burning"
+            burnSeconds={entry.elapsedSeconds}
+            burnTargetSeconds={entry.targetSeconds}
           />
         ))}
       </div>
