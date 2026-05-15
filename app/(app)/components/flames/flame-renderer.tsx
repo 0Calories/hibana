@@ -2,8 +2,8 @@
 
 import type { TargetAndTransition } from 'framer-motion';
 import { motion, useReducedMotion } from 'framer-motion';
+import type { Flame } from '@/lib/supabase/rows';
 import { ShakeWrapper } from '../../flames/components/flame-card/effects/ShakeWrapper';
-import type { ShapeColors } from '../../flames/components/flame-card/effects/types';
 import { FLAME_REGISTRY } from '../../flames/components/flame-card/flames';
 import type { FlameState } from './constants/state';
 
@@ -30,22 +30,21 @@ const completionBounceTransition = {
 };
 
 interface FlameRendererProps {
+  flame: Flame;
   state: FlameState;
-  level: number;
-  colors: ShapeColors;
   completionProgress?: number;
   className?: string;
   isOverburning?: boolean;
 }
 
 export function FlameRenderer({
+  flame,
   state,
-  level,
-  colors,
   completionProgress = 0,
   className,
   isOverburning = false,
 }: FlameRendererProps) {
+  const { color, level } = flame;
   const shouldReduceMotion = useReducedMotion();
   const clampedLevel = Math.max(1, Math.min(8, level));
   const { Base, Flame, CompletedFlame, animation } =
@@ -75,11 +74,11 @@ export function FlameRenderer({
         }}
       >
         {CompletedFlame ? (
-          <CompletedFlame colors={colors} />
+          <CompletedFlame />
         ) : (
           <>
             {Base && <Base />}
-            <Flame colors={colors} />
+            <Flame />
           </>
         )}
       </motion.svg>
@@ -98,7 +97,7 @@ export function FlameRenderer({
         transition={springTransition}
       >
         {Base && <Base />}
-        <Flame colors={colors} />
+        <Flame />
       </motion.svg>
     );
   }
