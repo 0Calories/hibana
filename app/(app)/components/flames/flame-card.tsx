@@ -46,7 +46,7 @@ export function FlameCard({
         <FlameRenderer state={flameState} level={0} colors={color} />
       </CardContent>
 
-      <CardFooter className="flex flex-col items-center text-center">
+      <CardFooter className="flex flex-col items-center text-center gap-2">
         <p>{durationLabel}</p>
         <Progress value={progress} />
         <p>{`Burning ...`}</p>
