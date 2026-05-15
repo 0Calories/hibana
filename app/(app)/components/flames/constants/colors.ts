@@ -1,66 +1,67 @@
-export type FlameColorName =
-  | 'rose'
-  | 'orange'
-  | 'amber'
-  | 'indigo'
-  | 'teal'
-  | 'green'
-  | 'blue'
-  | 'sky'
-  | 'fuchsia';
+export const FlameColorIdentifiers = [
+  'rose',
+  'orange',
+  'amber',
+  'indigo',
+  'teal',
+  'green',
+  'blue',
+  'sky',
+  'fuchsia',
+] as const;
 
-// Colors picked from Tailwind color palette:
-// https://tailwindcss.com/docs/colors
-// Each family has shades: [400, 500, 600]
+export type FlameColorName = (typeof FlameColorIdentifiers)[number];
+type FlameColorPalette = { light: string; medium: string; dark: string };
 
-export const FLAME_BG_CLASSES: Record<FlameColorName, string> = {
-  rose: 'bg-rose-500',
-  orange: 'bg-orange-500',
-  amber: 'bg-amber-500',
-  indigo: 'bg-indigo-500',
-  teal: 'bg-teal-500',
-  green: 'bg-green-500',
-  blue: 'bg-blue-500',
-  sky: 'bg-sky-500',
-  fuchsia: 'bg-fuchsia-500',
+const FLAME_COLOR_PALETTE: Record<FlameColorName, FlameColorPalette> = {
+  rose: {
+    light: 'oklch(0.81 0.117 11.638)',
+    medium: 'oklch(0.645 0.246 16.439)',
+    dark: 'oklch(0.586 0.253 17.585)',
+  },
+  orange: {
+    light: 'oklch(0.837 0.128 66.29)',
+    medium: 'oklch(0.705 0.213 47.604)',
+    dark: 'oklch(0.646 0.222 41.116)',
+  },
+  amber: {
+    light: 'oklch(0.879 0.169 91.605)',
+    medium: 'oklch(0.769 0.188 70.08)',
+    dark: 'oklch(0.666 0.179 58.318)',
+  },
+  indigo: {
+    light: 'oklch(0.785 0.115 274.713)',
+    medium: 'oklch(0.585 0.233 277.117)',
+    dark: 'oklch(0.511 0.262 276.966)',
+  },
+  teal: {
+    light: 'oklch(0.777 0.152 181.912)',
+    medium: 'oklch(0.704 0.14 182.503)',
+    dark: 'oklch(0.6 0.118 184.704)',
+  },
+  green: {
+    light: 'oklch(0.792 0.209 151.711)',
+    medium: 'oklch(0.723 0.219 149.579)',
+    dark: 'oklch(0.627 0.194 149.214)',
+  },
+  blue: {
+    light: 'oklch(0.809 0.105 251.813)',
+    medium: 'oklch(0.623 0.214 259.815)',
+    dark: 'oklch(0.546 0.245 262.881)',
+  },
+  sky: {
+    light: 'oklch(0.828 0.111 230.318)',
+    medium: 'oklch(0.685 0.169 237.323)',
+    dark: 'oklch(0.588 0.158 241.966)',
+  },
+  fuchsia: {
+    light: 'oklch(0.833 0.145 321.434)',
+    medium: 'oklch(0.667 0.295 322.15)',
+    dark: 'oklch(0.591 0.293 322.896)',
+  },
 };
 
-export const FLAME_GRADIENT_CLASSES: Record<FlameColorName, string> = {
-  rose: 'bg-gradient-to-t from-rose-400 to-rose-600',
-  orange: 'bg-gradient-to-t from-orange-300 to-orange-600',
-  amber: 'bg-gradient-to-t from-amber-300 to-amber-600',
-  indigo: 'bg-gradient-to-t from-indigo-300 to-indigo-600',
-  teal: 'bg-gradient-to-t from-teal-300 to-teal-600',
-  green: 'bg-gradient-to-t from-green-300 to-green-600',
-  blue: 'bg-gradient-to-t from-blue-300 to-blue-600',
-  sky: 'bg-gradient-to-t from-sky-300 to-sky-600',
-  fuchsia: 'bg-gradient-to-t from-fuchsia-300 to-fuchsia-600',
-};
-
-// Earthly flames: warm fire colors (ordered hot → cool)
-export const EARTHLY_FLAMES: FlameColorName[] = ['rose', 'orange', 'amber'];
-// Chemical flames: nature/elemental colors (ordered hot → cool)
-export const CHEMICAL_FLAMES: FlameColorName[] = ['indigo', 'teal', 'green'];
-// Cosmic flames: mystical/space colors (ordered hot → cool)
-export const COSMIC_FLAMES: FlameColorName[] = ['blue', 'sky', 'fuchsia'];
-
-// Hex colors for SVG fills and glow effects
-export const FLAME_HEX_COLORS: Record<
-  FlameColorName,
-  { light: string; medium: string; dark: string }
-> = {
-  rose: { light: '#fda4af', medium: '#f43f5e', dark: '#e11d48' },
-  orange: { light: '#fdba74', medium: '#f97316', dark: '#ea580c' },
-  amber: { light: '#fcd34d', medium: '#f59e0b', dark: '#d97706' },
-  indigo: { light: '#a5b4fc', medium: '#6366f1', dark: '#4f46e5' },
-  teal: { light: '#5eead4', medium: '#14b8a6', dark: '#0d9488' },
-  green: { light: '#86efac', medium: '#22c55e', dark: '#16a34a' },
-  blue: { light: '#93c5fd', medium: '#3b82f6', dark: '#2563eb' },
-  sky: { light: '#7dd3fc', medium: '#0ea5e9', dark: '#0284c7' },
-  fuchsia: { light: '#f0abfc', medium: '#d946ef', dark: '#c026d3' },
-};
-
-export function getFlameColors(colorName: FlameColorName | string | null) {
-  const name = (colorName ?? 'orange') as FlameColorName;
-  return FLAME_HEX_COLORS[name] ?? FLAME_HEX_COLORS.orange;
+export function getFlameColorPalette(identifier: string) {
+  const name = (identifier ?? 'orange') as FlameColorName;
+  return FLAME_COLOR_PALETTE[name] ?? FLAME_COLOR_PALETTE.orange;
 }
