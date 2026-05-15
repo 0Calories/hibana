@@ -96,9 +96,7 @@ function FlamesListContent() {
           // />
           <FlameCard
             key={entry.flame.id}
-            name={entry.flame.name}
-            level={entry.flame.level}
-            color={entry.flame.color ?? ''}
+            flame={entry.flame}
             flameState="burning"
             burnSeconds={entry.elapsedSeconds}
             burnTargetSeconds={entry.targetSeconds}
