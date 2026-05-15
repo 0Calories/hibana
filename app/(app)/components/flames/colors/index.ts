@@ -10,10 +10,10 @@ export const FlameColorIdentifiers = [
   'fuchsia',
 ] as const;
 
-export type FlameColorName = (typeof FlameColorIdentifiers)[number];
+export type FlameColor = (typeof FlameColorIdentifiers)[number];
 type FlameColorPalette = { light: string; medium: string; dark: string };
 
-const FLAME_COLOR_PALETTE: Record<FlameColorName, FlameColorPalette> = {
+const FLAME_COLOR_PALETTE: Record<FlameColor, FlameColorPalette> = {
   rose: {
     light: 'oklch(0.81 0.117 11.638)',
     medium: 'oklch(0.645 0.246 16.439)',
