@@ -2,10 +2,10 @@
 
 import type { TargetAndTransition } from 'framer-motion';
 import { motion, useReducedMotion } from 'framer-motion';
-import type { FlameState } from '../../../utils/types';
-import { FLAME_REGISTRY } from '../flames';
-import { ShakeWrapper } from './ShakeWrapper';
-import type { ShapeColors } from './types';
+import { ShakeWrapper } from '../../flames/components/flame-card/effects/ShakeWrapper';
+import type { ShapeColors } from '../../flames/components/flame-card/effects/types';
+import { FLAME_REGISTRY } from '../../flames/components/flame-card/flames';
+import type { FlameState } from '../../flames/utils/types';
 
 const stateVariants: Record<FlameState, TargetAndTransition> = {
   untended: { scale: 0.8, opacity: 0.88, y: 0 },

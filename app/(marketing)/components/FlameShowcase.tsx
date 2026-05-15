@@ -3,8 +3,8 @@
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
+import { FlameRenderer } from '@/app/(app)/components/flames/flame-renderer';
 import { EffectsRenderer } from '@/app/(app)/flames/components/flame-card/effects/EffectsRenderer';
-import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
 import { FLAME_REGISTRY } from '@/app/(app)/flames/components/flame-card/flames';
 import { FLAME_HEX_COLORS } from '@/app/(app)/flames/utils/colors';
 import { FLAME_LEVELS } from '@/app/(app)/flames/utils/levels';

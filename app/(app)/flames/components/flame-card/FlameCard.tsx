@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
+import { FlameRenderer } from '../../../components/flames/flame-renderer';
 import { useFlameInteractions } from '../../hooks/useFlameInteractions';
 import type { FlameCardActions, FlameEntry } from '../../hooks/useFlames';
 import { getFlameColors } from '../../utils/colors';
@@ -13,7 +14,6 @@ import { CompletionSummaryModal } from '../CompletionSummaryModal';
 import { CompletionCelebration } from './effects/CompletionCelebration';
 import { CompletionRingProgress } from './effects/CompletionRingProgress';
 import { EffectsRenderer } from './effects/EffectsRenderer';
-import { FlameRenderer } from './effects/FlameRenderer';
 import { FlameGeometryProvider } from './FlameGeometryContext';
 import { FLAME_REGISTRY } from './flames';
 

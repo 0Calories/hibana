@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Flame, FlameSession } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
+import { FlameCard } from '../../components/flames/flame-card';
 import type { FuelBudgetStatus } from '../actions';
 import { FlamesProvider, useFlamesContext } from '../hooks/useFlames';
 import { FlamesPageActions } from './FlamesPageActions';
 import { FuelBarStickyContainer } from './FuelBarStickyContainer';
 import { FuelMeter } from './FuelMeter';
-import { FlameCard } from './flame-card';
 
 interface FlamesListProps {
   flames: Flame[];

@@ -6,9 +6,9 @@ import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { FlameRenderer } from '@/app/(app)/components/flames/flame-renderer';
 import { ColorPickerGrid } from '@/app/(app)/flames/components/ColorPickerGrid';
 import { EffectsRenderer } from '@/app/(app)/flames/components/flame-card/effects/EffectsRenderer';
-import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
 import { FLAME_REGISTRY } from '@/app/(app)/flames/components/flame-card/flames';
 import { Button } from '@/components/ui/button';
 import {
