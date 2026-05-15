@@ -2,13 +2,13 @@
 
 import { useReducedMotion } from 'framer-motion';
 import { useCallback, useState } from 'react';
+import type { FlameState } from '../../components/flames/constants/state';
 import {
   cancelCompletionSound,
   finishCompletionSound,
   startCompletionSound,
   updateCompletionSound,
 } from '../components/completion-sounds';
-import type { FlameState } from '../utils/types';
 import type { FlameCardActions } from './useFlames';
 import { useLongPress } from './useLongPress';
 

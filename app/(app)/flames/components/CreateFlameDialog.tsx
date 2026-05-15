@@ -31,12 +31,12 @@ import {
 } from '@/lib/schemas/flame';
 import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
-import { createFlame, updateFlame } from '../actions';
 import {
   FLAME_GRADIENT_CLASSES,
   type FlameColorName,
   getFlameColors,
-} from '../utils/colors';
+} from '../../components/flames/constants/colors';
+import { createFlame, updateFlame } from '../actions';
 
 interface CreateFlameDialogProps {
   open: boolean;

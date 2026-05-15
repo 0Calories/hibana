@@ -1,5 +1,5 @@
 import type { TargetAndTransition } from 'framer-motion';
-import type { FlameState } from '../../../utils/types';
+import type { FlameState } from '../../../../components/flames/constants/state';
 import type { FlameParticleEffect } from '../../particles';
 
 export interface ShapeColors {

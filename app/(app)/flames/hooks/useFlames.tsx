@@ -13,13 +13,13 @@ import {
 import { toast } from 'sonner';
 import { creditCompletionReward } from '@/app/(app)/shop/actions';
 import type { Flame, FlameSession } from '@/lib/supabase/rows';
+import type { FlameState } from '../../components/flames/constants/state';
 import {
   type FuelBudgetStatus,
   getRemainingFuelBudget,
   setFlameCompletion,
 } from '../actions';
 import { getAllSessionsForDate, toggleSession } from '../session-actions';
-import type { FlameState } from '../utils/types';
 
 // ─── Types ───────────────────────────────────────────────────────────
 

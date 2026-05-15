@@ -9,7 +9,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import type { Flame } from '@/lib/supabase/rows';
 import { formatTimer } from '@/lib/time';
-import { getFlameLevel } from '../../flames/utils/levels';
+import { getFlameLevel } from './constants/levels';
 import { FlameRenderer } from './flame-renderer';
 
 type FlameState = 'paused' | 'burning' | 'completed';

@@ -23,10 +23,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
+import { getFlameColors } from '../../../components/flames/constants/colors';
 import { archiveFlame } from '../../actions';
 import { CreateFlameDialog } from '../../components/CreateFlameDialog';
 import { StaticFlameIcon } from '../../components/StaticFlameIcon';
-import { getFlameColors } from '../../utils/colors';
 import { DeleteFlameDialog } from './DeleteFlameDialog';
 
 type FilterValue = 'all' | 'active' | 'archived';

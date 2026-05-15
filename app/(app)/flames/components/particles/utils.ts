@@ -1,4 +1,4 @@
-import type { FlameState } from '@/app/(app)/flames/utils/types';
+import type { FlameState } from '@/app/(app)/components/flames/constants/state';
 import type {
   AnimationIntensity,
   Particle,

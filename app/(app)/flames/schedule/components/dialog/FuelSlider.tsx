@@ -2,11 +2,11 @@
 
 import { FuelIcon } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
+import type { FlameColorName } from '@/app/(app)/components/flames/constants/colors';
 import {
   FLAME_HEX_COLORS,
   getFlameColors,
-} from '@/app/(app)/flames/utils/colors';
+} from '@/app/(app)/components/flames/constants/colors';
 import type { Flame } from '@/lib/supabase/rows';
 import { formatTimer, parseBudgetClock } from '@/lib/time';
 import { cn } from '@/lib/utils';

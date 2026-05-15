@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { FlameState } from '../../utils/types';
+import type { FlameState } from '../../../components/flames/constants/state';
 import type { ShapeColors } from '../flame-card/effects/types';
 import { useFlameGeometry } from '../flame-card/FlameGeometryContext';
 import { ParticleField } from './ParticleField';

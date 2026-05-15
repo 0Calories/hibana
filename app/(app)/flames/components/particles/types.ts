@@ -1,5 +1,5 @@
 import type { Easing } from 'framer-motion';
-import type { FlameState } from '@/app/(app)/flames/utils/types';
+import type { FlameState } from '@/app/(app)/components/flames/constants/state';
 import type { ShapeColors } from '../flame-card/effects/types';
 import type { ParticleRangeConfig } from './utils';
 
