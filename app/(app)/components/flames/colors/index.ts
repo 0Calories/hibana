@@ -61,7 +61,6 @@ const FLAME_COLOR_PALETTE: Record<FlameColor, FlameColorPalette> = {
   },
 };
 
-export function getFlameColorPalette(identifier: string) {
-  const name = (identifier ?? 'orange') as FlameColorName;
-  return FLAME_COLOR_PALETTE[name] ?? FLAME_COLOR_PALETTE.orange;
+export function getFlameColorPalette(identifier: FlameColor) {
+  return FLAME_COLOR_PALETTE[identifier] ?? FLAME_COLOR_PALETTE.orange;
 }
