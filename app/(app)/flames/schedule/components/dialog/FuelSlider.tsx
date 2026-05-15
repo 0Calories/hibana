@@ -2,23 +2,16 @@
 
 import { FuelIcon } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import type { FlameColorName } from '@/app/(app)/components/flames/constants/colors';
 import {
-  FLAME_HEX_COLORS,
-  getFlameColors,
-} from '@/app/(app)/components/flames/constants/colors';
+  type FlameColor,
+  getFlameColorPalette,
+} from '@/app/(app)/components/flames/colors';
 import type { Flame } from '@/lib/supabase/rows';
 import { formatTimer, parseBudgetClock } from '@/lib/time';
 import { cn } from '@/lib/utils';
 
 const MAX_MINUTES = 720; // 12 hours
 const SNAP_INCREMENT = 15;
-
-// Amber-ish flame colors that blend into the fuel bar
-const WARM_COLORS = new Set<string>([
-  FLAME_HEX_COLORS.amber.medium,
-  FLAME_HEX_COLORS.orange.medium,
-]);
 
 interface FuelSliderProps {
   value: number;
@@ -89,13 +82,13 @@ export function FuelSlider({
         const startFrac = acc.cursor / MAX_MINUTES;
         acc.cursor += budget;
         const endFrac = Math.min(acc.cursor / MAX_MINUTES, 1);
-        const colors = getFlameColors(flame.color as FlameColorName);
+        const colors = getFlameColorPalette(flame.color as FlameColor);
         acc.segments.push({
           flameId: flame.id,
           startFrac,
           endFrac,
           colors,
-          needsOutline: WARM_COLORS.has(colors.medium),
+          needsOutline: flame.color === 'orange' || flame.color === 'amber',
         });
 
         return acc;
