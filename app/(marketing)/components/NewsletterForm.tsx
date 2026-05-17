@@ -35,6 +35,7 @@ export function NewsletterForm() {
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetIdRef = useRef<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [turnstileReady, setTurnstileReady] = useState(false);
 
   useEffect(() => {
     if (
@@ -55,6 +56,7 @@ export function NewsletterForm() {
         size: 'flexible',
       },
     );
+    setTurnstileReady(true);
   }, [scriptLoaded]);
 
   function resetTurnstile() {
@@ -63,8 +65,15 @@ export function NewsletterForm() {
     }
   }
 
+  const turnstileRequired = Boolean(SITE_KEY);
+  const submitDisabled = isPending || (turnstileRequired && !turnstileReady);
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (turnstileRequired && !turnstileReady) {
+      toast.error(t('genericError'));
+      return;
+    }
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
@@ -136,7 +145,7 @@ export function NewsletterForm() {
               />
               <button
                 type="submit"
-                disabled={isPending}
+                disabled={submitDisabled}
                 className="group relative cursor-pointer overflow-hidden rounded-xl bg-[#E60076] px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-[#ff1a8e] hover:shadow-[0_0_30px_rgba(230,0,118,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span className="relative z-10">
