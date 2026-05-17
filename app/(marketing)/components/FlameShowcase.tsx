@@ -1,8 +1,4 @@
-'use client';
-
-import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
-import { useRef } from 'react';
+import { getTranslations } from 'next-intl/server';
 import { ShowcaseFuelBar } from './ShowcaseFuelBar';
 import {
   REVEALED_LEVEL_COUNT,
@@ -10,8 +6,6 @@ import {
   type ShowcaseColors,
 } from './showcase/colors';
 import { ShowcaseFlame } from './showcase/Flames';
-
-const EASE_OUT_EXPO = [0.21, 0.47, 0.32, 0.98] as const;
 
 function MysteryGlyph({
   colors,
@@ -50,14 +44,11 @@ function MysteryGlyph({
   );
 }
 
-export function FlameShowcase() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
-  const shouldReduceMotion = useReducedMotion();
-  const t = useTranslations('marketing.progression');
+export async function FlameShowcase() {
+  const t = await getTranslations('marketing.progression');
 
   return (
-    <div ref={ref} className="space-y-8">
+    <div className="space-y-8">
       <div className="mx-auto max-w-md">
         <ShowcaseFuelBar />
       </div>
@@ -69,16 +60,10 @@ export function FlameShowcase() {
           const colors = level.colors;
 
           return (
-            <motion.div
+            <div
               key={level.level}
-              initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{
-                duration: 0.5,
-                delay: 0.2 + i * 0.08,
-                ease: EASE_OUT_EXPO,
-              }}
-              className="flex flex-col items-center"
+              className="flex flex-col items-center motion-safe:animate-marketing-fade-in-up"
+              style={{ animationDelay: `${0.2 + i * 0.08}s` }}
             >
               <div className="relative mb-3 flex h-28 w-20 items-center justify-center">
                 {revealed ? (
@@ -113,7 +98,7 @@ export function FlameShowcase() {
               >
                 {level.name}
               </span>
-            </motion.div>
+            </div>
           );
         })}
       </div>
@@ -126,17 +111,10 @@ export function FlameShowcase() {
             const colors = level.colors;
 
             return (
-              <motion.div
+              <div
                 key={level.level}
-                initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  duration: 0.5,
-                  delay: i * 0.06,
-                  ease: EASE_OUT_EXPO,
-                }}
-                className="w-18 flex shrink-0 snap-center flex-col items-center"
+                className="w-18 flex shrink-0 snap-center flex-col items-center motion-safe:animate-marketing-fade-in-up"
+                style={{ animationDelay: `${i * 0.06}s` }}
               >
                 <div className="w-18 relative mb-3 flex h-24 items-center justify-center">
                   {revealed ? (
@@ -171,7 +149,7 @@ export function FlameShowcase() {
                 >
                   {level.name}
                 </span>
-              </motion.div>
+              </div>
             );
           })}
         </div>

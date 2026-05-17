@@ -1,11 +1,6 @@
-'use client';
-
-import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 
 export function EmberFloat() {
-  const shouldReduceMotion = useReducedMotion();
-
   return (
     <div className="relative">
       <div
@@ -16,14 +11,7 @@ export function EmberFloat() {
         }}
       />
 
-      <motion.div
-        animate={shouldReduceMotion ? {} : { y: [0, -6, 0] }}
-        transition={{
-          duration: 4,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: 'easeInOut',
-        }}
-      >
+      <div className="motion-safe:animate-marketing-float">
         <Image
           src="/ember.png"
           alt="Ember — Hibana's AI flame-sprite companion"
@@ -33,7 +21,7 @@ export function EmberFloat() {
           draggable={false}
           priority={false}
         />
-      </motion.div>
+      </div>
     </div>
   );
 }

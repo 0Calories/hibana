@@ -1,8 +1,7 @@
-'use client';
-
-import { motion, useReducedMotion } from 'framer-motion';
-
-/** Deterministic star-shaped sparkle particles for decorative elements */
+/**
+ * Decorative star-shaped sparkle particles. Deterministic seed values keep
+ * server and client renders identical.
+ */
 const SPARKLES = Array.from({ length: 5 }, (_, i) => ({
   id: i,
   x: 1 + ((i * 2741) % 90),
@@ -14,43 +13,31 @@ const SPARKLES = Array.from({ length: 5 }, (_, i) => ({
   color: i % 3 === 0 ? '#ffb3d9' : i % 2 === 0 ? '#E60076' : '#ffffff',
 }));
 
-/**
- * Overlay container that scatters animated star-shaped sparkle dots.
- * Wrap it around any element to add sparkles.
- */
 export function SparkleEffect({ children }: { children: React.ReactNode }) {
-  const shouldReduceMotion = useReducedMotion();
-
   return (
     <span className="relative inline-block">
       {children}
-      {!shouldReduceMotion &&
-        SPARKLES.map((s) => (
-          <motion.span
-            key={s.id}
-            className="pointer-events-none absolute"
-            style={{
+      {SPARKLES.map((s) => (
+        <span
+          key={s.id}
+          aria-hidden="true"
+          className="pointer-events-none absolute motion-safe:animate-marketing-sparkle"
+          style={
+            {
               width: s.size,
               height: s.size,
               left: `${s.x}%`,
               top: `${s.y}%`,
               backgroundColor: s.color,
-              transform: 'rotate(45deg)',
               boxShadow: `0 0 ${s.size * 2}px ${s.color}90`,
-            }}
-            animate={{
-              opacity: [0, 1, 0],
-              scale: [0.3, 1.3, 0.3],
-              rotate: [45, 45 + s.rotation, 45],
-            }}
-            transition={{
-              duration: s.duration,
-              delay: s.delay,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: 'easeInOut',
-            }}
-          />
-        ))}
+              opacity: 0,
+              '--sparkle-duration': `${s.duration}s`,
+              '--sparkle-delay': `${s.delay}s`,
+              '--sparkle-rot': `${s.rotation}deg`,
+            } as React.CSSProperties
+          }
+        />
+      ))}
     </span>
   );
 }

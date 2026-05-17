@@ -1,7 +1,3 @@
-'use client';
-
-import { motion, useReducedMotion } from 'framer-motion';
-
 const EMBER_DATA = Array.from({ length: 40 }, (_, i) => ({
   id: i,
   x: (i * 2741) % 100,
@@ -20,34 +16,34 @@ const EMBER_DATA = Array.from({ length: 40 }, (_, i) => ({
   opacity: 0.15 + ((i * 317) % 45) / 100,
 }));
 
+/**
+ * Decorative ember particles drifting up from the hero. CSS keyframed; the
+ * `motion-safe:` variant nukes the animation for reduced-motion users, and
+ * the surrounding container hides the layer entirely in that case via the
+ * `motion-reduce:hidden` utility.
+ */
 export function HeroEmbers() {
-  const shouldReduceMotion = useReducedMotion();
-  if (shouldReduceMotion) return null;
-
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden motion-reduce:hidden">
       {EMBER_DATA.map((ember) => (
-        <motion.div
+        <span
           key={ember.id}
-          className="absolute rounded-full"
-          style={{
-            left: `${ember.x}%`,
-            bottom: '-5%',
-            width: ember.size,
-            height: ember.size,
-            backgroundColor: ember.color,
-          }}
-          animate={{
-            y: '-120vh',
-            x: [0, ember.drift],
-            opacity: [0, ember.opacity, ember.opacity, 0],
-          }}
-          transition={{
-            duration: ember.duration,
-            delay: ember.delay,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: 'easeOut',
-          }}
+          aria-hidden="true"
+          className="absolute rounded-full motion-safe:animate-marketing-ember"
+          style={
+            {
+              left: `${ember.x}%`,
+              bottom: '-5%',
+              width: ember.size,
+              height: ember.size,
+              backgroundColor: ember.color,
+              opacity: 0,
+              '--ember-duration': `${ember.duration}s`,
+              '--ember-delay': `${ember.delay}s`,
+              '--ember-drift': `${ember.drift}px`,
+              '--ember-opacity': ember.opacity,
+            } as React.CSSProperties
+          }
         />
       ))}
     </div>

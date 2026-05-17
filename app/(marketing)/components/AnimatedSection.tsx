@@ -1,53 +1,31 @@
-'use client';
-
-import { type HTMLMotionProps, motion } from 'framer-motion';
-
-const EASE_OUT_EXPO = [0.21, 0.47, 0.32, 0.98] as const;
+/**
+ * Pass-through wrappers kept for backwards-compat with page.tsx. The original
+ * framer-motion implementation had identical `initial` and `whileInView`
+ * values, so the visible effect was already a no-op; the wrappers are now
+ * plain server-rendered elements.
+ */
 
 export function AnimatedSection({
   children,
-  className = '',
-  delay = 0,
+  className,
   ...rest
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-} & Omit<HTMLMotionProps<'section'>, 'children' | 'className'>) {
+}: React.HTMLAttributes<HTMLElement>) {
   return (
-    <motion.section
-      initial={{ opacity: 1, y: 0 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.7, delay, ease: EASE_OUT_EXPO }}
-      className={className}
-      {...rest}
-    >
+    <section className={className} {...rest}>
       {children}
-    </motion.section>
+    </section>
   );
 }
 
 export function AnimatedDiv({
   children,
-  className = '',
-  delay = 0,
+  className,
+  delay: _delay,
   ...rest
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-} & Omit<HTMLMotionProps<'div'>, 'children' | 'className'>) {
+}: React.HTMLAttributes<HTMLDivElement> & { delay?: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 1, y: 0 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.6, delay, ease: EASE_OUT_EXPO }}
-      className={className}
-      {...rest}
-    >
+    <div className={className} {...rest}>
       {children}
-    </motion.div>
+    </div>
   );
 }

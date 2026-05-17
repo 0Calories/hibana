@@ -1,7 +1,3 @@
-'use client';
-
-import { motion, useReducedMotion } from 'framer-motion';
-
 // Deterministic seed values so server and client render identically.
 // Mirrors the look of the in-app FuelDroplets/SmokePuffs without dragging the
 // app-side particle engine into the marketing bundle.
@@ -25,36 +21,27 @@ const PUFFS = [
 ] as const;
 
 export function FuelDroplets({ className }: { className?: string }) {
-  const shouldReduceMotion = useReducedMotion();
-  if (shouldReduceMotion) return null;
-
   return (
     <>
       {DROPLETS.map((d, i) => (
-        <motion.div
+        <span
           // biome-ignore lint/suspicious/noArrayIndexKey: static deterministic list
           key={i}
-          className={`absolute ${className ?? ''}`}
-          style={{
-            width: d.size,
-            height: d.size + 1,
-            left: -d.size / 2,
-            top: '50%',
-            borderRadius: '40% 40% 50% 50%',
-          }}
-          initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
-          animate={{
-            opacity: [0, 0.7, 0.5, 0],
-            y: [0, 6, 16, 24],
-            x: [0, d.drift * 0.5, d.drift],
-            scale: [1, 1, 0.8, 0.4],
-          }}
-          transition={{
-            duration: d.duration,
-            delay: d.delay,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: 'easeIn',
-          }}
+          aria-hidden="true"
+          className={`absolute motion-safe:animate-marketing-droplet ${className ?? ''}`}
+          style={
+            {
+              width: d.size,
+              height: d.size + 1,
+              left: -d.size / 2,
+              top: '50%',
+              borderRadius: '40% 40% 50% 50%',
+              opacity: 0,
+              '--p-duration': `${d.duration}s`,
+              '--p-delay': `${d.delay}s`,
+              '--p-drift': `${d.drift}px`,
+            } as React.CSSProperties
+          }
         />
       ))}
     </>
@@ -62,37 +49,29 @@ export function FuelDroplets({ className }: { className?: string }) {
 }
 
 export function SmokePuffs({ color }: { color: string }) {
-  const shouldReduceMotion = useReducedMotion();
-  if (shouldReduceMotion) return null;
-
   return (
     <>
       {PUFFS.map((p, i) => (
-        <motion.div
+        <span
           // biome-ignore lint/suspicious/noArrayIndexKey: static deterministic list
           key={i}
-          className="absolute rounded-full"
-          style={{
-            width: p.size,
-            height: p.size,
-            left: -p.size / 2,
-            top: '50%',
-            filter: `blur(${p.blur}px)`,
-            background: color,
-          }}
-          initial={{ opacity: 0, y: 0, x: 0, scale: 1 }}
-          animate={{
-            opacity: [0, p.peak, p.peak * 0.5, 0],
-            y: [0, -8, -18, -28],
-            x: [0, p.drift * 0.3, p.drift * 0.7, p.drift],
-            scale: [0.6, 1, 1.4, 1.8],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: 'easeOut',
-          }}
+          aria-hidden="true"
+          className="absolute rounded-full motion-safe:animate-marketing-smoke"
+          style={
+            {
+              width: p.size,
+              height: p.size,
+              left: -p.size / 2,
+              top: '50%',
+              filter: `blur(${p.blur}px)`,
+              background: color,
+              opacity: 0,
+              '--p-duration': `${p.duration}s`,
+              '--p-delay': `${p.delay}s`,
+              '--p-drift': `${p.drift}px`,
+              '--p-peak': p.peak,
+            } as React.CSSProperties
+          }
         />
       ))}
     </>
