@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
+import { Logo } from './components/Logo';
 
 export const metadata: Metadata = {
   title: 'Hibana — Set your motivation ablaze',
@@ -44,7 +44,6 @@ export default async function MarketingLayout({
   return (
     <div className="dark relative min-h-svh bg-[#090b14] text-white">
       {/* Match html/body bg to prevent overscroll color mismatch on Mac */}
-      {/* eslint-disable-next-line @next/next/no-css-tags */}
       <style>{`html, body { background-color: #090b14; }`}</style>
 
       {/* ── Fixed nav ── */}
@@ -53,11 +52,8 @@ export default async function MarketingLayout({
           href="/"
           className="group flex items-center gap-2 text-lg font-bold tracking-tight"
         >
-          <Image
-            src="/logo.svg"
-            alt=""
-            width={28}
-            height={28}
+          <Logo
+            size={28}
             className="transition-opacity group-hover:opacity-80"
           />
           <span className="font-extrabold text-white">Hibana</span>
@@ -80,13 +76,7 @@ export default async function MarketingLayout({
       <footer className="border-t border-white/4 px-6 py-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-sm text-white/30">
-            <Image
-              src="/logo.svg"
-              alt=""
-              width={18}
-              height={18}
-              className="mr-1.5 inline-block align-text-bottom"
-            />
+            <Logo size={18} className="mr-1.5 inline-block align-text-bottom" />
             <span className="font-medium text-white/50">火花 Hibana</span>
             {' · '}
             {m('footer.tagline')}

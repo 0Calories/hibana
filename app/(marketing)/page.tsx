@@ -8,6 +8,9 @@ import { HeroSection } from './components/HeroSection';
 import { NewsletterForm } from './components/NewsletterForm';
 import { SparkleEffect } from './components/SparkleEffect';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 const EMBER_TAGS = [
   { key: 'ember.tagPlanDay' as const, color: '#0ea5e9' },
   { key: 'ember.tagTakeNotes' as const, color: '#facc15' },

@@ -4,6 +4,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
 };
 
 const withNextIntl = createNextIntlPlugin({

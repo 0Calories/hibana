@@ -18,6 +18,10 @@ const fontJa = M_PLUS_Rounded_1c({
   weight: ['400', '500', '700'],
   subsets: ['latin'],
   variable: '--font-ja',
+  // Not preloaded — only fetched if the page actually uses --font-ja as a
+  // fallback. Avoids a render-blocking preload on routes (e.g. the marketing
+  // landing page in English) that don't need it.
+  preload: false,
 });
 
 export const metadata: Metadata = {
