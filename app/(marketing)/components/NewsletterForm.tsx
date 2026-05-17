@@ -57,19 +57,28 @@ export function NewsletterForm() {
     );
   }, [scriptLoaded]);
 
+  function resetTurnstile() {
+    if (window.turnstile && turnstileWidgetIdRef.current) {
+      window.turnstile.reset(turnstileWidgetIdRef.current);
+    }
+  }
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const result = await joinWaitlist(formData);
-      if (result.success) {
-        setIsSuccess(true);
-      } else {
-        toast.error(result.error);
-        if (window.turnstile && turnstileWidgetIdRef.current) {
-          window.turnstile.reset(turnstileWidgetIdRef.current);
+      try {
+        const result = await joinWaitlist(formData);
+        if (result.success) {
+          setIsSuccess(true);
+        } else {
+          toast.error(result.error);
+          resetTurnstile();
         }
+      } catch {
+        toast.error(t('genericError'));
+        resetTurnstile();
       }
     });
   }
@@ -94,11 +103,9 @@ export function NewsletterForm() {
           >
             <CheckCircle className="h-6 w-6 text-emerald-400" />
             <p className="text-sm font-medium text-emerald-300">
-              You're on the list!
+              {t('successTitle')}
             </p>
-            <p className="text-xs text-white/40">
-              We'll reach out when it's your turn. Keep an eye on your inbox.
-            </p>
+            <p className="text-xs text-white/40">{t('successBody')}</p>
           </motion.div>
         ) : (
           <motion.form
@@ -133,7 +140,7 @@ export function NewsletterForm() {
                 className="group relative cursor-pointer overflow-hidden rounded-xl bg-[#E60076] px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-[#ff1a8e] hover:shadow-[0_0_30px_rgba(230,0,118,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span className="relative z-10">
-                  {isPending ? 'Joining...' : t('submit')}
+                  {isPending ? t('loading') : t('submit')}
                 </span>
                 <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
               </button>

@@ -36,13 +36,23 @@ export async function joinWaitlist(
     headerList.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     undefined;
 
-  const verified = await verifyTurnstileToken(turnstileToken, remoteIp);
-  if (!verified) {
-    return { success: false, error: 'Verification failed. Please try again.' };
-  }
+  try {
+    const verified = await verifyTurnstileToken(turnstileToken, remoteIp);
+    if (!verified) {
+      return {
+        success: false,
+        error: 'Verification failed. Please try again.',
+      };
+    }
 
-  const result = await addContactToWaitlist(email);
-  if (!result.ok) {
+    const result = await addContactToWaitlist(email);
+    if (!result.ok) {
+      return {
+        success: false,
+        error: 'Something went wrong. Please try again.',
+      };
+    }
+  } catch {
     return { success: false, error: 'Something went wrong. Please try again.' };
   }
 

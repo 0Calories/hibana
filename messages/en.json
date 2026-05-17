@@ -242,7 +242,11 @@
     "newsletter": {
       "placeholder": "your@email.com",
       "ariaLabel": "Email address for newsletter",
-      "submit": "Join Waitlist"
+      "submit": "Join Waitlist",
+      "loading": "Joining...",
+      "successTitle": "You're on the list!",
+      "successBody": "We'll reach out when it's your turn. Keep an eye on your inbox.",
+      "genericError": "Something went wrong. Please try again."
     },
     "progression": {
       "headlinePrefix": "Habits that",

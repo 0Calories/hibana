@@ -11,23 +11,26 @@ function getTurnstileSecret() {
   return secret;
 }
 
+const VERIFY_TIMEOUT_MS = 5000;
+
 export async function verifyTurnstileToken(
   token: string,
   remoteIp?: string,
 ): Promise<boolean> {
   if (!token) return false;
 
-  const body = new URLSearchParams({
-    secret: getTurnstileSecret(),
-    response: token,
-  });
-  if (remoteIp) body.append('remoteip', remoteIp);
-
   try {
+    const body = new URLSearchParams({
+      secret: getTurnstileSecret(),
+      response: token,
+    });
+    if (remoteIp) body.append('remoteip', remoteIp);
+
     const res = await fetch(TURNSTILE_VERIFY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body,
+      signal: AbortSignal.timeout(VERIFY_TIMEOUT_MS),
     });
     if (!res.ok) return false;
     const data = (await res.json()) as { success?: boolean };

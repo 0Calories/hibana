@@ -1,4 +1,5 @@
 const RESEND_API_BASE = 'https://api.resend.com';
+const REQUEST_TIMEOUT_MS = 5000;
 
 function getResendConfig() {
   const apiKey = process.env.RESEND_API_KEY;
@@ -23,19 +24,21 @@ export type AddContactResult =
 export async function addContactToWaitlist(
   email: string,
 ): Promise<AddContactResult> {
-  const { apiKey, audienceId } = getResendConfig();
-
-  const res = await fetch(
-    `${RESEND_API_BASE}/audiences/${audienceId}/contacts`,
-    {
+  let res: Response;
+  try {
+    const { apiKey, audienceId } = getResendConfig();
+    res = await fetch(`${RESEND_API_BASE}/audiences/${audienceId}/contacts`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ email, unsubscribed: false }),
-    },
-  );
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch {
+    return { ok: false, status: 0, message: 'Network error contacting Resend' };
+  }
 
   if (res.ok) return { ok: true };
 
