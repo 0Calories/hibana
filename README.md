@@ -32,9 +32,11 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 SUPABASE_SECRET_KEY=your_supabase_secret_key
 
-# Marketing waitlist (Resend + Cloudflare Turnstile)
-RESEND_API_KEY=re_...
-RESEND_WAITLIST_AUDIENCE_ID=your_resend_audience_id
+# Marketing waitlist (Resend)
+RESEND_API_KEY=your_resend_api_key
+RESEND_WAITLIST_SEGMENT_ID=your_resend_waitlist_segment_id
+
+# Cloudflare Turnstile
 TURNSTILE_SECRET_KEY=your_turnstile_secret_key
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key
 ```

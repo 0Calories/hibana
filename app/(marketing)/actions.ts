@@ -1,8 +1,10 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { addContactToWaitlist } from '@/lib/resend';
+import { Resend } from 'resend';
 import { verifyTurnstileToken } from '@/lib/turnstile';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export type JoinWaitlistResult =
   | { success: true }
@@ -30,6 +32,14 @@ export async function joinWaitlist(
     };
   }
 
+  const audienceSegmentId = process.env.RESEND_WAITLIST_SEGMENT_ID;
+  if (!audienceSegmentId) {
+    return {
+      success: false,
+      error: 'RESEND_WAITLIST_SEGMENT_ID is not configured',
+    };
+  }
+
   const headerList = await headers();
   const remoteIp =
     headerList.get('cf-connecting-ip') ??
@@ -45,11 +55,15 @@ export async function joinWaitlist(
       };
     }
 
-    const result = await addContactToWaitlist(email);
-    if (!result.ok) {
+    const { error } = await resend.contacts.create({
+      email,
+      segments: [{ id: audienceSegmentId }],
+    });
+
+    if (error) {
       return {
         success: false,
-        error: 'Something went wrong. Please try again.',
+        error: `Resend API error: ${error.message}`,
       };
     }
   } catch {
