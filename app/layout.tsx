@@ -3,6 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 import { Geologica, M_PLUS_Rounded_1c } from 'next/font/google';
 import './globals.css';
+import Script from 'next/script';
 import { NextIntlClientProvider } from 'next-intl';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
@@ -41,6 +42,13 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn('h-full', font.variable, fontJa.variable)}
     >
+      <head>
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+          strategy="beforeInteractive"
+          defer
+        />
+      </head>
       <body className="h-full antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
