@@ -242,7 +242,11 @@
     "newsletter": {
       "placeholder": "your@email.com",
       "ariaLabel": "ニュースレター用メールアドレス",
-      "submit": "登録する"
+      "submit": "登録する",
+      "loading": "登録中...",
+      "successTitle": "登録が完了しました！",
+      "successBody": "順番が来ましたらご連絡いたします。受信トレイをご確認ください。",
+      "genericError": "問題が発生しました。もう一度お試しください。"
     },
     "progression": {
       "headlinePrefix": "あなたと共に",
