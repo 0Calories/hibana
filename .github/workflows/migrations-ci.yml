@@ -17,6 +17,42 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check migration ordering vs base branch
+        run: |
+          base_ref="origin/${{ github.base_ref || 'master' }}"
+
+          latest_on_base=$(git ls-tree -r --name-only "$base_ref" -- supabase/migrations/ \
+            | grep -E '/[0-9]{14}_[^/]+\.sql$' \
+            | sed -E 's|.*/([0-9]{14})_.*|\1|' \
+            | sort \
+            | tail -1)
+
+          if [ -z "$latest_on_base" ]; then
+            echo "No timestamped migrations on $base_ref — skipping ordering check."
+            exit 0
+          fi
+
+          new_migrations=$(git diff --name-only --diff-filter=A "$base_ref"...HEAD -- supabase/migrations/ \
+            | grep -E 'supabase/migrations/[0-9]{14}_[^/]+\.sql$' || true)
+
+          if [ -z "$new_migrations" ]; then
+            echo "No new migration files added in this PR."
+            exit 0
+          fi
+
+          fail=0
+          for f in $new_migrations; do
+            ts=$(basename "$f" | sed -E 's|^([0-9]{14})_.*|\1|')
+            if [ "$ts" -le "$latest_on_base" ]; then
+              echo "::error file=$f::Migration timestamp $ts is not later than the latest on $base_ref ($latest_on_base). Rename this file to a timestamp greater than $latest_on_base (e.g. with 'git mv') before merging, so production applies migrations in order."
+              fail=1
+            fi
+          done
+
+          exit $fail
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v2
