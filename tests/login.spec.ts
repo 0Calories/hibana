@@ -15,5 +15,9 @@ test.describe('login (authenticated)', () => {
   }) => {
     await page.goto('/dashboard');
     await expect(page).toHaveURL('/dashboard');
+
+    const cookies = await page.context().cookies();
+    const tzCookie = cookies.find((c) => c.name === 'timezone');
+    expect(tzCookie?.value).toBeTruthy();
   });
 });
