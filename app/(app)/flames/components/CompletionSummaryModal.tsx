@@ -22,10 +22,10 @@ import {
   OVERBURN_GRACE,
 } from '@/lib/sparks';
 import { formatTimer } from '@/lib/time';
+import { FlameRenderer } from '../../components/flames/flame-renderer';
 import { CompletionEmbers } from './CompletionEmbers';
 import { CompletionCelebration } from './flame-card/effects/CompletionCelebration';
 import { EffectsRenderer } from './flame-card/effects/EffectsRenderer';
-import { FlameRenderer } from './flame-card/effects/FlameRenderer';
 import type { EffectConfig, ShapeColors } from './flame-card/effects/types';
 
 interface CompletionSummaryModalProps {

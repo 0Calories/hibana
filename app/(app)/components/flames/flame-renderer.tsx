@@ -2,10 +2,11 @@
 
 import type { TargetAndTransition } from 'framer-motion';
 import { motion, useReducedMotion } from 'framer-motion';
-import type { FlameState } from '../../../utils/types';
-import { FLAME_REGISTRY } from '../flames';
-import { ShakeWrapper } from './ShakeWrapper';
-import type { ShapeColors } from './types';
+import type { Flame } from '@/lib/supabase/rows';
+import { ShakeWrapper } from '../../flames/components/flame-card/effects/ShakeWrapper';
+import { FLAME_REGISTRY } from '../../flames/components/flame-card/flames';
+import type { FlameColor } from './colors';
+import type { FlameState } from './constants/state';
 
 const stateVariants: Record<FlameState, TargetAndTransition> = {
   untended: { scale: 0.8, opacity: 0.88, y: 0 },
@@ -30,22 +31,22 @@ const completionBounceTransition = {
 };
 
 interface FlameRendererProps {
+  flame: Flame;
   state: FlameState;
-  level: number;
-  colors: ShapeColors;
   completionProgress?: number;
   className?: string;
   isOverburning?: boolean;
 }
 
 export function FlameRenderer({
+  flame,
   state,
-  level,
-  colors,
   completionProgress = 0,
   className,
   isOverburning = false,
 }: FlameRendererProps) {
+  // TODO: Flame color should be enforced in data model rather than optional
+  const { color, level } = flame;
   const shouldReduceMotion = useReducedMotion();
   const clampedLevel = Math.max(1, Math.min(8, level));
   const { Base, Flame, CompletedFlame, animation } =
@@ -75,11 +76,11 @@ export function FlameRenderer({
         }}
       >
         {CompletedFlame ? (
-          <CompletedFlame colors={colors} />
+          <CompletedFlame color={color as FlameColor} />
         ) : (
           <>
             {Base && <Base />}
-            <Flame colors={colors} />
+            <Flame color={color as FlameColor} />
           </>
         )}
       </motion.svg>
@@ -98,7 +99,7 @@ export function FlameRenderer({
         transition={springTransition}
       >
         {Base && <Base />}
-        <Flame colors={colors} />
+        <Flame color={color as FlameColor} />
       </motion.svg>
     );
   }
@@ -146,7 +147,7 @@ export function FlameRenderer({
           animate={animation.variants[state]}
           transition={animTransition}
         >
-          <Flame colors={colors} />
+          <Flame color={color as FlameColor} />
         </motion.g>
       </motion.svg>
     </ShakeWrapper>

@@ -2,18 +2,21 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type FlameColor,
+  getFlameColorPalette,
+} from '@/app/(app)/components/flames/colors';
 import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
+import { getFlameLevel } from '../../../components/flames/constants/levels';
+import type { FlameState } from '../../../components/flames/constants/state';
+import { FlameRenderer } from '../../../components/flames/flame-renderer';
 import { useFlameInteractions } from '../../hooks/useFlameInteractions';
 import type { FlameCardActions, FlameEntry } from '../../hooks/useFlames';
-import { getFlameColors } from '../../utils/colors';
-import { getFlameLevel } from '../../utils/levels';
-import type { FlameState } from '../../utils/types';
 import { CompletionSummaryModal } from '../CompletionSummaryModal';
 import { CompletionCelebration } from './effects/CompletionCelebration';
 import { CompletionRingProgress } from './effects/CompletionRingProgress';
 import { EffectsRenderer } from './effects/EffectsRenderer';
-import { FlameRenderer } from './effects/FlameRenderer';
 import { FlameGeometryProvider } from './FlameGeometryContext';
 import { FLAME_REGISTRY } from './flames';
 
@@ -28,8 +31,6 @@ interface FlameCardProps {
   footer?: React.ReactNode;
   onCompletionError?: () => void;
 }
-
-type FlameColors = ReturnType<typeof getFlameColors>;
 
 const SIZE_CONFIG = {
   default: {
@@ -74,8 +75,9 @@ function getBorderGlow(
   state: FlameState,
   canComplete: boolean,
   isOverburning: boolean,
-  colors: FlameColors,
+  color: FlameColor,
 ): React.CSSProperties {
+  const colors = getFlameColorPalette(color);
   if (state === 'burning') {
     return isOverburning
       ? {
@@ -104,7 +106,8 @@ export function FlameCard({
   onCompletionError,
 }: FlameCardProps) {
   const shouldReduceMotion = useReducedMotion();
-  const colors = getFlameColors(flame.color);
+  const flameColor = flame.color as FlameColor;
+  const colors = getFlameColorPalette(flameColor);
   const level = entry?.level ?? levelProp ?? 1;
   const levelInfo = getFlameLevel(level);
   const flameDef = FLAME_REGISTRY[level];
@@ -141,7 +144,7 @@ export function FlameCard({
     state,
     canComplete,
     isOverburning,
-    colors,
+    flameColor,
   );
 
   const cardVariants = {
@@ -222,9 +225,8 @@ export function FlameCard({
         )}
       >
         <FlameRenderer
+          flame={flame}
           state={state}
-          level={level}
-          colors={colors}
           completionProgress={state === 'completing' ? longPress.progress : 0}
           isOverburning={isOverburning}
           className={sizeConfig.flameSvg}

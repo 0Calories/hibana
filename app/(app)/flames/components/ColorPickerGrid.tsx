@@ -8,7 +8,7 @@ import {
   EARTHLY_FLAMES,
   FLAME_BG_CLASSES,
   type FlameColorName,
-} from '../utils/colors';
+} from '../../components/flames/constants/colors';
 
 const FLAME_COLOR_GRID = [
   [EARTHLY_FLAMES[0], EARTHLY_FLAMES[1], EARTHLY_FLAMES[2]],

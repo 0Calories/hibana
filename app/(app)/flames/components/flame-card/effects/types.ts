@@ -1,20 +1,7 @@
 import type { TargetAndTransition } from 'framer-motion';
-import type { FlameState } from '../../../utils/types';
+import type { FlameColor } from '@/app/(app)/components/flames/colors';
+import type { FlameState } from '../../../../components/flames/constants/state';
 import type { FlameParticleEffect } from '../../particles';
-
-export interface ShapeColors {
-  light: string;
-  medium: string;
-  dark: string;
-}
-
-export interface FlameComponentProps {
-  colors: ShapeColors;
-}
-
-export interface CompletedFlameProps {
-  colors: ShapeColors;
-}
 
 export interface CompletedSmokeEffectConfig {
   type: 'completedSmoke';
@@ -30,10 +17,14 @@ export interface CompletedSmokeEffectConfig {
 
 export type EffectConfig = FlameParticleEffect | CompletedSmokeEffectConfig;
 
+export type FlameComponentProps = {
+  color: FlameColor;
+};
+
 export interface FlameDefinition {
   Flame: React.FC<FlameComponentProps>;
   Base?: React.FC;
-  CompletedFlame?: React.FC<CompletedFlameProps>;
+  CompletedFlame?: React.FC<FlameComponentProps>;
 
   animation: {
     origin: { x: string; y: string };

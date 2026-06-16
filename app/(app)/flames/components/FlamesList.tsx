@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Flame, FlameSession } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
+import { FlameCard } from '../../components/flames/flame-card';
 import type { FuelBudgetStatus } from '../actions';
 import { FlamesProvider, useFlamesContext } from '../hooks/useFlames';
 import { FlamesPageActions } from './FlamesPageActions';
 import { FuelBarStickyContainer } from './FuelBarStickyContainer';
 import { FuelMeter } from './FuelMeter';
-import { InteractiveFlameCard } from './flame-card/InteractiveFlameCard';
 
 interface FlamesListProps {
   flames: Flame[];
@@ -81,18 +81,25 @@ function FlamesListContent() {
       </FuelBarStickyContainer>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {entries.map((entry) => (
-          <InteractiveFlameCard
+          // <InteractiveFlameCard
+          //   key={entry.flame.id}
+          //   flame={entry.flame}
+          //   entry={entry}
+          //   actions={{
+          //     onToggle: () => actions.toggle(entry.flame.id),
+          //     onBeginCompletion: () => actions.beginCompletion(entry.flame.id),
+          //     onCancelCompletion: () =>
+          //       actions.cancelCompletion(entry.flame.id),
+          //     onCompleteFlame: () => actions.completeFlame(entry.flame.id),
+          //   }}
+          //   isFuelDepleted={fuel.isFuelDepleted || !fuel.hasBudget}
+          // />
+          <FlameCard
             key={entry.flame.id}
             flame={entry.flame}
-            entry={entry}
-            actions={{
-              onToggle: () => actions.toggle(entry.flame.id),
-              onBeginCompletion: () => actions.beginCompletion(entry.flame.id),
-              onCancelCompletion: () =>
-                actions.cancelCompletion(entry.flame.id),
-              onCompleteFlame: () => actions.completeFlame(entry.flame.id),
-            }}
-            isFuelDepleted={fuel.isFuelDepleted || !fuel.hasBudget}
+            flameState="burning"
+            burnSeconds={entry.elapsedSeconds}
+            burnTargetSeconds={entry.targetSeconds}
           />
         ))}
       </div>
