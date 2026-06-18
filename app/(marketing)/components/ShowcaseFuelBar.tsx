@@ -4,8 +4,7 @@ import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { Fuel } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import { FuelDroplets } from '@/app/(app)/flames/components/FuelDroplets';
-import { SmokePuffs } from '@/app/(app)/flames/components/SmokePuffs';
+import { FuelDroplets, SmokePuffs } from './showcase/FuelBarParticles';
 
 /**
  * Visual-only fuel bar for the marketing page.
