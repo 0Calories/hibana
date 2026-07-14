@@ -36,7 +36,7 @@ See @package.json for available scripts for this project.
 
 ### Issue tracker
 
-Issues live in GitHub Issues for `0Calories/hibana`. Use the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues live in GitHub Issues for `0Calories/hibana`. Use the `gh` CLI. External PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
