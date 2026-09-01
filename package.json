@@ -15,7 +15,8 @@
     "db:push": "pnpx supabase db push",
     "db:types": "pnpx supabase gen types typescript --local > lib/supabase/types.ts",
     "prepare": "husky",
-    "test": "echo \"No tests configured yet\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "pnpm exec playwright test",
     "test:e2e:ui": "pnpm exec playwright test --ui"
   },
@@ -61,7 +62,8 @@
     "lint-staged": "^16.4.0",
     "supabase": "^2.72.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json}": [
