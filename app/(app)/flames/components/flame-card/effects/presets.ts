@@ -1,5 +1,5 @@
 import type { TargetAndTransition } from 'framer-motion';
-import type { FlameState } from '../../../utils/types';
+import type { FlameState } from '../../../../components/flames/constants/state';
 import type { FlameParticleEffect, ParticleStateConfig } from '../../particles';
 import { generateHash } from '../../particles';
 import type { CompletedSmokeEffectConfig } from './types';

@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { formatTimer } from '@/lib/time';
-import type { FlameState } from '../../utils/types';
+import type { FlameState } from '../../../components/flames/constants/state';
 
 interface TimerDisplayProps {
   elapsedSeconds: number;

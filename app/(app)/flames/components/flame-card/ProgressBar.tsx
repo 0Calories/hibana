@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import type { FlameState } from '../../utils/types';
+import type { FlameState } from '../../../components/flames/constants/state';
 import { SmokePuffs } from '../SmokePuffs';
 
 interface ProgressBarProps {

@@ -18,7 +18,7 @@ import {
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { getFlameLevel } from '@/app/(app)/flames/utils/levels';
+import { getFlameLevel } from '@/app/(app)/components/flames/constants/levels';
 import {
   Popover,
   PopoverContent,

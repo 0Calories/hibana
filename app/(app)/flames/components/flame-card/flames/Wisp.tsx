@@ -1,3 +1,4 @@
+import { getFlameColorPalette } from '@/app/(app)/components/flames/colors';
 import {
   FLICKER_DURATIONS,
   FLICKER_ORIGIN,
@@ -6,13 +7,11 @@ import {
   WISP_EMBER_EFFECT,
 } from '../effects/presets';
 import { SmolderingEmbers } from '../effects/SmolderingEmbers';
-import type {
-  CompletedFlameProps,
-  FlameComponentProps,
-  FlameDefinition,
-} from '../effects/types';
+import type { FlameComponentProps, FlameDefinition } from '../effects/types';
 
-function WispFlame({ colors }: FlameComponentProps) {
+function WispFlame({ color }: FlameComponentProps) {
+  const colors = getFlameColorPalette(color);
+
   return (
     <>
       <circle cx="50" cy="60" r="20" fill={colors.dark} opacity={0.5} />
@@ -23,7 +22,8 @@ function WispFlame({ colors }: FlameComponentProps) {
   );
 }
 
-function WispCompleted({ colors }: CompletedFlameProps) {
+function WispCompleted({ color }: FlameComponentProps) {
+  const colors = getFlameColorPalette(color);
   return <SmolderingEmbers color={colors.medium} />;
 }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { FlameState } from '../../../utils/types';
+import type { FlameState } from '../../../../components/flames/constants/state';
 import type { ParticleConditions } from '../../particles';
 import { FlameParticles } from '../../particles';
 import { CompletedSmokeWisps } from './CompletedSmokeWisps';

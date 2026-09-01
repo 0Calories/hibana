@@ -1,18 +1,12 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { FlameColorName } from '@/app/(app)/flames/utils/colors';
 import {
-  FLAME_HEX_COLORS,
-  getFlameColors,
-} from '@/app/(app)/flames/utils/colors';
+  type FlameColor,
+  getFlameColorPalette,
+} from '@/app/(app)/components/flames/colors';
 import type { Flame } from '@/lib/supabase/rows';
 import { cn } from '@/lib/utils';
-
-const WARM_COLORS = new Set<string>([
-  FLAME_HEX_COLORS.amber.medium,
-  FLAME_HEX_COLORS.orange.medium,
-]);
 
 interface DayRowFuelBarProps {
   fuelMinutes: number;
@@ -54,13 +48,13 @@ export function DayRowFuelBar({
       const startPct = (cursor / fuelMinutes) * 100;
       cursor += budget;
       const endPct = Math.min((cursor / fuelMinutes) * 100, 100);
-      const colors = getFlameColors(flame.color as FlameColorName);
+      const colors = getFlameColorPalette(flame.color as FlameColor);
 
       result.push({
         startPct,
         widthPct: endPct - startPct,
         colors,
-        needsOutline: WARM_COLORS.has(colors.medium),
+        needsOutline: flame.color === 'orange' || flame.color === 'amber',
       });
     }
 
