@@ -3,28 +3,52 @@
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import { EffectsRenderer } from '@/app/(app)/flames/components/flame-card/effects/EffectsRenderer';
-import { FlameRenderer } from '@/app/(app)/flames/components/flame-card/effects/FlameRenderer';
-import { FLAME_REGISTRY } from '@/app/(app)/flames/components/flame-card/flames';
-import { FLAME_HEX_COLORS } from '@/app/(app)/flames/utils/colors';
-import { FLAME_LEVELS } from '@/app/(app)/flames/utils/levels';
 import { ShowcaseFuelBar } from './ShowcaseFuelBar';
+import {
+  REVEALED_LEVEL_COUNT,
+  SHOWCASE_LEVELS,
+  type ShowcaseColors,
+} from './showcase/colors';
+import { ShowcaseFlame } from './showcase/Flames';
 
 const EASE_OUT_EXPO = [0.21, 0.47, 0.32, 0.98] as const;
 
-const SHOWCASE_COLORS = [
-  FLAME_HEX_COLORS.rose,
-  FLAME_HEX_COLORS.orange,
-  FLAME_HEX_COLORS.amber,
-  FLAME_HEX_COLORS.green,
-  FLAME_HEX_COLORS.sky,
-  FLAME_HEX_COLORS.indigo,
-  FLAME_HEX_COLORS.fuchsia,
-  FLAME_HEX_COLORS.blue,
-] as const;
-
-// Only reveal the first 3 flame shapes — the rest are a surprise
-const REVEALED_COUNT = 3;
+function MysteryGlyph({
+  colors,
+  size = 'lg',
+  label,
+}: {
+  colors: ShowcaseColors;
+  size?: 'sm' | 'lg';
+  label: string;
+}) {
+  const dim = size === 'lg' ? 'h-10 w-10' : 'h-8 w-8';
+  const text = size === 'lg' ? 'text-sm' : 'text-xs';
+  return (
+    <div className="relative flex h-full w-full items-center justify-center">
+      {size === 'lg' && (
+        <div
+          className="absolute h-12 w-12 rounded-full blur-xl"
+          style={{ backgroundColor: `${colors.medium}15` }}
+        />
+      )}
+      <div
+        className={`flex ${dim} items-center justify-center rounded-full border`}
+        style={{
+          borderColor: `${colors.medium}20`,
+          backgroundColor: `${colors.medium}08`,
+        }}
+      >
+        <span
+          className={`${text} font-bold`}
+          style={{ color: `${colors.medium}40` }}
+        >
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function FlameShowcase() {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,10 +63,10 @@ export function FlameShowcase() {
       </div>
 
       {/* Desktop / tablet grid */}
-      <div className="hidden sm:grid sm:grid-cols-4 lg:grid-cols-8 gap-4">
-        {FLAME_LEVELS.map((level, i) => {
-          const revealed = i < REVEALED_COUNT;
-          const colors = SHOWCASE_COLORS[i];
+      <div className="hidden gap-4 sm:grid sm:grid-cols-4 lg:grid-cols-8">
+        {SHOWCASE_LEVELS.map((level, i) => {
+          const revealed = i < REVEALED_LEVEL_COUNT;
+          const colors = level.colors;
 
           return (
             <motion.div
@@ -58,40 +82,17 @@ export function FlameShowcase() {
             >
               <div className="relative mb-3 flex h-28 w-20 items-center justify-center">
                 {revealed ? (
-                  <>
-                    <FlameRenderer
-                      state="burning"
-                      level={level.level}
-                      colors={colors}
-                      className="h-24 w-20"
-                    />
-                    <EffectsRenderer
-                      effects={FLAME_REGISTRY[level.level].effects}
-                      state="paused"
-                      colors={colors}
-                    />
-                  </>
+                  <ShowcaseFlame
+                    level={level.level}
+                    colors={colors}
+                    className="h-24 w-20"
+                  />
                 ) : (
-                  <div className="relative flex h-full w-full items-center justify-center">
-                    <div
-                      className="absolute h-12 w-12 rounded-full blur-xl"
-                      style={{ backgroundColor: `${colors.medium}15` }}
-                    />
-                    <div
-                      className="flex h-10 w-10 items-center justify-center rounded-full border"
-                      style={{
-                        borderColor: `${colors.medium}20`,
-                        backgroundColor: `${colors.medium}08`,
-                      }}
-                    >
-                      <span
-                        className="text-sm font-bold"
-                        style={{ color: `${colors.medium}40` }}
-                      >
-                        {t('mysteryLabel')}
-                      </span>
-                    </div>
-                  </div>
+                  <MysteryGlyph
+                    colors={colors}
+                    size="lg"
+                    label={t('mysteryLabel')}
+                  />
                 )}
               </div>
               <span
@@ -118,11 +119,11 @@ export function FlameShowcase() {
       </div>
 
       {/* Mobile: scrollable row */}
-      <div className="sm:hidden -my-16">
+      <div className="-my-16 sm:hidden">
         <div className="flex snap-x snap-mandatory gap-6 overflow-x-scroll overflow-y-hidden px-2 pt-16 pb-4">
-          {FLAME_LEVELS.map((level, i) => {
-            const revealed = i < REVEALED_COUNT;
-            const colors = SHOWCASE_COLORS[i];
+          {SHOWCASE_LEVELS.map((level, i) => {
+            const revealed = i < REVEALED_LEVEL_COUNT;
+            const colors = level.colors;
 
             return (
               <motion.div
@@ -135,40 +136,21 @@ export function FlameShowcase() {
                   delay: i * 0.06,
                   ease: EASE_OUT_EXPO,
                 }}
-                className="flex shrink-0 snap-center flex-col items-center"
+                className="w-18 flex shrink-0 snap-center flex-col items-center"
               >
-                <div className="relative mb-3 flex h-24 w-18 items-center justify-center">
+                <div className="w-18 relative mb-3 flex h-24 items-center justify-center">
                   {revealed ? (
-                    <>
-                      <FlameRenderer
-                        state="burning"
-                        level={level.level}
-                        colors={colors}
-                        className="h-20 w-16"
-                      />
-                      <EffectsRenderer
-                        effects={FLAME_REGISTRY[level.level].effects}
-                        state="paused"
-                        colors={colors}
-                      />
-                    </>
+                    <ShowcaseFlame
+                      level={level.level}
+                      colors={colors}
+                      className="h-20 w-16"
+                    />
                   ) : (
-                    <div className="relative flex h-full w-full items-center justify-center">
-                      <div
-                        className="flex h-8 w-8 items-center justify-center rounded-full border"
-                        style={{
-                          borderColor: `${colors.medium}20`,
-                          backgroundColor: `${colors.medium}08`,
-                        }}
-                      >
-                        <span
-                          className="text-xs font-bold"
-                          style={{ color: `${colors.medium}40` }}
-                        >
-                          {t('mysteryLabel')}
-                        </span>
-                      </div>
-                    </div>
+                    <MysteryGlyph
+                      colors={colors}
+                      size="sm"
+                      label={t('mysteryLabel')}
+                    />
                   )}
                 </div>
                 <span
